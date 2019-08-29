@@ -1,5 +1,6 @@
 #include "Parser.h"
 
+#include <algorithm>
 #include <iostream>
 #include <vector>
 
@@ -16,7 +17,7 @@ void printParseTree(ParseTreeNode *root, int indentation = 0) {
 void printCurrentParseState(StateTransition &action, std::vector<int> &states,
                             std::vector<ParseTreeNode *> &nodes) {
   for (auto node : nodes) {
-      std::cout << to_string(node->symbol) + " ";
+    std::cout << to_string(node->symbol) + " ";
   }
   std::cout << std::endl;
   std::cout << to_string(action) << " | ";
@@ -108,13 +109,17 @@ void Parser::executeGoto(std::vector<int> &states, StateTransition &action) {
 void Parser::executeReduce(std::vector<int> &states, StateTransition &action,
                            std::vector<ParseTreeNode *> &nodes) {
   auto newNode = new ParseTreeNode(action.symbol);
+  auto lastNode = nodes.back();
+  nodes.pop_back();
   for (auto &ruleElement : action.rule) {
     auto lastNode = nodes.back();
     newNode->children.push_back(lastNode);
     nodes.pop_back();
     states.pop_back();
   }
+  std::reverse(newNode->children.begin(), newNode->children.end());
   nodes.push_back(newNode);
+  nodes.push_back(lastNode);
 
   auto rowIndex = states.back();
   int columnIndex = action.symbol;
@@ -174,6 +179,7 @@ ParseTreeNode *Parser::createParseTree() {
       for (auto node : nodes) {
         root->children.push_back(node);
       }
+      std::reverse(root->children.begin(), root->children.end());
       printParseTree(root);
       std::cout << "Accepted program!" << std::endl;
       return root;
