@@ -1,0 +1,56 @@
+program
+    stmts eof
+
+stmts
+    stmt
+    stmts ; stmt
+
+stmt
+#    selection
+#    iteration
+#    assignment
+    expr
+
+#iteration
+#    for (  ) { stmts }
+
+expr
+    sum
+
+#disjunction
+#    conjunction
+#    disjunction or conjunction
+#
+#conjunction
+#    negation
+#    conjunction and negation
+#
+#negation
+#    relation
+#    not relation
+#
+#relation
+#    sum
+#    sum < sum
+#    sum <= sum
+#    sum == sum
+#    sum != sum
+#    sum >= sum
+#    sum > sum
+
+sum
+    term
+    sum + term
+    sum - term
+
+term
+    factor
+    term * factor
+    term / factor
+
+factor
+    true
+    false
+    integer
+    float
+    ( expr )
