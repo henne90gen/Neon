@@ -46,16 +46,16 @@ std::string to_string(GrammarSymbol symbol) {
 
 std::string to_string(StateTransitionType transition) {
   switch (transition) {
-  case SHIFT:
-    return "SHIFT";
-  case GOTO:
-    return "GOTO";
-  case REDUCE:
-    return "REDUCE";
-  case ACCEPT:
-    return "ACCEPT";
-  case ERROR:
-    return "ERROR";
+    case SHIFT:
+      return "SHIFT";
+    case GOTO:
+      return "GOTO";
+    case REDUCE:
+      return "REDUCE";
+    case ACCEPT:
+      return "ACCEPT";
+    case ERROR:
+      return "ERROR";
   }
 }
 

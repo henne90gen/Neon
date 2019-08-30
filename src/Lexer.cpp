@@ -4,13 +4,16 @@
 #include <iostream>
 #include <regex>
 
-std::string StdInCodeProvider::getMoreCode() {
+std::optional<std::string> StdInCodeProvider::getMoreCode() {
   std::string result = "";
   std::cin >> result;
-  return result;
+  if (result.empty()) {
+    return {};
+  }
+  return std::optional(result);
 }
 
-std::string FileCodeProvider::getMoreCode() {
+std::optional<std::string> FileCodeProvider::getMoreCode() {
   if (!fileHasBeenRead) {
     fileHasBeenRead = true;
     std::ifstream infile(fileName);
@@ -21,16 +24,16 @@ std::string FileCodeProvider::getMoreCode() {
   }
 
   if (lines.empty()) {
-    return "";
+    return {};
   }
 
   std::string result = lines.front();
   lines.erase(lines.begin());
-  return result;
+  return std::optional(result);
 }
 
 void removeLeadingWhitespace(std::string &str) {
-  while (str != "" && str[0] == ' ') {
+  while (!str.empty() && str[0] == ' ') {
     str = str.substr(1, str.length());
   }
 }
@@ -38,7 +41,14 @@ void removeLeadingWhitespace(std::string &str) {
 Token Lexer::getToken() {
   while (true) {
     if (currentWord.empty()) {
-      currentWord = codeProvider->getMoreCode();
+      auto optionalCode = codeProvider->getMoreCode();
+      if (!optionalCode) {
+        break;
+      }
+      currentWord = optionalCode.value();
+      if (currentWord.empty()) {
+        continue;
+      }
     }
 
     removeLeadingWhitespace(currentWord);
@@ -69,29 +79,27 @@ Token Lexer::getToken() {
       currentWord = currentWord.substr(1, currentWord.length() - 1);
       return oneCharToken;
     }
-
-    if (currentWord == "") {
-      break;
-    }
-    std::cout << "Could not match: " << currentWord << std::endl;
-    currentWord = "";
   }
+
   return {Token::END_OF_FILE, ""};
 }
 
 Token Lexer::matchOneCharacterToken() {
-  if (currentWord.substr(0, 1) == "(") {
+  char firstChar = currentWord[0];
+  if (firstChar == '(') {
     return {Token::LEFT_PARAN, "("};
-  } else if (currentWord.substr(0, 1) == ")") {
+  } else if (firstChar == ')') {
     return {Token::RIGHT_PARAN, ")"};
-  } else if (currentWord.substr(0, 1) == "+") {
+  } else if (firstChar == '+') {
     return {Token::PLUS, "+"};
-  } else if (currentWord.substr(0, 1) == "-") {
+  } else if (firstChar == '-') {
     return {Token::MINUS, "-"};
-  } else if (currentWord.substr(0, 1) == "*") {
+  } else if (firstChar == '*') {
     return {Token::STAR, "*"};
-  } else if (currentWord.substr(0, 1) == "/") {
+  } else if (firstChar == '/') {
     return {Token::DIV, "/"};
+  } else if (firstChar == ';') {
+    return {Token::SEMICOLON, ";"};
   }
   return {Token::END_OF_FILE, ""};
 }

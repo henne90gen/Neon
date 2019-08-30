@@ -3,6 +3,7 @@ program
 
 stmts
     stmt
+    stmts ;
     stmts ; stmt
 
 stmt

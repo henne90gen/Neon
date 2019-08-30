@@ -305,7 +305,8 @@ const std::vector<StateTransition> stateTransitionTable[{row_count}][{col_count}
     header_template = header_template.replace("{col_count}", str(len(header)))
     header_template = header_template.replace("{table_content}", table_content)
 
-    print(header_template)
+    if verbose:
+        print(header_template)
     with open(header_file, "w") as f:
         f.write(header_template)
 
@@ -363,7 +364,8 @@ std::string to_string(StateTransition &action) {
     cpp_template = cpp_template.replace(
         "{grammar_symbol_switch_cases}", grammar_symbol_switch_cases)
 
-    print(cpp_template)
+    if verbose:
+        print(cpp_template)
     with open(cpp_file, "w") as f:
         f.write(cpp_template)
 

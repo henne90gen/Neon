@@ -2,17 +2,8 @@
 
 #include <algorithm>
 #include <iostream>
+#include <optional>
 #include <vector>
-
-void printParseTree(ParseTreeNode *root, int indentation = 0) {
-  for (int i = 0; i < indentation; i++) {
-    std::cout << "  ";
-  }
-  std::cout << "Node " << to_string(root->symbol) << std::endl;
-  for (auto node : root->children) {
-    printParseTree(node, indentation + 1);
-  }
-}
 
 void printCurrentParseState(StateTransition &action, std::vector<int> &states,
                             std::vector<ParseTreeNode *> &nodes) {
@@ -47,50 +38,44 @@ GrammarSymbol convertToGrammarSymbol(Token &token) {
     return GrammarSymbol::RIGHT_PARAN;
   case Token::END_OF_FILE:
     return GrammarSymbol::END_OF_FILE;
+  case Token::SEMICOLON:
+    return GrammarSymbol::SEMICOLON;
   }
   return END_OF_FILE;
 }
 
-bool getNextAction(int rowIndex, int columnIndex, StateTransition &action) {
+std::optional<StateTransition> Parser::getNextAction(int rowIndex, int columnIndex) {
   auto actions = stateTransitionTable[rowIndex][columnIndex];
-  if (actions.size() == 0) {
-    return true;
+  if (actions.empty()) {
+    return {};
   }
 
   if (actions.size() == 1) {
-    action = actions[0];
-    return false;
+    return std::optional(actions[0]);
   }
 
-  bool foundAccept = false;
-  for (auto &act : actions) {
-    if (act.type == StateTransitionType::ACCEPT) {
-      action = act;
-      foundAccept = true;
-      std::cout << "Found ACCEPT" << std::endl;
-      break;
+  for (auto &action : actions) {
+    if (action.type == StateTransitionType::ACCEPT) {
+      if (verbose) {
+        std::cout << "Found ACCEPT" << std::endl;
+      }
+      return std::optional(action);
     }
   }
-  if (foundAccept) {
-    return false;
-  }
 
-  bool foundShift = false;
-  for (auto &act : actions) {
-    if (act.type == StateTransitionType::SHIFT) {
-      action = act;
-      foundShift = true;
-      std::cout << "Preferring SHIFT over REDUCE" << std::endl;
-      break;
+  for (auto &action : actions) {
+    if (action.type == StateTransitionType::SHIFT) {
+      if (verbose) {
+        std::cout << "Preferring SHIFT over REDUCE" << std::endl;
+      }
+      return std::optional(action);
     }
   }
-  if (foundShift) {
-    return false;
-  }
 
-  action = actions[0];
-  std::cout << "Choosing first action instead of best one" << std::endl;
-  return false;
+  if (verbose) {
+    std::cout << "Choosing first action instead of best one" << std::endl;
+  }
+  return std::optional(actions[0]);
 }
 
 void Parser::executeShift(Token &token, std::vector<int> &states,
@@ -98,7 +83,7 @@ void Parser::executeShift(Token &token, std::vector<int> &states,
                           std::vector<ParseTreeNode *> &nodes) {
   token = lexer.getToken();
   states.push_back(action.nextStateIndex);
-  auto newNode = new ParseTreeNode(convertToGrammarSymbol(token));
+  auto newNode = new ParseTreeNode(convertToGrammarSymbol(token), token);
   nodes.push_back(newNode);
 }
 
@@ -123,14 +108,13 @@ void Parser::executeReduce(std::vector<int> &states, StateTransition &action,
 
   auto rowIndex = states.back();
   int columnIndex = action.symbol;
-  StateTransition newAction = {};
-  bool err = getNextAction(rowIndex, columnIndex, newAction);
-  if (err) {
+  auto newActionOptional = getNextAction(rowIndex, columnIndex);
+  if (!newActionOptional) {
     std::cout << "This should never happen " << rowIndex << "," << columnIndex
               << std::endl;
     exit(1);
   }
-  states.push_back(newAction.nextStateIndex);
+  states.push_back(newActionOptional.value().nextStateIndex);
 }
 
 /**
@@ -154,15 +138,19 @@ ParseTreeNode *Parser::createParseTree() {
   nodes.push_back(new ParseTreeNode(convertToGrammarSymbol(token)));
 
   while (true) {
+    int rowIndex = states.back();
     int columnIndex = convertToGrammarSymbol(token);
-    StateTransition action;
-    bool err = getNextAction(states.back(), columnIndex, action);
-    if (err) {
-      std::cout << "Could not get next action" << std::endl;
+    auto actionOptional = getNextAction(rowIndex, columnIndex);
+    if (!actionOptional) {
+      std::cout << "Could not get next action: " << rowIndex << ", "
+                << columnIndex << std::endl;
       break;
     }
+    auto action = actionOptional.value();
 
-    printCurrentParseState(action, states, nodes);
+    if (verbose) {
+      printCurrentParseState(action, states, nodes);
+    }
 
     switch (action.type) {
     case SHIFT:
@@ -179,8 +167,6 @@ ParseTreeNode *Parser::createParseTree() {
       for (auto node : nodes) {
         root->children.push_back(node);
       }
-      std::reverse(root->children.begin(), root->children.end());
-      printParseTree(root);
       std::cout << "Accepted program!" << std::endl;
       return root;
     }

@@ -13,6 +13,7 @@ struct Token {
     DIV,
     LEFT_PARAN,
     RIGHT_PARAN,
+    SEMICOLON,
     END_OF_FILE
   };
 
