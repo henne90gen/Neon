@@ -5,11 +5,12 @@
 #include "AbstractSyntaxTree.h"
 
 struct CalculationResult {
-  enum CalculationType { INTEGER, FLOAT };
+  enum CalculationType { INTEGER, FLOAT, BOOL };
   CalculationType type = INTEGER;
   union {
     int intResult;
     float floatResult;
+    bool boolResult;
   };
 };
 

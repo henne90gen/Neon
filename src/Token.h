@@ -6,7 +6,8 @@ struct Token {
   enum TokenType {
     INT_LIT,
     FLOAT_LIT,
-    //   IDENTIFIER,
+    TRUE,
+    FALSE,
     PLUS,
     MINUS,
     STAR,

@@ -23,6 +23,11 @@ void Interpreter::interpretSTMT(AstNode *node) {
     std::cout << result.intResult << std::endl;
   } else if (result.type == CalculationResult::FLOAT) {
     std::cout << result.floatResult << std::endl;
+  } else if (result.type == CalculationResult::BOOL) {
+    std::string str = result.boolResult ? "true" : "false";
+    std::cout << str << std::endl;
+  } else {
+    std::cout << "Could not print result." << std::endl;
   }
 }
 
@@ -130,6 +135,9 @@ void Interpreter::interpretLIT(AstNode *node) {
   } else if (node->type == AstNode::FLOAT_LIT) {
     result = {CalculationResult::FLOAT};
     result.floatResult = ((FloatData *)node->data)->value;
+  } else if (node->type == AstNode::BOOL_LIT) {
+    result = {CalculationResult::BOOL};
+    result.boolResult = ((BoolData *)node->data)->value;
   } else {
     std::cout << "Data type not supported yet!" << std::endl;
     return;
@@ -140,6 +148,11 @@ void Interpreter::interpretLIT(AstNode *node) {
 void Interpreter::interpret(AstNode *node) {
   if (verbose) {
     std::cout << "Interpreting " << to_string(node->type) << std::endl;
+  }
+
+  if (node == nullptr) {
+    std::cout << "Could not interpret node (nullptr)" << std::endl;
+    return;
   }
 
   switch (node->type) {
@@ -160,6 +173,7 @@ void Interpreter::interpret(AstNode *node) {
     break;
   case AstNode::INT_LIT:
   case AstNode::FLOAT_LIT:
+  case AstNode::BOOL_LIT:
     interpretLIT(node);
     break;
   default:

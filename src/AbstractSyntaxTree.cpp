@@ -20,8 +20,11 @@ std::string to_string(AstNode::AstNodeType type) {
     return "FLOAT";
   case AstNode::INT_LIT:
     return "INT";
+  case AstNode::BOOL_LIT:
+    return "BOOL";
+  default:
+    return "ERROR";
   }
-  return "";
 }
 
 bool isBinaryOperation(ParseTreeNode *node) {
@@ -32,7 +35,9 @@ bool isBinaryOperation(ParseTreeNode *node) {
 
 bool isLiteral(ParseTreeNode *node) {
   return node->symbol == GrammarSymbol::INT_LIT ||
-         node->symbol == GrammarSymbol::FLOAT_LIT;
+         node->symbol == GrammarSymbol::FLOAT_LIT ||
+         node->symbol == GrammarSymbol::TRUE_LIT ||
+         node->symbol == GrammarSymbol::FALSE_LIT;
 }
 
 bool isSequence(ParseTreeNode *node) {
@@ -67,7 +72,15 @@ AstNode::AstNodeType getLiteralType(GrammarSymbol symbol) {
     return AstNode::INT_LIT;
   case GrammarSymbol::FLOAT_LIT:
     return AstNode::FLOAT_LIT;
+  case GrammarSymbol::TRUE_LIT:
+  case GrammarSymbol::FALSE_LIT:
+    return AstNode::BOOL_LIT;
   }
+
+  std::cout << "Could not determine literal type!" << std::endl;
+  exit(1);
+
+  return AstNode::INT_LIT;
 }
 
 AstNode *createBinaryOperation(ParseTreeNode *node) {
@@ -90,8 +103,15 @@ AstNode *createLiteral(ParseTreeNode *node) {
     astNode->data = new FloatData(std::stof(node->token.content));
   } else if (nodeType == AstNode::INT_LIT) {
     astNode->data = new IntegerData(std::stoi(node->token.content));
+  } else if (nodeType == AstNode::BOOL_LIT) {
+    bool value = false;
+    if (node->token.content == "true") {
+      value = true;
+    }
+    astNode->data = new BoolData(value);
   } else {
     std::cout << "Data type not supported yet!" << std::endl;
+    return nullptr;
   }
 
   return astNode;

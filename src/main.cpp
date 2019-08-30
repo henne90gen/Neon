@@ -18,12 +18,12 @@ void printParseTree(ParseTreeNode *root, int indentation = 0) {
 }
 
 void printAst(AstNode *node, int indentation = 0) {
-  if (node == nullptr) {
-    std::cout << "Node was a nullptr" << std::endl;
-    return;
-  }
   for (int i = 0; i < indentation; i++) {
     std::cout << "  ";
+  }
+  if (node == nullptr) {
+    std::cout << "AstNode nullptr" << std::endl;
+    return;
   }
   std::cout << "AstNode " << to_string(node->type) << std::endl;
   for (auto child : node->children) {
@@ -34,7 +34,7 @@ void printAst(AstNode *node, int indentation = 0) {
 int main() {
   bool verbose = true;
   CodeProvider *codeProvider = new FileCodeProvider("main.mfl");
-  Lexer lexer = {codeProvider};
+  Lexer lexer = {codeProvider, verbose};
   Parser parser = {lexer, verbose};
 
   auto parseTreeRoot = parser.createParseTree();

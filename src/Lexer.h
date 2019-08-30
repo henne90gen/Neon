@@ -29,13 +29,15 @@ private:
 
 class Lexer {
 public:
-  Lexer(CodeProvider *codeProvider) : codeProvider(codeProvider){};
+  Lexer(CodeProvider *codeProvider, bool verbose = false)
+      : codeProvider(codeProvider), verbose(verbose){};
 
   Token getToken();
 
 private:
   std::string currentWord;
   CodeProvider *codeProvider;
+  bool verbose;
 
   Token matchOneCharacterToken();
 };

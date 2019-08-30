@@ -52,7 +52,9 @@ Token Lexer::getToken() {
     }
 
     removeLeadingWhitespace(currentWord);
-    // std::cout << "Current word: " << currentWord << std::endl;
+    if (verbose) {
+      std::cout << "Current word: '" << currentWord << "'" << std::endl;
+    }
 
     std::regex floatRegex("^[0-9]+.[0-9]+");
     auto itr = std::sregex_iterator(currentWord.begin(), currentWord.end(),
@@ -72,6 +74,16 @@ Token Lexer::getToken() {
       currentWord =
           currentWord.substr(content.length(), currentWord.length() - 1);
       return {Token::INT_LIT, content};
+    }
+
+    if (currentWord.find("true") == 0) {
+      currentWord = currentWord.substr(4, currentWord.length() - 1);
+      return { Token::TRUE, "true"};
+    }
+
+    if (currentWord.find("false") == 0) {
+      currentWord = currentWord.substr(5, currentWord.length() - 1);
+      return { Token::FALSE, "false"};
     }
 
     auto oneCharToken = matchOneCharacterToken();

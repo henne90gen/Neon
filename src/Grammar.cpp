@@ -3,6 +3,8 @@
 
 std::string to_string(GrammarSymbol symbol) {
   switch (symbol) {
+  case NOT_EQUALS:
+    return "NOT_EQUALS";
   case LEFT_PARAN:
     return "LEFT_PARAN";
   case RIGHT_PARAN:
@@ -17,20 +19,32 @@ std::string to_string(GrammarSymbol symbol) {
     return "DIV";
   case SEMICOLON:
     return "SEMICOLON";
+  case LESS_THAN:
+    return "LESS_THAN";
+  case LESS_EQUALS:
+    return "LESS_EQUALS";
+  case EQUALS:
+    return "EQUALS";
+  case GREATER_THAN:
+    return "GREATER_THAN";
+  case GREATER_EQUALS:
+    return "GREATER_EQUALS";
   case END_OF_FILE:
     return "END_OF_FILE";
   case EXPRESSION:
     return "EXPRESSION";
   case FACTOR:
     return "FACTOR";
-  case FALSE:
-    return "FALSE";
+  case FALSE_LIT:
+    return "FALSE_LIT";
   case FLOAT_LIT:
     return "FLOAT_LIT";
   case INT_LIT:
     return "INT_LIT";
   case PROGRAM:
     return "PROGRAM";
+  case RELATION:
+    return "RELATION";
   case STATEMENT:
     return "STATEMENT";
   case STATEMENTS:
@@ -39,8 +53,8 @@ std::string to_string(GrammarSymbol symbol) {
     return "SUM";
   case TERM:
     return "TERM";
-  case TRUE:
-    return "TRUE";
+  case TRUE_LIT:
+    return "TRUE_LIT";
   }
 }
 

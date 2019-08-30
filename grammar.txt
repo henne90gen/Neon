@@ -16,7 +16,7 @@ stmt
 #    for (  ) { stmts }
 
 expr
-    sum
+    relation
 
 #disjunction
 #    conjunction
@@ -30,14 +30,14 @@ expr
 #    relation
 #    not relation
 #
-#relation
-#    sum
-#    sum < sum
-#    sum <= sum
-#    sum == sum
-#    sum != sum
-#    sum >= sum
-#    sum > sum
+relation
+    sum
+    sum < sum
+    sum <= sum
+    sum == sum
+    sum != sum
+    sum >= sum
+    sum > sum
 
 sum
     term

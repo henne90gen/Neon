@@ -22,7 +22,11 @@ std::string to_string(Token::TokenType type) {
     return "STAR";
   case Token::END_OF_FILE:
     return "END_OF_FILE";
+  case Token::TRUE:
+    return "TRUE";
+  case Token::FALSE:
+    return "FALSE";
   default:
-    return "ERROR";
+    return "NOT IMPLEMENTED YET" + std::to_string((int)type);
   }
 }

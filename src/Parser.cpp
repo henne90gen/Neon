@@ -40,11 +40,19 @@ GrammarSymbol convertToGrammarSymbol(Token &token) {
     return GrammarSymbol::END_OF_FILE;
   case Token::SEMICOLON:
     return GrammarSymbol::SEMICOLON;
+  case Token::TRUE:
+    return GrammarSymbol::TRUE_LIT;
+  case Token::FALSE:
+    return GrammarSymbol::FALSE_LIT;
+  default:
+    std::cout << "Could not convert token " << to_string(token.type)
+              << " to grammar symbol." << std::endl;
   }
   return END_OF_FILE;
 }
 
-std::optional<StateTransition> Parser::getNextAction(int rowIndex, int columnIndex) {
+std::optional<StateTransition> Parser::getNextAction(int rowIndex,
+                                                     int columnIndex) {
   auto actions = stateTransitionTable[rowIndex][columnIndex];
   if (actions.empty()) {
     return {};

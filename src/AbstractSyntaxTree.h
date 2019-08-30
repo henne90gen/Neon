@@ -16,6 +16,13 @@ public:
   int value;
 };
 
+class BoolData {
+public:
+  BoolData(int value) : value(value) {}
+
+  bool value;
+};
+
 class AstNode {
 public:
   enum AstNodeType {
@@ -27,7 +34,8 @@ public:
     SEQUENCE,
     STATEMENT,
     INT_LIT,
-    FLOAT_LIT
+    FLOAT_LIT,
+    BOOL_LIT
   };
 
   static AstNode *createAstFromParseTree(ParseTreeNode *node);

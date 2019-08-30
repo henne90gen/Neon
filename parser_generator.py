@@ -4,8 +4,32 @@ from dataclasses import dataclass, field
 
 
 symbol_to_enum_mapping = {
-    '(': 'LEFT_PARAN', ')': 'RIGHT_PARAN', '*': 'STAR', '+': 'PLUS', '-': 'MINUS', '/': 'DIV', ';': 'SEMICOLON', 'eof': 'END_OF_FILE', 'expr': 'EXPRESSION', 'factor': 'FACTOR',
-    'false': 'FALSE', 'float': 'FLOAT_LIT', 'integer': 'INT_LIT', 'program': 'PROGRAM', 'stmt': 'STATEMENT', 'stmts': 'STATEMENTS', 'sum': 'SUM', 'term': 'TERM', 'true': 'TRUE'
+    '(': 'LEFT_PARAN',
+    ')': 'RIGHT_PARAN',
+    '*': 'STAR',
+    '+': 'PLUS',
+    '-': 'MINUS',
+    '/': 'DIV',
+    ';': 'SEMICOLON',
+    '<': 'LESS_THAN',
+    '>': 'GREATER_THAN',
+    '<=': 'LESS_EQUALS',
+    '>=': 'GREATER_EQUALS',
+    '==': 'EQUALS',
+    '!=': 'NOT_EQUALS',
+    'eof': 'END_OF_FILE',
+    'expr': 'EXPRESSION',
+    'factor': 'FACTOR',
+    'false': 'FALSE_LIT',
+    'float': 'FLOAT_LIT',
+    'integer': 'INT_LIT',
+    'program': 'PROGRAM',
+    'stmt': 'STATEMENT',
+    'stmts': 'STATEMENTS',
+    'sum': 'SUM',
+    'term': 'TERM',
+    'true': 'TRUE_LIT',
+    'relation': 'RELATION'
 }
 
 
