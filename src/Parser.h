@@ -16,13 +16,13 @@ public:
 
 class Parser {
 public:
-  Parser(Lexer lexer) : lexer(lexer) {}
+  Parser(Lexer lexer, bool verbose = false) : lexer(lexer), verbose(verbose) {}
 
   ParseTreeNode *createParseTree();
 
 private:
   Lexer lexer;
-  bool verbose = false;
+  bool verbose;
 
   void executeShift(Token &token, std::vector<int> &states,
                     StateTransition &action,

@@ -32,15 +32,20 @@ void printAst(AstNode *node, int indentation = 0) {
 }
 
 int main() {
+  bool verbose = true;
   CodeProvider *codeProvider = new FileCodeProvider("main.mfl");
   Lexer lexer = {codeProvider};
-  Parser parser = {lexer};
+  Parser parser = {lexer, verbose};
 
   auto parseTreeRoot = parser.createParseTree();
-  // printParseTree(parseTreeRoot);
+  if (verbose) {
+    printParseTree(parseTreeRoot);
+  }
 
   auto astRoot = AstNode::createAstFromParseTree(parseTreeRoot);
-  // printAst(astRoot);
+  if (verbose) {
+    printAst(astRoot);
+  }
 
   Interpreter interpreter = {};
   interpreter.interpret(astRoot);
