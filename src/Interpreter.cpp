@@ -4,204 +4,204 @@
 #include <iostream>
 
 void Interpreter::interpretSEQ(AstNode *node) {
-  for (auto child : node->children) {
-    interpret(child);
-  }
+    for (auto child : node->children) {
+        interpret(child);
+    }
 }
 
 void Interpreter::interpretSTMT(AstNode *node) {
-  auto child = node->children[0];
-  interpret(child);
-  if (calculationResults.find(child) == calculationResults.end()) {
-    std::cout << "STATEMENT did not produce a result." << std::endl;
-    return;
-  }
+    auto child = node->children[0];
+    interpret(child);
+    if (calculationResults.find(child) == calculationResults.end()) {
+        std::cout << "STATEMENT did not produce a result." << std::endl;
+        return;
+    }
 
-  auto result = calculationResults[child];
-  calculationResults[node] = result;
-  if (result.type == CalculationResult::INTEGER) {
-    std::cout << result.intResult << std::endl;
-  } else if (result.type == CalculationResult::FLOAT) {
-    std::cout << result.floatResult << std::endl;
-  } else if (result.type == CalculationResult::BOOL) {
-    std::string str = result.boolResult ? "true" : "false";
-    std::cout << str << std::endl;
-  } else {
-    std::cout << "Could not print result." << std::endl;
-  }
+    auto result = calculationResults[child];
+    calculationResults[node] = result;
+    if (result.type == CalculationResult::INTEGER) {
+        std::cout << result.intResult << std::endl;
+    } else if (result.type == CalculationResult::FLOAT) {
+        std::cout << result.floatResult << std::endl;
+    } else if (result.type == CalculationResult::BOOL) {
+        std::string str = result.boolResult ? "true" : "false";
+        std::cout << str << std::endl;
+    } else {
+        std::cout << "Could not print result." << std::endl;
+    }
 }
 
 CalculationResult getTypedResult(CalculationResult &left,
                                  CalculationResult &right) {
-  CalculationResult result = {CalculationResult::INTEGER};
-  if (left.type == CalculationResult::FLOAT ||
-      right.type == CalculationResult::FLOAT) {
-    result.type = CalculationResult::FLOAT;
-  }
-  return result;
+    CalculationResult result = {CalculationResult::INTEGER};
+    if (left.type == CalculationResult::FLOAT ||
+        right.type == CalculationResult::FLOAT) {
+        result.type = CalculationResult::FLOAT;
+    }
+    return result;
 }
 
 float castToFloat(CalculationResult &result) {
-  if (result.type == CalculationResult::INTEGER) {
-    return (float)result.intResult;
-  } else {
-    return result.floatResult;
-  }
+    if (result.type == CalculationResult::INTEGER) {
+        return (float) result.intResult;
+    } else {
+        return result.floatResult;
+    }
 }
 
 CalculationResult add(CalculationResult &left, CalculationResult &right) {
-  CalculationResult result = getTypedResult(left, right);
-  if (result.type == CalculationResult::FLOAT) {
-    float l = castToFloat(left);
-    float r = castToFloat(right);
-    result.floatResult = l + r;
-  } else if (result.type == CalculationResult::INTEGER) {
-    result.intResult = left.intResult + right.intResult;
-  }
-  return result;
+    CalculationResult result = getTypedResult(left, right);
+    if (result.type == CalculationResult::FLOAT) {
+        float l = castToFloat(left);
+        float r = castToFloat(right);
+        result.floatResult = l + r;
+    } else if (result.type == CalculationResult::INTEGER) {
+        result.intResult = left.intResult + right.intResult;
+    }
+    return result;
 }
 
 CalculationResult subtract(CalculationResult &left, CalculationResult &right) {
-  CalculationResult result = getTypedResult(left, right);
-  if (result.type == CalculationResult::FLOAT) {
-    float l = castToFloat(left);
-    float r = castToFloat(right);
-    result.floatResult = l - r;
-  } else if (result.type == CalculationResult::INTEGER) {
-    result.intResult = left.intResult - right.intResult;
-  }
-  return result;
+    CalculationResult result = getTypedResult(left, right);
+    if (result.type == CalculationResult::FLOAT) {
+        float l = castToFloat(left);
+        float r = castToFloat(right);
+        result.floatResult = l - r;
+    } else if (result.type == CalculationResult::INTEGER) {
+        result.intResult = left.intResult - right.intResult;
+    }
+    return result;
 }
 
 CalculationResult multiply(CalculationResult &left, CalculationResult &right) {
-  CalculationResult result = getTypedResult(left, right);
-  if (result.type == CalculationResult::FLOAT) {
-    float l = castToFloat(left);
-    float r = castToFloat(right);
-    result.floatResult = l * r;
-  } else if (result.type == CalculationResult::INTEGER) {
-    result.intResult = left.intResult * right.intResult;
-  }
-  return result;
+    CalculationResult result = getTypedResult(left, right);
+    if (result.type == CalculationResult::FLOAT) {
+        float l = castToFloat(left);
+        float r = castToFloat(right);
+        result.floatResult = l * r;
+    } else if (result.type == CalculationResult::INTEGER) {
+        result.intResult = left.intResult * right.intResult;
+    }
+    return result;
 }
 
 CalculationResult divide(CalculationResult &left, CalculationResult &right) {
-  CalculationResult result = getTypedResult(left, right);
-  if (result.type == CalculationResult::FLOAT) {
-    float l = castToFloat(left);
-    float r = castToFloat(right);
-    result.floatResult = l / r;
-  } else if (result.type == CalculationResult::INTEGER) {
-    result.intResult = left.intResult / right.intResult;
-  }
-  return result;
+    CalculationResult result = getTypedResult(left, right);
+    if (result.type == CalculationResult::FLOAT) {
+        float l = castToFloat(left);
+        float r = castToFloat(right);
+        result.floatResult = l / r;
+    } else if (result.type == CalculationResult::INTEGER) {
+        result.intResult = left.intResult / right.intResult;
+    }
+    return result;
 }
 
 CalculationResult negate(CalculationResult &calc) {
-  CalculationResult result = {CalculationResult::BOOL};
-  if (calc.type == CalculationResult::BOOL) {
-    result.boolResult = !calc.boolResult;
-  }
-  return result;
+    CalculationResult result = {CalculationResult::BOOL};
+    if (calc.type == CalculationResult::BOOL) {
+        result.boolResult = !calc.boolResult;
+    }
+    return result;
 }
 
 void Interpreter::interpretBIN_OP(AstNode *node) {
-  for (auto child : node->children) {
-    if (calculationResults.find(child) != calculationResults.end()) {
-      continue;
+    for (auto child : node->children) {
+        if (calculationResults.find(child) != calculationResults.end()) {
+            continue;
+        }
+        interpret(child);
     }
-    interpret(child);
-  }
 
-  auto leftResult = calculationResults[node->children[0]];
-  auto rightResult = calculationResults[node->children[1]];
-  CalculationResult result = {};
-  switch (node->type) {
-  case AstNode::BIN_OP_ADD:
-    result = add(leftResult, rightResult);
-    break;
-  case AstNode::BIN_OP_SUB:
-    result = subtract(leftResult, rightResult);
-    break;
-  case AstNode::BIN_OP_MUL:
-    result = multiply(leftResult, rightResult);
-    break;
-  case AstNode::BIN_OP_DIV:
-    result = divide(leftResult, rightResult);
-    break;
-  }
-  calculationResults[node] = result;
+    auto leftResult = calculationResults[node->children[0]];
+    auto rightResult = calculationResults[node->children[1]];
+    CalculationResult result = {};
+    switch (node->type) {
+        case AstNode::BIN_OP_ADD:
+            result = add(leftResult, rightResult);
+            break;
+        case AstNode::BIN_OP_SUB:
+            result = subtract(leftResult, rightResult);
+            break;
+        case AstNode::BIN_OP_MUL:
+            result = multiply(leftResult, rightResult);
+            break;
+        case AstNode::BIN_OP_DIV:
+            result = divide(leftResult, rightResult);
+            break;
+    }
+    calculationResults[node] = result;
 }
 
 void Interpreter::interpretUN_OP(AstNode *node) {
-  auto child = node->children[0];
-  if (calculationResults.find(child) == calculationResults.end()) {
-    interpret(child);
-  }
+    auto child = node->children[0];
+    if (calculationResults.find(child) == calculationResults.end()) {
+        interpret(child);
+    }
 
-  auto childResult = calculationResults[child];
+    auto childResult = calculationResults[child];
 
-  CalculationResult result = {};
-  switch (node->type) {
-  case AstNode::UNARY_OP_NOT:
-    result = negate(childResult);
-    break;
-  }
-  calculationResults[node] = result;
+    CalculationResult result = {};
+    switch (node->type) {
+        case AstNode::UNARY_OP_NOT:
+            result = negate(childResult);
+            break;
+    }
+    calculationResults[node] = result;
 }
 
 void Interpreter::interpretLIT(AstNode *node) {
-  CalculationResult result = {};
-  if (node->type == AstNode::INT_LIT) {
-    result = {CalculationResult::INTEGER};
-    result.intResult = ((IntegerData *)node->data)->value;
-  } else if (node->type == AstNode::FLOAT_LIT) {
-    result = {CalculationResult::FLOAT};
-    result.floatResult = ((FloatData *)node->data)->value;
-  } else if (node->type == AstNode::BOOL_LIT) {
-    result = {CalculationResult::BOOL};
-    result.boolResult = ((BoolData *)node->data)->value;
-  } else {
-    std::cout << "Data type not supported yet!" << std::endl;
-    return;
-  }
-  calculationResults[node] = result;
+    CalculationResult result = {};
+    if (node->type == AstNode::INT_LIT) {
+        result = {CalculationResult::INTEGER};
+        result.intResult = ((IntegerData *) node->data)->value;
+    } else if (node->type == AstNode::FLOAT_LIT) {
+        result = {CalculationResult::FLOAT};
+        result.floatResult = ((FloatData *) node->data)->value;
+    } else if (node->type == AstNode::BOOL_LIT) {
+        result = {CalculationResult::BOOL};
+        result.boolResult = ((BoolData *) node->data)->value;
+    } else {
+        std::cout << "Data type not supported yet!" << std::endl;
+        return;
+    }
+    calculationResults[node] = result;
 }
 
 void Interpreter::interpret(AstNode *node) {
-  if (verbose) {
-    std::cout << "Interpreting " << to_string(node->type) << std::endl;
-  }
+    if (verbose) {
+        std::cout << "Interpreting " << to_string(node->type) << std::endl;
+    }
 
-  if (node == nullptr) {
-    std::cout << "Could not interpret node (nullptr)" << std::endl;
-    return;
-  }
+    if (node == nullptr) {
+        std::cout << "Could not interpret node (nullptr)" << std::endl;
+        return;
+    }
 
-  switch (node->type) {
-  case AstNode::SEQUENCE:
-    interpretSEQ(node);
-    break;
-  case AstNode::STATEMENT:
-    interpretSTMT(node);
-    break;
-  case AstNode::BIN_OP_ADD:
-  case AstNode::BIN_OP_SUB:
-  case AstNode::BIN_OP_MUL:
-  case AstNode::BIN_OP_DIV:
-    interpretBIN_OP(node);
-    break;
-  case AstNode::UNARY_OP_NOT:
-    interpretUN_OP(node);
-    break;
-  case AstNode::INT_LIT:
-  case AstNode::FLOAT_LIT:
-  case AstNode::BOOL_LIT:
-    interpretLIT(node);
-    break;
-  default:
-    std::cout << "AST node " << to_string(node->type) << " not supported."
-              << std::endl;
-    break;
-  }
+    switch (node->type) {
+        case AstNode::SEQUENCE:
+            interpretSEQ(node);
+            break;
+        case AstNode::STATEMENT:
+            interpretSTMT(node);
+            break;
+        case AstNode::BIN_OP_ADD:
+        case AstNode::BIN_OP_SUB:
+        case AstNode::BIN_OP_MUL:
+        case AstNode::BIN_OP_DIV:
+            interpretBIN_OP(node);
+            break;
+        case AstNode::UNARY_OP_NOT:
+            interpretUN_OP(node);
+            break;
+        case AstNode::INT_LIT:
+        case AstNode::FLOAT_LIT:
+        case AstNode::BOOL_LIT:
+            interpretLIT(node);
+            break;
+        default:
+            std::cout << "AST node " << to_string(node->type) << " not supported."
+                      << std::endl;
+            break;
+    }
 }
