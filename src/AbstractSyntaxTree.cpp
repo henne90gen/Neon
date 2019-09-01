@@ -22,6 +22,8 @@ std::string to_string(AstNode::AstNodeType type) {
     return "INT";
   case AstNode::BOOL_LIT:
     return "BOOL";
+  case AstNode::UNARY_OP_NOT:
+    return "NOT";
   default:
     return "ERROR";
   }
@@ -31,6 +33,11 @@ bool isBinaryOperation(ParseTreeNode *node) {
   return (node->symbol == GrammarSymbol::SUM ||
           node->symbol == GrammarSymbol::TERM) &&
          node->children.size() == 3;
+}
+
+bool isUnaryOperation(ParseTreeNode *node) {
+  return (node->symbol == GrammarSymbol::NEGATION) &&
+         node->children.size() == 2;
 }
 
 bool isLiteral(ParseTreeNode *node) {
@@ -64,6 +71,25 @@ AstNode::AstNodeType getBinaryOperationType(GrammarSymbol symbol) {
   case GrammarSymbol::DIV:
     return AstNode::BIN_OP_DIV;
   }
+
+  std::cout << "Could not determine binary opartor type! (" << to_string(symbol)
+            << ")" << std::endl;
+  exit(1);
+
+  return AstNode::BIN_OP_ADD;
+}
+
+AstNode::AstNodeType getUnaryOperationType(GrammarSymbol symbol) {
+  switch (symbol) {
+  case GrammarSymbol::NOT:
+    return AstNode::UNARY_OP_NOT;
+  }
+
+  std::cout << "Could not determine unary opartor type! (" << to_string(symbol)
+            << ")" << std::endl;
+  exit(1);
+
+  return AstNode::UNARY_OP_NOT;
 }
 
 AstNode::AstNodeType getLiteralType(GrammarSymbol symbol) {
@@ -77,7 +103,8 @@ AstNode::AstNodeType getLiteralType(GrammarSymbol symbol) {
     return AstNode::BOOL_LIT;
   }
 
-  std::cout << "Could not determine literal type!" << std::endl;
+  std::cout << "Could not determine literal type! (" << to_string(symbol) << ")"
+            << std::endl;
   exit(1);
 
   return AstNode::INT_LIT;
@@ -92,6 +119,15 @@ AstNode *createBinaryOperation(ParseTreeNode *node) {
 
   auto rightNode = AstNode::createAstFromParseTree(node->children[2]);
   astNode->children.push_back(rightNode);
+  return astNode;
+}
+
+AstNode *createUnaryOperation(ParseTreeNode *node) {
+  auto nodeType = getUnaryOperationType(node->children[0]->symbol);
+  auto astNode = new AstNode(nodeType);
+
+  auto child = AstNode::createAstFromParseTree(node->children[1]);
+  astNode->children.push_back(child);
   return astNode;
 }
 
@@ -162,6 +198,10 @@ AstNode *AstNode::createAstFromParseTree(ParseTreeNode *node) {
 
   if (isBinaryOperation(node)) {
     return createBinaryOperation(node);
+  }
+
+  if (isUnaryOperation(node)) {
+    return createUnaryOperation(node);
   }
 
   if (isLiteral(node)) {

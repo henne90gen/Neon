@@ -44,6 +44,8 @@ GrammarSymbol convertToGrammarSymbol(Token &token) {
     return GrammarSymbol::TRUE_LIT;
   case Token::FALSE:
     return GrammarSymbol::FALSE_LIT;
+  case Token::NOT:
+    return GrammarSymbol::NOT;
   default:
     std::cout << "Could not convert token " << to_string(token.type)
               << " to grammar symbol." << std::endl;

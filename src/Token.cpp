@@ -26,7 +26,9 @@ std::string to_string(Token::TokenType type) {
     return "TRUE";
   case Token::FALSE:
     return "FALSE";
+  case Token::NOT:
+    return "NOT";
   default:
-    return "NOT IMPLEMENTED YET" + std::to_string((int)type);
+    return "NOT IMPLEMENTED YET (" + std::to_string((int)type) + ")";
   }
 }

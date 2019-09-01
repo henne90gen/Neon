@@ -16,7 +16,7 @@ stmt
 #    for (  ) { stmts }
 
 expr
-    relation
+    negation
 
 #disjunction
 #    conjunction
@@ -25,11 +25,11 @@ expr
 #conjunction
 #    negation
 #    conjunction and negation
-#
-#negation
-#    relation
-#    not relation
-#
+
+negation
+    relation
+    not relation
+
 relation
     sum
     sum < sum

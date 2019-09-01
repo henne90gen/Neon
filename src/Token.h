@@ -8,6 +8,7 @@ struct Token {
     FLOAT_LIT,
     TRUE,
     FALSE,
+    NOT,
     PLUS,
     MINUS,
     STAR,

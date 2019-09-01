@@ -41,6 +41,10 @@ std::string to_string(GrammarSymbol symbol) {
     return "FLOAT_LIT";
   case INT_LIT:
     return "INT_LIT";
+  case NEGATION:
+    return "NEGATION";
+  case NOT:
+    return "NOT";
   case PROGRAM:
     return "PROGRAM";
   case RELATION:

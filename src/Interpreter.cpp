@@ -55,7 +55,7 @@ CalculationResult add(CalculationResult &left, CalculationResult &right) {
     float l = castToFloat(left);
     float r = castToFloat(right);
     result.floatResult = l + r;
-  } else {
+  } else if (result.type == CalculationResult::INTEGER) {
     result.intResult = left.intResult + right.intResult;
   }
   return result;
@@ -67,7 +67,7 @@ CalculationResult subtract(CalculationResult &left, CalculationResult &right) {
     float l = castToFloat(left);
     float r = castToFloat(right);
     result.floatResult = l - r;
-  } else {
+  } else if (result.type == CalculationResult::INTEGER) {
     result.intResult = left.intResult - right.intResult;
   }
   return result;
@@ -79,7 +79,7 @@ CalculationResult multiply(CalculationResult &left, CalculationResult &right) {
     float l = castToFloat(left);
     float r = castToFloat(right);
     result.floatResult = l * r;
-  } else {
+  } else if (result.type == CalculationResult::INTEGER) {
     result.intResult = left.intResult * right.intResult;
   }
   return result;
@@ -91,8 +91,16 @@ CalculationResult divide(CalculationResult &left, CalculationResult &right) {
     float l = castToFloat(left);
     float r = castToFloat(right);
     result.floatResult = l / r;
-  } else {
+  } else if (result.type == CalculationResult::INTEGER) {
     result.intResult = left.intResult / right.intResult;
+  }
+  return result;
+}
+
+CalculationResult negate(CalculationResult &calc) {
+  CalculationResult result = {CalculationResult::BOOL};
+  if (calc.type == CalculationResult::BOOL) {
+    result.boolResult = !calc.boolResult;
   }
   return result;
 }
@@ -125,7 +133,22 @@ void Interpreter::interpretBIN_OP(AstNode *node) {
   calculationResults[node] = result;
 }
 
-void Interpreter::interpretUN_OP(AstNode *node) {}
+void Interpreter::interpretUN_OP(AstNode *node) {
+  auto child = node->children[0];
+  if (calculationResults.find(child) == calculationResults.end()) {
+    interpret(child);
+  }
+
+  auto childResult = calculationResults[child];
+
+  CalculationResult result = {};
+  switch (node->type) {
+  case AstNode::UNARY_OP_NOT:
+    result = negate(childResult);
+    break;
+  }
+  calculationResults[node] = result;
+}
 
 void Interpreter::interpretLIT(AstNode *node) {
   CalculationResult result = {};

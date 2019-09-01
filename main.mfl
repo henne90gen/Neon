@@ -3,5 +3,6 @@
 6 * 7;
 12 / 3;
 7.5 + 2.5;
-true;
-false;
+7.5 + 2;
+not true;
+not false;

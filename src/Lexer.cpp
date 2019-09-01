@@ -78,12 +78,17 @@ Token Lexer::getToken() {
 
     if (currentWord.find("true") == 0) {
       currentWord = currentWord.substr(4, currentWord.length() - 1);
-      return { Token::TRUE, "true"};
+      return {Token::TRUE, "true"};
     }
 
     if (currentWord.find("false") == 0) {
       currentWord = currentWord.substr(5, currentWord.length() - 1);
-      return { Token::FALSE, "false"};
+      return {Token::FALSE, "false"};
+    }
+
+    if (currentWord.find("not") == 0) {
+      currentWord = currentWord.substr(3, currentWord.length() - 1);
+      return {Token::NOT, "not"};
     }
 
     auto oneCharToken = matchOneCharacterToken();

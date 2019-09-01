@@ -17,6 +17,7 @@ symbol_to_enum_mapping = {
     '>=': 'GREATER_EQUALS',
     '==': 'EQUALS',
     '!=': 'NOT_EQUALS',
+    'not': 'NOT',
     'eof': 'END_OF_FILE',
     'expr': 'EXPRESSION',
     'factor': 'FACTOR',
@@ -29,7 +30,8 @@ symbol_to_enum_mapping = {
     'sum': 'SUM',
     'term': 'TERM',
     'true': 'TRUE_LIT',
-    'relation': 'RELATION'
+    'relation': 'RELATION',
+    'negation': 'NEGATION'
 }
 
 
