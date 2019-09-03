@@ -4,21 +4,21 @@
 
 class FloatData {
 public:
-    FloatData(float value) : value(value) {}
+    explicit FloatData(float value) : value(value) {}
 
     float value;
 };
 
 class IntegerData {
 public:
-    IntegerData(int value) : value(value) {}
+    explicit IntegerData(int value) : value(value) {}
 
     int value;
 };
 
 class BoolData {
 public:
-    BoolData(int value) : value(value) {}
+    explicit BoolData(int value) : value(value) {}
 
     bool value;
 };
@@ -40,11 +40,13 @@ public:
 
     static AstNode *createAstFromParseTree(ParseTreeNode *node);
 
-    AstNode(AstNodeType type) : type(type) {}
+    explicit AstNode(AstNodeType type) : type(type) {}
 
     AstNodeType type;
     std::vector<AstNode *> children = {};
-    void *data;
+    void *data = nullptr;
 };
 
 std::string to_string(AstNode::AstNodeType type);
+
+void printAst(AstNode *node, int indentation = 0);

@@ -29,36 +29,44 @@ std::string to_string(GrammarSymbol symbol) {
     return "GREATER_THAN";
   case GREATER_EQUALS:
     return "GREATER_EQUALS";
-  case END_OF_FILE:
-    return "END_OF_FILE";
-  case EXPRESSION:
-    return "EXPRESSION";
+  case AND:
+    return "AND";
+  case CONJUNCTION:
+    return "CONJUNCTION";
+  case DISJUNCTION:
+    return "DISJUNCTION";
+  case ENDOFFILE:
+    return "ENDOFFILE";
+  case EXPR:
+    return "EXPR";
   case FACTOR:
     return "FACTOR";
-  case FALSE_LIT:
-    return "FALSE_LIT";
-  case FLOAT_LIT:
-    return "FLOAT_LIT";
-  case INT_LIT:
-    return "INT_LIT";
+  case FALSE:
+    return "FALSE";
+  case FLOAT:
+    return "FLOAT";
+  case INTEGER:
+    return "INTEGER";
   case NEGATION:
     return "NEGATION";
   case NOT:
     return "NOT";
+  case OR:
+    return "OR";
   case PROGRAM:
     return "PROGRAM";
   case RELATION:
     return "RELATION";
-  case STATEMENT:
-    return "STATEMENT";
-  case STATEMENTS:
-    return "STATEMENTS";
+  case STMT:
+    return "STMT";
+  case STMTS:
+    return "STMTS";
   case SUM:
     return "SUM";
   case TERM:
     return "TERM";
-  case TRUE_LIT:
-    return "TRUE_LIT";
+  case TRUE:
+    return "TRUE";
   }
 }
 

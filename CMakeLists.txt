@@ -42,8 +42,10 @@ enable_testing()
 include(${CMAKE_CURRENT_SOURCE_DIR}/vendor/catch/contrib/Catch.cmake)
 set(CATCH_INCLUDE_DIR ${CMAKE_CURRENT_SOURCE_DIR}/vendor/catch/single_include)
 
-set(TEST_SOURCES ${CMAKE_CURRENT_SOURCE_DIR}/test/main.cpp
-        ${CMAKE_CURRENT_SOURCE_DIR}/test/LexerTest.cpp)
+set(TEST_SOURCES
+        ${CMAKE_CURRENT_SOURCE_DIR}/test/main.cpp
+        ${CMAKE_CURRENT_SOURCE_DIR}/test/LexerTest.cpp
+        ${CMAKE_CURRENT_SOURCE_DIR}/test/ParserTest.cpp)
 
 add_executable(Tests ${TEST_SOURCES})
 target_include_directories(Tests PRIVATE ${CATCH_INCLUDE_DIR} ${CMAKE_CURRENT_SOURCE_DIR}/src)

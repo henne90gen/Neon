@@ -5,8 +5,41 @@
 #include <optional>
 #include <vector>
 
-void printCurrentParseState(StateTransition &action, std::vector<int> &states,
-                            std::vector<ParseTreeNode *> &nodes) {
+void printParseTree(ParseTreeNode *node, int indentation) {
+    if (node == nullptr) {
+        return;
+    }
+#if 0
+    for (int i = 0; i < indentation; i++) {
+        std::cout << "  ";
+    }
+    std::cout << "Node " << to_string(node->symbol) << std::endl;
+    for (auto child : node->children) {
+        printParseTree(child, indentation + 1);
+    }
+#else
+    if (indentation == 0) {
+        std::cout << std::endl;
+        std::cout << "TEST_CASE(\"Parser can handle ''\") {" << std::endl;
+        std::cout << "    std::vector<std::pair<int, GrammarSymbol>> parseTree = {" << std::endl;
+    }
+
+    std::cout << "        {" << indentation << ",  GrammarSymbol::" << to_string(node->symbol) << "}," << std::endl;
+    for (auto child : node->children) {
+        printParseTree(child, indentation + 1);
+    }
+
+    if (indentation == 0) {
+        std::cout << "    };" << std::endl;
+        std::cout << "    std::vector<std::string> program = {\"\"};" << std::endl;
+        std::cout << "    assertProgramCreatesParseTree(program, parseTree);" << std::endl;
+        std::cout << "}" << std::endl;
+        std::cout << std::endl;
+    }
+#endif
+}
+
+void printCurrentParseState(StateTransition &action, std::vector<int> &states, std::vector<ParseTreeNode *> &nodes) {
     for (auto node : nodes) {
         std::cout << to_string(node->symbol) + " ";
     }
@@ -20,41 +53,52 @@ void printCurrentParseState(StateTransition &action, std::vector<int> &states,
 
 GrammarSymbol convertToGrammarSymbol(Token &token) {
     switch (token.type) {
-        case Token::INT_LIT:
-            return GrammarSymbol::INT_LIT;
-        case Token::FLOAT_LIT:
-            return GrammarSymbol::FLOAT_LIT;
-        case Token::PLUS:
-            return GrammarSymbol::PLUS;
-        case Token::MINUS:
-            return GrammarSymbol::MINUS;
-        case Token::STAR:
-            return GrammarSymbol::STAR;
-        case Token::DIV:
-            return GrammarSymbol::DIV;
-        case Token::LEFT_PARAN:
-            return GrammarSymbol::LEFT_PARAN;
-        case Token::RIGHT_PARAN:
-            return GrammarSymbol::RIGHT_PARAN;
-        case Token::END_OF_FILE:
-            return GrammarSymbol::END_OF_FILE;
-        case Token::SEMICOLON:
-            return GrammarSymbol::SEMICOLON;
-        case Token::TRUE:
-            return GrammarSymbol::TRUE_LIT;
-        case Token::FALSE:
-            return GrammarSymbol::FALSE_LIT;
-        case Token::NOT:
-            return GrammarSymbol::NOT;
-        default:
-            std::cout << "Could not convert token " << to_string(token.type)
-                      << " to grammar symbol." << std::endl;
+    case Token::INTEGER:
+        return GrammarSymbol::INTEGER;
+    case Token::FLOAT:
+        return GrammarSymbol::FLOAT;
+    case Token::PLUS:
+        return GrammarSymbol::PLUS;
+    case Token::MINUS:
+        return GrammarSymbol::MINUS;
+    case Token::STAR:
+        return GrammarSymbol::STAR;
+    case Token::DIV:
+        return GrammarSymbol::DIV;
+    case Token::LEFT_PARAN:
+        return GrammarSymbol::LEFT_PARAN;
+    case Token::RIGHT_PARAN:
+        return GrammarSymbol::RIGHT_PARAN;
+    case Token::END_OF_FILE:
+        return GrammarSymbol::ENDOFFILE;
+    case Token::SEMICOLON:
+        return GrammarSymbol::SEMICOLON;
+    case Token::TRUE:
+        return GrammarSymbol::TRUE;
+    case Token::FALSE:
+        return GrammarSymbol::FALSE;
+    case Token::NOT:
+        return GrammarSymbol::NOT;
+    case Token::LESS_THAN:
+        return GrammarSymbol::LESS_THAN;
+    case Token::GREATER_THAN:
+        return GrammarSymbol::GREATER_THAN;
+    case Token::LESS_EQUALS:
+        return GrammarSymbol::LESS_EQUALS;
+    case Token::GREATER_EQUALS:
+        return GrammarSymbol::GREATER_EQUALS;
+    case Token::AND:
+        return GrammarSymbol::AND;
+    case Token::OR:
+        return GrammarSymbol::OR;
+    default:
+        std::cout << "Could not convert token " << to_string(token.type) << " to grammar symbol." << std::endl;
+        exit(1);
     }
-    return END_OF_FILE;
+    return GrammarSymbol::ENDOFFILE;
 }
 
-std::optional<StateTransition> Parser::getNextAction(int rowIndex,
-                                                     int columnIndex) {
+std::optional<StateTransition> Parser::getNextAction(int rowIndex, int columnIndex) {
     auto actions = stateTransitionTable[rowIndex][columnIndex];
     if (actions.empty()) {
         return {};
@@ -88,8 +132,7 @@ std::optional<StateTransition> Parser::getNextAction(int rowIndex,
     return std::optional(actions[0]);
 }
 
-void Parser::executeShift(Token &token, std::vector<int> &states,
-                          StateTransition &action,
+void Parser::executeShift(Token &token, std::vector<int> &states, StateTransition &action,
                           std::vector<ParseTreeNode *> &nodes) {
     token = lexer.getToken();
     states.push_back(action.nextStateIndex);
@@ -97,18 +140,15 @@ void Parser::executeShift(Token &token, std::vector<int> &states,
     nodes.push_back(newNode);
 }
 
-void Parser::executeGoto(std::vector<int> &states, StateTransition &action) {
-    states.push_back(action.nextStateIndex);
-}
+void Parser::executeGoto(std::vector<int> &states, StateTransition &action) { states.push_back(action.nextStateIndex); }
 
-void Parser::executeReduce(std::vector<int> &states, StateTransition &action,
-                           std::vector<ParseTreeNode *> &nodes) {
+void Parser::executeReduce(std::vector<int> &states, StateTransition &action, std::vector<ParseTreeNode *> &nodes) {
     auto newNode = new ParseTreeNode(action.symbol);
     auto lastNode = nodes.back();
     nodes.pop_back();
     for (auto &ruleElement : action.rule) {
-        auto lastNode = nodes.back();
-        newNode->children.push_back(lastNode);
+        auto lastN = nodes.back();
+        newNode->children.push_back(lastN);
         nodes.pop_back();
         states.pop_back();
     }
@@ -120,8 +160,7 @@ void Parser::executeReduce(std::vector<int> &states, StateTransition &action,
     int columnIndex = action.symbol;
     auto newActionOptional = getNextAction(rowIndex, columnIndex);
     if (!newActionOptional) {
-        std::cout << "This should never happen " << rowIndex << "," << columnIndex
-                  << std::endl;
+        std::cout << "This should never happen " << rowIndex << "," << columnIndex << std::endl;
         exit(1);
     }
     states.push_back(newActionOptional.value().nextStateIndex);
@@ -145,15 +184,14 @@ ParseTreeNode *Parser::createParseTree() {
     std::vector<int> states = {};
     states.push_back(0);
     auto token = lexer.getToken();
-    nodes.push_back(new ParseTreeNode(convertToGrammarSymbol(token)));
+    nodes.push_back(new ParseTreeNode(convertToGrammarSymbol(token), token));
 
     while (true) {
         int rowIndex = states.back();
         int columnIndex = convertToGrammarSymbol(token);
         auto actionOptional = getNextAction(rowIndex, columnIndex);
         if (!actionOptional) {
-            std::cout << "Could not get next action: " << rowIndex << ", "
-                      << columnIndex << std::endl;
+            std::cout << "Could not get next action: " << rowIndex << ", " << columnIndex << std::endl;
             break;
         }
         auto action = actionOptional.value();
@@ -163,27 +201,28 @@ ParseTreeNode *Parser::createParseTree() {
         }
 
         switch (action.type) {
-            case SHIFT:
-                executeShift(token, states, action, nodes);
-                break;
-            case GOTO:
-                executeGoto(states, action);
-                break;
-            case REDUCE: {
-                executeReduce(states, action, nodes);
+        case SHIFT:
+            executeShift(token, states, action, nodes);
+            break;
+        case GOTO:
+            executeGoto(states, action);
+            break;
+        case REDUCE: {
+            executeReduce(states, action, nodes);
+        } break;
+        case ACCEPT: {
+            auto root = new ParseTreeNode(GrammarSymbol::PROGRAM);
+            for (auto node : nodes) {
+                root->children.push_back(node);
             }
-                break;
-            case ACCEPT: {
-                auto root = new ParseTreeNode(GrammarSymbol::PROGRAM);
-                for (auto node : nodes) {
-                    root->children.push_back(node);
-                }
+            if (verbose) {
                 std::cout << "Accepted program!" << std::endl;
-                return root;
             }
-            case ERROR:
-                std::cout << "ERROR!" << std::endl;
-                return nullptr;
+            return root;
+        }
+        case ERROR:
+            std::cout << "ERROR!" << std::endl;
+            return nullptr;
         }
     }
 

@@ -3,6 +3,7 @@
 #include <fstream>
 #include <iostream>
 #include <regex>
+#include <optional>
 
 std::optional<std::string> StdInCodeProvider::getMoreCode() {
     std::string result = "";
@@ -52,7 +53,7 @@ Token Lexer::getToken() {
     while (true) {
         if (currentWord.empty()) {
             auto optionalCode = codeProvider->getMoreCode();
-            if (!optionalCode) {
+            if (!optionalCode.has_value()) {
                 break;
             }
             currentWord = optionalCode.value();
@@ -66,45 +67,42 @@ Token Lexer::getToken() {
             std::cout << "Current word: '" << currentWord << "'" << std::endl;
         }
 
-        std::regex floatRegex("^[0-9]+.[0-9]+");
+        std::regex floatRegex("^[0-9]+\\.[0-9]+");
         auto itr = std::sregex_iterator(currentWord.begin(), currentWord.end(),
                                         floatRegex);
         if (itr != std::sregex_iterator()) {
-            auto content = (*itr).str();
+            auto content = static_cast<std::string>((*itr).str());
             currentWord =
                     currentWord.substr(content.length(), currentWord.length() - 1);
-            return {Token::FLOAT_LIT, content};
+            return {Token::FLOAT, content};
         }
 
         std::regex intRegex("^[0-9]+");
         itr =
                 std::sregex_iterator(currentWord.begin(), currentWord.end(), intRegex);
         if (itr != std::sregex_iterator()) {
-            auto content = (*itr).str();
+            auto content = static_cast<std::string>((*itr).str());
             currentWord =
                     currentWord.substr(content.length(), currentWord.length() - 1);
-            return {Token::INT_LIT, content};
+            return {Token::INTEGER, content};
         }
 
-        if (currentWord.find("true") == 0) {
-            currentWord = currentWord.substr(4, currentWord.length() - 1);
-            return {Token::TRUE, "true"};
+        auto wordToken = matchWordToken();
+        if (wordToken.has_value()) {
+            currentWord = currentWord.substr(wordToken.value().content.length(), currentWord.length() - 1);
+            return wordToken.value();
         }
 
-        if (currentWord.find("false") == 0) {
-            currentWord = currentWord.substr(5, currentWord.length() - 1);
-            return {Token::FALSE, "false"};
-        }
-
-        if (currentWord.find("not") == 0) {
-            currentWord = currentWord.substr(3, currentWord.length() - 1);
-            return {Token::NOT, "not"};
+        auto twoCharToken = matchTwoCharToken();
+        if (twoCharToken.has_value()) {
+            currentWord = currentWord.substr(2, currentWord.length() - 1);
+            return twoCharToken.value();
         }
 
         auto oneCharToken = matchOneCharacterToken();
-        if (oneCharToken.type != Token::END_OF_FILE) {
+        if (oneCharToken.has_value()) {
             currentWord = currentWord.substr(1, currentWord.length() - 1);
-            return oneCharToken;
+            return oneCharToken.value();
         }
 
         if (currentWord == previousWord) {
@@ -115,7 +113,7 @@ Token Lexer::getToken() {
     }
 
     std::string invalidToken;
-    auto nextSpace = currentWord.find(" ");
+    auto nextSpace = currentWord.find(' ');
     if (nextSpace == -1) {
         invalidToken = currentWord;
         currentWord = "";
@@ -123,25 +121,61 @@ Token Lexer::getToken() {
         invalidToken = currentWord.substr(0, nextSpace);
         currentWord = currentWord.substr(nextSpace + 1, currentWord.length() - 1);
     }
+
+    if (!invalidToken.empty() && verbose) {
+        std::cout << "Found an invalid token: '" << invalidToken << "'" << std::endl;
+    }
     return {Token::END_OF_FILE, invalidToken};
 }
 
-Token Lexer::matchOneCharacterToken() {
+std::optional<Token> Lexer::matchWordToken() {
+    if (currentWord.find("true") == 0) {
+        return std::optional<Token>({Token::TRUE, "true"});
+    } else if (currentWord.find("false") == 0) {
+        return std::optional<Token>({Token::FALSE, "false"});
+    } else if (currentWord.find("not") == 0) {
+        return std::optional<Token>({Token::NOT, "not"});
+    } else if (currentWord.find("and") == 0) {
+        return std::optional<Token>({Token::AND, "and"});
+    } else if (currentWord.find("or") == 0) {
+        return std::optional<Token>({Token::OR, "or"});
+    }
+    return {};
+}
+
+std::optional<Token> Lexer::matchTwoCharToken() {
+    if (currentWord.find("!=") == 0) {
+        return std::optional<Token>({Token::NOT_EQUALS, "!="});
+    } else if (currentWord.find("==") == 0) {
+        return std::optional<Token>({Token::EQUALS, "=="});
+    } else if (currentWord.find(">=") == 0) {
+        return std::optional<Token>({Token::GREATER_EQUALS, ">="});
+    } else if (currentWord.find("<=") == 0) {
+        return std::optional<Token>({Token::LESS_EQUALS, "<="});
+    }
+    return {};
+}
+
+std::optional<Token> Lexer::matchOneCharacterToken() {
     char firstChar = currentWord[0];
     if (firstChar == '(') {
-        return {Token::LEFT_PARAN, "("};
+        return std::optional<Token>({Token::LEFT_PARAN, "("});
     } else if (firstChar == ')') {
-        return {Token::RIGHT_PARAN, ")"};
+        return std::optional<Token>({Token::RIGHT_PARAN, ")"});
     } else if (firstChar == '+') {
-        return {Token::PLUS, "+"};
+        return std::optional<Token>({Token::PLUS, "+"});
     } else if (firstChar == '-') {
-        return {Token::MINUS, "-"};
+        return std::optional<Token>({Token::MINUS, "-"});
     } else if (firstChar == '*') {
-        return {Token::STAR, "*"};
+        return std::optional<Token>({Token::STAR, "*"});
     } else if (firstChar == '/') {
-        return {Token::DIV, "/"};
+        return std::optional<Token>({Token::DIV, "/"});
     } else if (firstChar == ';') {
-        return {Token::SEMICOLON, ";"};
+        return std::optional<Token>({Token::SEMICOLON, ";"});
+    } else if (firstChar == '<') {
+        return std::optional<Token>({Token::LESS_THAN, "<"});
+    } else if (firstChar == '>') {
+        return std::optional<Token>({Token::GREATER_THAN, ">"});
     }
-    return {Token::END_OF_FILE, ""};
+    return {};
 }

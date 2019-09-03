@@ -1,10 +1,11 @@
 program
-    stmts eof
+    stmts endoffile
 
+# TODO this allows the first statement to be without a semicolon
 stmts
     stmt
     stmts ;
-    stmts ; stmt
+    stmts ; stmt ;
 
 stmt
 #    selection
@@ -16,15 +17,15 @@ stmt
 #    for (  ) { stmts }
 
 expr
-    negation
+    disjunction
 
-#disjunction
-#    conjunction
-#    disjunction or conjunction
-#
-#conjunction
-#    negation
-#    conjunction and negation
+disjunction
+    conjunction
+    disjunction or conjunction
+
+conjunction
+    negation
+    conjunction and negation
 
 negation
     relation

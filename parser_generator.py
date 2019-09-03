@@ -1,9 +1,10 @@
 import copy
 from typing import List
-from dataclasses import dataclass, field
+from dataclasses import dataclass
 
+END_OF_FILE = "endoffile"
 
-symbol_to_enum_mapping = {
+SYMBOL_TO_ENUM_MAPPING = {
     '(': 'LEFT_PARAN',
     ')': 'RIGHT_PARAN',
     '*': 'STAR',
@@ -17,26 +18,12 @@ symbol_to_enum_mapping = {
     '>=': 'GREATER_EQUALS',
     '==': 'EQUALS',
     '!=': 'NOT_EQUALS',
-    'not': 'NOT',
-    'eof': 'END_OF_FILE',
-    'expr': 'EXPRESSION',
-    'factor': 'FACTOR',
-    'false': 'FALSE_LIT',
-    'float': 'FLOAT_LIT',
-    'integer': 'INT_LIT',
-    'program': 'PROGRAM',
-    'stmt': 'STATEMENT',
-    'stmts': 'STATEMENTS',
-    'sum': 'SUM',
-    'term': 'TERM',
-    'true': 'TRUE_LIT',
-    'relation': 'RELATION',
-    'negation': 'NEGATION'
 }
 
 
 def parse_rules(lines: List[str]) -> dict:
     rules = {}
+    current_rule = ""
     for line in lines:
         if not line.strip() or line.startswith("#"):
             continue
@@ -46,7 +33,11 @@ def parse_rules(lines: List[str]) -> dict:
             rules[current_rule] = []
             continue
 
-        rules[current_rule].append(line.strip().split())
+        if current_rule:
+            rules[current_rule].append(line.strip().split())
+        else:
+            print("Could not associate this line with a rule.")
+
     return rules
 
 
@@ -172,7 +163,7 @@ class State:
 
 
 def extract_all_symbols(rules: dict):
-    symbols = set(["program"])
+    symbols = {"program"}
     for rule_collection in rules.values():
         for rule in rule_collection:
             for symbol in rule:
@@ -200,7 +191,7 @@ def construct_table(rules: dict, states: []):
 
             for rule_name, rule_collection in state.rules.items():
                 for rule in rule_collection:
-                    if len(rule) > 1 and rule[-2] == '.' and rule[-1] == "eof" and trans == "eof":
+                    if len(rule) > 1 and rule[-2] == '.' and rule[-1] == END_OF_FILE and trans == END_OF_FILE:
                         table[state_index][symbol_index].append("a")
 
         for rule_name, rule_collection in state.rules.items():
@@ -223,16 +214,31 @@ def create_table_row(row: List[List[str]]) -> str:
     return result
 
 
+def get_grammar_symbol(symbol):
+    found_other_char = False
+    for c in symbol:
+        if not c.isalpha():
+            found_other_char = True
+    if found_other_char:
+        if symbol in SYMBOL_TO_ENUM_MAPPING:
+            return SYMBOL_TO_ENUM_MAPPING[symbol]
+        else:
+            print(f"Could not find '{symbol}' in the symbol mapping table.")
+            exit(1)
+    return symbol.upper()
+
+
 def convert_to_state_transition(transition: str) -> str:
     t = transition[0]
     rest = transition[1:]
     if t == "r":
         index = rest.index(">")
-        rule_symbol = f"GrammarSymbol::{symbol_to_enum_mapping[rest[1:index - 1]]}"
+        grammar_symbol = get_grammar_symbol(rest[1:index - 1])
+        rule_symbol = f"GrammarSymbol::{grammar_symbol}"
         rest = rest[index + 1:]
         rule = ', '.join(
             map(lambda s: f"GrammarSymbol::{s}",
-                map(lambda s: symbol_to_enum_mapping[s], rest.split())))
+                map(get_grammar_symbol, rest.split())))
         return f"{{StateTransitionType::REDUCE, -1, {rule_symbol}, {{{rule}}}}}"
     if t == "s":
         return f"{{StateTransitionType::SHIFT, {rest}}}"
@@ -253,21 +259,22 @@ def convert_to_state_transitions(elem: List[str]) -> str:
 
 
 def create_grammar_symbols(header: List[str]) -> str:
-    return ",\n".join(map(lambda e: f"  {symbol_to_enum_mapping[e[1]]} = {e[0]}", enumerate(header)))
+    return ",\n".join(map(lambda e: f"  {get_grammar_symbol(e[1])} = {e[0]}", enumerate(header)))
 
 
 def create_grammar_symbol_switch_cases(header: List[str]) -> str:
     return "\n".join(
         map(create_switch_case_for_grammar_symbol,
-            map(lambda x: symbol_to_enum_mapping[x], header)))
+            map(get_grammar_symbol, header)))
 
 
 def create_switch_case_for_grammar_symbol(grammar_symbol: str):
     return f"  case {grammar_symbol}:\n    return \"{grammar_symbol}\";"
 
 
-def main(grammer_file: str = "grammar.txt", header_file: str = "src/Grammar.h", cpp_file: str = "src/Grammar.cpp", verbose: bool = False):
-    with open("grammar.txt") as f:
+def main(grammer_file: str = "grammar.txt", header_file: str = "src/Grammar.h", cpp_file: str = "src/Grammar.cpp",
+         verbose: bool = False):
+    with open(grammer_file) as f:
         lines = f.readlines()
 
     rules = parse_rules(lines)
@@ -316,7 +323,7 @@ std::string to_string(StateTransitionType transition);
 struct StateTransition {
   StateTransitionType type = StateTransitionType::ERROR;
   int nextStateIndex = 0;
-  GrammarSymbol symbol = END_OF_FILE;
+  GrammarSymbol symbol = ENDOFFILE;
   std::vector<GrammarSymbol> rule = {};
 };
 

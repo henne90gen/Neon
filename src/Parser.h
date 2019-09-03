@@ -1,14 +1,16 @@
 #pragma once
 
+#include <utility>
+
 #include "Grammar.h"
 #include "Lexer.h"
 
 class ParseTreeNode {
 public:
-    ParseTreeNode(GrammarSymbol symbol) : symbol(symbol) {}
+    explicit ParseTreeNode(GrammarSymbol symbol) : symbol(symbol) {}
 
     ParseTreeNode(GrammarSymbol symbol, Token token)
-            : symbol(symbol), token(token) {}
+            : symbol(symbol), token(std::move(token)) {}
 
     GrammarSymbol symbol;
     Token token;
@@ -17,7 +19,7 @@ public:
 
 class Parser {
 public:
-    Parser(Lexer lexer, bool verbose = false) : lexer(lexer), verbose(verbose) {}
+    explicit Parser(Lexer lexer, bool verbose = false) : lexer(std::move(lexer)), verbose(verbose) {}
 
     ParseTreeNode *createParseTree();
 
@@ -36,3 +38,5 @@ private:
 
     std::optional<StateTransition> getNextAction(int rowIndex, int columnIndex);
 };
+
+void printParseTree(ParseTreeNode *node, int indentation = 0);

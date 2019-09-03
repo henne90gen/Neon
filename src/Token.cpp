@@ -8,10 +8,10 @@ std::string to_string(Token::TokenType type) {
             return "LEFT_PARAN";
         case Token::RIGHT_PARAN:
             return "RIGHT_PARAN";
-        case Token::INT_LIT:
-            return "INT_LIT";
-        case Token::FLOAT_LIT:
-            return "FLOAT_LIT";
+        case Token::INTEGER:
+            return "INTEGER";
+        case Token::FLOAT:
+            return "FLOAT";
         case Token::PLUS:
             return "PLUS";
         case Token::MINUS:
@@ -28,6 +28,20 @@ std::string to_string(Token::TokenType type) {
             return "FALSE";
         case Token::NOT:
             return "NOT";
+        case Token::AND:
+            return "AND";
+        case Token::OR:
+            return "OR";
+        case Token::GREATER_THAN:
+            return "GREATER_THAN";
+        case Token::LESS_THAN:
+            return "LESS_THAN";
+        case Token::GREATER_EQUALS:
+            return "GREATER_EQUALS";
+        case Token::EQUALS:
+            return "EQUALS";
+        case Token::NOT_EQUALS:
+            return "NOT_EQUALS";
         default:
             return "NOT IMPLEMENTED YET (" + std::to_string((int) type) + ")";
     }

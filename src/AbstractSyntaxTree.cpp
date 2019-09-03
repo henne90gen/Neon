@@ -2,6 +2,20 @@
 
 #include <iostream>
 
+void printAst(AstNode *node, int indentation) {
+    for (int i = 0; i < indentation; i++) {
+        std::cout << "  ";
+    }
+    if (node == nullptr) {
+        std::cout << "AstNode nullptr" << std::endl;
+        return;
+    }
+    std::cout << "AstNode " << to_string(node->type) << std::endl;
+    for (auto child : node->children) {
+        printAst(child, indentation + 1);
+    }
+}
+
 std::string to_string(AstNode::AstNodeType type) {
     switch (type) {
         case AstNode::BIN_OP_ADD:
@@ -41,23 +55,23 @@ bool isUnaryOperation(ParseTreeNode *node) {
 }
 
 bool isLiteral(ParseTreeNode *node) {
-    return node->symbol == GrammarSymbol::INT_LIT ||
-           node->symbol == GrammarSymbol::FLOAT_LIT ||
-           node->symbol == GrammarSymbol::TRUE_LIT ||
-           node->symbol == GrammarSymbol::FALSE_LIT;
+    return node->symbol == GrammarSymbol::INTEGER ||
+           node->symbol == GrammarSymbol::FLOAT ||
+           node->symbol == GrammarSymbol::TRUE ||
+           node->symbol == GrammarSymbol::FALSE;
 }
 
 bool isSequence(ParseTreeNode *node) {
-    return node->symbol == GrammarSymbol::STATEMENTS && node->children.size() > 1;
+    return node->symbol == GrammarSymbol::STMTS && node->children.size() > 1;
 }
 
 bool isStatement(ParseTreeNode *node) {
-    return node->symbol == GrammarSymbol::STATEMENT;
+    return node->symbol == GrammarSymbol::STMT;
 }
 
 bool isIgnored(ParseTreeNode *node) {
     return node->symbol == GrammarSymbol::SEMICOLON ||
-           node->symbol == GrammarSymbol::END_OF_FILE;
+           node->symbol == GrammarSymbol::ENDOFFILE;
 }
 
 AstNode::AstNodeType getBinaryOperationType(GrammarSymbol symbol) {
@@ -94,12 +108,12 @@ AstNode::AstNodeType getUnaryOperationType(GrammarSymbol symbol) {
 
 AstNode::AstNodeType getLiteralType(GrammarSymbol symbol) {
     switch (symbol) {
-        case GrammarSymbol::INT_LIT:
+        case GrammarSymbol::INTEGER:
             return AstNode::INT_LIT;
-        case GrammarSymbol::FLOAT_LIT:
+        case GrammarSymbol::FLOAT:
             return AstNode::FLOAT_LIT;
-        case GrammarSymbol::TRUE_LIT:
-        case GrammarSymbol::FALSE_LIT:
+        case GrammarSymbol::TRUE:
+        case GrammarSymbol::FALSE:
             return AstNode::BOOL_LIT;
     }
 
@@ -134,6 +148,11 @@ AstNode *createUnaryOperation(ParseTreeNode *node) {
 AstNode *createLiteral(ParseTreeNode *node) {
     auto nodeType = getLiteralType(node->symbol);
     auto astNode = new AstNode(nodeType);
+
+    if (node->token.content.empty()) {
+        std::cout << "Missing token content. Can't create a literal." << std::endl;
+        return nullptr;
+    }
 
     if (nodeType == AstNode::FLOAT_LIT) {
         astNode->data = new FloatData(std::stof(node->token.content));
