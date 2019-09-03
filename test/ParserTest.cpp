@@ -15,7 +15,7 @@ ParseTreeNode *createParseTree(const std::vector<std::pair<int, GrammarSymbol>> 
 }
 
 void assertParseTreesAreEqual(ParseTreeNode *node1, ParseTreeNode *node2) {
-    INFO("Node " + to_string(node1->symbol) + " | Node " + to_string(node2->symbol));
+    INFO("Node " + to_string(node1->symbol) + " | Node " + to_string(node2->symbol))
     REQUIRE(node1->symbol == node2->symbol);
     REQUIRE(node1->children.size() == node2->children.size());
     for (unsigned long i = 0; i < node1->children.size(); i++) {
