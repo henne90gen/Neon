@@ -135,3 +135,71 @@ TEST_CASE("Parser can handle single statement without semicolon") {
     std::vector<std::string> program = {"1 + 1"};
     assertProgramCreatesParseTree(program, parseTree);
 }
+
+TEST_CASE("Parser can handle 'not (1 < 2)'") {
+    std::vector<std::pair<int, GrammarSymbol>> parseTree = {
+          {0,  GrammarSymbol::PROGRAM},
+          {1,  GrammarSymbol::STMTS},
+          {2,  GrammarSymbol::STMTS},
+          {3,  GrammarSymbol::STMT},
+          {4,  GrammarSymbol::EXPR},
+          {5,  GrammarSymbol::DISJUNCTION},
+          {6,  GrammarSymbol::CONJUNCTION},
+          {7,  GrammarSymbol::NEGATION},
+          {8,  GrammarSymbol::NOT},
+          {8,  GrammarSymbol::RELATION},
+          {9,  GrammarSymbol::SUM},
+          {10,  GrammarSymbol::TERM},
+          {11,  GrammarSymbol::FACTOR},
+          {12,  GrammarSymbol::LEFT_PARAN},
+          {12,  GrammarSymbol::EXPR},
+          {13,  GrammarSymbol::DISJUNCTION},
+          {14,  GrammarSymbol::CONJUNCTION},
+          {15,  GrammarSymbol::NEGATION},
+          {16,  GrammarSymbol::RELATION},
+          {17,  GrammarSymbol::SUM},
+          {18,  GrammarSymbol::TERM},
+          {19,  GrammarSymbol::FACTOR},
+          {20,  GrammarSymbol::INTEGER},
+          {17,  GrammarSymbol::LESS_THAN},
+          {17,  GrammarSymbol::SUM},
+          {18,  GrammarSymbol::TERM},
+          {19,  GrammarSymbol::FACTOR},
+          {20,  GrammarSymbol::INTEGER},
+          {12,  GrammarSymbol::RIGHT_PARAN},
+          {2,  GrammarSymbol::SEMICOLON},
+          {1,  GrammarSymbol::ENDOFFILE},
+    };
+    std::vector<std::string> program = {"not (1 < 2);"};
+    assertProgramCreatesParseTree(program, parseTree);
+}
+
+TEST_CASE("Parser can handle 'true and false;'") {
+    std::vector<std::pair<int, GrammarSymbol>> parseTree = {
+          {0,  GrammarSymbol::PROGRAM},
+          {1,  GrammarSymbol::STMTS},
+          {2,  GrammarSymbol::STMTS},
+          {3,  GrammarSymbol::STMT},
+          {4,  GrammarSymbol::EXPR},
+          {5,  GrammarSymbol::DISJUNCTION},
+          {6,  GrammarSymbol::CONJUNCTION},
+          {7,  GrammarSymbol::CONJUNCTION},
+          {8,  GrammarSymbol::NEGATION},
+          {9,  GrammarSymbol::RELATION},
+          {10,  GrammarSymbol::SUM},
+          {11,  GrammarSymbol::TERM},
+          {12,  GrammarSymbol::FACTOR},
+          {13,  GrammarSymbol::TRUE},
+          {7,  GrammarSymbol::AND},
+          {7,  GrammarSymbol::NEGATION},
+          {8,  GrammarSymbol::RELATION},
+          {9,  GrammarSymbol::SUM},
+          {10,  GrammarSymbol::TERM},
+          {11,  GrammarSymbol::FACTOR},
+          {12,  GrammarSymbol::FALSE},
+          {2,  GrammarSymbol::SEMICOLON},
+          {1,  GrammarSymbol::ENDOFFILE},
+    };
+    std::vector<std::string> program = {"true and false;"};
+    assertProgramCreatesParseTree(program, parseTree);
+}

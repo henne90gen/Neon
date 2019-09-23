@@ -2,20 +2,6 @@
 
 #include <iostream>
 
-//void printAst(AstNode *node, int indentation) {
-//    for (int i = 0; i < indentation; i++) {
-//        std::cout << "  ";
-//    }
-//    if (node == nullptr) {
-//        std::cout << "AstNode nullptr" << std::endl;
-//        return;
-//    }
-//    std::cout << "AstNode " << node->getName() << std::endl;
-//    for (auto child : node->children) {
-//        printAst(child, indentation + 1);
-//    }
-//}
-
 bool isBinaryOperation(ParseTreeNode *node) {
     return (node->symbol == GrammarSymbol::SUM || node->symbol == GrammarSymbol::TERM) && node->children.size() == 3;
 }
@@ -57,11 +43,11 @@ BinaryOperationNode::BinaryOperationType getBinaryOperationType(GrammarSymbol sy
 UnaryOperationNode::UnaryOperationType getUnaryOperationType(GrammarSymbol symbol) {
     switch (symbol) {
     case GrammarSymbol::NOT:
-        return UnaryOperationNode::UNARY_OP_NOT;
+        return UnaryOperationNode::NOT;
     default:
         std::cout << "Could not determine unary opartor type! (" << to_string(symbol) << ")" << std::endl;
         exit(1);
-        return UnaryOperationNode::UNARY_OP_NOT;
+        return UnaryOperationNode::NOT;
     }
 }
 
@@ -194,16 +180,73 @@ AstNode *createAstFromParseTree(ParseTreeNode *node) {
     return nullptr;
 }
 
-#include "llvm/ADT/APFloat.h"
-#include "llvm/ADT/STLExtras.h"
-#include "llvm/IR/BasicBlock.h"
-#include "llvm/IR/Constants.h"
-#include "llvm/IR/DerivedTypes.h"
-#include "llvm/IR/Function.h"
-#include "llvm/IR/IRBuilder.h"
-#include "llvm/IR/LLVMContext.h"
-#include "llvm/IR/Module.h"
-#include "llvm/IR/Type.h"
-#include "llvm/IR/Verifier.h"
+void indent(int indentation) {
+    for (int i = 0; i < indentation; i++) {
+        std::cout << "  ";
+    }
+}
 
-void AstNode::generateIR() {}
+void SequenceNode::print(int indentation) {
+    indent(indentation);
+    std::cout << "SequenceNode(size=" << children.size() << ")" << std::endl;
+    for (auto child : children) {
+        child->print(indentation + 1);
+    }
+}
+
+void StatementNode::print(int indentation) {
+    indent(indentation);
+    std::cout << "StatementNode(hasChild=" << (child != nullptr) << ")" << std::endl;
+    if (child != nullptr) {
+        child->print(indentation + 1);
+    }
+}
+
+void IntegerNode::print(int indentation) {
+    indent(indentation);
+    std::cout << "IntegerNode(value=" << value << ")" << std::endl;
+}
+
+void FloatNode::print(int indentation) {
+    indent(indentation);
+    std::cout << "FloatNode(value=" << value << ")" << std::endl;
+}
+
+void BoolNode::print(int indentation) {
+    indent(indentation);
+    std::cout << "BoolNode(value=" << value << ")" << std::endl;
+}
+
+void UnaryOperationNode::print(int indentation) {
+    indent(indentation);
+    std::string operationType = "ERROR";
+    if (type == UnaryOperationNode::NOT) {
+        operationType = "NOT";
+    }
+    std::cout << "UnaryOperationNode(hasChild=" << (child != nullptr) << ", type=" << operationType << ")" << std::endl;
+    if (child != nullptr) {
+        child->print(indentation + 1);
+    }
+}
+
+void BinaryOperationNode::print(int indentation) {
+    indent(indentation);
+    std::string operationType = "ERROR";
+    if (type == BinaryOperationNode::ADDITION) {
+        operationType = "ADDITION";
+    } else if (type == BinaryOperationNode::SUBTRACTION) {
+        operationType = "SUBTRACTION";
+    } else if (type == BinaryOperationNode::MULTIPLICATION) {
+        operationType = "MULTIPLICATION";
+    } else if (type == BinaryOperationNode::DIVISION) {
+        operationType = "DIVISION";
+    }
+    std::cout << "UnaryOperationNode(hasLeft=" << (left != nullptr) << ", hasRight=" << (right != nullptr)
+              << ", type=" << operationType << ")" << std::endl;
+    if (left != nullptr) {
+        left->print(indentation + 1);
+    }
+    if (right != nullptr) {
+        right->print(indentation + 1);
+    }
+}

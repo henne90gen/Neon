@@ -141,7 +141,7 @@ void Interpreter::interpretUN_OP(UnaryOperationNode *node) {
 
     CalculationResult result = {};
     switch (node->getType()) {
-    case UnaryOperationNode::UNARY_OP_NOT:
+    case UnaryOperationNode::NOT:
         result = negate(childResult);
         break;
     }

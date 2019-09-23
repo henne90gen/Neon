@@ -16,11 +16,12 @@ int main() {
     auto parseTreeRoot = parser.createParseTree();
     if (verbose) {
         printParseTree(parseTreeRoot);
+        printParseTreeTestCase(parseTreeRoot);
     }
 
     auto astRoot = createAstFromParseTree(parseTreeRoot);
     if (verbose) {
-        //        printAst(astRoot);
+        astRoot->print();
     }
 
     Interpreter interpreter = {};

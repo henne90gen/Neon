@@ -9,6 +9,8 @@ class AstNode {
     enum AstNodeType { SEQUENCE, STATEMENT, LITERAL, UNARY_OPERATION, BINARY_OPERATION };
     explicit AstNode(AstNodeType type) : type(type) {}
 
+    virtual void print(int indentation = 0) = 0;
+
     virtual void generateIR() = 0;
 
     AstNodeType getAstNodeType() { return type; }
@@ -21,9 +23,11 @@ class SequenceNode : public AstNode {
   public:
     SequenceNode() : AstNode(AstNode::SEQUENCE) {}
 
+    void print(int indentation) override;
+
     void generateIR() override {}
 
-    std::vector<AstNode *> getChildren() { return children; }
+    std::vector<AstNode *> &getChildren() { return children; }
 
   private:
     std::vector<AstNode *> children = {};
@@ -32,6 +36,8 @@ class SequenceNode : public AstNode {
 class StatementNode : public AstNode {
   public:
     StatementNode() : AstNode(AstNode::STATEMENT) {}
+
+    void print(int indentation) override;
 
     void generateIR() override {}
 
@@ -61,6 +67,8 @@ class IntegerNode : public LiteralNode {
 
     int getValue() { return value; }
 
+    void print(int indentation) override;
+
     void generateIR() override {}
 
   private:
@@ -72,6 +80,8 @@ class FloatNode : public LiteralNode {
     explicit FloatNode(float value) : LiteralNode(LiteralNode::FLOAT), value(value) {}
 
     float getValue() { return value; }
+
+    void print(int indentation) override;
 
     void generateIR() override {}
 
@@ -85,6 +95,8 @@ class BoolNode : public LiteralNode {
 
     bool getValue() { return value; }
 
+    void print(int indentation) override;
+
     void generateIR() override {}
 
   private:
@@ -94,7 +106,7 @@ class BoolNode : public LiteralNode {
 class UnaryOperationNode : public AstNode {
   public:
     enum UnaryOperationType {
-        UNARY_OP_NOT,
+        NOT,
     };
 
     explicit UnaryOperationNode(UnaryOperationType type) : AstNode(AstNode::UNARY_OPERATION), type(type) {}
@@ -104,6 +116,8 @@ class UnaryOperationNode : public AstNode {
     AstNode *getChild() { return child; }
 
     UnaryOperationType getType() { return type; }
+
+    void print(int indentation) override;
 
     void generateIR() override {}
 
@@ -130,6 +144,8 @@ class BinaryOperationNode : public AstNode {
     AstNode *getRight() { return right; }
 
     BinaryOperationType getType() { return type; }
+
+    void print(int indentation) override;
 
     void generateIR() override {}
 
