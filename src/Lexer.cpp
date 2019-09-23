@@ -2,11 +2,11 @@
 
 #include <fstream>
 #include <iostream>
-#include <regex>
 #include <optional>
+#include <regex>
 
 std::optional<std::string> StdInCodeProvider::getMoreCode() {
-    std::string result = "";
+    std::string result;
     std::cin >> result;
     if (result.empty()) {
         return {};
@@ -18,6 +18,9 @@ std::optional<std::string> FileCodeProvider::getMoreCode() {
     if (!fileHasBeenRead) {
         fileHasBeenRead = true;
         std::ifstream infile(fileName);
+        if (!infile.good()) {
+            std::cerr << "Could not read file '" << fileName << "'." << std::endl;
+        }
         std::string line;
         while (std::getline(infile, line)) {
             lines.push_back(line);
@@ -68,22 +71,18 @@ Token Lexer::getToken() {
         }
 
         std::regex floatRegex("^[0-9]+\\.[0-9]+");
-        auto itr = std::sregex_iterator(currentWord.begin(), currentWord.end(),
-                                        floatRegex);
+        auto itr = std::sregex_iterator(currentWord.begin(), currentWord.end(), floatRegex);
         if (itr != std::sregex_iterator()) {
             auto content = static_cast<std::string>((*itr).str());
-            currentWord =
-                    currentWord.substr(content.length(), currentWord.length() - 1);
+            currentWord = currentWord.substr(content.length(), currentWord.length() - 1);
             return {Token::FLOAT, content};
         }
 
         std::regex intRegex("^[0-9]+");
-        itr =
-                std::sregex_iterator(currentWord.begin(), currentWord.end(), intRegex);
+        itr = std::sregex_iterator(currentWord.begin(), currentWord.end(), intRegex);
         if (itr != std::sregex_iterator()) {
             auto content = static_cast<std::string>((*itr).str());
-            currentWord =
-                    currentWord.substr(content.length(), currentWord.length() - 1);
+            currentWord = currentWord.substr(content.length(), currentWord.length() - 1);
             return {Token::INTEGER, content};
         }
 

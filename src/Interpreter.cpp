@@ -3,14 +3,14 @@
 #include <functional>
 #include <iostream>
 
-void Interpreter::interpretSEQ(AstNode *node) {
-    for (auto child : node->children) {
+void Interpreter::interpretSEQ(SequenceNode *node) {
+    for (auto child : node->getChildren()) {
         interpret(child);
     }
 }
 
-void Interpreter::interpretSTMT(AstNode *node) {
-    auto child = node->children[0];
+void Interpreter::interpretSTMT(StatementNode *node) {
+    auto child = node->getChild();
     interpret(child);
     if (calculationResults.find(child) == calculationResults.end()) {
         std::cout << "STATEMENT did not produce a result." << std::endl;
@@ -31,11 +31,9 @@ void Interpreter::interpretSTMT(AstNode *node) {
     }
 }
 
-CalculationResult getTypedResult(CalculationResult &left,
-                                 CalculationResult &right) {
+CalculationResult getTypedResult(CalculationResult &left, CalculationResult &right) {
     CalculationResult result = {CalculationResult::INTEGER};
-    if (left.type == CalculationResult::FLOAT ||
-        right.type == CalculationResult::FLOAT) {
+    if (left.type == CalculationResult::FLOAT || right.type == CalculationResult::FLOAT) {
         result.type = CalculationResult::FLOAT;
     }
     return result;
@@ -43,7 +41,7 @@ CalculationResult getTypedResult(CalculationResult &left,
 
 float castToFloat(CalculationResult &result) {
     if (result.type == CalculationResult::INTEGER) {
-        return (float) result.intResult;
+        return (float)result.intResult;
     } else {
         return result.floatResult;
     }
@@ -105,36 +103,36 @@ CalculationResult negate(CalculationResult &calc) {
     return result;
 }
 
-void Interpreter::interpretBIN_OP(AstNode *node) {
-    for (auto child : node->children) {
-        if (calculationResults.find(child) != calculationResults.end()) {
-            continue;
-        }
-        interpret(child);
+void Interpreter::interpretBIN_OP(BinaryOperationNode *node) {
+    if (calculationResults.find(node->getLeft()) == calculationResults.end()) {
+        interpret(node->getLeft());
+    }
+    if (calculationResults.find(node->getRight()) == calculationResults.end()) {
+        interpret(node->getRight());
     }
 
-    auto leftResult = calculationResults[node->children[0]];
-    auto rightResult = calculationResults[node->children[1]];
+    auto leftResult = calculationResults[node->getLeft()];
+    auto rightResult = calculationResults[node->getRight()];
     CalculationResult result = {};
-    switch (node->type) {
-        case AstNode::BIN_OP_ADD:
-            result = add(leftResult, rightResult);
-            break;
-        case AstNode::BIN_OP_SUB:
-            result = subtract(leftResult, rightResult);
-            break;
-        case AstNode::BIN_OP_MUL:
-            result = multiply(leftResult, rightResult);
-            break;
-        case AstNode::BIN_OP_DIV:
-            result = divide(leftResult, rightResult);
-            break;
+    switch (node->getType()) {
+    case BinaryOperationNode::ADDITION:
+        result = add(leftResult, rightResult);
+        break;
+    case BinaryOperationNode::SUBTRACTION:
+        result = subtract(leftResult, rightResult);
+        break;
+    case BinaryOperationNode::MULTIPLICATION:
+        result = multiply(leftResult, rightResult);
+        break;
+    case BinaryOperationNode::DIVISION:
+        result = divide(leftResult, rightResult);
+        break;
     }
     calculationResults[node] = result;
 }
 
-void Interpreter::interpretUN_OP(AstNode *node) {
-    auto child = node->children[0];
+void Interpreter::interpretUN_OP(UnaryOperationNode *node) {
+    auto child = node->getChild();
     if (calculationResults.find(child) == calculationResults.end()) {
         interpret(child);
     }
@@ -142,25 +140,25 @@ void Interpreter::interpretUN_OP(AstNode *node) {
     auto childResult = calculationResults[child];
 
     CalculationResult result = {};
-    switch (node->type) {
-        case AstNode::UNARY_OP_NOT:
-            result = negate(childResult);
-            break;
+    switch (node->getType()) {
+    case UnaryOperationNode::UNARY_OP_NOT:
+        result = negate(childResult);
+        break;
     }
     calculationResults[node] = result;
 }
 
-void Interpreter::interpretLIT(AstNode *node) {
+void Interpreter::interpretLIT(LiteralNode *node) {
     CalculationResult result = {};
-    if (node->type == AstNode::INT_LIT) {
+    if (node->getLiteralType() == LiteralNode::INTEGER) {
         result = {CalculationResult::INTEGER};
-        result.intResult = ((IntegerData *) node->data)->value;
-    } else if (node->type == AstNode::FLOAT_LIT) {
+        result.intResult = ((IntegerNode *)node)->getValue();
+    } else if (node->getLiteralType() == LiteralNode::FLOAT) {
         result = {CalculationResult::FLOAT};
-        result.floatResult = ((FloatData *) node->data)->value;
-    } else if (node->type == AstNode::BOOL_LIT) {
+        result.floatResult = ((FloatNode *)node)->getValue();
+    } else if (node->getLiteralType() == LiteralNode::BOOL) {
         result = {CalculationResult::BOOL};
-        result.boolResult = ((BoolData *) node->data)->value;
+        result.boolResult = ((BoolNode *)node)->getValue();
     } else {
         std::cout << "Data type not supported yet!" << std::endl;
         return;
@@ -170,7 +168,7 @@ void Interpreter::interpretLIT(AstNode *node) {
 
 void Interpreter::interpret(AstNode *node) {
     if (verbose) {
-        std::cout << "Interpreting " << to_string(node->type) << std::endl;
+        std::cout << "Interpreting " << node->getAstNodeType() << std::endl;
     }
 
     if (node == nullptr) {
@@ -178,30 +176,24 @@ void Interpreter::interpret(AstNode *node) {
         return;
     }
 
-    switch (node->type) {
-        case AstNode::SEQUENCE:
-            interpretSEQ(node);
-            break;
-        case AstNode::STATEMENT:
-            interpretSTMT(node);
-            break;
-        case AstNode::BIN_OP_ADD:
-        case AstNode::BIN_OP_SUB:
-        case AstNode::BIN_OP_MUL:
-        case AstNode::BIN_OP_DIV:
-            interpretBIN_OP(node);
-            break;
-        case AstNode::UNARY_OP_NOT:
-            interpretUN_OP(node);
-            break;
-        case AstNode::INT_LIT:
-        case AstNode::FLOAT_LIT:
-        case AstNode::BOOL_LIT:
-            interpretLIT(node);
-            break;
-        default:
-            std::cout << "AST node " << to_string(node->type) << " not supported."
-                      << std::endl;
-            break;
+    switch (node->getAstNodeType()) {
+    case AstNode::SEQUENCE:
+        interpretSEQ((SequenceNode *)node);
+        break;
+    case AstNode::STATEMENT:
+        interpretSTMT((StatementNode *)node);
+        break;
+    case AstNode::BINARY_OPERATION:
+        interpretBIN_OP((BinaryOperationNode *)node);
+        break;
+    case AstNode::UNARY_OPERATION:
+        interpretUN_OP((UnaryOperationNode *)node);
+        break;
+    case AstNode::LITERAL:
+        interpretLIT((LiteralNode *)node);
+        break;
+    default:
+        std::cout << "AST node " << node->getAstNodeType() << " not supported." << std::endl;
+        break;
     }
 }

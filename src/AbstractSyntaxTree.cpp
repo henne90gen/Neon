@@ -2,195 +2,137 @@
 
 #include <iostream>
 
-void printAst(AstNode *node, int indentation) {
-    for (int i = 0; i < indentation; i++) {
-        std::cout << "  ";
-    }
-    if (node == nullptr) {
-        std::cout << "AstNode nullptr" << std::endl;
-        return;
-    }
-    std::cout << "AstNode " << to_string(node->type) << std::endl;
-    for (auto child : node->children) {
-        printAst(child, indentation + 1);
-    }
-}
-
-std::string to_string(AstNode::AstNodeType type) {
-    switch (type) {
-        case AstNode::BIN_OP_ADD:
-            return "ADD";
-        case AstNode::BIN_OP_SUB:
-            return "SUB";
-        case AstNode::BIN_OP_MUL:
-            return "MUL";
-        case AstNode::BIN_OP_DIV:
-            return "DIV";
-        case AstNode::SEQUENCE:
-            return "SEQ";
-        case AstNode::STATEMENT:
-            return "STMT";
-        case AstNode::FLOAT_LIT:
-            return "FLOAT";
-        case AstNode::INT_LIT:
-            return "INT";
-        case AstNode::BOOL_LIT:
-            return "BOOL";
-        case AstNode::UNARY_OP_NOT:
-            return "NOT";
-        default:
-            return "ERROR";
-    }
-}
+//void printAst(AstNode *node, int indentation) {
+//    for (int i = 0; i < indentation; i++) {
+//        std::cout << "  ";
+//    }
+//    if (node == nullptr) {
+//        std::cout << "AstNode nullptr" << std::endl;
+//        return;
+//    }
+//    std::cout << "AstNode " << node->getName() << std::endl;
+//    for (auto child : node->children) {
+//        printAst(child, indentation + 1);
+//    }
+//}
 
 bool isBinaryOperation(ParseTreeNode *node) {
-    return (node->symbol == GrammarSymbol::SUM ||
-            node->symbol == GrammarSymbol::TERM) &&
-           node->children.size() == 3;
+    return (node->symbol == GrammarSymbol::SUM || node->symbol == GrammarSymbol::TERM) && node->children.size() == 3;
 }
 
 bool isUnaryOperation(ParseTreeNode *node) {
-    return (node->symbol == GrammarSymbol::NEGATION) &&
-           node->children.size() == 2;
+    return (node->symbol == GrammarSymbol::NEGATION) && node->children.size() == 2;
 }
 
 bool isLiteral(ParseTreeNode *node) {
-    return node->symbol == GrammarSymbol::INTEGER ||
-           node->symbol == GrammarSymbol::FLOAT ||
-           node->symbol == GrammarSymbol::TRUE ||
-           node->symbol == GrammarSymbol::FALSE;
+    return node->symbol == GrammarSymbol::INTEGER || node->symbol == GrammarSymbol::FLOAT ||
+           node->symbol == GrammarSymbol::TRUE || node->symbol == GrammarSymbol::FALSE;
 }
 
-bool isSequence(ParseTreeNode *node) {
-    return node->symbol == GrammarSymbol::STMTS && node->children.size() > 1;
-}
+bool isSequence(ParseTreeNode *node) { return node->symbol == GrammarSymbol::STMTS && node->children.size() > 1; }
 
-bool isStatement(ParseTreeNode *node) {
-    return node->symbol == GrammarSymbol::STMT;
-}
+bool isStatement(ParseTreeNode *node) { return node->symbol == GrammarSymbol::STMT; }
 
 bool isIgnored(ParseTreeNode *node) {
-    return node->symbol == GrammarSymbol::SEMICOLON ||
-           node->symbol == GrammarSymbol::ENDOFFILE;
+    return node->symbol == GrammarSymbol::SEMICOLON || node->symbol == GrammarSymbol::ENDOFFILE;
 }
 
-AstNode::AstNodeType getBinaryOperationType(GrammarSymbol symbol) {
+BinaryOperationNode::BinaryOperationType getBinaryOperationType(GrammarSymbol symbol) {
     switch (symbol) {
-        case GrammarSymbol::PLUS:
-            return AstNode::BIN_OP_ADD;
-        case GrammarSymbol::MINUS:
-            return AstNode::BIN_OP_SUB;
-        case GrammarSymbol::STAR:
-            return AstNode::BIN_OP_MUL;
-        case GrammarSymbol::DIV:
-            return AstNode::BIN_OP_DIV;
+    case GrammarSymbol::PLUS:
+        return BinaryOperationNode::ADDITION;
+    case GrammarSymbol::MINUS:
+        return BinaryOperationNode::SUBTRACTION;
+    case GrammarSymbol::STAR:
+        return BinaryOperationNode::MULTIPLICATION;
+    case GrammarSymbol::DIV:
+        return BinaryOperationNode::DIVISION;
+    default:
+        std::cout << "Could not determine binary opartor type! (" << to_string(symbol) << ")" << std::endl;
+        exit(1);
+        return BinaryOperationNode::ADDITION;
     }
-
-    std::cout << "Could not determine binary opartor type! (" << to_string(symbol)
-              << ")" << std::endl;
-    exit(1);
-
-    return AstNode::BIN_OP_ADD;
 }
 
-AstNode::AstNodeType getUnaryOperationType(GrammarSymbol symbol) {
+UnaryOperationNode::UnaryOperationType getUnaryOperationType(GrammarSymbol symbol) {
     switch (symbol) {
-        case GrammarSymbol::NOT:
-            return AstNode::UNARY_OP_NOT;
+    case GrammarSymbol::NOT:
+        return UnaryOperationNode::UNARY_OP_NOT;
+    default:
+        std::cout << "Could not determine unary opartor type! (" << to_string(symbol) << ")" << std::endl;
+        exit(1);
+        return UnaryOperationNode::UNARY_OP_NOT;
     }
-
-    std::cout << "Could not determine unary opartor type! (" << to_string(symbol)
-              << ")" << std::endl;
-    exit(1);
-
-    return AstNode::UNARY_OP_NOT;
-}
-
-AstNode::AstNodeType getLiteralType(GrammarSymbol symbol) {
-    switch (symbol) {
-        case GrammarSymbol::INTEGER:
-            return AstNode::INT_LIT;
-        case GrammarSymbol::FLOAT:
-            return AstNode::FLOAT_LIT;
-        case GrammarSymbol::TRUE:
-        case GrammarSymbol::FALSE:
-            return AstNode::BOOL_LIT;
-    }
-
-    std::cout << "Could not determine literal type! (" << to_string(symbol) << ")"
-              << std::endl;
-    exit(1);
-
-    return AstNode::INT_LIT;
 }
 
 AstNode *createBinaryOperation(ParseTreeNode *node) {
     auto nodeType = getBinaryOperationType(node->children[1]->symbol);
-    auto astNode = new AstNode(nodeType);
+    auto astNode = new BinaryOperationNode(nodeType);
 
-    auto leftNode = AstNode::createAstFromParseTree(node->children[0]);
-    astNode->children.push_back(leftNode);
+    auto leftNode = createAstFromParseTree(node->children[0]);
+    astNode->setLeft(leftNode);
 
-    auto rightNode = AstNode::createAstFromParseTree(node->children[2]);
-    astNode->children.push_back(rightNode);
+    auto rightNode = createAstFromParseTree(node->children[2]);
+    astNode->setRight(rightNode);
     return astNode;
 }
 
 AstNode *createUnaryOperation(ParseTreeNode *node) {
     auto nodeType = getUnaryOperationType(node->children[0]->symbol);
-    auto astNode = new AstNode(nodeType);
+    auto unaryOperationNode = new UnaryOperationNode(nodeType);
 
-    auto child = AstNode::createAstFromParseTree(node->children[1]);
-    astNode->children.push_back(child);
-    return astNode;
+    auto child = createAstFromParseTree(node->children[1]);
+    unaryOperationNode->setChild(child);
+    return unaryOperationNode;
 }
 
 AstNode *createLiteral(ParseTreeNode *node) {
-    auto nodeType = getLiteralType(node->symbol);
-    auto astNode = new AstNode(nodeType);
-
     if (node->token.content.empty()) {
         std::cout << "Missing token content. Can't create a literal." << std::endl;
         return nullptr;
     }
 
-    if (nodeType == AstNode::FLOAT_LIT) {
-        astNode->data = new FloatData(std::stof(node->token.content));
-    } else if (nodeType == AstNode::INT_LIT) {
-        astNode->data = new IntegerData(std::stoi(node->token.content));
-    } else if (nodeType == AstNode::BOOL_LIT) {
+    switch (node->symbol) {
+    case GrammarSymbol::INTEGER: {
+        int value = std::stoi(node->token.content);
+        return new IntegerNode(value);
+    }
+    case GrammarSymbol::FLOAT: {
+        float value = std::stof(node->token.content);
+        return new FloatNode(value);
+    }
+    case GrammarSymbol::TRUE:
+    case GrammarSymbol::FALSE: {
         bool value = false;
         if (node->token.content == "true") {
             value = true;
         }
-        astNode->data = new BoolData(value);
-    } else {
+        return new BoolNode(value);
+    }
+    default:
         std::cout << "Data type not supported yet!" << std::endl;
         return nullptr;
     }
-
-    return astNode;
 }
 
-AstNode *createSequence(ParseTreeNode *node, AstNode *seqRoot = nullptr) {
+AstNode *createSequence(ParseTreeNode *node, SequenceNode *seqRoot = nullptr) {
     if (seqRoot == nullptr) {
-        auto nodeType = AstNode::SEQUENCE;
-        seqRoot = new AstNode(nodeType);
+        seqRoot = new SequenceNode();
     }
 
     for (auto child : node->children) {
         if (isSequence(child)) {
-            seqRoot = createSequence(child, seqRoot);
+            seqRoot = (SequenceNode *)createSequence(child, seqRoot);
             continue;
         }
-        auto astChild = AstNode::createAstFromParseTree(child);
+        auto astChild = createAstFromParseTree(child);
         if (astChild != nullptr) {
-            seqRoot->children.push_back(astChild);
+            seqRoot->getChildren().push_back(astChild);
         }
     }
 
-    if (seqRoot->children.size() == 1) {
-        auto result = seqRoot->children[0];
+    if (seqRoot->getChildren().size() == 1) {
+        auto result = seqRoot->getChildren()[0];
         delete seqRoot;
         return result;
     }
@@ -199,18 +141,16 @@ AstNode *createSequence(ParseTreeNode *node, AstNode *seqRoot = nullptr) {
 }
 
 AstNode *createStatement(ParseTreeNode *node) {
-    auto nodeType = AstNode::STATEMENT;
-    auto astNode = new AstNode(nodeType);
+    auto statementNode = new StatementNode();
     if (node->children.size() > 1) {
-        std::cout << "A statement should never have more than one child."
-                  << std::endl;
+        std::cout << "A statement should never have more than one child." << std::endl;
     }
-    auto child = AstNode::createAstFromParseTree(node->children[0]);
-    astNode->children.push_back(child);
-    return astNode;
+    auto child = createAstFromParseTree(node->children[0]);
+    statementNode->setChild(child);
+    return statementNode;
 }
 
-AstNode *AstNode::createAstFromParseTree(ParseTreeNode *node) {
+AstNode *createAstFromParseTree(ParseTreeNode *node) {
     if (node == nullptr) {
         return nullptr;
     }
@@ -236,21 +176,34 @@ AstNode *AstNode::createAstFromParseTree(ParseTreeNode *node) {
     }
 
     if (node->children.size() == 1 || node->symbol == GrammarSymbol::PROGRAM) {
-        return AstNode::createAstFromParseTree(node->children[0]);
+        return createAstFromParseTree(node->children[0]);
     }
 
     if (node->symbol == GrammarSymbol::FACTOR && node->children.size() == 3 &&
         node->children[0]->symbol == GrammarSymbol::LEFT_PARAN &&
         node->children[2]->symbol == GrammarSymbol::RIGHT_PARAN) {
-        return AstNode::createAstFromParseTree(node->children[1]);
+        return createAstFromParseTree(node->children[1]);
     }
 
     if (isIgnored(node)) {
         return nullptr;
     }
 
-    std::cout << "Could not find a suitable AstNode for "
-              << to_string(node->symbol) << std::endl;
+    std::cout << "Could not find a suitable AstNode for " << to_string(node->symbol) << std::endl;
 
     return nullptr;
 }
+
+#include "llvm/ADT/APFloat.h"
+#include "llvm/ADT/STLExtras.h"
+#include "llvm/IR/BasicBlock.h"
+#include "llvm/IR/Constants.h"
+#include "llvm/IR/DerivedTypes.h"
+#include "llvm/IR/Function.h"
+#include "llvm/IR/IRBuilder.h"
+#include "llvm/IR/LLVMContext.h"
+#include "llvm/IR/Module.h"
+#include "llvm/IR/Type.h"
+#include "llvm/IR/Verifier.h"
+
+void AstNode::generateIR() {}

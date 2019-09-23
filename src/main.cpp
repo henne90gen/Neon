@@ -9,7 +9,7 @@
 
 int main() {
     bool verbose = true;
-    CodeProvider *codeProvider = new FileCodeProvider("main.mfl");
+    CodeProvider *codeProvider = new FileCodeProvider("main.ne");
     Lexer lexer(codeProvider, verbose);
     Parser parser(lexer, verbose);
 
@@ -18,7 +18,7 @@ int main() {
         printParseTree(parseTreeRoot);
     }
 
-    auto astRoot = AstNode::createAstFromParseTree(parseTreeRoot);
+    auto astRoot = createAstFromParseTree(parseTreeRoot);
     if (verbose) {
         //        printAst(astRoot);
     }

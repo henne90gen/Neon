@@ -1,52 +1,144 @@
 #pragma once
 
+#include <utility>
+
 #include "Parser.h"
 
-class FloatData {
-public:
-    explicit FloatData(float value) : value(value) {}
+class AstNode {
+  public:
+    enum AstNodeType { SEQUENCE, STATEMENT, LITERAL, UNARY_OPERATION, BINARY_OPERATION };
+    explicit AstNode(AstNodeType type) : type(type) {}
 
-    float value;
+    virtual void generateIR() = 0;
+
+    AstNodeType getAstNodeType() { return type; }
+
+  private:
+    AstNodeType type;
 };
 
-class IntegerData {
-public:
-    explicit IntegerData(int value) : value(value) {}
+class SequenceNode : public AstNode {
+  public:
+    SequenceNode() : AstNode(AstNode::SEQUENCE) {}
 
+    void generateIR() override {}
+
+    std::vector<AstNode *> getChildren() { return children; }
+
+  private:
+    std::vector<AstNode *> children = {};
+};
+
+class StatementNode : public AstNode {
+  public:
+    StatementNode() : AstNode(AstNode::STATEMENT) {}
+
+    void generateIR() override {}
+
+    void setChild(AstNode *child) { this->child = child; }
+
+    AstNode *getChild() { return child; }
+
+  private:
+    AstNode *child = nullptr;
+};
+
+class LiteralNode : public AstNode {
+  public:
+    enum LiteralType { INTEGER, FLOAT, BOOL };
+
+    explicit LiteralNode(LiteralType type) : AstNode(AstNode::LITERAL), type(type) {}
+
+    LiteralType getLiteralType() { return type; }
+
+  private:
+    LiteralType type;
+};
+
+class IntegerNode : public LiteralNode {
+  public:
+    explicit IntegerNode(int value) : LiteralNode(LiteralNode::INTEGER), value(value) {}
+
+    int getValue() { return value; }
+
+    void generateIR() override {}
+
+  private:
     int value;
 };
 
-class BoolData {
-public:
-    explicit BoolData(int value) : value(value) {}
+class FloatNode : public LiteralNode {
+  public:
+    explicit FloatNode(float value) : LiteralNode(LiteralNode::FLOAT), value(value) {}
 
+    float getValue() { return value; }
+
+    void generateIR() override {}
+
+  private:
+    float value;
+};
+
+class BoolNode : public LiteralNode {
+  public:
+    explicit BoolNode(bool value) : LiteralNode(LiteralNode::BOOL), value(value) {}
+
+    bool getValue() { return value; }
+
+    void generateIR() override {}
+
+  private:
     bool value;
 };
 
-class AstNode {
-public:
-    enum AstNodeType {
-        BIN_OP_ADD,
-        BIN_OP_MUL,
-        BIN_OP_SUB,
-        BIN_OP_DIV,
+class UnaryOperationNode : public AstNode {
+  public:
+    enum UnaryOperationType {
         UNARY_OP_NOT,
-        SEQUENCE,
-        STATEMENT,
-        INT_LIT,
-        FLOAT_LIT,
-        BOOL_LIT
     };
 
-    static AstNode *createAstFromParseTree(ParseTreeNode *node);
+    explicit UnaryOperationNode(UnaryOperationType type) : AstNode(AstNode::UNARY_OPERATION), type(type) {}
 
-    explicit AstNode(AstNodeType type) : type(type) {}
+    void setChild(AstNode *child) { this->child = child; }
 
-    AstNodeType type;
-    std::vector<AstNode *> children = {};
-    void *data = nullptr;
+    AstNode *getChild() { return child; }
+
+    UnaryOperationType getType() { return type; }
+
+    void generateIR() override {}
+
+  private:
+    UnaryOperationType type;
+    AstNode *child = nullptr;
 };
 
-std::string to_string(AstNode::AstNodeType type);
+class BinaryOperationNode : public AstNode {
+  public:
+    enum BinaryOperationType {
+        ADDITION,
+        MULTIPLICATION,
+        SUBTRACTION,
+        DIVISION,
+    };
 
-void printAst(AstNode *node, int indentation = 0);
+    explicit BinaryOperationNode(BinaryOperationType type) : AstNode(AstNode::BINARY_OPERATION), type(type) {}
+
+    void setLeft(AstNode *left) { this->left = left; }
+    AstNode *getLeft() { return left; }
+
+    void setRight(AstNode *right) { this->right = right; }
+    AstNode *getRight() { return right; }
+
+    BinaryOperationType getType() { return type; }
+
+    void generateIR() override {}
+
+  private:
+    BinaryOperationType type;
+    AstNode *left = nullptr;
+    AstNode *right = nullptr;
+};
+
+AstNode *createAstFromParseTree(ParseTreeNode *node);
+
+// void printAst(AstNode *node, int indentation = 0);
