@@ -1,10 +1,8 @@
-#include "AbstractSyntaxTree.h"
+#include "AST.h"
 #include "Interpreter.h"
 #include "Lexer.h"
 #include "Parser.h"
-#include "Token.h"
 
-#include <iostream>
 #include <string>
 
 int main() {
@@ -26,5 +24,7 @@ int main() {
 
     Interpreter interpreter = {};
     interpreter.interpret(astRoot);
+
+    generateIR(astRoot);
     return 0;
 }

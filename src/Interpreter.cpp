@@ -6,19 +6,17 @@
 void Interpreter::interpretSEQ(SequenceNode *node) {
     for (auto child : node->getChildren()) {
         interpret(child);
+        printStatementResult(child);
     }
 }
 
-void Interpreter::interpretSTMT(StatementNode *node) {
-    auto child = node->getChild();
-    interpret(child);
+void Interpreter::printStatementResult(AstNode *child) {
     if (calculationResults.find(child) == calculationResults.end()) {
-        std::cout << "STATEMENT did not produce a result." << std::endl;
+        std::cout << "Calculation did not produce a result." << std::endl;
         return;
     }
 
     auto result = calculationResults[child];
-    calculationResults[node] = result;
     if (result.type == CalculationResult::INTEGER) {
         std::cout << result.intResult << std::endl;
     } else if (result.type == CalculationResult::FLOAT) {
@@ -179,9 +177,6 @@ void Interpreter::interpret(AstNode *node) {
     switch (node->getAstNodeType()) {
     case AstNode::SEQUENCE:
         interpretSEQ((SequenceNode *)node);
-        break;
-    case AstNode::STATEMENT:
-        interpretSTMT((StatementNode *)node);
         break;
     case AstNode::BINARY_OPERATION:
         interpretBIN_OP((BinaryOperationNode *)node);

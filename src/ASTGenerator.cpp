@@ -1,4 +1,4 @@
-#include "AbstractSyntaxTree.h"
+#include "AST.h"
 
 #include <iostream>
 
@@ -127,12 +127,12 @@ AstNode *createSequence(ParseTreeNode *node, SequenceNode *seqRoot = nullptr) {
 }
 
 AstNode *createStatement(ParseTreeNode *node) {
-    auto statementNode = new StatementNode();
+    auto statementNode = new SequenceNode();
     if (node->children.size() > 1) {
         std::cout << "A statement should never have more than one child." << std::endl;
     }
     auto child = createAstFromParseTree(node->children[0]);
-    statementNode->setChild(child);
+    statementNode->getChildren().push_back(child);
     return statementNode;
 }
 
@@ -190,14 +190,6 @@ void SequenceNode::print(int indentation) {
     indent(indentation);
     std::cout << "SequenceNode(size=" << children.size() << ")" << std::endl;
     for (auto child : children) {
-        child->print(indentation + 1);
-    }
-}
-
-void StatementNode::print(int indentation) {
-    indent(indentation);
-    std::cout << "StatementNode(hasChild=" << (child != nullptr) << ")" << std::endl;
-    if (child != nullptr) {
         child->print(indentation + 1);
     }
 }

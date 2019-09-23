@@ -2,16 +2,21 @@
 
 #include <utility>
 
+#include <llvm/IR/LLVMContext.h>
+#include <llvm/IR/IRBuilder.h>
+#include <llvm/IR/Module.h>
+#include <llvm/IR/Value.h>
+
 #include "Parser.h"
 
 class AstNode {
   public:
-    enum AstNodeType { SEQUENCE, STATEMENT, LITERAL, UNARY_OPERATION, BINARY_OPERATION };
+    enum AstNodeType { SEQUENCE, LITERAL, UNARY_OPERATION, BINARY_OPERATION };
     explicit AstNode(AstNodeType type) : type(type) {}
 
     virtual void print(int indentation = 0) = 0;
 
-    virtual void generateIR() = 0;
+    virtual llvm::Value *generateIR(llvm::LLVMContext &context, llvm::IRBuilder<> &builder, llvm::Module &module) = 0;
 
     AstNodeType getAstNodeType() { return type; }
 
@@ -25,28 +30,12 @@ class SequenceNode : public AstNode {
 
     void print(int indentation) override;
 
-    void generateIR() override {}
+    llvm::Value *generateIR(llvm::LLVMContext &context, llvm::IRBuilder<> &builder, llvm::Module &module) override;
 
     std::vector<AstNode *> &getChildren() { return children; }
 
   private:
     std::vector<AstNode *> children = {};
-};
-
-class StatementNode : public AstNode {
-  public:
-    StatementNode() : AstNode(AstNode::STATEMENT) {}
-
-    void print(int indentation) override;
-
-    void generateIR() override {}
-
-    void setChild(AstNode *child) { this->child = child; }
-
-    AstNode *getChild() { return child; }
-
-  private:
-    AstNode *child = nullptr;
 };
 
 class LiteralNode : public AstNode {
@@ -69,7 +58,7 @@ class IntegerNode : public LiteralNode {
 
     void print(int indentation) override;
 
-    void generateIR() override {}
+    llvm::Value *generateIR(llvm::LLVMContext &context, llvm::IRBuilder<> &builder, llvm::Module &module) override;
 
   private:
     int value;
@@ -83,7 +72,7 @@ class FloatNode : public LiteralNode {
 
     void print(int indentation) override;
 
-    void generateIR() override {}
+    llvm::Value *generateIR(llvm::LLVMContext &context, llvm::IRBuilder<> &builder, llvm::Module &module) override;
 
   private:
     float value;
@@ -97,7 +86,7 @@ class BoolNode : public LiteralNode {
 
     void print(int indentation) override;
 
-    void generateIR() override {}
+    llvm::Value *generateIR(llvm::LLVMContext &context, llvm::IRBuilder<> &builder, llvm::Module &module) override;
 
   private:
     bool value;
@@ -119,7 +108,7 @@ class UnaryOperationNode : public AstNode {
 
     void print(int indentation) override;
 
-    void generateIR() override {}
+    llvm::Value *generateIR(llvm::LLVMContext &context, llvm::IRBuilder<> &builder, llvm::Module &module) override;
 
   private:
     UnaryOperationType type;
@@ -147,7 +136,7 @@ class BinaryOperationNode : public AstNode {
 
     void print(int indentation) override;
 
-    void generateIR() override {}
+    llvm::Value *generateIR(llvm::LLVMContext &context, llvm::IRBuilder<> &builder, llvm::Module &module) override;
 
   private:
     BinaryOperationType type;
@@ -157,4 +146,4 @@ class BinaryOperationNode : public AstNode {
 
 AstNode *createAstFromParseTree(ParseTreeNode *node);
 
-// void printAst(AstNode *node, int indentation = 0);
+void generateIR(AstNode *root);

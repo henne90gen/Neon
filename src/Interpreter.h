@@ -2,7 +2,7 @@
 
 #include <unordered_map>
 
-#include "AbstractSyntaxTree.h"
+#include "AST.h"
 
 struct CalculationResult {
     enum CalculationType { INTEGER, FLOAT, BOOL };
@@ -26,11 +26,11 @@ class Interpreter {
 
     void interpretSEQ(SequenceNode *node);
 
-    void interpretSTMT(StatementNode *node);
-
     void interpretBIN_OP(BinaryOperationNode *node);
 
     void interpretUN_OP(UnaryOperationNode *node);
 
     void interpretLIT(LiteralNode *node);
+
+    void printStatementResult(AstNode *node);
 };
