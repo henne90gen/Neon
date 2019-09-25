@@ -203,3 +203,24 @@ TEST_CASE("Parser can handle 'true and false;'") {
     std::vector<std::string> program = {"true and false;"};
     assertProgramCreatesParseTree(program, parseTree);
 }
+
+TEST_CASE("Parser can handle 'fun helloWorld(int i) int { }'") {
+    std::vector<std::pair<int, GrammarSymbol>> parseTree = {
+          {0,  GrammarSymbol::PROGRAM},
+          {1,  GrammarSymbol::FUNCTION},
+          {2,  GrammarSymbol::FUN},
+          {2,  GrammarSymbol::VARIABLE_NAME},
+          {2,  GrammarSymbol::LEFT_PARAN},
+          {2,  GrammarSymbol::FUNCTION_ARGS},
+          {3,  GrammarSymbol::FUNCTION_ARG},
+          {4,  GrammarSymbol::DATA_TYPE},
+          {4,  GrammarSymbol::VARIABLE_NAME},
+          {2,  GrammarSymbol::RIGHT_PARAN},
+          {2,  GrammarSymbol::DATA_TYPE},
+          {2,  GrammarSymbol::LEFT_CURLY_BRACE},
+          {2,  GrammarSymbol::RIGHT_CURLY_BRACE},
+          {1,  GrammarSymbol::ENDOFFILE},
+    };
+    std::vector<std::string> program = {"fun helloWorld(int i) int { }"};
+    assertProgramCreatesParseTree(program, parseTree);
+}

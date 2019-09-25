@@ -25,7 +25,7 @@ void printParseTreeTestCase(ParseTreeNode *node, int indentation) {
     std::string program;
     if (indentation == 0) {
         for (const auto &t : node->program) {
-            program += t.content;
+            program += t.content + " ";
         }
         std::cout << std::endl;
         std::cout << "TEST_CASE(\"Parser can handle '" << program << "'\") {" << std::endl;
@@ -98,6 +98,18 @@ GrammarSymbol convertToGrammarSymbol(Token &token) {
         return GrammarSymbol::AND;
     case Token::OR:
         return GrammarSymbol::OR;
+    case Token::FUN:
+        return GrammarSymbol::FUN;
+    case Token::VARIABLE_NAME:
+        return GrammarSymbol::VARIABLE_NAME;
+    case Token::DATA_TYPE:
+        return GrammarSymbol::DATA_TYPE;
+    case Token::LEFT_CURLY_BRACE:
+        return GrammarSymbol::LEFT_CURLY_BRACE;
+    case Token::RIGHT_CURLY_BRACE:
+        return GrammarSymbol::RIGHT_CURLY_BRACE;
+    case Token::RETURN:
+        return GrammarSymbol::RETURN;
     default:
         std::cout << "Could not convert token " << to_string(token.type) << " to grammar symbol." << std::endl;
         exit(1);
@@ -242,5 +254,11 @@ ParseTreeNode *Parser::createParseTree() {
     }
 
     std::cout << "Could not accept program!" << std::endl;
+    if (verbose) {
+        std::cout << "Program:" << std::endl;
+        for (auto &t : program) {
+            std::cout << to_string(t.type) << ": " << t.content << std::endl;
+        }
+    }
     return nullptr;
 }

@@ -6,8 +6,12 @@
 void Interpreter::interpretSEQ(SequenceNode *node) {
     for (auto child : node->getChildren()) {
         interpret(child);
-        printStatementResult(child);
     }
+}
+
+void Interpreter::interpretSTMT(StatementNode *node) {
+    interpret(node->getChild());
+    printStatementResult(node->getChild());
 }
 
 void Interpreter::printStatementResult(AstNode *child) {
@@ -164,6 +168,14 @@ void Interpreter::interpretLIT(LiteralNode *node) {
     calculationResults[node] = result;
 }
 
+void Interpreter::interpretFUN(FunctionNode *node) {
+    if (functions.find(node->getName()) != functions.end()) {
+        std::cout << "Redefinition of function " << node->getName() << "!" << std::endl;
+    } else {
+        functions[node->getName()] = node;
+    }
+}
+
 void Interpreter::interpret(AstNode *node) {
     if (verbose) {
         std::cout << "Interpreting " << node->getAstNodeType() << std::endl;
@@ -178,6 +190,9 @@ void Interpreter::interpret(AstNode *node) {
     case AstNode::SEQUENCE:
         interpretSEQ((SequenceNode *)node);
         break;
+    case AstNode::STATEMENT:
+        interpretSTMT((StatementNode*)node);
+        break;
     case AstNode::BINARY_OPERATION:
         interpretBIN_OP((BinaryOperationNode *)node);
         break;
@@ -187,6 +202,8 @@ void Interpreter::interpret(AstNode *node) {
     case AstNode::LITERAL:
         interpretLIT((LiteralNode *)node);
         break;
+    case AstNode::FUNCTION:
+        interpretFUN((FunctionNode *)node);
     default:
         std::cout << "AST node " << node->getAstNodeType() << " not supported." << std::endl;
         break;

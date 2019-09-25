@@ -18,7 +18,7 @@ int main() {
     }
 
     auto astRoot = createAstFromParseTree(parseTreeRoot);
-    if (verbose) {
+    if (verbose && astRoot != nullptr) {
         astRoot->print();
     }
 

@@ -7,10 +7,13 @@ END_OF_FILE = "endoffile"
 SYMBOL_TO_ENUM_MAPPING = {
     '(': 'LEFT_PARAN',
     ')': 'RIGHT_PARAN',
+    '{': 'LEFT_CURLY_BRACE',
+    '}': 'RIGHT_CURLY_BRACE',
     '*': 'STAR',
     '+': 'PLUS',
     '-': 'MINUS',
     '/': 'DIV',
+    ',': 'COMMA',
     ';': 'SEMICOLON',
     '<': 'LESS_THAN',
     '>': 'GREATER_THAN',
@@ -43,7 +46,8 @@ def parse_rules(lines: List[str]) -> dict:
 
 def construct_dfa_states(rules: dict):
     working_rules = {"program": copy.deepcopy(rules["program"])}
-    working_rules["program"][0].insert(0, '.')
+    for rule in working_rules["program"]:
+        rule.insert(0, '.')
 
     states = [State(0, [], closure(rules, working_rules), {})]
 
@@ -217,7 +221,7 @@ def create_table_row(row: List[List[str]]) -> str:
 def get_grammar_symbol(symbol):
     found_other_char = False
     for c in symbol:
-        if not c.isalpha():
+        if not c.isalpha() and not c == "_":
             found_other_char = True
     if found_other_char:
         if symbol in SYMBOL_TO_ENUM_MAPPING:
@@ -273,7 +277,7 @@ def create_switch_case_for_grammar_symbol(grammar_symbol: str):
 
 
 def main(grammer_file: str = "grammar.txt", header_file: str = "src/Grammar.h", cpp_file: str = "src/Grammar.cpp",
-         verbose: bool = False):
+         verbose: bool = True):
     with open(grammer_file) as f:
         lines = f.readlines()
 
@@ -331,7 +335,8 @@ std::string to_string(StateTransition &action);
 
 const std::vector<StateTransition> stateTransitionTable[{row_count}][{col_count}] = {
 {table_content}
-};"""
+};
+"""
     header_template = header_template.replace(
         "{grammar_symbols}", grammar_symbols)
     header_template = header_template.replace("{row_count}", str(len(table)))

@@ -104,6 +104,14 @@ Token Lexer::getToken() {
             return oneCharToken.value();
         }
 
+        std::regex varNameRegex("^[a-zA-Z][a-zA-Z0-9]*");
+        itr = std::sregex_iterator(currentWord.begin(), currentWord.end(), varNameRegex);
+        if (itr != std::sregex_iterator()) {
+            auto content = static_cast<std::string>((*itr).str());
+            currentWord = currentWord.substr(content.length(), currentWord.length() - 1);
+            return {Token::VARIABLE_NAME, content};
+        }
+
         if (currentWord == previousWord) {
             break;
         } else {
@@ -128,17 +136,31 @@ Token Lexer::getToken() {
 }
 
 std::optional<Token> Lexer::matchWordToken() {
-    if (currentWord.find("true") == 0) {
-        return std::optional<Token>({Token::TRUE, "true"});
-    } else if (currentWord.find("false") == 0) {
-        return std::optional<Token>({Token::FALSE, "false"});
-    } else if (currentWord.find("not") == 0) {
-        return std::optional<Token>({Token::NOT, "not"});
-    } else if (currentWord.find("and") == 0) {
-        return std::optional<Token>({Token::AND, "and"});
-    } else if (currentWord.find("or") == 0) {
-        return std::optional<Token>({Token::OR, "or"});
+#define CONTAINS(word, search) word.find(search) == 0
+#define TOKEN(type, content) std::optional<Token>({type, content});
+
+    if (CONTAINS(currentWord, "true")) {
+        return TOKEN(Token::TRUE, "true");
+    } else if (CONTAINS(currentWord, "false")) {
+        return TOKEN(Token::FALSE, "false");
+    } else if (CONTAINS(currentWord, "not")) {
+        return TOKEN(Token::NOT, "not");
+    } else if (CONTAINS(currentWord, "and")) {
+        return TOKEN(Token::AND, "and");
+    } else if (CONTAINS(currentWord, "or")) {
+        return TOKEN(Token::OR, "or");
+    } else if (CONTAINS(currentWord, "fun")) {
+        return TOKEN(Token::FUN, "fun");
+    } else if (CONTAINS(currentWord, "int")) {
+        return TOKEN(Token::DATA_TYPE, "int");
+    } else if (CONTAINS(currentWord, "float")) {
+        return TOKEN(Token::DATA_TYPE, "float");
+    } else if (CONTAINS(currentWord, "bool")) {
+        return TOKEN(Token::DATA_TYPE, "bool");
+    } else if (CONTAINS(currentWord, "return")) {
+        return TOKEN(Token::RETURN, "return");
     }
+
     return {};
 }
 
@@ -161,6 +183,10 @@ std::optional<Token> Lexer::matchOneCharacterToken() {
         return std::optional<Token>({Token::LEFT_PARAN, "("});
     } else if (firstChar == ')') {
         return std::optional<Token>({Token::RIGHT_PARAN, ")"});
+    } else if (firstChar == '{') {
+        return std::optional<Token>({Token::LEFT_CURLY_BRACE, "{"});
+    } else if (firstChar == '}') {
+        return std::optional<Token>({Token::RIGHT_CURLY_BRACE, "}"});
     } else if (firstChar == '+') {
         return std::optional<Token>({Token::PLUS, "+"});
     } else if (firstChar == '-') {
@@ -169,6 +195,8 @@ std::optional<Token> Lexer::matchOneCharacterToken() {
         return std::optional<Token>({Token::STAR, "*"});
     } else if (firstChar == '/') {
         return std::optional<Token>({Token::DIV, "/"});
+    } else if (firstChar == ',') {
+        return std::optional<Token>({Token::COMMA, ","});
     } else if (firstChar == ';') {
         return std::optional<Token>({Token::SEMICOLON, ";"});
     } else if (firstChar == '<') {

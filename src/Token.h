@@ -4,6 +4,7 @@
 
 struct Token {
     enum TokenType {
+        INVALID,
         INTEGER,
         FLOAT,
         TRUE,
@@ -23,8 +24,15 @@ struct Token {
         NOT_EQUALS,
         LEFT_PARAN,
         RIGHT_PARAN,
+        LEFT_CURLY_BRACE,
+        RIGHT_CURLY_BRACE,
+        COMMA,
         SEMICOLON,
-        END_OF_FILE
+        FUN,
+        VARIABLE_NAME,
+        DATA_TYPE,
+        RETURN,
+        END_OF_FILE,
     };
 
     TokenType type;

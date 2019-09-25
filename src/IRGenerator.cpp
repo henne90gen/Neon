@@ -43,12 +43,18 @@ llvm::Value *SequenceNode::generateIR(llvm::LLVMContext &context, llvm::IRBuilde
     return function;
 }
 
+llvm::Value *StatementNode::generateIR(llvm::LLVMContext &context, llvm::IRBuilder<> &builder, llvm::Module &module) {
+    return nullptr;
+}
+
 llvm::Value *IntegerNode::generateIR(llvm::LLVMContext &context, llvm::IRBuilder<> &builder, llvm::Module &module) {
     return llvm::ConstantInt::get(context, llvm::APInt(32, value));
 }
+
 llvm::Value *FloatNode::generateIR(llvm::LLVMContext &context, llvm::IRBuilder<> &builder, llvm::Module &module) {
     return llvm::ConstantFP::get(context, llvm::APFloat(value));
 }
+
 llvm::Value *BoolNode::generateIR(llvm::LLVMContext &context, llvm::IRBuilder<> &builder, llvm::Module &module) {
     return llvm::ConstantInt::get(context, llvm::APInt(1, value));
 }
@@ -89,7 +95,23 @@ llvm::Value *BinaryOperationNode::generateIR(llvm::LLVMContext &context, llvm::I
     }
 }
 
+llvm::Value *VariableNode::generateIR(llvm::LLVMContext &context, llvm::IRBuilder<> &builder, llvm::Module &module) {
+    return LogError("Variables are not implemented yet.");
+}
+
+llvm::Value *VariableDefinitionNode::generateIR(llvm::LLVMContext &context, llvm::IRBuilder<> &builder, llvm::Module &module) {
+    return LogError("Variable definitions are not implemented yet.");
+}
+
+llvm::Value *FunctionNode::generateIR(llvm::LLVMContext &context, llvm::IRBuilder<> &builder, llvm::Module &module) {
+    return LogError("Functions are not implemented yet.");
+}
+
 void generateIR(AstNode *root) {
+    if (root == nullptr) {
+        return;
+    }
+
     llvm::LLVMContext context;
     llvm::IRBuilder<> builder(context);
 

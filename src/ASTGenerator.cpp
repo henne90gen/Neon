@@ -15,9 +15,15 @@ bool isLiteral(ParseTreeNode *node) {
            node->symbol == GrammarSymbol::TRUE || node->symbol == GrammarSymbol::FALSE;
 }
 
+bool isVariable(ParseTreeNode *node) { return node->symbol == GrammarSymbol::VARIABLE_NAME; }
+
+bool isVariableDefinition(ParseTreeNode *node) { return node->symbol == GrammarSymbol::VARIABLE_DEFINITION; }
+
 bool isSequence(ParseTreeNode *node) { return node->symbol == GrammarSymbol::STMTS && node->children.size() > 1; }
 
 bool isStatement(ParseTreeNode *node) { return node->symbol == GrammarSymbol::STMT; }
+
+bool isFunction(ParseTreeNode *node) { return node->symbol == GrammarSymbol::FUNCTION; }
 
 bool isIgnored(ParseTreeNode *node) {
     return node->symbol == GrammarSymbol::SEMICOLON || node->symbol == GrammarSymbol::ENDOFFILE;
@@ -101,6 +107,30 @@ AstNode *createLiteral(ParseTreeNode *node) {
     }
 }
 
+AstNode *createVariable(ParseTreeNode *node) { return new VariableNode(node->token.content); }
+
+AstNode::DataType getDataType(ParseTreeNode *node) {
+    if (node->token.type != Token::DATA_TYPE) {
+        return AstNode::DataType::NONE;
+    }
+
+    if (node->token.content == "int") {
+        return AstNode::DataType::INT;
+    } else if (node->token.content == "float") {
+        return AstNode::DataType::FLOAT;
+    } else if (node->token.content == "bool") {
+        return AstNode::DataType::BOOL;
+    }
+    return AstNode::DataType::NONE;
+}
+
+AstNode *createVariableDefinition(ParseTreeNode *node) {
+    auto dataTypeNode = node->children[0];
+    auto nameNode = node->children[1];
+    AstNode::DataType dataType = getDataType(dataTypeNode);
+    return new VariableDefinitionNode(nameNode->token.content, dataType);
+}
+
 AstNode *createSequence(ParseTreeNode *node, SequenceNode *seqRoot = nullptr) {
     if (seqRoot == nullptr) {
         seqRoot = new SequenceNode();
@@ -127,13 +157,73 @@ AstNode *createSequence(ParseTreeNode *node, SequenceNode *seqRoot = nullptr) {
 }
 
 AstNode *createStatement(ParseTreeNode *node) {
-    auto statementNode = new SequenceNode();
-    if (node->children.size() > 1) {
+    auto statementNode = new StatementNode();
+    if (node->children.empty()) {
+        std::cout << "Statement did not contain anything." << std::endl;
+        return statementNode;
+    }
+
+    bool isReturnStatement = node->children[0]->symbol == GrammarSymbol::RETURN;
+    statementNode->setIsReturnStatement(isReturnStatement);
+
+    if (node->children.size() > 1 && !isReturnStatement) {
         std::cout << "A statement should never have more than one child." << std::endl;
     }
-    auto child = createAstFromParseTree(node->children[0]);
-    statementNode->getChildren().push_back(child);
+
+    auto child = createAstFromParseTree(node->children[isReturnStatement ? 1 : 0]);
+    statementNode->setChild(child);
+
     return statementNode;
+}
+
+void addArguments(FunctionNode *function, ParseTreeNode *root) {
+    auto currentNode = root;
+    while (currentNode != nullptr) {
+        ParseTreeNode *argNode = nullptr;
+        if (currentNode->children.size() == 1) {
+            argNode = currentNode->children[0];
+        } else if (currentNode->children.size() == 3) {
+            argNode = currentNode->children[2];
+        }
+
+        auto argument = (VariableDefinitionNode *)createVariableDefinition(argNode);
+        function->getArguments().push_back(argument);
+
+        if (currentNode->children.size() == 3) {
+            currentNode = currentNode->children[0];
+        } else {
+            break;
+        }
+    }
+}
+
+AstNode *createFunction(ParseTreeNode *node) {
+    //    node->children[0] = FUN
+    //    node->children[1] = VARIABLE_NAME
+    //    node->children[2] = LEFT_PARAN
+    //    node->children[3] = FUNCTION_ARGS
+    //    node->children[4] = RIGHT_PARAN
+    //    node->children[5] = DATA_TYPE
+    //    node->children[6] = LEFT_CURLY_BRACE
+    //    node->children[7] = BODY?
+    //    node->children[8] = RIGHT_CURLY_BRACE
+    if (node->children.size() < 8) {
+        std::cerr << "Malformed function node." << std::endl;
+        return nullptr;
+    }
+    auto variableNameNode = node->children[1];
+    auto returnType = getDataType(node->children[5]);
+    auto function = new FunctionNode(variableNameNode->token.content, returnType);
+    addArguments(function, node->children[3]);
+
+    if (node->children[7]->symbol == GrammarSymbol::RIGHT_CURLY_BRACE) {
+        function->setBody(new SequenceNode());
+    } else {
+        auto body = createAstFromParseTree(node->children[7]);
+        function->setBody(body);
+    }
+
+    return function;
 }
 
 AstNode *createAstFromParseTree(ParseTreeNode *node) {
@@ -159,6 +249,18 @@ AstNode *createAstFromParseTree(ParseTreeNode *node) {
 
     if (isStatement(node)) {
         return createStatement(node);
+    }
+
+    if (isVariable(node)) {
+        return createVariable(node);
+    }
+
+    if (isVariableDefinition(node)) {
+        return createVariableDefinition(node);
+    }
+
+    if (isFunction(node)) {
+        return createFunction(node);
     }
 
     if (node->children.size() == 1 || node->symbol == GrammarSymbol::PROGRAM) {
@@ -194,6 +296,17 @@ void SequenceNode::print(int indentation) {
     }
 }
 
+void StatementNode::print(int indentation) {
+    indent(indentation);
+    std::cout << "StatementNode(isReturnStatement=" << isReturnStatement << ")" << std::endl;
+    if (child != nullptr) {
+        child->print(indentation + 1);
+    } else {
+        indent(indentation + 1);
+        std::cout << "nullptr" << std::endl;
+    }
+}
+
 void IntegerNode::print(int indentation) {
     indent(indentation);
     std::cout << "IntegerNode(value=" << value << ")" << std::endl;
@@ -218,6 +331,9 @@ void UnaryOperationNode::print(int indentation) {
     std::cout << "UnaryOperationNode(hasChild=" << (child != nullptr) << ", type=" << operationType << ")" << std::endl;
     if (child != nullptr) {
         child->print(indentation + 1);
+    } else {
+        indent(indentation + 1);
+        std::cout << "nullptr" << std::endl;
     }
 }
 
@@ -233,12 +349,42 @@ void BinaryOperationNode::print(int indentation) {
     } else if (type == BinaryOperationNode::DIVISION) {
         operationType = "DIVISION";
     }
-    std::cout << "UnaryOperationNode(hasLeft=" << (left != nullptr) << ", hasRight=" << (right != nullptr)
+    std::cout << "BinaryOperationNode(hasLeft=" << (left != nullptr) << ", hasRight=" << (right != nullptr)
               << ", type=" << operationType << ")" << std::endl;
     if (left != nullptr) {
         left->print(indentation + 1);
+    } else {
+        indent(indentation + 1);
+        std::cout << "nullptr" << std::endl;
     }
     if (right != nullptr) {
         right->print(indentation + 1);
+    } else {
+        indent(indentation + 1);
+        std::cout << "nullptr" << std::endl;
+    }
+}
+
+void VariableNode::print(int indentation) {
+    indent(indentation);
+    std::cout << "VariableNode(name='" << name << "')" << std::endl;
+}
+
+void VariableDefinitionNode::print(int indentation) {
+    indent(indentation);
+    std::cout << "VariableDefinitionNode(name='" << name << "')" << std::endl;
+}
+
+void FunctionNode::print(int indentation) {
+    indent(indentation);
+    std::cout << "FunctionNode(name='" << name << "', numArguments=" << arguments.size() << ")" << std::endl;
+    for (auto &argument : arguments) {
+        argument->print(indentation + 1);
+    }
+    if (body != nullptr) {
+        body->print(indentation + 1);
+    } else {
+        indent(indentation + 1);
+        std::cout << "No Body - this should not happen" << std::endl;
     }
 }

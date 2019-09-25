@@ -13,6 +13,8 @@ std::string to_string(GrammarSymbol symbol) {
     return "STAR";
   case PLUS:
     return "PLUS";
+  case COMMA:
+    return "COMMA";
   case MINUS:
     return "MINUS";
   case DIV:
@@ -33,6 +35,8 @@ std::string to_string(GrammarSymbol symbol) {
     return "AND";
   case CONJUNCTION:
     return "CONJUNCTION";
+  case DATA_TYPE:
+    return "DATA_TYPE";
   case DISJUNCTION:
     return "DISJUNCTION";
   case ENDOFFILE:
@@ -45,6 +49,12 @@ std::string to_string(GrammarSymbol symbol) {
     return "FALSE";
   case FLOAT:
     return "FLOAT";
+  case FUN:
+    return "FUN";
+  case FUNCTION:
+    return "FUNCTION";
+  case FUNCTION_ARGS:
+    return "FUNCTION_ARGS";
   case INTEGER:
     return "INTEGER";
   case NEGATION:
@@ -57,6 +67,8 @@ std::string to_string(GrammarSymbol symbol) {
     return "PROGRAM";
   case RELATION:
     return "RELATION";
+  case RETURN:
+    return "RETURN";
   case STMT:
     return "STMT";
   case STMTS:
@@ -67,6 +79,14 @@ std::string to_string(GrammarSymbol symbol) {
     return "TERM";
   case TRUE:
     return "TRUE";
+  case VARIABLE_DEFINITION:
+    return "VARIABLE_DEFINITION";
+  case VARIABLE_NAME:
+    return "VARIABLE_NAME";
+  case LEFT_CURLY_BRACE:
+    return "LEFT_CURLY_BRACE";
+  case RIGHT_CURLY_BRACE:
+    return "RIGHT_CURLY_BRACE";
   }
 }
 

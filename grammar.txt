@@ -1,9 +1,21 @@
 program
+    function endoffile
     stmts endoffile
+
+function
+    fun variable_name ( function_args ) data_type { }
+    fun variable_name ( function_args ) data_type { stmts }
+
+function_args
+    variable_definition
+    function_args , variable_definition
+
+variable_definition
+    data_type variable_name
 
 # TODO this allows the first statement to be without a semicolon
 stmts
-    stmt
+    stmt ;
     stmts ;
     stmts ; stmt ;
 
@@ -12,6 +24,8 @@ stmt
 #    iteration
 #    assignment
     expr
+    variable_definition
+    return expr
 
 #iteration
 #    for (  ) { stmts }
@@ -55,4 +69,5 @@ factor
     false
     integer
     float
+    variable_name
     ( expr )

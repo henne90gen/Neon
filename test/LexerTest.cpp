@@ -12,15 +12,6 @@ TEST_CASE("Lexer can handle lots of spaces") {
     REQUIRE(token.type == Token::INTEGER);
 }
 
-TEST_CASE("Lexer can handle invalid token") {
-    std::vector<std::string> lines = {"invalid-token"};
-    CodeProvider *codeProvider = new StringCodeProvider(lines);
-    auto lexer = Lexer(codeProvider);
-    auto token = lexer.getToken();
-    REQUIRE(token.content == "invalid-token");
-    REQUIRE(token.type == Token::END_OF_FILE);
-}
-
 TEST_CASE("Lexer can handle spaces between tokens") {
     std::vector<std::string> lines = {"1 - 5"};
     CodeProvider *codeProvider = new StringCodeProvider(lines);
@@ -57,24 +48,33 @@ TEST_CASE("Lexer can handle no spaces between tokens") {
 
 TEST_CASE("Lexer can handle all tokens") {
     std::unordered_map<std::string, Token::TokenType> tokens = {
-            {"1",   Token::INTEGER},
-            {"1.5", Token::FLOAT},
-            {"<",   Token::LESS_THAN},
-            {">",   Token::GREATER_THAN},
-            {"<=",  Token::LESS_EQUALS},
-            {">=",  Token::GREATER_EQUALS},
-            {"==",  Token::EQUALS},
-            {"!=",  Token::NOT_EQUALS},
-            {"+",   Token::PLUS},
-            {"-",   Token::MINUS},
-            {"*",   Token::STAR},
-            {"/",   Token::DIV},
-            {"not", Token::NOT},
-            {"and", Token::AND},
-            {"or",  Token::OR},
-            {"(",   Token::LEFT_PARAN},
-            {")",   Token::RIGHT_PARAN},
-            {";",   Token::SEMICOLON}
+          {"1", Token::INTEGER}, //
+          {"1.5", Token::FLOAT},
+          {"<", Token::LESS_THAN},
+          {">", Token::GREATER_THAN},
+          {"<=", Token::LESS_EQUALS},
+          {">=", Token::GREATER_EQUALS},
+          {"==", Token::EQUALS},
+          {"!=", Token::NOT_EQUALS},
+          {"+", Token::PLUS},
+          {"-", Token::MINUS},
+          {"*", Token::STAR},
+          {"/", Token::DIV},
+          {"not", Token::NOT},
+          {"and", Token::AND},
+          {"or", Token::OR},
+          {"(", Token::LEFT_PARAN},
+          {")", Token::RIGHT_PARAN},
+          {"{", Token::LEFT_CURLY_BRACE},
+          {"}", Token::RIGHT_CURLY_BRACE},
+          {";", Token::SEMICOLON},
+          {",", Token::COMMA},
+          {"helloWorld", Token::VARIABLE_NAME},
+          {"hello123World", Token::VARIABLE_NAME},
+          {"int", Token::DATA_TYPE},
+          {"float", Token::DATA_TYPE},
+          {"bool", Token::DATA_TYPE},
+          {"fun", Token::FUN},
     };
     std::vector<std::string> lines;
     lines.reserve(tokens.size());
