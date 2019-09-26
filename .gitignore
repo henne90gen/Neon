@@ -9,3 +9,4 @@ cmake-build-relwithdebinfo/
 __pycache__/
 env/
 docs/
+main.ne

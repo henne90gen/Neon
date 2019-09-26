@@ -37,7 +37,6 @@ class IRGenerator : public ASTVisitor {
     llvm::IRBuilder<> builder;
     llvm::Module module;
 
-    llvm::Function *currentFunction = nullptr;
     std::unordered_map<AstNode *, llvm::Value *> nodesToValues = {};
     std::unordered_map<std::string, llvm::AllocaInst *> definedVariables = {};
 

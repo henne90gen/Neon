@@ -2,9 +2,7 @@
 
 #include <iostream>
 
-void IRGenerator::logError(const std::string &msg) {
-    std::cout << msg << std::endl;
-}
+void IRGenerator::logError(const std::string &msg) { std::cout << msg << std::endl; }
 
 llvm::Type *IRGenerator::getType(AstNode::DataType type) {
     switch (type) {
@@ -22,7 +20,8 @@ llvm::Type *IRGenerator::getType(AstNode::DataType type) {
 }
 
 llvm::AllocaInst *IRGenerator::createEntryBlockAlloca(llvm::Type *type, const std::string &name) {
-    llvm::IRBuilder<> tmpB(&currentFunction->getEntryBlock(), currentFunction->getEntryBlock().begin());
+    auto function = builder.GetInsertBlock()->getParent();
+    llvm::IRBuilder<> tmpB(&function->getEntryBlock(), function->getEntryBlock().begin());
     return tmpB.CreateAlloca(type, 0, name);
 }
 
@@ -42,7 +41,6 @@ void IRGenerator::visitFunctionNode(FunctionNode *node) {
         if (function == nullptr) {
             return logError("Could not create function");
         }
-        currentFunction = function;
 
         unsigned int i = 0;
         for (auto &arg : function->args()) {
@@ -72,13 +70,18 @@ void IRGenerator::visitFunctionNode(FunctionNode *node) {
 }
 
 void IRGenerator::visitVariableNode(VariableNode *node) {
-    //    currentValue = definedVariables[node->getName()];
-    //    if (currentValue == nullptr) {
-    //        return logError("Undefined variable " + node->getName());
-    //    }
+    if (definedVariables.find(node->getName()) == definedVariables.end()) {
+        return logError("Undefined variable " + node->getName());
+    }
+    auto alloca = definedVariables[node->getName()];
+    nodesToValues[node] = builder.CreateLoad(alloca, node->getName());
 }
 
-void IRGenerator::visitVariableDefinitionNode(VariableDefinitionNode *node) {}
+void IRGenerator::visitVariableDefinitionNode(VariableDefinitionNode *node) {
+    auto alloca = createEntryBlockAlloca(getType(node->getType()), node->getName());
+    definedVariables[node->getName()] = alloca;
+    nodesToValues[node] = alloca;
+}
 
 void IRGenerator::visitBinaryOperationNode(BinaryOperationNode *node) {
     node->getLeft()->accept(this);
@@ -155,7 +158,11 @@ void IRGenerator::visitBoolNode(BoolNode *node) {
 
 void IRGenerator::print() { module.print(llvm::outs(), nullptr); }
 
-void IRGenerator::visitAssignmentNode(AssignmentNode *node) { std::cerr << "Not implemented." << std::endl; }
+void IRGenerator::visitAssignmentNode(AssignmentNode *node) {
+    node->getLeft()->accept(this);
+    node->getRight()->accept(this);
+    nodesToValues[node] = builder.CreateStore(nodesToValues[node->getRight()], nodesToValues[node->getLeft()]);
+}
 
 void generateIR(AstNode *root) {
     if (root == nullptr) {
