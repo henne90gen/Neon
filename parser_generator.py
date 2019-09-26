@@ -13,13 +13,14 @@ SYMBOL_TO_ENUM_MAPPING = {
     '+': 'PLUS',
     '-': 'MINUS',
     '/': 'DIV',
+    '=': 'SINGLE_EQUALS',
     ',': 'COMMA',
     ';': 'SEMICOLON',
     '<': 'LESS_THAN',
     '>': 'GREATER_THAN',
     '<=': 'LESS_EQUALS',
     '>=': 'GREATER_EQUALS',
-    '==': 'EQUALS',
+    '==': 'DOUBLE_EQUALS',
     '!=': 'NOT_EQUALS',
 }
 

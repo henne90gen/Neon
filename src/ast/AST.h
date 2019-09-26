@@ -1,13 +1,35 @@
 #pragma once
 
+#include <string>
 #include <utility>
+#include <vector>
 
-#include <llvm/IR/IRBuilder.h>
-#include <llvm/IR/LLVMContext.h>
-#include <llvm/IR/Module.h>
-#include <llvm/IR/Value.h>
+class FunctionNode;
+class VariableNode;
+class VariableDefinitionNode;
+class BinaryOperationNode;
+class UnaryOperationNode;
+class AssignmentNode;
+class SequenceNode;
+class StatementNode;
+class FloatNode;
+class IntegerNode;
+class BoolNode;
 
-#include "Parser.h"
+class ASTVisitor {
+  public:
+    virtual void visitFunctionNode(FunctionNode *node) = 0;
+    virtual void visitVariableNode(VariableNode *node) = 0;
+    virtual void visitVariableDefinitionNode(VariableDefinitionNode *node) = 0;
+    virtual void visitUnaryOperationNode(UnaryOperationNode *node) = 0;
+    virtual void visitBinaryOperationNode(BinaryOperationNode *node) = 0;
+    virtual void visitAssignmentNode(AssignmentNode *node) = 0;
+    virtual void visitSequenceNode(SequenceNode *node) = 0;
+    virtual void visitStatementNode(StatementNode *node) = 0;
+    virtual void visitFloatNode(FloatNode *node) = 0;
+    virtual void visitIntegerNode(IntegerNode *node) = 0;
+    virtual void visitBoolNode(BoolNode *node) = 0;
+};
 
 class AstNode {
   public:
@@ -19,15 +41,14 @@ class AstNode {
         BINARY_OPERATION,
         FUNCTION,
         VARIABLE_DEFINITION,
-        VARIABLE
+        VARIABLE,
+        ASSIGNMENT,
     };
-    enum DataType { NONE, INT, FLOAT, BOOL };
+    enum DataType { VOID, INT, FLOAT, BOOL };
 
     explicit AstNode(AstNodeType type) : type(type) {}
 
-    virtual void print(int indentation = 0) = 0;
-
-    virtual llvm::Value *generateIR(llvm::LLVMContext &context, llvm::IRBuilder<> &builder, llvm::Module &module) = 0;
+    virtual void accept(ASTVisitor *v) = 0;
 
     AstNodeType getAstNodeType() { return type; }
 
@@ -39,9 +60,7 @@ class SequenceNode : public AstNode {
   public:
     SequenceNode() : AstNode(AstNode::SEQUENCE) {}
 
-    void print(int indentation) override;
-
-    llvm::Value *generateIR(llvm::LLVMContext &context, llvm::IRBuilder<> &builder, llvm::Module &module) override;
+    void accept(ASTVisitor *v) override { v->visitSequenceNode(this); };
 
     std::vector<AstNode *> &getChildren() { return children; }
 
@@ -53,18 +72,34 @@ class StatementNode : public AstNode {
   public:
     StatementNode() : AstNode(AstNode::STATEMENT) {}
 
-    void print(int indentation) override;
+    void accept(ASTVisitor *v) override { v->visitStatementNode(this); };
 
-    llvm::Value *generateIR(llvm::LLVMContext &context, llvm::IRBuilder<> &builder, llvm::Module &module) override;
-
-    void setIsReturnStatement(bool isReturnStatement) { this->isReturnStatement = isReturnStatement; }
+    bool isReturnStatement() { return this->returnStatement; }
+    void setIsReturnStatement(bool returnStatement) { this->returnStatement = returnStatement; }
 
     AstNode *getChild() { return child; }
     void setChild(AstNode *child) { this->child = child; }
 
   private:
-    bool isReturnStatement = false;
+    bool returnStatement = false;
     AstNode *child = nullptr;
+};
+
+class AssignmentNode : public AstNode {
+  public:
+    explicit AssignmentNode() : AstNode(AstNode::ASSIGNMENT) {}
+
+    void accept(ASTVisitor *v) override { v->visitAssignmentNode(this); };
+
+    AstNode *getLeft() { return left; }
+    void setLeft(AstNode *left) { this->left = left; }
+
+    AstNode *getRight() { return right; }
+    void setRight(AstNode *right) { this->right = right; }
+
+  private:
+    AstNode *left = nullptr;
+    AstNode *right = nullptr;
 };
 
 class LiteralNode : public AstNode {
@@ -83,11 +118,9 @@ class IntegerNode : public LiteralNode {
   public:
     explicit IntegerNode(int value) : LiteralNode(LiteralNode::INTEGER), value(value) {}
 
+    void accept(ASTVisitor *v) override { v->visitIntegerNode(this); };
+
     int getValue() { return value; }
-
-    void print(int indentation) override;
-
-    llvm::Value *generateIR(llvm::LLVMContext &context, llvm::IRBuilder<> &builder, llvm::Module &module) override;
 
   private:
     int value;
@@ -97,11 +130,9 @@ class FloatNode : public LiteralNode {
   public:
     explicit FloatNode(float value) : LiteralNode(LiteralNode::FLOAT), value(value) {}
 
+    void accept(ASTVisitor *v) override { v->visitFloatNode(this); };
+
     float getValue() { return value; }
-
-    void print(int indentation) override;
-
-    llvm::Value *generateIR(llvm::LLVMContext &context, llvm::IRBuilder<> &builder, llvm::Module &module) override;
 
   private:
     float value;
@@ -111,11 +142,9 @@ class BoolNode : public LiteralNode {
   public:
     explicit BoolNode(bool value) : LiteralNode(LiteralNode::BOOL), value(value) {}
 
+    void accept(ASTVisitor *v) override { v->visitBoolNode(this); };
+
     bool getValue() { return value; }
-
-    void print(int indentation) override;
-
-    llvm::Value *generateIR(llvm::LLVMContext &context, llvm::IRBuilder<> &builder, llvm::Module &module) override;
 
   private:
     bool value;
@@ -125,9 +154,9 @@ class VariableNode : public AstNode {
   public:
     explicit VariableNode(std::string name) : AstNode(AstNode::VARIABLE), name(std::move(name)) {}
 
-    void print(int indentation) override;
+    void accept(ASTVisitor *v) override { v->visitVariableNode(this); };
 
-    llvm::Value *generateIR(llvm::LLVMContext &context, llvm::IRBuilder<> &builder, llvm::Module &module) override;
+    std::string &getName() { return name; }
 
   private:
     std::string name;
@@ -141,15 +170,13 @@ class UnaryOperationNode : public AstNode {
 
     explicit UnaryOperationNode(UnaryOperationType type) : AstNode(AstNode::UNARY_OPERATION), type(type) {}
 
+    void accept(ASTVisitor *v) override { v->visitUnaryOperationNode(this); };
+
     void setChild(AstNode *child) { this->child = child; }
 
     AstNode *getChild() { return child; }
 
     UnaryOperationType getType() { return type; }
-
-    void print(int indentation) override;
-
-    llvm::Value *generateIR(llvm::LLVMContext &context, llvm::IRBuilder<> &builder, llvm::Module &module) override;
 
   private:
     UnaryOperationType type;
@@ -167,6 +194,8 @@ class BinaryOperationNode : public AstNode {
 
     explicit BinaryOperationNode(BinaryOperationType type) : AstNode(AstNode::BINARY_OPERATION), type(type) {}
 
+    void accept(ASTVisitor *v) override { v->visitBinaryOperationNode(this); };
+
     void setLeft(AstNode *left) { this->left = left; }
     AstNode *getLeft() { return left; }
 
@@ -174,10 +203,6 @@ class BinaryOperationNode : public AstNode {
     AstNode *getRight() { return right; }
 
     BinaryOperationType getType() { return type; }
-
-    void print(int indentation) override;
-
-    llvm::Value *generateIR(llvm::LLVMContext &context, llvm::IRBuilder<> &builder, llvm::Module &module) override;
 
   private:
     BinaryOperationType type;
@@ -190,9 +215,11 @@ class VariableDefinitionNode : public AstNode {
     explicit VariableDefinitionNode(std::string name, DataType type)
         : AstNode(AstNode::VARIABLE_DEFINITION), name(std::move(name)), type(type) {}
 
-    void print(int indentation) override;
+    void accept(ASTVisitor *v) override { v->visitVariableDefinitionNode(this); };
 
-    llvm::Value *generateIR(llvm::LLVMContext &context, llvm::IRBuilder<> &builder, llvm::Module &module) override;
+    std::string &getName() { return name; }
+
+    DataType getType() { return type; }
 
   private:
     std::string name;
@@ -204,15 +231,16 @@ class FunctionNode : public AstNode {
     explicit FunctionNode(std::string name, AstNode::DataType returnType)
         : AstNode(AstNode::FUNCTION), name(std::move(name)), returnType(returnType) {}
 
-    void print(int indentation) override;
+    void accept(ASTVisitor *v) override { v->visitFunctionNode(this); };
 
-    llvm::Value *generateIR(llvm::LLVMContext &context, llvm::IRBuilder<> &builder, llvm::Module &module) override;
-
+    AstNode *getBody() { return body; }
     void setBody(AstNode *body) { this->body = body; }
 
     std::vector<VariableDefinitionNode *> &getArguments() { return arguments; }
 
     std::string &getName() { return name; }
+
+    AstNode::DataType getReturnType() { return returnType; }
 
   private:
     std::string name;
@@ -220,7 +248,3 @@ class FunctionNode : public AstNode {
     AstNode *body = nullptr;
     std::vector<VariableDefinitionNode *> arguments = {};
 };
-
-AstNode *createAstFromParseTree(ParseTreeNode *node);
-
-void generateIR(AstNode *root);

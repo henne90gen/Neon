@@ -1,9 +1,9 @@
-#include "AST.h"
-#include "Interpreter.h"
+#include "IRGenerator.h"
 #include "Lexer.h"
 #include "Parser.h"
-
-#include <string>
+#include "ast/ASTGenerator.h"
+#include "ast/ASTInterpreter.h"
+#include "ast/ASTPrinter.h"
 
 int main() {
     bool verbose = true;
@@ -19,11 +19,11 @@ int main() {
 
     auto astRoot = createAstFromParseTree(parseTreeRoot);
     if (verbose && astRoot != nullptr) {
-        astRoot->print();
+        auto printer = new ASTPrinter();
+        astRoot->accept(printer);
     }
 
-    Interpreter interpreter = {};
-    interpreter.interpret(astRoot);
+    interpretAst(astRoot, verbose);
 
     generateIR(astRoot);
     return 0;

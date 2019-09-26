@@ -25,14 +25,18 @@ std::string to_string(GrammarSymbol symbol) {
     return "LESS_THAN";
   case LESS_EQUALS:
     return "LESS_EQUALS";
-  case EQUALS:
-    return "EQUALS";
+  case SINGLE_EQUALS:
+    return "SINGLE_EQUALS";
+  case DOUBLE_EQUALS:
+    return "DOUBLE_EQUALS";
   case GREATER_THAN:
     return "GREATER_THAN";
   case GREATER_EQUALS:
     return "GREATER_EQUALS";
   case AND:
     return "AND";
+  case ASSIGNMENT:
+    return "ASSIGNMENT";
   case CONJUNCTION:
     return "CONJUNCTION";
   case DATA_TYPE:

@@ -135,10 +135,10 @@ Token Lexer::getToken() {
     return {Token::END_OF_FILE, invalidToken};
 }
 
-std::optional<Token> Lexer::matchWordToken() {
 #define CONTAINS(word, search) word.find(search) == 0
 #define TOKEN(type, content) std::optional<Token>({type, content});
 
+std::optional<Token> Lexer::matchWordToken() {
     if (CONTAINS(currentWord, "true")) {
         return TOKEN(Token::TRUE, "true");
     } else if (CONTAINS(currentWord, "false")) {
@@ -165,14 +165,14 @@ std::optional<Token> Lexer::matchWordToken() {
 }
 
 std::optional<Token> Lexer::matchTwoCharToken() {
-    if (currentWord.find("!=") == 0) {
-        return std::optional<Token>({Token::NOT_EQUALS, "!="});
-    } else if (currentWord.find("==") == 0) {
-        return std::optional<Token>({Token::EQUALS, "=="});
-    } else if (currentWord.find(">=") == 0) {
-        return std::optional<Token>({Token::GREATER_EQUALS, ">="});
-    } else if (currentWord.find("<=") == 0) {
-        return std::optional<Token>({Token::LESS_EQUALS, "<="});
+    if (CONTAINS(currentWord, "!=")) {
+        return TOKEN(Token::NOT_EQUALS, "!=");
+    } else if (CONTAINS(currentWord, "==")) {
+        return TOKEN(Token::DOUBLE_EQUALS, "==");
+    } else if (CONTAINS(currentWord, ">=")) {
+        return TOKEN(Token::GREATER_EQUALS, ">=");
+    } else if (CONTAINS(currentWord, "<=")) {
+        return TOKEN(Token::LESS_EQUALS, "<=");
     }
     return {};
 }
@@ -180,29 +180,31 @@ std::optional<Token> Lexer::matchTwoCharToken() {
 std::optional<Token> Lexer::matchOneCharacterToken() {
     char firstChar = currentWord[0];
     if (firstChar == '(') {
-        return std::optional<Token>({Token::LEFT_PARAN, "("});
+        return TOKEN(Token::LEFT_PARAN, "(");
     } else if (firstChar == ')') {
-        return std::optional<Token>({Token::RIGHT_PARAN, ")"});
+        return TOKEN(Token::RIGHT_PARAN, ")");
     } else if (firstChar == '{') {
-        return std::optional<Token>({Token::LEFT_CURLY_BRACE, "{"});
+        return TOKEN(Token::LEFT_CURLY_BRACE, "{");
     } else if (firstChar == '}') {
-        return std::optional<Token>({Token::RIGHT_CURLY_BRACE, "}"});
+        return TOKEN(Token::RIGHT_CURLY_BRACE, "}");
+    } else if (firstChar == '=') {
+        return TOKEN(Token::SINGLE_EQUALS, "=");
     } else if (firstChar == '+') {
-        return std::optional<Token>({Token::PLUS, "+"});
+        return TOKEN(Token::PLUS, "+");
     } else if (firstChar == '-') {
-        return std::optional<Token>({Token::MINUS, "-"});
+        return TOKEN(Token::MINUS, "-");
     } else if (firstChar == '*') {
-        return std::optional<Token>({Token::STAR, "*"});
+        return TOKEN(Token::STAR, "*");
     } else if (firstChar == '/') {
-        return std::optional<Token>({Token::DIV, "/"});
+        return TOKEN(Token::DIV, "/");
     } else if (firstChar == ',') {
-        return std::optional<Token>({Token::COMMA, ","});
+        return TOKEN(Token::COMMA, ",");
     } else if (firstChar == ';') {
-        return std::optional<Token>({Token::SEMICOLON, ";"});
+        return TOKEN(Token::SEMICOLON, ";");
     } else if (firstChar == '<') {
-        return std::optional<Token>({Token::LESS_THAN, "<"});
+        return TOKEN(Token::LESS_THAN, "<");
     } else if (firstChar == '>') {
-        return std::optional<Token>({Token::GREATER_THAN, ">"});
+        return TOKEN(Token::GREATER_THAN, ">");
     }
     return {};
 }

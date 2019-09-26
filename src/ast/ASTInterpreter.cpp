@@ -1,20 +1,8 @@
-#include "Interpreter.h"
+#include "ASTInterpreter.h"
 
-#include <functional>
 #include <iostream>
 
-void Interpreter::interpretSEQ(SequenceNode *node) {
-    for (auto child : node->getChildren()) {
-        interpret(child);
-    }
-}
-
-void Interpreter::interpretSTMT(StatementNode *node) {
-    interpret(node->getChild());
-    printStatementResult(node->getChild());
-}
-
-void Interpreter::printStatementResult(AstNode *child) {
+void ASTInterpreter::printStatementResult(AstNode *child) {
     if (calculationResults.find(child) == calculationResults.end()) {
         std::cout << "Calculation did not produce a result." << std::endl;
         return;
@@ -105,12 +93,20 @@ CalculationResult negate(CalculationResult &calc) {
     return result;
 }
 
-void Interpreter::interpretBIN_OP(BinaryOperationNode *node) {
+void ASTInterpreter::visitFunctionNode(FunctionNode *node) {
+    if (functions.find(node->getName()) != functions.end()) {
+        std::cout << "Redefinition of function " << node->getName() << "!" << std::endl;
+    } else {
+        functions[node->getName()] = node;
+    }
+}
+
+void ASTInterpreter::visitBinaryOperationNode(BinaryOperationNode *node) {
     if (calculationResults.find(node->getLeft()) == calculationResults.end()) {
-        interpret(node->getLeft());
+        node->getLeft()->accept(this);
     }
     if (calculationResults.find(node->getRight()) == calculationResults.end()) {
-        interpret(node->getRight());
+        node->getRight()->accept(this);
     }
 
     auto leftResult = calculationResults[node->getLeft()];
@@ -133,10 +129,10 @@ void Interpreter::interpretBIN_OP(BinaryOperationNode *node) {
     calculationResults[node] = result;
 }
 
-void Interpreter::interpretUN_OP(UnaryOperationNode *node) {
+void ASTInterpreter::visitUnaryOperationNode(UnaryOperationNode *node) {
     auto child = node->getChild();
     if (calculationResults.find(child) == calculationResults.end()) {
-        interpret(child);
+        child->accept(this);
     }
 
     auto childResult = calculationResults[child];
@@ -150,62 +146,62 @@ void Interpreter::interpretUN_OP(UnaryOperationNode *node) {
     calculationResults[node] = result;
 }
 
-void Interpreter::interpretLIT(LiteralNode *node) {
-    CalculationResult result = {};
-    if (node->getLiteralType() == LiteralNode::INTEGER) {
-        result = {CalculationResult::INTEGER};
-        result.intResult = ((IntegerNode *)node)->getValue();
-    } else if (node->getLiteralType() == LiteralNode::FLOAT) {
-        result = {CalculationResult::FLOAT};
-        result.floatResult = ((FloatNode *)node)->getValue();
-    } else if (node->getLiteralType() == LiteralNode::BOOL) {
-        result = {CalculationResult::BOOL};
-        result.boolResult = ((BoolNode *)node)->getValue();
-    } else {
-        std::cout << "Data type not supported yet!" << std::endl;
+void ASTInterpreter::visitSequenceNode(SequenceNode *node) {
+    for (auto child : node->getChildren()) {
+        child->accept(this);
+    }
+}
+
+void ASTInterpreter::visitStatementNode(StatementNode *node) {
+    if (node->getChild() == nullptr) {
+        std::cout << "Could not interpret child of StatementNode." << std::endl;
         return;
     }
+    node->getChild()->accept(this);
+    printStatementResult(node->getChild());
+}
+
+void ASTInterpreter::visitVariableNode(VariableNode *node) {
+    if (variables.find(node->getName()) == variables.end()) {
+        std::cout << "Use of undefined variable." << std::endl;
+        return;
+    }
+    calculationResults[node] = calculationResults[variables[node->getName()]];
+}
+
+void ASTInterpreter::visitVariableDefinitionNode(VariableDefinitionNode *node) { variables[node->getName()] = node; }
+
+void ASTInterpreter::visitFloatNode(FloatNode *node) {
+    CalculationResult result = {CalculationResult::FLOAT};
+    result.floatResult = node->getValue();
     calculationResults[node] = result;
 }
 
-void Interpreter::interpretFUN(FunctionNode *node) {
-    if (functions.find(node->getName()) != functions.end()) {
-        std::cout << "Redefinition of function " << node->getName() << "!" << std::endl;
-    } else {
-        functions[node->getName()] = node;
-    }
+void ASTInterpreter::visitIntegerNode(IntegerNode *node) {
+    CalculationResult result = {CalculationResult::INTEGER};
+    result.intResult = node->getValue();
+    calculationResults[node] = result;
 }
 
-void Interpreter::interpret(AstNode *node) {
-    if (verbose) {
-        std::cout << "Interpreting " << node->getAstNodeType() << std::endl;
-    }
+void ASTInterpreter::visitBoolNode(BoolNode *node) {
+    CalculationResult result = {CalculationResult::BOOL};
+    result.boolResult = node->getValue();
+    calculationResults[node] = result;
+}
 
+void ASTInterpreter::visitAssignmentNode(AssignmentNode *node) {
+    if (calculationResults.find(node->getRight()) == calculationResults.end()) {
+        node->getRight()->accept(this);
+    }
+    calculationResults[node] = calculationResults[node->getRight()];
+}
+
+void interpretAst(AstNode *node, bool verbose) {
     if (node == nullptr) {
         std::cout << "Could not interpret node (nullptr)" << std::endl;
         return;
     }
 
-    switch (node->getAstNodeType()) {
-    case AstNode::SEQUENCE:
-        interpretSEQ((SequenceNode *)node);
-        break;
-    case AstNode::STATEMENT:
-        interpretSTMT((StatementNode*)node);
-        break;
-    case AstNode::BINARY_OPERATION:
-        interpretBIN_OP((BinaryOperationNode *)node);
-        break;
-    case AstNode::UNARY_OPERATION:
-        interpretUN_OP((UnaryOperationNode *)node);
-        break;
-    case AstNode::LITERAL:
-        interpretLIT((LiteralNode *)node);
-        break;
-    case AstNode::FUNCTION:
-        interpretFUN((FunctionNode *)node);
-    default:
-        std::cout << "AST node " << node->getAstNodeType() << " not supported." << std::endl;
-        break;
-    }
+    auto interpreter = new ASTInterpreter(verbose);
+    node->accept(interpreter);
 }

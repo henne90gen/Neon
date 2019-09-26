@@ -15,20 +15,19 @@ variable_definition
 
 # TODO this allows the first statement to be without a semicolon
 stmts
-    stmt ;
+    stmt
     stmts ;
     stmts ; stmt ;
 
 stmt
 #    selection
 #    iteration
-#    assignment
-    expr
-    variable_definition
+    assignment
     return expr
+    variable_definition
 
-#iteration
-#    for (  ) { stmts }
+assignment
+    variable_definition = expr
 
 expr
     disjunction

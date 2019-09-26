@@ -28,8 +28,9 @@ set(SOURCES
         ${CMAKE_CURRENT_SOURCE_DIR}/src/Parser.cpp
         ${CMAKE_CURRENT_SOURCE_DIR}/src/Token.cpp
         ${CMAKE_CURRENT_SOURCE_DIR}/src/Grammar.cpp
-        ${CMAKE_CURRENT_SOURCE_DIR}/src/Interpreter.cpp
-        ${CMAKE_CURRENT_SOURCE_DIR}/src/ASTGenerator.cpp
+        src/ast/ASTInterpreter.cpp
+        ${CMAKE_CURRENT_SOURCE_DIR}/src/ast/ASTPrinter.cpp
+        ${CMAKE_CURRENT_SOURCE_DIR}/src/ast/ASTGenerator.cpp
         ${CMAKE_CURRENT_SOURCE_DIR}/src/IRGenerator.cpp)
 
 add_library(${PROJECT_NAME}_lib ${SOURCES})

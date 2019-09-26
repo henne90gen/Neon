@@ -38,8 +38,10 @@ std::string to_string(Token::TokenType type) {
         return "LESS_THAN";
     case Token::GREATER_EQUALS:
         return "GREATER_EQUALS";
-    case Token::EQUALS:
-        return "EQUALS";
+    case Token::DOUBLE_EQUALS:
+        return "DOUBLE_EQUALS";
+    case Token::SINGLE_EQUALS:
+        return "SINGLE_EQUALS";
     case Token::NOT_EQUALS:
         return "NOT_EQUALS";
     case Token::FUN:
@@ -54,6 +56,8 @@ std::string to_string(Token::TokenType type) {
         return "RIGHT_CURLY_BRACE";
     case Token::COMMA:
         return "COMMA";
+    case Token::SEMICOLON:
+        return "SEMICOLON";
     case Token::RETURN:
         return "RETURN";
     default:

@@ -1,4 +1,4 @@
-#include "AST.h"
+#include "ASTGenerator.h"
 
 #include <iostream>
 
@@ -24,6 +24,8 @@ bool isSequence(ParseTreeNode *node) { return node->symbol == GrammarSymbol::STM
 bool isStatement(ParseTreeNode *node) { return node->symbol == GrammarSymbol::STMT; }
 
 bool isFunction(ParseTreeNode *node) { return node->symbol == GrammarSymbol::FUNCTION; }
+
+bool isAssignment(ParseTreeNode *node) { return node->symbol == GrammarSymbol::ASSIGNMENT; }
 
 bool isIgnored(ParseTreeNode *node) {
     return node->symbol == GrammarSymbol::SEMICOLON || node->symbol == GrammarSymbol::ENDOFFILE;
@@ -111,7 +113,7 @@ AstNode *createVariable(ParseTreeNode *node) { return new VariableNode(node->tok
 
 AstNode::DataType getDataType(ParseTreeNode *node) {
     if (node->token.type != Token::DATA_TYPE) {
-        return AstNode::DataType::NONE;
+        return AstNode::DataType::VOID;
     }
 
     if (node->token.content == "int") {
@@ -121,10 +123,10 @@ AstNode::DataType getDataType(ParseTreeNode *node) {
     } else if (node->token.content == "bool") {
         return AstNode::DataType::BOOL;
     }
-    return AstNode::DataType::NONE;
+    return AstNode::DataType::VOID;
 }
 
-AstNode *createVariableDefinition(ParseTreeNode *node) {
+VariableDefinitionNode *createVariableDefinition(ParseTreeNode *node) {
     auto dataTypeNode = node->children[0];
     auto nameNode = node->children[1];
     AstNode::DataType dataType = getDataType(dataTypeNode);
@@ -186,7 +188,7 @@ void addArguments(FunctionNode *function, ParseTreeNode *root) {
             argNode = currentNode->children[2];
         }
 
-        auto argument = (VariableDefinitionNode *)createVariableDefinition(argNode);
+        auto argument = createVariableDefinition(argNode);
         function->getArguments().push_back(argument);
 
         if (currentNode->children.size() == 3) {
@@ -226,6 +228,20 @@ AstNode *createFunction(ParseTreeNode *node) {
     return function;
 }
 
+AstNode *createAssignment(ParseTreeNode *node) {
+    auto assignment = new AssignmentNode();
+    if (node->children.size() != 3) {
+        std::cout << "Assignment should always have 3 children" << std::endl;
+        return assignment;
+    }
+
+    auto left = createAstFromParseTree(node->children[0]);
+    assignment->setLeft(left);
+    auto right = createAstFromParseTree(node->children[2]);
+    assignment->setRight(right);
+    return assignment;
+}
+
 AstNode *createAstFromParseTree(ParseTreeNode *node) {
     if (node == nullptr) {
         return nullptr;
@@ -263,6 +279,10 @@ AstNode *createAstFromParseTree(ParseTreeNode *node) {
         return createFunction(node);
     }
 
+    if (isAssignment(node)) {
+        return createAssignment(node);
+    }
+
     if (node->children.size() == 1 || node->symbol == GrammarSymbol::PROGRAM) {
         return createAstFromParseTree(node->children[0]);
     }
@@ -280,111 +300,4 @@ AstNode *createAstFromParseTree(ParseTreeNode *node) {
     std::cout << "Could not find a suitable AstNode for " << to_string(node->symbol) << std::endl;
 
     return nullptr;
-}
-
-void indent(int indentation) {
-    for (int i = 0; i < indentation; i++) {
-        std::cout << "  ";
-    }
-}
-
-void SequenceNode::print(int indentation) {
-    indent(indentation);
-    std::cout << "SequenceNode(size=" << children.size() << ")" << std::endl;
-    for (auto child : children) {
-        child->print(indentation + 1);
-    }
-}
-
-void StatementNode::print(int indentation) {
-    indent(indentation);
-    std::cout << "StatementNode(isReturnStatement=" << isReturnStatement << ")" << std::endl;
-    if (child != nullptr) {
-        child->print(indentation + 1);
-    } else {
-        indent(indentation + 1);
-        std::cout << "nullptr" << std::endl;
-    }
-}
-
-void IntegerNode::print(int indentation) {
-    indent(indentation);
-    std::cout << "IntegerNode(value=" << value << ")" << std::endl;
-}
-
-void FloatNode::print(int indentation) {
-    indent(indentation);
-    std::cout << "FloatNode(value=" << value << ")" << std::endl;
-}
-
-void BoolNode::print(int indentation) {
-    indent(indentation);
-    std::cout << "BoolNode(value=" << value << ")" << std::endl;
-}
-
-void UnaryOperationNode::print(int indentation) {
-    indent(indentation);
-    std::string operationType = "ERROR";
-    if (type == UnaryOperationNode::NOT) {
-        operationType = "NOT";
-    }
-    std::cout << "UnaryOperationNode(hasChild=" << (child != nullptr) << ", type=" << operationType << ")" << std::endl;
-    if (child != nullptr) {
-        child->print(indentation + 1);
-    } else {
-        indent(indentation + 1);
-        std::cout << "nullptr" << std::endl;
-    }
-}
-
-void BinaryOperationNode::print(int indentation) {
-    indent(indentation);
-    std::string operationType = "ERROR";
-    if (type == BinaryOperationNode::ADDITION) {
-        operationType = "ADDITION";
-    } else if (type == BinaryOperationNode::SUBTRACTION) {
-        operationType = "SUBTRACTION";
-    } else if (type == BinaryOperationNode::MULTIPLICATION) {
-        operationType = "MULTIPLICATION";
-    } else if (type == BinaryOperationNode::DIVISION) {
-        operationType = "DIVISION";
-    }
-    std::cout << "BinaryOperationNode(hasLeft=" << (left != nullptr) << ", hasRight=" << (right != nullptr)
-              << ", type=" << operationType << ")" << std::endl;
-    if (left != nullptr) {
-        left->print(indentation + 1);
-    } else {
-        indent(indentation + 1);
-        std::cout << "nullptr" << std::endl;
-    }
-    if (right != nullptr) {
-        right->print(indentation + 1);
-    } else {
-        indent(indentation + 1);
-        std::cout << "nullptr" << std::endl;
-    }
-}
-
-void VariableNode::print(int indentation) {
-    indent(indentation);
-    std::cout << "VariableNode(name='" << name << "')" << std::endl;
-}
-
-void VariableDefinitionNode::print(int indentation) {
-    indent(indentation);
-    std::cout << "VariableDefinitionNode(name='" << name << "')" << std::endl;
-}
-
-void FunctionNode::print(int indentation) {
-    indent(indentation);
-    std::cout << "FunctionNode(name='" << name << "', numArguments=" << arguments.size() << ")" << std::endl;
-    for (auto &argument : arguments) {
-        argument->print(indentation + 1);
-    }
-    if (body != nullptr) {
-        body->print(indentation + 1);
-    } else {
-        indent(indentation + 1);
-        std::cout << "No Body - this should not happen" << std::endl;
-    }
 }

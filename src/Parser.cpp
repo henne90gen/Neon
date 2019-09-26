@@ -78,6 +78,8 @@ GrammarSymbol convertToGrammarSymbol(Token &token) {
         return GrammarSymbol::RIGHT_PARAN;
     case Token::END_OF_FILE:
         return GrammarSymbol::ENDOFFILE;
+    case Token::COMMA:
+        return GrammarSymbol::COMMA;
     case Token::SEMICOLON:
         return GrammarSymbol::SEMICOLON;
     case Token::TRUE:
@@ -86,6 +88,10 @@ GrammarSymbol convertToGrammarSymbol(Token &token) {
         return GrammarSymbol::FALSE;
     case Token::NOT:
         return GrammarSymbol::NOT;
+    case Token::SINGLE_EQUALS:
+        return GrammarSymbol::SINGLE_EQUALS;
+    case Token::DOUBLE_EQUALS:
+        return GrammarSymbol::DOUBLE_EQUALS;
     case Token::LESS_THAN:
         return GrammarSymbol::LESS_THAN;
     case Token::GREATER_THAN:

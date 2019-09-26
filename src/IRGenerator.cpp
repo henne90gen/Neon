@@ -1,123 +1,169 @@
-#include "AST.h"
+#include "IRGenerator.h"
 
 #include <iostream>
 
-#include "llvm/ADT/APFloat.h"
-#include "llvm/ADT/APInt.h"
-#include "llvm/IR/BasicBlock.h"
-#include "llvm/IR/Constants.h"
-#include "llvm/IR/IRBuilder.h"
-#include "llvm/IR/LLVMContext.h"
-#include "llvm/IR/Module.h"
-#include "llvm/IR/Verifier.h"
-#include "llvm/Support/raw_ostream.h"
-
-llvm::Value *LogError(const char *Str) {
-    std::cout << Str << std::endl;
-    return nullptr;
+void IRGenerator::logError(const std::string &msg) {
+    std::cout << msg << std::endl;
 }
 
-llvm::Value *SequenceNode::generateIR(llvm::LLVMContext &context, llvm::IRBuilder<> &builder, llvm::Module &module) {
-    const char *functionName = "MyFunction";
-    llvm::Function *function = module.getFunction(functionName);
-    if (function == nullptr) {
-        llvm::FunctionType *FT = llvm::FunctionType::get(llvm::Type::getFloatTy(context), false);
-
-        function = llvm::Function::Create(FT, llvm::Function::ExternalLinkage, functionName, module);
+llvm::Type *IRGenerator::getType(AstNode::DataType type) {
+    switch (type) {
+    case AstNode::VOID:
+        return nullptr;
+    case AstNode::INT:
+        return llvm::Type::getInt32Ty(context);
+    case AstNode::FLOAT:
+        return llvm::Type::getFloatTy(context);
+    case AstNode::BOOL:
+        return llvm::Type::getInt1Ty(context);
+    default:
+        return nullptr;
     }
+}
 
-    if (!function) {
-        return LogError("Could not create function");
+llvm::AllocaInst *IRGenerator::createEntryBlockAlloca(llvm::Type *type, const std::string &name) {
+    llvm::IRBuilder<> tmpB(&currentFunction->getEntryBlock(), currentFunction->getEntryBlock().begin());
+    return tmpB.CreateAlloca(type, 0, name);
+}
+
+void IRGenerator::visitFunctionNode(FunctionNode *node) {
+    llvm::Function *function = module.getFunction(node->getName());
+    if (function == nullptr) {
+        auto retType = getType(node->getReturnType());
+
+        std::vector<llvm::Type *> argumentTypes = {};
+        for (auto &arg : node->getArguments()) {
+            argumentTypes.push_back(getType(arg->getType()));
+        }
+
+        llvm::FunctionType *functionType = llvm::FunctionType::get(retType, argumentTypes, false);
+
+        function = llvm::Function::Create(functionType, llvm::Function::ExternalLinkage, node->getName(), module);
+        if (function == nullptr) {
+            return logError("Could not create function");
+        }
+        currentFunction = function;
+
+        unsigned int i = 0;
+        for (auto &arg : function->args()) {
+            arg.setName(node->getArguments()[i++]->getName());
+        }
     }
 
     llvm::BasicBlock *BB = llvm::BasicBlock::Create(context, "entry", function);
     builder.SetInsertPoint(BB);
 
-    llvm::Value *returnValue = nullptr;
-    for (auto &child : children) {
-        returnValue = child->generateIR(context, builder, module);
+    for (auto &arg : function->args()) {
+        llvm::AllocaInst *allocaInst = createEntryBlockAlloca(arg.getType(), arg.getName());
+
+        // store initial value
+        builder.CreateStore(&arg, allocaInst);
+
+        definedVariables[arg.getName()] = allocaInst;
     }
-    builder.CreateRet(returnValue);
+
+    node->getBody()->accept(this);
+
+    if (node->getReturnType() == AstNode::VOID) {
+        builder.CreateRetVoid();
+    }
 
     llvm::verifyFunction(*function);
-    return function;
 }
 
-llvm::Value *StatementNode::generateIR(llvm::LLVMContext &context, llvm::IRBuilder<> &builder, llvm::Module &module) {
-    return nullptr;
+void IRGenerator::visitVariableNode(VariableNode *node) {
+    //    currentValue = definedVariables[node->getName()];
+    //    if (currentValue == nullptr) {
+    //        return logError("Undefined variable " + node->getName());
+    //    }
 }
 
-llvm::Value *IntegerNode::generateIR(llvm::LLVMContext &context, llvm::IRBuilder<> &builder, llvm::Module &module) {
-    return llvm::ConstantInt::get(context, llvm::APInt(32, value));
-}
+void IRGenerator::visitVariableDefinitionNode(VariableDefinitionNode *node) {}
 
-llvm::Value *FloatNode::generateIR(llvm::LLVMContext &context, llvm::IRBuilder<> &builder, llvm::Module &module) {
-    return llvm::ConstantFP::get(context, llvm::APFloat(value));
-}
+void IRGenerator::visitBinaryOperationNode(BinaryOperationNode *node) {
+    node->getLeft()->accept(this);
+    auto l = nodesToValues[node->getLeft()];
+    node->getRight()->accept(this);
+    auto r = nodesToValues[node->getRight()];
 
-llvm::Value *BoolNode::generateIR(llvm::LLVMContext &context, llvm::IRBuilder<> &builder, llvm::Module &module) {
-    return llvm::ConstantInt::get(context, llvm::APInt(1, value));
-}
-
-llvm::Value *UnaryOperationNode::generateIR(llvm::LLVMContext &context, llvm::IRBuilder<> &builder,
-                                            llvm::Module &module) {
-    auto c = child->generateIR(context, builder, module);
-    if (c == nullptr) {
-        return LogError("Generating the child failed.");
-    }
-    switch (type) {
-    case NOT:
-        return builder.CreateNot(c, "nottmp");
-    default:
-        return LogError("Invalid unary operation.");
-    }
-}
-
-llvm::Value *BinaryOperationNode::generateIR(llvm::LLVMContext &context, llvm::IRBuilder<> &builder,
-                                             llvm::Module &module) {
-    auto l = left->generateIR(context, builder, module);
-    auto r = right->generateIR(context, builder, module);
     if (l == nullptr || r == nullptr) {
-        return LogError("Generating left or right side failed.");
+        return logError("Generating left or right side failed.");
     }
 
-    switch (type) {
-    case ADDITION:
-        return builder.CreateFAdd(l, r, "addtmp");
-    case MULTIPLICATION:
-        return builder.CreateFMul(l, r, "multmp");
-    case SUBTRACTION:
-        return builder.CreateFSub(l, r, "subtmp");
-    case DIVISION:
-        return builder.CreateFDiv(l, r, "divtmp");
+    switch (node->getType()) {
+    case BinaryOperationNode::ADDITION:
+        nodesToValues[node] = builder.CreateFAdd(l, r, "addtmp");
+        return;
+    case BinaryOperationNode::MULTIPLICATION:
+        nodesToValues[node] = builder.CreateFMul(l, r, "multmp");
+        return;
+    case BinaryOperationNode::SUBTRACTION:
+        nodesToValues[node] = builder.CreateFSub(l, r, "subtmp");
+        return;
+    case BinaryOperationNode::DIVISION:
+        nodesToValues[node] = builder.CreateFDiv(l, r, "divtmp");
+        return;
     default:
-        return LogError("Invalid binary operation.");
+        return logError("Invalid binary operation.");
     }
 }
 
-llvm::Value *VariableNode::generateIR(llvm::LLVMContext &context, llvm::IRBuilder<> &builder, llvm::Module &module) {
-    return LogError("Variables are not implemented yet.");
+void IRGenerator::visitUnaryOperationNode(UnaryOperationNode *node) {
+    node->getChild()->accept(this);
+    auto c = nodesToValues[node->getChild()];
+    if (c == nullptr) {
+        return logError("Generating the child failed.");
+    }
+
+    switch (node->getType()) {
+    case UnaryOperationNode::NOT:
+        nodesToValues[node] = builder.CreateNot(c, "nottmp");
+        return;
+    default:
+        return logError("Invalid unary operation.");
+    }
 }
 
-llvm::Value *VariableDefinitionNode::generateIR(llvm::LLVMContext &context, llvm::IRBuilder<> &builder, llvm::Module &module) {
-    return LogError("Variable definitions are not implemented yet.");
+void IRGenerator::visitSequenceNode(SequenceNode *node) {
+    for (auto child : node->getChildren()) {
+        child->accept(this);
+    }
 }
 
-llvm::Value *FunctionNode::generateIR(llvm::LLVMContext &context, llvm::IRBuilder<> &builder, llvm::Module &module) {
-    return LogError("Functions are not implemented yet.");
+void IRGenerator::visitStatementNode(StatementNode *node) {
+    if (node->getChild() == nullptr) {
+        return;
+    }
+
+    node->getChild()->accept(this);
+    if (node->isReturnStatement()) {
+        builder.CreateRet(nodesToValues[node->getChild()]);
+    }
 }
+
+void IRGenerator::visitIntegerNode(IntegerNode *node) {
+    nodesToValues[node] = llvm::ConstantInt::get(context, llvm::APInt(32, node->getValue()));
+}
+
+void IRGenerator::visitFloatNode(FloatNode *node) {
+    nodesToValues[node] = llvm::ConstantFP::get(context, llvm::APFloat(node->getValue()));
+}
+
+void IRGenerator::visitBoolNode(BoolNode *node) {
+    nodesToValues[node] = llvm::ConstantInt::get(context, llvm::APInt(1, node->getValue()));
+}
+
+void IRGenerator::print() { module.print(llvm::outs(), nullptr); }
+
+void IRGenerator::visitAssignmentNode(AssignmentNode *node) { std::cerr << "Not implemented." << std::endl; }
 
 void generateIR(AstNode *root) {
     if (root == nullptr) {
         return;
     }
 
-    llvm::LLVMContext context;
-    llvm::IRBuilder<> builder(context);
+    auto generator = new IRGenerator();
+    root->accept(generator);
 
-    llvm::Module TheModule = llvm::Module("MyModuleName", context);
-
-    root->generateIR(context, builder, TheModule);
-
-    TheModule.print(llvm::errs(), nullptr);
+    generator->print();
 }
