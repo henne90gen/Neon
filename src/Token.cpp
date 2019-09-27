@@ -60,6 +60,8 @@ std::string to_string(Token::TokenType type) {
         return "SEMICOLON";
     case Token::RETURN:
         return "RETURN";
+    case Token::EXTERN:
+        return "EXTERN";
     default:
         return "NOT IMPLEMENTED YET (" + std::to_string((int)type) + ")";
     }

@@ -37,6 +37,10 @@ std::string to_string(GrammarSymbol symbol) {
     return "AND";
   case ASSIGNMENT:
     return "ASSIGNMENT";
+  case CALL:
+    return "CALL";
+  case CALL_ARGS:
+    return "CALL_ARGS";
   case CONJUNCTION:
     return "CONJUNCTION";
   case DATA_TYPE:
@@ -47,6 +51,14 @@ std::string to_string(GrammarSymbol symbol) {
     return "ENDOFFILE";
   case EXPR:
     return "EXPR";
+  case EXTERN:
+    return "EXTERN";
+  case EXTERNAL_FUNCTION:
+    return "EXTERNAL_FUNCTION";
+  case EXTERNAL_FUNCTION_ARGS:
+    return "EXTERNAL_FUNCTION_ARGS";
+  case EXTERNAL_FUNCTION_RETURN:
+    return "EXTERNAL_FUNCTION_RETURN";
   case FACTOR:
     return "FACTOR";
   case FALSE:
@@ -59,6 +71,12 @@ std::string to_string(GrammarSymbol symbol) {
     return "FUNCTION";
   case FUNCTION_ARGS:
     return "FUNCTION_ARGS";
+  case FUNCTION_BODY:
+    return "FUNCTION_BODY";
+  case FUNCTION_HEADER:
+    return "FUNCTION_HEADER";
+  case FUNCTION_RETURN:
+    return "FUNCTION_RETURN";
   case INTEGER:
     return "INTEGER";
   case NEGATION:

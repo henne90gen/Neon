@@ -159,6 +159,8 @@ std::optional<Token> Lexer::matchWordToken() {
         return TOKEN(Token::DATA_TYPE, "bool");
     } else if (CONTAINS(currentWord, "return")) {
         return TOKEN(Token::RETURN, "return");
+    } else if (CONTAINS(currentWord, "extern")) {
+        return TOKEN(Token::EXTERN, "extern");
     }
 
     return {};

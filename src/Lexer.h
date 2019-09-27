@@ -26,7 +26,7 @@ public:
 private:
     const std::string fileName;
     bool fileHasBeenRead = false;
-    std::vector<std::string> lines;
+    std::vector<std::string> lines = {};
 };
 
 class StringCodeProvider : public CodeProvider {
@@ -36,7 +36,7 @@ public:
     std::optional<std::string> getMoreCode() override;
 
 private:
-    std::vector<std::string> lines;
+    std::vector<std::string> lines = {};
 };
 
 class Lexer {

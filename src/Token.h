@@ -33,6 +33,7 @@ struct Token {
         VARIABLE_NAME,
         DATA_TYPE,
         RETURN,
+        EXTERN,
         END_OF_FILE,
     };
 

@@ -199,7 +199,15 @@ void addArguments(FunctionNode *function, ParseTreeNode *root) {
     }
 }
 
+AstNode *createExternalFunction(ParseTreeNode *node) {
+    return nullptr;
+}
+
 AstNode *createFunction(ParseTreeNode *node) {
+    if (node->children[0]->symbol == GrammarSymbol::EXTERN) {
+        return createExternalFunction(node);
+    }
+
     //    node->children[0] = FUN
     //    node->children[1] = VARIABLE_NAME
     //    node->children[2] = LEFT_PARAN

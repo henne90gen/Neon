@@ -28,7 +28,7 @@ set(SOURCES
         ${CMAKE_CURRENT_SOURCE_DIR}/src/Parser.cpp
         ${CMAKE_CURRENT_SOURCE_DIR}/src/Token.cpp
         ${CMAKE_CURRENT_SOURCE_DIR}/src/Grammar.cpp
-        src/ast/ASTInterpreter.cpp
+        ${CMAKE_CURRENT_SOURCE_DIR}/src/ast/ASTInterpreter.cpp
         ${CMAKE_CURRENT_SOURCE_DIR}/src/ast/ASTPrinter.cpp
         ${CMAKE_CURRENT_SOURCE_DIR}/src/ast/ASTGenerator.cpp
         ${CMAKE_CURRENT_SOURCE_DIR}/src/IRGenerator.cpp)
@@ -47,7 +47,9 @@ set(CATCH_INCLUDE_DIR ${CMAKE_CURRENT_SOURCE_DIR}/vendor/catch/single_include)
 set(TEST_SOURCES
         ${CMAKE_CURRENT_SOURCE_DIR}/test/main.cpp
         ${CMAKE_CURRENT_SOURCE_DIR}/test/LexerTest.cpp
-        ${CMAKE_CURRENT_SOURCE_DIR}/test/ParserTest.cpp)
+        ${CMAKE_CURRENT_SOURCE_DIR}/test/parser/ParserTest.cpp
+        ${CMAKE_CURRENT_SOURCE_DIR}/test/parser/FunctionTest.cpp
+        ${CMAKE_CURRENT_SOURCE_DIR}/test/parser/OperationTest.cpp)
 
 add_executable(Tests ${TEST_SOURCES})
 target_include_directories(Tests PRIVATE ${CATCH_INCLUDE_DIR} ${CMAKE_CURRENT_SOURCE_DIR}/src)

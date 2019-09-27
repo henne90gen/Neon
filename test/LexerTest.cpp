@@ -76,6 +76,7 @@ TEST_CASE("Lexer can handle all tokens") {
           {"float", Token::DATA_TYPE},
           {"bool", Token::DATA_TYPE},
           {"fun", Token::FUN},
+          {"extern", Token::EXTERN},
     };
     std::vector<std::string> lines;
     lines.reserve(tokens.size());

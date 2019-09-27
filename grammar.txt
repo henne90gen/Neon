@@ -1,10 +1,43 @@
 program
-    function endoffile
     stmts endoffile
 
+stmts
+    stmt
+    stmts stmt
+
+stmt
+    call ;
+    external_function ;
+    function
+    assignment ;
+    return expr ;
+    variable_definition ;
+
+external_function
+    extern fun variable_name ( external_function_args
+
+external_function_args
+    external_function_return
+    function_args external_function_return
+
+external_function_return
+    )
+    ) data_type
+
 function
-    fun variable_name ( function_args ) data_type { }
-    fun variable_name ( function_args ) data_type { stmts }
+    fun variable_name ( function_header
+
+function_header
+    ) function_return
+    function_args ) function_return
+
+function_return
+    { function_body
+    data_type { function_body
+
+function_body
+    }
+    stmts }
 
 function_args
     variable_definition
@@ -13,18 +46,12 @@ function_args
 variable_definition
     data_type variable_name
 
-# TODO this allows the first statement to be without a semicolon
-stmts
-    stmt
-    stmts ;
-    stmts ; stmt ;
+call
+    variable_name ( call_args )
 
-stmt
-#    selection
-#    iteration
-    assignment
-    return expr
-    variable_definition
+call_args
+    expr
+    call_args , expr
 
 assignment
     variable_definition = expr
