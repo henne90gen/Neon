@@ -34,7 +34,10 @@ set(SOURCES
         ${CMAKE_CURRENT_SOURCE_DIR}/src/ast/ASTPrinter.cpp
         ${CMAKE_CURRENT_SOURCE_DIR}/src/ast/ASTGenerator.cpp
         ${CMAKE_CURRENT_SOURCE_DIR}/src/IRGenerator.cpp
-        ${CMAKE_CURRENT_SOURCE_DIR}/src/ast/ASTTestCasePrinter.cpp src/Program.cpp src/Program.h src/ast/AST.cpp)
+        ${CMAKE_CURRENT_SOURCE_DIR}/src/ast/ASTTestCasePrinter.cpp
+        ${CMAKE_CURRENT_SOURCE_DIR}/src/Program.cpp
+        ${CMAKE_CURRENT_SOURCE_DIR}/src/ast/AST.cpp
+        ${CMAKE_CURRENT_SOURCE_DIR}/src/ast/ASTTypeAnalyser.cpp)
 
 add_library(${PROJECT_NAME}_lib ${SOURCES})
 target_link_libraries(${PROJECT_NAME}_lib ${LLVM_LIBS})
