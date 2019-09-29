@@ -20,7 +20,7 @@ public:
 
 class FileCodeProvider : public CodeProvider {
 public:
-    explicit FileCodeProvider(std::string fileName) : fileName(std::move(fileName)) {}
+    explicit FileCodeProvider(const Program &program) : fileName(program.fileName) {}
 
     std::optional<std::string> getMoreCode() override;
 

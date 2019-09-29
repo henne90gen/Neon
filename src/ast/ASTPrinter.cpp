@@ -135,3 +135,12 @@ void ASTPrinter::visitCallNode(CallNode *node) {
     }
     indentation--;
 }
+
+void printAst(AstNode *root) {
+    if (root == nullptr) {
+        std::cout << "Could not print AST (nullptr)." << std::endl;
+        return;
+    }
+    auto printer = new ASTPrinter();
+    root->accept(printer);
+}

@@ -3,33 +3,28 @@
 #include "Parser.h"
 #include "Program.h"
 #include "ast/ASTGenerator.h"
-#include "ast/ASTInterpreter.h"
 #include "ast/ASTPrinter.h"
 #include "ast/ASTTestCasePrinter.h"
 
 int main() {
     bool verbose = true;
-    CodeProvider *codeProvider = new FileCodeProvider("main.ne");
-    Program program = {};
+    Program program = {"main.ne"};
+    CodeProvider *codeProvider = new FileCodeProvider(program);
     Lexer lexer(codeProvider, program, verbose);
     Parser parser(lexer, program, verbose);
 
     auto parseTreeRoot = parser.createParseTree();
     if (verbose) {
         printParseTree(parseTreeRoot);
-        //        printParseTreeTestCase(parseTreeRoot, program);
+        printParseTreeTestCase(parseTreeRoot, program);
     }
 
     auto astRoot = createAstFromParseTree(parseTreeRoot);
-    if (verbose && astRoot != nullptr) {
-        auto printer = new ASTPrinter();
-        astRoot->accept(printer);
-
+    if (verbose) {
+        printAst(astRoot);
         printAstTestCase(program, astRoot);
     }
 
-//    interpretAst(astRoot, verbose);
-
-    generateIR(astRoot);
+    generateIR(astRoot, program);
     return 0;
 }

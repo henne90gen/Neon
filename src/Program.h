@@ -6,6 +6,7 @@
 #include <vector>
 
 struct Program {
+    std::string fileName;
     AstNode *astRoot = nullptr;
     std::vector<Token> tokens = {};
 

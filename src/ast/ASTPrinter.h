@@ -22,3 +22,5 @@ class ASTPrinter : public ASTVisitor {
   private:
     int indentation = 0;
 };
+
+void printAst(AstNode *root);

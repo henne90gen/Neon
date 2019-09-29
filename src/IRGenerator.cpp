@@ -2,7 +2,9 @@
 
 #include <iostream>
 
-IRGenerator::IRGenerator() : builder(context), module("MyModuleName", context) {
+void logError(const std::string &msg) { std::cerr << msg << std::endl; }
+
+IRGenerator::IRGenerator(const Program &program) : builder(context), module(program.fileName, context) {
     llvm::InitializeNativeTarget();
     llvm::InitializeNativeTargetAsmParser();
     llvm::InitializeNativeTargetAsmPrinter();
@@ -10,16 +12,12 @@ IRGenerator::IRGenerator() : builder(context), module("MyModuleName", context) {
     llvm::PassBuilder PB;
     PB.registerFunctionAnalyses(functionAnalysisManager);
     functionPassManager = llvm::FunctionPassManager();
-    //    functionPassManager.addPass(llvm::PromotePass());
-    //    functionPassManager.addPass(llvm::InstCombinePass(true));
-
-    // TODO find modern version of these passes
-    //        functionPassManager.addPass(llvm::createReassociatePass());
-    //        functionPassManager.addPass(llvm::createGVNPass());
-    //        functionPassManager.addPass(llvm::createCFGSimplificationPass());
+    functionPassManager.addPass(llvm::PromotePass());
+    functionPassManager.addPass(llvm::InstCombinePass());
+    //        functionPassManager.addPass(llvm::ReassociatePass()); // throws out of memory error
+    functionPassManager.addPass(llvm::GVN());
+    functionPassManager.addPass(llvm::SimplifyCFGPass());
 }
-
-void IRGenerator::logError(const std::string &msg) { std::cout << msg << std::endl; }
 
 llvm::Type *IRGenerator::getType(AstNode::DataType type) {
     switch (type) {
@@ -114,13 +112,13 @@ void IRGenerator::visitBinaryOperationNode(BinaryOperationNode *node) {
 
     switch (node->getType()) {
     case BinaryOperationNode::ADDITION:
-        nodesToValues[node] = builder.CreateFAdd(l, r, "add");
+        nodesToValues[node] = builder.CreateAdd(l, r, "add");
         return;
     case BinaryOperationNode::MULTIPLICATION:
-        nodesToValues[node] = builder.CreateFMul(l, r, "mul");
+        nodesToValues[node] = builder.CreateMul(l, r, "mul");
         return;
     case BinaryOperationNode::SUBTRACTION:
-        nodesToValues[node] = builder.CreateFSub(l, r, "sub");
+        nodesToValues[node] = builder.CreateSub(l, r, "sub");
         return;
     case BinaryOperationNode::DIVISION:
         nodesToValues[node] = builder.CreateFDiv(l, r, "div");
@@ -175,8 +173,6 @@ void IRGenerator::visitBoolNode(BoolNode *node) {
     nodesToValues[node] = llvm::ConstantInt::get(context, llvm::APInt(1, node->getValue()));
 }
 
-void IRGenerator::print() { module.print(llvm::outs(), nullptr); }
-
 void IRGenerator::visitAssignmentNode(AssignmentNode *node) {
     node->getLeft()->accept(this);
     node->getRight()->accept(this);
@@ -185,6 +181,14 @@ void IRGenerator::visitAssignmentNode(AssignmentNode *node) {
 
 void IRGenerator::visitCallNode(CallNode *node) {
     // TODO implement this
+}
+
+void IRGenerator::print() {
+    std::string fileName = "module.llvm";
+    std::error_code EC;
+    llvm::raw_fd_ostream dest(fileName, EC, llvm::sys::fs::OF_None);
+    module.print(llvm::outs(), nullptr);
+    module.print(dest, nullptr);
 }
 
 void IRGenerator::writeObjectFile(const std::string &fileName) {
@@ -225,12 +229,12 @@ void IRGenerator::writeObjectFile(const std::string &fileName) {
     dest.flush();
 }
 
-void generateIR(AstNode *root) {
+void generateIR(AstNode *root, const Program &program) {
     if (root == nullptr) {
         return;
     }
 
-    auto generator = new IRGenerator();
+    auto generator = new IRGenerator(program);
     root->accept(generator);
 
     generator->print();

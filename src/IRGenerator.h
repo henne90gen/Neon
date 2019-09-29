@@ -1,5 +1,6 @@
 #pragma once
 
+#include "Program.h"
 #include "ast/AST.h"
 
 #include <unordered_map>
@@ -32,11 +33,13 @@
 #include "llvm/Transforms/InstCombine/InstCombine.h"
 #include "llvm/Transforms/Scalar.h"
 #include "llvm/Transforms/Scalar/GVN.h"
+#include "llvm/Transforms/Scalar/Reassociate.h"
+#include "llvm/Transforms/Scalar/SimplifyCFG.h"
 #include "llvm/Transforms/Utils/Mem2Reg.h"
 
 class IRGenerator : public ASTVisitor {
   public:
-    IRGenerator();
+    explicit IRGenerator(const Program &program);
 
     void visitFunctionNode(FunctionNode *node) override;
     void visitCallNode(CallNode *node) override;
@@ -65,9 +68,8 @@ class IRGenerator : public ASTVisitor {
     std::unordered_map<AstNode *, llvm::Value *> nodesToValues = {};
     std::unordered_map<std::string, llvm::AllocaInst *> definedVariables = {};
 
-    void logError(const std::string &msg);
     llvm::Type *getType(AstNode::DataType type);
     llvm::AllocaInst *createEntryBlockAlloca(llvm::Type *type, const std::string &name);
 };
 
-void generateIR(AstNode *root);
+void generateIR(AstNode *root, const Program &program);
