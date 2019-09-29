@@ -2,12 +2,29 @@
 
 #include <iostream>
 
+IRGenerator::IRGenerator() : builder(context), module("MyModuleName", context) {
+    llvm::InitializeNativeTarget();
+    llvm::InitializeNativeTargetAsmParser();
+    llvm::InitializeNativeTargetAsmPrinter();
+
+    llvm::PassBuilder PB;
+    PB.registerFunctionAnalyses(functionAnalysisManager);
+    functionPassManager = llvm::FunctionPassManager();
+    //    functionPassManager.addPass(llvm::PromotePass());
+    //    functionPassManager.addPass(llvm::InstCombinePass(true));
+
+    // TODO find modern version of these passes
+    //        functionPassManager.addPass(llvm::createReassociatePass());
+    //        functionPassManager.addPass(llvm::createGVNPass());
+    //        functionPassManager.addPass(llvm::createCFGSimplificationPass());
+}
+
 void IRGenerator::logError(const std::string &msg) { std::cout << msg << std::endl; }
 
 llvm::Type *IRGenerator::getType(AstNode::DataType type) {
     switch (type) {
     case AstNode::VOID:
-        return nullptr;
+        return llvm::Type::getVoidTy(context);
     case AstNode::INT:
         return llvm::Type::getInt32Ty(context);
     case AstNode::FLOAT:
@@ -22,7 +39,7 @@ llvm::Type *IRGenerator::getType(AstNode::DataType type) {
 llvm::AllocaInst *IRGenerator::createEntryBlockAlloca(llvm::Type *type, const std::string &name) {
     auto function = builder.GetInsertBlock()->getParent();
     llvm::IRBuilder<> tmpB(&function->getEntryBlock(), function->getEntryBlock().begin());
-    return tmpB.CreateAlloca(type, 0, name);
+    return tmpB.CreateAlloca(type, nullptr, name);
 }
 
 void IRGenerator::visitFunctionNode(FunctionNode *node) {
@@ -67,6 +84,8 @@ void IRGenerator::visitFunctionNode(FunctionNode *node) {
     }
 
     llvm::verifyFunction(*function);
+
+    functionPassManager.run(*function, functionAnalysisManager);
 }
 
 void IRGenerator::visitVariableNode(VariableNode *node) {
@@ -95,16 +114,16 @@ void IRGenerator::visitBinaryOperationNode(BinaryOperationNode *node) {
 
     switch (node->getType()) {
     case BinaryOperationNode::ADDITION:
-        nodesToValues[node] = builder.CreateFAdd(l, r, "addtmp");
+        nodesToValues[node] = builder.CreateFAdd(l, r, "add");
         return;
     case BinaryOperationNode::MULTIPLICATION:
-        nodesToValues[node] = builder.CreateFMul(l, r, "multmp");
+        nodesToValues[node] = builder.CreateFMul(l, r, "mul");
         return;
     case BinaryOperationNode::SUBTRACTION:
-        nodesToValues[node] = builder.CreateFSub(l, r, "subtmp");
+        nodesToValues[node] = builder.CreateFSub(l, r, "sub");
         return;
     case BinaryOperationNode::DIVISION:
-        nodesToValues[node] = builder.CreateFDiv(l, r, "divtmp");
+        nodesToValues[node] = builder.CreateFDiv(l, r, "div");
         return;
     default:
         return logError("Invalid binary operation.");
@@ -164,6 +183,48 @@ void IRGenerator::visitAssignmentNode(AssignmentNode *node) {
     nodesToValues[node] = builder.CreateStore(nodesToValues[node->getRight()], nodesToValues[node->getLeft()]);
 }
 
+void IRGenerator::visitCallNode(CallNode *node) {
+    // TODO implement this
+}
+
+void IRGenerator::writeObjectFile(const std::string &fileName) {
+    auto targetTriple = llvm::sys::getDefaultTargetTriple();
+    std::string Error;
+    auto Target = llvm::TargetRegistry::lookupTarget(targetTriple, Error);
+
+    if (!Target) {
+        llvm::errs() << Error;
+        exit(1);
+    }
+
+    auto cpu = "generic";
+    auto features = "";
+    llvm::TargetOptions targetOptions = {};
+    auto RM = llvm::Optional<llvm::Reloc::Model>();
+    auto targetMachine = Target->createTargetMachine(targetTriple, cpu, features, targetOptions, RM);
+
+    module.setDataLayout(targetMachine->createDataLayout());
+    module.setTargetTriple(targetTriple);
+
+    std::error_code EC;
+    llvm::raw_fd_ostream dest(fileName, EC, llvm::sys::fs::OF_None);
+
+    if (EC) {
+        llvm::errs() << "Could not open file: " << EC.message();
+        exit(1);
+    }
+
+    auto fileType = llvm::TargetMachine::CGFT_ObjectFile;
+    llvm::legacy::PassManager pass;
+    if (targetMachine->addPassesToEmitFile(pass, dest, nullptr, fileType)) {
+        llvm::errs() << "TargetMachine can't emit a file of this type";
+        exit(1);
+    }
+
+    pass.run(module);
+    dest.flush();
+}
+
 void generateIR(AstNode *root) {
     if (root == nullptr) {
         return;
@@ -173,4 +234,6 @@ void generateIR(AstNode *root) {
     root->accept(generator);
 
     generator->print();
+
+    generator->writeObjectFile("hello.o");
 }

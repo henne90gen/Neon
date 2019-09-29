@@ -1,23 +1,10 @@
 #pragma once
 
-#include <unordered_map>
-
+#include "../Program.h"
 #include "AST.h"
 
-struct CalculationResult {
-    enum CalculationType { INTEGER, FLOAT, BOOL };
-    CalculationType type = INTEGER;
-    union {
-        int intResult;
-        float floatResult;
-        bool boolResult;
-    };
-};
-
-class ASTInterpreter : public ASTVisitor {
+class ASTTestCasePrinter : public ASTVisitor {
   public:
-    explicit ASTInterpreter(const bool verbose) : verbose(verbose) {}
-
     void visitFunctionNode(FunctionNode *node) override;
     void visitCallNode(CallNode *node) override;
     void visitVariableNode(VariableNode *node) override;
@@ -32,12 +19,9 @@ class ASTInterpreter : public ASTVisitor {
     void visitBoolNode(BoolNode *node) override;
 
   private:
-    const bool verbose;
-    std::unordered_map<AstNode *, CalculationResult> calculationResults = {};
-    std::unordered_map<std::string, FunctionNode *> functions = {};
-    std::unordered_map<std::string, VariableDefinitionNode *> variables = {};
+    int indentation = 0;
 
-    void printStatementResult(AstNode *node);
+    void printNode(AstNode *node);
 };
 
-void interpretAst(AstNode *node, bool verbose);
+void printAstTestCase(const Program &program, AstNode *root);

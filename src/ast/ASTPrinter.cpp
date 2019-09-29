@@ -124,3 +124,14 @@ void ASTPrinter::visitAssignmentNode(AssignmentNode *node) {
     }
     indentation--;
 }
+
+void ASTPrinter::visitCallNode(CallNode *node) {
+    indent(indentation);
+    std::cout << "CallNode(name=" << node->getName() << ", numArguments=" << node->getArguments().size() << ")"
+              << std::endl;
+    indentation++;
+    for (auto argument : node->getArguments()) {
+        argument->accept(this);
+    }
+    indentation--;
+}

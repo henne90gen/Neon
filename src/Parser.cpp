@@ -18,28 +18,26 @@ void printParseTree(ParseTreeNode *node, int indentation) {
     }
 }
 
-void printParseTreeTestCase(ParseTreeNode *node, int indentation) {
+void printParseTreeTestCase(const ParseTreeNode *node, const Program &program, int indentation) {
     if (node == nullptr) {
         return;
     }
-    std::string program;
+
+    std::string programStr = program.toString();
     if (indentation == 0) {
-        for (const auto &t : node->program) {
-            program += t.content + " ";
-        }
         std::cout << std::endl;
-        std::cout << "TEST_CASE(\"Parser can handle '" << program << "'\") {" << std::endl;
+        std::cout << "TEST_CASE(\"Parser can handle '" << programStr << "'\") {" << std::endl;
         std::cout << "    std::vector<std::pair<int, GrammarSymbol>> parseTree = {" << std::endl;
     }
 
     std::cout << "        {" << indentation << ",  GrammarSymbol::" << to_string(node->symbol) << "}," << std::endl;
     for (auto child : node->children) {
-        printParseTreeTestCase(child, indentation + 1);
+        printParseTreeTestCase(child, program, indentation + 1);
     }
 
     if (indentation == 0) {
         std::cout << "    };" << std::endl;
-        std::cout << "    std::vector<std::string> program = {\"" << program << "\"};" << std::endl;
+        std::cout << "    std::vector<std::string> program = {\"" << programStr << "\"};" << std::endl;
         std::cout << "    assertProgramCreatesParseTree(program, parseTree);" << std::endl;
         std::cout << "}" << std::endl;
         std::cout << std::endl;
@@ -163,9 +161,6 @@ void Parser::executeShift(Token &token, std::vector<int> &states, StateTransitio
                           std::vector<ParseTreeNode *> &nodes) {
     token = lexer.getToken();
 
-    // save token in program
-    program.push_back(token);
-
     states.push_back(action.nextStateIndex);
     auto newNode = new ParseTreeNode(convertToGrammarSymbol(token), token);
     nodes.push_back(newNode);
@@ -215,7 +210,6 @@ ParseTreeNode *Parser::createParseTree() {
     std::vector<int> states = {};
     states.push_back(0);
     auto token = lexer.getToken();
-    program.push_back(token);
     nodes.push_back(new ParseTreeNode(convertToGrammarSymbol(token), token));
 
     while (true) {
@@ -247,9 +241,6 @@ ParseTreeNode *Parser::createParseTree() {
             for (auto node : nodes) {
                 root->children.push_back(node);
             }
-            for (const auto &t : program) {
-                root->program.push_back(t);
-            }
             if (verbose) {
                 std::cout << "Accepted program!" << std::endl;
             }
@@ -264,7 +255,7 @@ ParseTreeNode *Parser::createParseTree() {
     std::cout << "Could not accept program!" << std::endl;
     if (verbose) {
         std::cout << "Program:" << std::endl;
-        for (auto &t : program) {
+        for (auto &t : program.tokens) {
             std::cout << to_string(t.type) << ": " << t.content << std::endl;
         }
     }

@@ -6,19 +6,40 @@
 
 #include "llvm/ADT/APFloat.h"
 #include "llvm/ADT/APInt.h"
+#include "llvm/ADT/StringRef.h"
+#include "llvm/ExecutionEngine/JITSymbol.h"
+#include "llvm/ExecutionEngine/Orc/CompileUtils.h"
+#include "llvm/ExecutionEngine/Orc/Core.h"
+#include "llvm/ExecutionEngine/Orc/ExecutionUtils.h"
+#include "llvm/ExecutionEngine/Orc/IRCompileLayer.h"
+#include "llvm/ExecutionEngine/Orc/JITTargetMachineBuilder.h"
+#include "llvm/ExecutionEngine/Orc/RTDyldObjectLinkingLayer.h"
+#include "llvm/ExecutionEngine/SectionMemoryManager.h"
 #include "llvm/IR/BasicBlock.h"
 #include "llvm/IR/Constants.h"
+#include "llvm/IR/DataLayout.h"
 #include "llvm/IR/IRBuilder.h"
 #include "llvm/IR/LLVMContext.h"
 #include "llvm/IR/Module.h"
+#include "llvm/IR/PassManager.h"
 #include "llvm/IR/Verifier.h"
+#include "llvm/Passes/PassBuilder.h"
+#include "llvm/Support/TargetRegistry.h"
+#include "llvm/Support/TargetSelect.h"
 #include "llvm/Support/raw_ostream.h"
+#include "llvm/Target/TargetMachine.h"
+#include "llvm/Target/TargetOptions.h"
+#include "llvm/Transforms/InstCombine/InstCombine.h"
+#include "llvm/Transforms/Scalar.h"
+#include "llvm/Transforms/Scalar/GVN.h"
+#include "llvm/Transforms/Utils/Mem2Reg.h"
 
 class IRGenerator : public ASTVisitor {
   public:
-    IRGenerator() : builder(context), module("MyModuleName", context) {}
+    IRGenerator();
 
     void visitFunctionNode(FunctionNode *node) override;
+    void visitCallNode(CallNode *node) override;
     void visitVariableNode(VariableNode *node) override;
     void visitVariableDefinitionNode(VariableDefinitionNode *node) override;
     void visitBinaryOperationNode(BinaryOperationNode *node) override;
@@ -32,10 +53,14 @@ class IRGenerator : public ASTVisitor {
 
     void print();
 
+    void writeObjectFile(const std::string &fileName);
+
   private:
     llvm::LLVMContext context = {};
     llvm::IRBuilder<> builder;
     llvm::Module module;
+    llvm::FunctionAnalysisManager functionAnalysisManager = llvm::FunctionAnalysisManager();
+    llvm::FunctionPassManager functionPassManager;
 
     std::unordered_map<AstNode *, llvm::Value *> nodesToValues = {};
     std::unordered_map<std::string, llvm::AllocaInst *> definedVariables = {};

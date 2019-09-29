@@ -19,11 +19,13 @@ bool isVariable(ParseTreeNode *node) { return node->symbol == GrammarSymbol::VAR
 
 bool isVariableDefinition(ParseTreeNode *node) { return node->symbol == GrammarSymbol::VARIABLE_DEFINITION; }
 
-bool isSequence(ParseTreeNode *node) { return node->symbol == GrammarSymbol::STMTS && node->children.size() > 1; }
+bool isSequence(ParseTreeNode *node) { return node->symbol == GrammarSymbol::STMTS; }
 
 bool isStatement(ParseTreeNode *node) { return node->symbol == GrammarSymbol::STMT; }
 
 bool isFunction(ParseTreeNode *node) { return node->symbol == GrammarSymbol::FUNCTION; }
+
+bool isCall(ParseTreeNode *node) { return node->symbol == GrammarSymbol::CALL; }
 
 bool isAssignment(ParseTreeNode *node) { return node->symbol == GrammarSymbol::ASSIGNMENT; }
 
@@ -149,12 +151,6 @@ AstNode *createSequence(ParseTreeNode *node, SequenceNode *seqRoot = nullptr) {
         }
     }
 
-    if (seqRoot->getChildren().size() == 1) {
-        auto result = seqRoot->getChildren()[0];
-        delete seqRoot;
-        return result;
-    }
-
     return seqRoot;
 }
 
@@ -168,8 +164,8 @@ AstNode *createStatement(ParseTreeNode *node) {
     bool isReturnStatement = node->children[0]->symbol == GrammarSymbol::RETURN;
     statementNode->setIsReturnStatement(isReturnStatement);
 
-    if (node->children.size() > 1 && !isReturnStatement) {
-        std::cout << "A statement should never have more than one child." << std::endl;
+    if (node->children.size() > 2 && !isReturnStatement) {
+        std::cout << "A statement should never have more than two children." << std::endl;
     }
 
     auto child = createAstFromParseTree(node->children[isReturnStatement ? 1 : 0]);
@@ -199,37 +195,51 @@ void addArguments(FunctionNode *function, ParseTreeNode *root) {
     }
 }
 
-AstNode *createExternalFunction(ParseTreeNode *node) {
-    return nullptr;
-}
+AstNode *createExternalFunction(ParseTreeNode *node) { return nullptr; }
 
 AstNode *createFunction(ParseTreeNode *node) {
     if (node->children[0]->symbol == GrammarSymbol::EXTERN) {
         return createExternalFunction(node);
     }
 
-    //    node->children[0] = FUN
-    //    node->children[1] = VARIABLE_NAME
-    //    node->children[2] = LEFT_PARAN
-    //    node->children[3] = FUNCTION_ARGS
-    //    node->children[4] = RIGHT_PARAN
-    //    node->children[5] = DATA_TYPE
-    //    node->children[6] = LEFT_CURLY_BRACE
-    //    node->children[7] = BODY?
-    //    node->children[8] = RIGHT_CURLY_BRACE
-    if (node->children.size() < 8) {
-        std::cerr << "Malformed function node." << std::endl;
-        return nullptr;
-    }
     auto variableNameNode = node->children[1];
-    auto returnType = getDataType(node->children[5]);
-    auto function = new FunctionNode(variableNameNode->token.content, returnType);
-    addArguments(function, node->children[3]);
+    auto header = node->children[3];
+    ParseTreeNode *argumentsNode = nullptr;
+    ParseTreeNode *returnNode = nullptr;
+    if (header->children[0]->symbol == GrammarSymbol::FUNCTION_ARGS) {
+        // we have function arguments
+        argumentsNode = header->children[0];
+        returnNode = header->children[2];
+    } else {
+        // we don't have function arguments
+        returnNode = header->children[1];
+    }
 
-    if (node->children[7]->symbol == GrammarSymbol::RIGHT_CURLY_BRACE) {
+    ParseTreeNode *returnTypeNode = nullptr;
+    ParseTreeNode *bodyNode = nullptr;
+    if (returnNode->children[0]->symbol == GrammarSymbol::DATA_TYPE) {
+        // we have a return type
+        returnTypeNode = returnNode->children[0];
+        bodyNode = returnNode->children[2];
+    } else {
+        // we don't have a return type (implicitly void)
+        bodyNode = returnNode->children[1];
+    }
+
+    auto returnType = AstNode::DataType::VOID;
+    if (returnTypeNode != nullptr) {
+        returnType = getDataType(returnTypeNode);
+    }
+    auto function = new FunctionNode(variableNameNode->token.content, returnType);
+    if (argumentsNode != nullptr) {
+        addArguments(function, argumentsNode);
+    }
+
+    if (bodyNode->children[0]->symbol == GrammarSymbol::RIGHT_CURLY_BRACE) {
+        // empty body
         function->setBody(new SequenceNode());
     } else {
-        auto body = createAstFromParseTree(node->children[7]);
+        auto body = createAstFromParseTree(bodyNode->children[0]);
         function->setBody(body);
     }
 
@@ -248,6 +258,37 @@ AstNode *createAssignment(ParseTreeNode *node) {
     auto right = createAstFromParseTree(node->children[2]);
     assignment->setRight(right);
     return assignment;
+}
+
+void addArguments(CallNode *call, ParseTreeNode *root) {
+    auto currentNode = root;
+    while (currentNode != nullptr) {
+        ParseTreeNode *argNode = nullptr;
+        if (currentNode->children.size() == 1) {
+            argNode = currentNode->children[0];
+        } else if (currentNode->children.size() == 3) {
+            argNode = currentNode->children[2];
+        }
+
+        auto argument = createVariableDefinition(argNode);
+        call->getArguments().push_back(argument);
+
+        if (currentNode->children.size() == 3) {
+            currentNode = currentNode->children[0];
+        } else {
+            break;
+        }
+    }
+}
+
+CallNode *createCall(ParseTreeNode *node) {
+    std::string name = node->children[0]->token.content;
+    auto call = new CallNode(name);
+    auto call_header = node->children[2];
+    if (call_header->children.size() == 2) {
+        addArguments(call, call_header->children[0]);
+    }
+    return call;
 }
 
 AstNode *createAstFromParseTree(ParseTreeNode *node) {
@@ -287,6 +328,10 @@ AstNode *createAstFromParseTree(ParseTreeNode *node) {
         return createFunction(node);
     }
 
+    if (isCall(node)) {
+        return createCall(node);
+    }
+
     if (isAssignment(node)) {
         return createAssignment(node);
     }
@@ -298,6 +343,7 @@ AstNode *createAstFromParseTree(ParseTreeNode *node) {
     if (node->symbol == GrammarSymbol::FACTOR && node->children.size() == 3 &&
         node->children[0]->symbol == GrammarSymbol::LEFT_PARAN &&
         node->children[2]->symbol == GrammarSymbol::RIGHT_PARAN) {
+        // removes parantheses from expressions
         return createAstFromParseTree(node->children[1]);
     }
 

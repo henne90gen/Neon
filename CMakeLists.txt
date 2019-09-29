@@ -3,6 +3,7 @@ project(Neon)
 
 set(CMAKE_CXX_STANDARD 17)
 set(CMAKE_EXPORT_COMPILE_COMMANDS TRUE)
+set(CMAKE_VERBOSE_MAKEFILE OFF)
 
 find_package(LLVM REQUIRED CONFIG)
 
@@ -13,7 +14,8 @@ message(STATUS "LLVM_DEFINITIONS=${LLVM_DEFINITIONS}")
 
 include_directories(${LLVM_INCLUDE_DIRS})
 add_definitions(${LLVM_DEFINITIONS})
-llvm_map_components_to_libnames(llvm_libs support core)
+# define needed llvm libraries here
+llvm_map_components_to_libnames(LLVM_LIBS core support passes mcjit native)
 
 # run parser generator, when grammar.txt has changed
 add_custom_command(OUTPUT ${CMAKE_CURRENT_SOURCE_DIR}/src/Grammar.h
@@ -31,10 +33,11 @@ set(SOURCES
         ${CMAKE_CURRENT_SOURCE_DIR}/src/ast/ASTInterpreter.cpp
         ${CMAKE_CURRENT_SOURCE_DIR}/src/ast/ASTPrinter.cpp
         ${CMAKE_CURRENT_SOURCE_DIR}/src/ast/ASTGenerator.cpp
-        ${CMAKE_CURRENT_SOURCE_DIR}/src/IRGenerator.cpp)
+        ${CMAKE_CURRENT_SOURCE_DIR}/src/IRGenerator.cpp
+        ${CMAKE_CURRENT_SOURCE_DIR}/src/ast/ASTTestCasePrinter.cpp src/Program.cpp src/Program.h src/ast/AST.cpp)
 
 add_library(${PROJECT_NAME}_lib ${SOURCES})
-target_link_libraries(${PROJECT_NAME}_lib ${llvm_libs})
+target_link_libraries(${PROJECT_NAME}_lib ${LLVM_LIBS})
 
 add_executable(${PROJECT_NAME} ${CMAKE_CURRENT_SOURCE_DIR}/src/main.cpp)
 target_link_libraries(${PROJECT_NAME} ${PROJECT_NAME}_lib)
@@ -49,7 +52,8 @@ set(TEST_SOURCES
         ${CMAKE_CURRENT_SOURCE_DIR}/test/LexerTest.cpp
         ${CMAKE_CURRENT_SOURCE_DIR}/test/parser/ParserTest.cpp
         ${CMAKE_CURRENT_SOURCE_DIR}/test/parser/FunctionTest.cpp
-        ${CMAKE_CURRENT_SOURCE_DIR}/test/parser/OperationTest.cpp)
+        ${CMAKE_CURRENT_SOURCE_DIR}/test/parser/OperationTest.cpp
+        ${CMAKE_CURRENT_SOURCE_DIR}/test/ast/ASTGeneratorTest.cpp)
 
 add_executable(Tests ${TEST_SOURCES})
 target_include_directories(Tests PRIVATE ${CATCH_INCLUDE_DIR} ${CMAKE_CURRENT_SOURCE_DIR}/src)

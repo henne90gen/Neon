@@ -15,10 +15,12 @@ class StatementNode;
 class FloatNode;
 class IntegerNode;
 class BoolNode;
+class CallNode;
 
 class ASTVisitor {
   public:
     virtual void visitFunctionNode(FunctionNode *node) = 0;
+    virtual void visitCallNode(CallNode *node) = 0;
     virtual void visitVariableNode(VariableNode *node) = 0;
     virtual void visitVariableDefinitionNode(VariableDefinitionNode *node) = 0;
     virtual void visitUnaryOperationNode(UnaryOperationNode *node) = 0;
@@ -40,6 +42,7 @@ class AstNode {
         UNARY_OPERATION,
         BINARY_OPERATION,
         FUNCTION,
+        CALL,
         VARIABLE_DEFINITION,
         VARIABLE,
         ASSIGNMENT,
@@ -248,3 +251,20 @@ class FunctionNode : public AstNode {
     AstNode *body = nullptr;
     std::vector<VariableDefinitionNode *> arguments = {};
 };
+
+class CallNode : public AstNode {
+  public:
+    explicit CallNode(std::string name) : AstNode(AstNode::CALL), name(std::move(name)) {}
+
+    void accept(ASTVisitor *v) override { v->visitCallNode(this); };
+
+    std::string &getName() { return name; }
+
+    std::vector<AstNode *> &getArguments() { return arguments; }
+
+  private:
+    std::string name;
+    std::vector<AstNode *> arguments = {};
+};
+
+std::string to_string(AstNode::AstNodeType type);

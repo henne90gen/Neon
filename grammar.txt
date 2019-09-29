@@ -47,7 +47,11 @@ variable_definition
     data_type variable_name
 
 call
-    variable_name ( call_args )
+    variable_name ( call_header
+
+call_header
+    )
+    call_args )
 
 call_args
     expr

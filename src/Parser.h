@@ -14,19 +14,18 @@ class ParseTreeNode {
     GrammarSymbol symbol;
     Token token;
     std::vector<ParseTreeNode *> children = {};
-    std::vector<Token> program = {};
 };
 
 class Parser {
   public:
-    explicit Parser(Lexer lexer, bool verbose = false) : lexer(std::move(lexer)), verbose(verbose) {}
+    explicit Parser(Lexer &lexer, Program &program, bool verbose = false) : lexer(lexer), program(program), verbose(verbose) {}
 
     ParseTreeNode *createParseTree();
 
   private:
-    Lexer lexer;
+    Lexer &lexer;
+    Program &program;
     bool verbose;
-    std::vector<Token> program = {};
 
     void executeShift(Token &token, std::vector<int> &states, StateTransition &action,
                       std::vector<ParseTreeNode *> &nodes);
@@ -40,4 +39,4 @@ class Parser {
 
 void printParseTree(ParseTreeNode *node, int indentation = 0);
 
-void printParseTreeTestCase(ParseTreeNode *node, int indentation = 0);
+void printParseTreeTestCase(const ParseTreeNode *node, const Program &program, int indentation = 0);

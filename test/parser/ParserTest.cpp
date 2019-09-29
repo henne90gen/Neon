@@ -28,8 +28,9 @@ void assertProgramCreatesParseTree(const std::vector<std::string> &program,
     int index = 0;
     ParseTreeNode *expected = createParseTree(tree, index);
     CodeProvider *cp = new StringCodeProvider(program);
-    Lexer lexer(cp, false);
-    Parser parser(lexer, false);
+    Program prog = {};
+    Lexer lexer(cp, prog, false);
+    Parser parser(lexer, prog, false);
 
     ParseTreeNode *actual = parser.createParseTree();
     assertParseTreesAreEqual(expected, actual);

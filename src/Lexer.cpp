@@ -51,7 +51,7 @@ void removeLeadingWhitespace(std::string &str) {
     }
 }
 
-Token Lexer::getToken() {
+Token Lexer::_getToken() {
     std::string previousWord = currentWord;
     while (true) {
         if (currentWord.empty()) {
@@ -133,6 +133,12 @@ Token Lexer::getToken() {
         std::cout << "Found an invalid token: '" << invalidToken << "'" << std::endl;
     }
     return {Token::END_OF_FILE, invalidToken};
+}
+
+Token Lexer::getToken() {
+    auto token = _getToken();
+    program.tokens.push_back(token);
+    return token;
 }
 
 #define CONTAINS(word, search) word.find(search) == 0

@@ -41,6 +41,8 @@ std::string to_string(GrammarSymbol symbol) {
     return "CALL";
   case CALL_ARGS:
     return "CALL_ARGS";
+  case CALL_HEADER:
+    return "CALL_HEADER";
   case CONJUNCTION:
     return "CONJUNCTION";
   case DATA_TYPE:

@@ -196,6 +196,10 @@ void ASTInterpreter::visitAssignmentNode(AssignmentNode *node) {
     calculationResults[node] = calculationResults[node->getRight()];
 }
 
+void ASTInterpreter::visitCallNode(CallNode *node) {
+    // TODO implement
+}
+
 void interpretAst(AstNode *node, bool verbose) {
     if (node == nullptr) {
         std::cout << "Could not interpret node (nullptr)" << std::endl;

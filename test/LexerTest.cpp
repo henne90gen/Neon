@@ -6,7 +6,8 @@
 TEST_CASE("Lexer can handle lots of spaces") {
     std::vector<std::string> lines = {"     1    "};
     CodeProvider *codeProvider = new StringCodeProvider(lines);
-    auto lexer = Lexer(codeProvider);
+    Program program = {};
+    auto lexer = Lexer(codeProvider, program);
     auto token = lexer.getToken();
     REQUIRE(token.content == "1");
     REQUIRE(token.type == Token::INTEGER);
@@ -15,7 +16,8 @@ TEST_CASE("Lexer can handle lots of spaces") {
 TEST_CASE("Lexer can handle spaces between tokens") {
     std::vector<std::string> lines = {"1 - 5"};
     CodeProvider *codeProvider = new StringCodeProvider(lines);
-    auto lexer = Lexer(codeProvider);
+    Program program = {};
+    auto lexer = Lexer(codeProvider, program, false);
     auto token = lexer.getToken();
     REQUIRE(token.type == Token::INTEGER);
     REQUIRE(token.content == "1");
@@ -32,7 +34,8 @@ TEST_CASE("Lexer can handle spaces between tokens") {
 TEST_CASE("Lexer can handle no spaces between tokens") {
     std::vector<std::string> lines = {"1-5"};
     CodeProvider *codeProvider = new StringCodeProvider(lines);
-    auto lexer = Lexer(codeProvider);
+    Program program = {};
+    auto lexer = Lexer(codeProvider, program, false);
     auto token = lexer.getToken();
     REQUIRE(token.type == Token::INTEGER);
     REQUIRE(token.content == "1");
@@ -85,7 +88,8 @@ TEST_CASE("Lexer can handle all tokens") {
     }
 
     CodeProvider *codeProvider = new StringCodeProvider(lines);
-    auto lexer = Lexer(codeProvider);
+    Program program = {};
+    auto lexer = Lexer(codeProvider, program, false);
     for (auto &expectedToken : tokens) {
         auto actualToken = lexer.getToken();
         INFO(to_string(actualToken.type) + " != " + to_string(expectedToken.second));

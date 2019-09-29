@@ -5,6 +5,7 @@
 #include <utility>
 #include <vector>
 
+#include "Program.h"
 #include "Token.h"
 
 class CodeProvider {
@@ -41,15 +42,18 @@ private:
 
 class Lexer {
 public:
-    explicit Lexer(CodeProvider *codeProvider, bool verbose = false)
-            : codeProvider(codeProvider), verbose(verbose) {};
+    explicit Lexer(CodeProvider *codeProvider, Program &program, bool verbose = false)
+            : codeProvider(codeProvider), program(program), verbose(verbose) {};
 
     Token getToken();
 
 private:
     std::string currentWord;
     CodeProvider *codeProvider;
+    Program &program;
     bool verbose;
+
+    Token _getToken();
 
     std::optional<Token> matchOneCharacterToken();
 

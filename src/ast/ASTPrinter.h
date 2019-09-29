@@ -7,6 +7,7 @@ class ASTPrinter : public ASTVisitor {
     explicit ASTPrinter() = default;
 
     void visitFunctionNode(FunctionNode *node) override;
+    void visitCallNode(CallNode *node) override;
     void visitVariableNode(VariableNode *node) override;
     void visitVariableDefinitionNode(VariableDefinitionNode *node) override;
     void visitBinaryOperationNode(BinaryOperationNode *node) override;
