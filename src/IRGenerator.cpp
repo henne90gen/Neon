@@ -4,7 +4,8 @@
 
 void logError(const std::string &msg) { std::cerr << msg << std::endl; }
 
-IRGenerator::IRGenerator(const Program &program) : builder(context), module(program.fileName, context) {
+IRGenerator::IRGenerator(const Program &program)
+    : program(program), builder(context), module(program.fileName, context) {
     llvm::InitializeNativeTarget();
     llvm::InitializeNativeTargetAsmParser();
     llvm::InitializeNativeTargetAsmPrinter();
@@ -184,7 +185,7 @@ void IRGenerator::visitCallNode(CallNode *node) {
 }
 
 void IRGenerator::print() {
-    std::string fileName = "module.llvm";
+    std::string fileName = program.fileName + ".llvm";
     std::error_code EC;
     llvm::raw_fd_ostream dest(fileName, EC, llvm::sys::fs::OF_None);
     module.print(llvm::outs(), nullptr);

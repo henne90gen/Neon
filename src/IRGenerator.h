@@ -59,6 +59,7 @@ class IRGenerator : public ASTVisitor {
     void writeObjectFile(const std::string &fileName);
 
   private:
+    const Program &program;
     llvm::LLVMContext context = {};
     llvm::IRBuilder<> builder;
     llvm::Module module;
