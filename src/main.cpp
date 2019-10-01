@@ -5,6 +5,7 @@
 #include "ast/ASTGenerator.h"
 #include "ast/ASTPrinter.h"
 #include "ast/ASTTestCasePrinter.h"
+#include "ast/ASTTypeAnalyser.h"
 
 int main() {
     bool verbose = true;
@@ -24,6 +25,8 @@ int main() {
         printAst(astRoot);
         printAstTestCase(program, astRoot);
     }
+
+    analyseTypes(astRoot);
 
     generateIR(astRoot, program);
     return 0;

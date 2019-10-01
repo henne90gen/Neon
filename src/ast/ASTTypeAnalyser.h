@@ -21,4 +21,8 @@ class ASTTypeAnalyser : public ASTVisitor {
 
   private:
     std::unordered_map<AstNode *, AstNode::DataType> typeMap = {};
+    std::unordered_map<std::string, AstNode::DataType> variableMap = {};
+    std::unordered_map<std::string, AstNode::DataType> functionMap = {};
 };
+
+void analyseTypes(AstNode *root);
