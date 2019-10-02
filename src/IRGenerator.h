@@ -39,7 +39,7 @@
 
 class IRGenerator : public ASTVisitor {
   public:
-    explicit IRGenerator(const Program &program);
+    explicit IRGenerator(const Program &program, bool verbose);
 
     void visitFunctionNode(FunctionNode *node) override;
     void visitCallNode(CallNode *node) override;
@@ -56,21 +56,24 @@ class IRGenerator : public ASTVisitor {
 
     void run(AstNode *root);
 
-    void print();
+    void print(bool writeToFile = true);
 
     llvm::Module &getModule() { return module; }
 
   private:
     const Program &program;
+    const bool verbose = false;
     llvm::LLVMContext context = {};
     llvm::IRBuilder<> builder;
     llvm::Module module;
-    llvm::FunctionAnalysisManager functionAnalysisManager = llvm::FunctionAnalysisManager();
-    llvm::FunctionPassManager functionPassManager;
 
+    llvm::Function *currentFunction = nullptr;
     std::unordered_map<AstNode *, llvm::Value *> nodesToValues = {};
     std::unordered_map<std::string, llvm::AllocaInst *> definedVariables = {};
 
     llvm::Type *getType(AstNode::DataType type);
+    llvm::Function *getOrCreateFunction(const std::string &name, AstNode::DataType returnType,
+                                        const std::vector<VariableDefinitionNode *> &arguments);
     llvm::AllocaInst *createEntryBlockAlloca(llvm::Type *type, const std::string &name);
+    void finalizeFunction(llvm::Function *function, AstNode::DataType returnType);
 };

@@ -7,6 +7,10 @@
 #include <string>
 
 void writeModuleToObjectFile(const Program &program, IRGenerator *irGenerator) {
+    llvm::InitializeNativeTarget();
+    llvm::InitializeNativeTargetAsmParser();
+    llvm::InitializeNativeTargetAsmPrinter();
+
     const std::string fileName = program.fileName + ".o";
     auto targetTriple = llvm::sys::getDefaultTargetTriple();
     std::string Error;
@@ -26,6 +30,11 @@ void writeModuleToObjectFile(const Program &program, IRGenerator *irGenerator) {
     auto &module = irGenerator->getModule();
     module.setDataLayout(targetMachine->createDataLayout());
     module.setTargetTriple(targetTriple);
+
+    if (llvm::verifyModule((const llvm::Module &)module, &llvm::errs())) {
+        irGenerator->print(false);
+        return;
+    }
 
     std::error_code EC;
     llvm::raw_fd_ostream dest(fileName, EC, llvm::sys::fs::OF_None);

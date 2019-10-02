@@ -29,7 +29,7 @@ int main() {
 
     analyseTypes(astRoot);
 
-    auto generator = new IRGenerator(program);
+    auto generator = new IRGenerator(program, verbose);
     generator->run(astRoot);
 
     writeModuleToObjectFile(program, generator);
