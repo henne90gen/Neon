@@ -1,4 +1,5 @@
 #include "IRGenerator.h"
+#include "ObjectFileWriter.h"
 
 #include <iostream>
 
@@ -36,7 +37,11 @@ llvm::Type *IRGenerator::getType(AstNode::DataType type) {
 }
 
 llvm::AllocaInst *IRGenerator::createEntryBlockAlloca(llvm::Type *type, const std::string &name) {
-    auto function = builder.GetInsertBlock()->getParent();
+    llvm::BasicBlock *block = builder.GetInsertBlock();
+    if (block == nullptr) {
+        return nullptr;
+    }
+    auto function = block->getParent();
     llvm::IRBuilder<> tmpB(&function->getEntryBlock(), function->getEntryBlock().begin());
     return tmpB.CreateAlloca(type, nullptr, name);
 }
@@ -92,6 +97,9 @@ void IRGenerator::visitVariableNode(VariableNode *node) {
         return logError("Undefined variable " + node->getName());
     }
     auto alloca = definedVariables[node->getName()];
+    if (alloca == nullptr) {
+        return;
+    }
     nodesToValues[node] = builder.CreateLoad(alloca, node->getName());
 }
 
@@ -177,7 +185,12 @@ void IRGenerator::visitBoolNode(BoolNode *node) {
 void IRGenerator::visitAssignmentNode(AssignmentNode *node) {
     node->getLeft()->accept(this);
     node->getRight()->accept(this);
-    nodesToValues[node] = builder.CreateStore(nodesToValues[node->getRight()], nodesToValues[node->getLeft()]);
+    llvm::Value *&src = nodesToValues[node->getRight()];
+    llvm::Value *&dest = nodesToValues[node->getLeft()];
+    if (src == nullptr || dest == nullptr) {
+        return logError("Could not create assignment.");
+    }
+    nodesToValues[node] = builder.CreateStore(src, dest);
 }
 
 void IRGenerator::visitCallNode(CallNode *node) {
@@ -192,53 +205,12 @@ void IRGenerator::print() {
     module.print(dest, nullptr);
 }
 
-void IRGenerator::writeObjectFile(const std::string &fileName) {
-    auto targetTriple = llvm::sys::getDefaultTargetTriple();
-    std::string Error;
-    auto Target = llvm::TargetRegistry::lookupTarget(targetTriple, Error);
-
-    if (!Target) {
-        llvm::errs() << Error;
-        exit(1);
-    }
-
-    auto cpu = "generic";
-    auto features = "";
-    llvm::TargetOptions targetOptions = {};
-    auto RM = llvm::Optional<llvm::Reloc::Model>();
-    auto targetMachine = Target->createTargetMachine(targetTriple, cpu, features, targetOptions, RM);
-
-    module.setDataLayout(targetMachine->createDataLayout());
-    module.setTargetTriple(targetTriple);
-
-    std::error_code EC;
-    llvm::raw_fd_ostream dest(fileName, EC, llvm::sys::fs::OF_None);
-
-    if (EC) {
-        llvm::errs() << "Could not open file: " << EC.message();
-        exit(1);
-    }
-
-    auto fileType = llvm::TargetMachine::CGFT_ObjectFile;
-    llvm::legacy::PassManager pass;
-    if (targetMachine->addPassesToEmitFile(pass, dest, nullptr, fileType)) {
-        llvm::errs() << "TargetMachine can't emit a file of this type";
-        exit(1);
-    }
-
-    pass.run(module);
-    dest.flush();
-}
-
-void generateIR(AstNode *root, const Program &program) {
+void IRGenerator::run(AstNode *root) {
     if (root == nullptr) {
         return;
     }
 
-    auto generator = new IRGenerator(program);
-    root->accept(generator);
+    root->accept(this);
 
-    generator->print();
-
-    generator->writeObjectFile("hello.o");
+    this->print();
 }

@@ -54,9 +54,11 @@ class IRGenerator : public ASTVisitor {
     void visitIntegerNode(IntegerNode *node) override;
     void visitBoolNode(BoolNode *node) override;
 
+    void run(AstNode *root);
+
     void print();
 
-    void writeObjectFile(const std::string &fileName);
+    llvm::Module &getModule() { return module; }
 
   private:
     const Program &program;
@@ -72,5 +74,3 @@ class IRGenerator : public ASTVisitor {
     llvm::Type *getType(AstNode::DataType type);
     llvm::AllocaInst *createEntryBlockAlloca(llvm::Type *type, const std::string &name);
 };
-
-void generateIR(AstNode *root, const Program &program);

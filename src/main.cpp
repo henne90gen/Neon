@@ -1,5 +1,6 @@
 #include "IRGenerator.h"
 #include "Lexer.h"
+#include "ObjectFileWriter.h"
 #include "Parser.h"
 #include "Program.h"
 #include "ast/ASTGenerator.h"
@@ -28,6 +29,10 @@ int main() {
 
     analyseTypes(astRoot);
 
-    generateIR(astRoot, program);
+    auto generator = new IRGenerator(program);
+    generator->run(astRoot);
+
+    writeModuleToObjectFile(program, generator);
+
     return 0;
 }
