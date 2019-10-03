@@ -197,3 +197,27 @@ TEST_CASE("Parser can handle 'bool b = true and false ;  '") {
     std::vector<std::string> program = {"bool b = true and false ;  "};
     assertProgramCreatesParseTree(program, parseTree);
 }
+
+TEST_CASE("Parser can handle 'a = 5 ;'") {
+    std::vector<std::pair<int, GrammarSymbol>> parseTree = {
+          {0,  GrammarSymbol::PROGRAM},
+          {1,  GrammarSymbol::STMTS},
+          {2,  GrammarSymbol::STMT},
+          {3,  GrammarSymbol::ASSIGNMENT},
+          {4,  GrammarSymbol::VARIABLE_NAME},
+          {4,  GrammarSymbol::SINGLE_EQUALS},
+          {4,  GrammarSymbol::EXPR},
+          {5,  GrammarSymbol::DISJUNCTION},
+          {6,  GrammarSymbol::CONJUNCTION},
+          {7,  GrammarSymbol::NEGATION},
+          {8,  GrammarSymbol::RELATION},
+          {9,  GrammarSymbol::SUM},
+          {10,  GrammarSymbol::TERM},
+          {11,  GrammarSymbol::FACTOR},
+          {12,  GrammarSymbol::INTEGER},
+          {3,  GrammarSymbol::SEMICOLON},
+          {1,  GrammarSymbol::ENDOFFILE},
+    };
+    std::vector<std::string> program = {"a = 5 ;"};
+    assertProgramCreatesParseTree(program, parseTree);
+}

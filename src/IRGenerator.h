@@ -72,4 +72,5 @@ class IRGenerator : public ASTVisitor {
     llvm::AllocaInst *createEntryBlockAlloca(llvm::Type *type, const std::string &name);
     void finalizeFunction(llvm::Function *function, AstNode::DataType returnType);
     llvm::Constant *getInitializer(const AstNode::DataType &dt);
+    void setupGlobalInitialization(llvm::Function *func);
 };

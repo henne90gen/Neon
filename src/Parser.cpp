@@ -254,10 +254,11 @@ ParseTreeNode *Parser::createParseTree() {
 
     std::cout << "Could not accept program!" << std::endl;
     if (verbose) {
-        std::cout << "Program:" << std::endl;
+        std::cout << std::endl << "Program:" << std::endl;
         for (auto &t : program.tokens) {
             std::cout << to_string(t.type) << ": " << t.content << std::endl;
         }
     }
+
     return nullptr;
 }

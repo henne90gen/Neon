@@ -59,6 +59,7 @@ call_args
 
 assignment
     variable_definition = expr
+    variable_name = expr
 
 expr
     disjunction

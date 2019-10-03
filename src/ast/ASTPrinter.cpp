@@ -138,9 +138,10 @@ void ASTPrinter::visitCallNode(CallNode *node) {
 
 void printAst(AstNode *root) {
     if (root == nullptr) {
-        std::cout << "Could not print AST (nullptr)." << std::endl;
+        std::cerr << "Could not print AST (nullptr)." << std::endl;
         return;
     }
+
     auto printer = new ASTPrinter();
     root->accept(printer);
 }

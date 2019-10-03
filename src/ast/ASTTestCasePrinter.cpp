@@ -16,13 +16,9 @@ void ASTTestCasePrinter::visitFunctionNode(FunctionNode *node) {
     indentation--;
 }
 
-void ASTTestCasePrinter::visitVariableNode(VariableNode *node) {
-    printNode(node);
-}
+void ASTTestCasePrinter::visitVariableNode(VariableNode *node) { printNode(node); }
 
-void ASTTestCasePrinter::visitVariableDefinitionNode(VariableDefinitionNode *node) {
-    printNode(node);
-}
+void ASTTestCasePrinter::visitVariableDefinitionNode(VariableDefinitionNode *node) { printNode(node); }
 
 void ASTTestCasePrinter::visitBinaryOperationNode(BinaryOperationNode *node) {
     printNode(node);
@@ -63,17 +59,11 @@ void ASTTestCasePrinter::visitStatementNode(StatementNode *node) {
     indentation--;
 }
 
-void ASTTestCasePrinter::visitFloatNode(FloatNode *node) {
-    printNode(node);
-}
+void ASTTestCasePrinter::visitFloatNode(FloatNode *node) { printNode(node); }
 
-void ASTTestCasePrinter::visitIntegerNode(IntegerNode *node) {
-    printNode(node);
-}
+void ASTTestCasePrinter::visitIntegerNode(IntegerNode *node) { printNode(node); }
 
-void ASTTestCasePrinter::visitBoolNode(BoolNode *node) {
-    printNode(node);
-}
+void ASTTestCasePrinter::visitBoolNode(BoolNode *node) { printNode(node); }
 
 void ASTTestCasePrinter::visitCallNode(CallNode *node) {
     printNode(node);
@@ -83,6 +73,11 @@ void ASTTestCasePrinter::visitCallNode(CallNode *node) {
 }
 
 void printAstTestCase(const Program &program, AstNode *root) {
+    if (root == nullptr) {
+        std::cerr << "Could not print AST test case (nullptr)." << std::endl;
+        return;
+    }
+
     std::cout << std::endl;
     std::cout << "TEST_CASE(\"ASTGenerator can handle '" << program.toString() << "'\") {" << std::endl;
     std::cout << "    std::vector<AstNodeSpec> spec = {" << std::endl;

@@ -49,8 +49,12 @@ void IRGenerator::visitFunctionNode(FunctionNode *node) {
     node->getBody()->accept(this);
 
     finalizeFunction(currentFunction, node->getReturnType());
+
     isGlobalScope = previousGlobalScopeState;
     currentFunction = previousFunction;
+    // TODO this is a hack to enable us to get back to the previous functions insertion point
+    //      we should save that last insertion point somewhere, instead of guessing it here
+    builder.SetInsertPoint(&currentFunction->getBasicBlockList().back());
 
     LOG("Exit Function")
 }
@@ -214,7 +218,7 @@ void IRGenerator::finalizeFunction(llvm::Function *function, AstNode::DataType r
     llvm::PassBuilder PB;
     PB.registerFunctionAnalyses(functionAnalysisManager);
     functionPassManager = PB.buildFunctionSimplificationPipeline(llvm::PassBuilder::OptimizationLevel::O0,
-                                                                 llvm::PassBuilder::ThinLTOPhase::None, true);
+                                                                 llvm::PassBuilder::ThinLTOPhase::None);
     // functionPassManager = llvm::FunctionPassManager();
     //    functionPassManager.addPass(llvm::PromotePass());
     //    functionPassManager.addPass(llvm::InstCombinePass());
@@ -223,6 +227,22 @@ void IRGenerator::finalizeFunction(llvm::Function *function, AstNode::DataType r
     //    functionPassManager.addPass(llvm::SimplifyCFGPass());
 
     functionPassManager.run(*function, functionAnalysisManager);
+}
+
+void IRGenerator::setupGlobalInitialization(llvm::Function *func) {
+    std::vector<llvm::Type *> types = {llvm::Type::getInt32Ty(context), func->getType(),
+                                       llvm::PointerType::getInt8PtrTy(context)};
+    auto structType = llvm::StructType::get(context, types);
+    module.getOrInsertGlobal("llvm.global_ctors", llvm::ArrayType::get(structType, 1));
+    llvm::GlobalVariable *ctorsVar = module.getGlobalVariable("llvm.global_ctors");
+    ctorsVar->setLinkage(llvm::GlobalValue::LinkageTypes::AppendingLinkage);
+
+    llvm::ConstantInt *intValue = llvm::ConstantInt::get(llvm::Type::getInt32Ty(context), 65535);
+    llvm::ConstantPointerNull *nullValue = llvm::ConstantPointerNull::get(llvm::PointerType::getInt8PtrTy(context));
+    std::vector<llvm::Constant *> structValues = {intValue, func, nullValue};
+    std::vector<llvm::Constant *> arrayValues = {llvm::ConstantStruct::get(structType, structValues)};
+    llvm::Constant *initializer = llvm::ConstantArray::get(llvm::ArrayType::get(structType, 1), arrayValues);
+    ctorsVar->setInitializer(initializer);
 }
 
 void IRGenerator::visitSequenceNode(SequenceNode *node) {
@@ -243,21 +263,7 @@ void IRGenerator::visitSequenceNode(SequenceNode *node) {
     if (initFunc != nullptr) {
         isGlobalScope = false;
         finalizeFunction(initFunc, AstNode::DataType::VOID);
-
-        std::vector<llvm::Type *> types = {llvm::Type::getInt32Ty(context), initFunc->getType(),
-                                           llvm::PointerType::getInt8PtrTy(context)};
-        auto structType = llvm::StructType::get(context, types);
-        module.getOrInsertGlobal("llvm.global_ctors", llvm::ArrayType::get(structType, 1));
-        llvm::GlobalVariable *ctorsVar = module.getGlobalVariable("llvm.global_ctors");
-        ctorsVar->setLinkage(llvm::GlobalValue::LinkageTypes::AppendingLinkage);
-        //        ctorsVar->setSection(".ctor");
-
-        llvm::ConstantInt *intValue = llvm::ConstantInt::get(llvm::Type::getInt32Ty(context), 65535);
-        llvm::ConstantPointerNull *nullValue = llvm::ConstantPointerNull::get(llvm::PointerType::getInt8PtrTy(context));
-        std::vector<llvm::Constant *> structValues = {intValue, initFunc, nullValue};
-        std::vector<llvm::Constant *> arrayValues = {llvm::ConstantStruct::get(structType, structValues)};
-        llvm::Constant *initializer = llvm::ConstantArray::get(llvm::ArrayType::get(structType, 1), arrayValues);
-        ctorsVar->setInitializer(initializer);
+        setupGlobalInitialization(initFunc);
     }
 
     LOG("Exit Sequence")
@@ -294,10 +300,18 @@ void IRGenerator::visitBoolNode(BoolNode *node) {
 }
 
 void IRGenerator::visitAssignmentNode(AssignmentNode *node) {
-    node->getLeft()->accept(this);
+    llvm::Value *dest = nullptr;
+    if (node->getLeft()->getAstNodeType() == AstNode::AstNodeType::VARIABLE_DEFINITION) {
+        // only generate variable definitions
+        node->getLeft()->accept(this);
+        dest = nodesToValues[node->getLeft()];
+    } else {
+        auto variable = (VariableNode *)node->getLeft();
+        dest = definedVariables[variable->getName()];
+    }
+
     node->getRight()->accept(this);
-    llvm::Value *&src = nodesToValues[node->getRight()];
-    llvm::Value *&dest = nodesToValues[node->getLeft()];
+    llvm::Value *src = nodesToValues[node->getRight()];
     if (src == nullptr || dest == nullptr) {
         return logError("Could not create assignment.");
     }
@@ -305,7 +319,30 @@ void IRGenerator::visitAssignmentNode(AssignmentNode *node) {
 }
 
 void IRGenerator::visitCallNode(CallNode *node) {
-    // TODO implement this
+    llvm::Function *calleeFunc = module.getFunction(node->getName());
+    if (!calleeFunc)
+        return logError("Use of undeclared identifier " + node->getName());
+
+    if (calleeFunc->arg_size() != node->getArguments().size())
+        return logError("Incorrect number arguments passed.");
+
+    std::vector<llvm::Value *> arguments;
+    for (auto &argument : node->getArguments()) {
+        argument->accept(this);
+        auto itr = nodesToValues.find(argument);
+        if (itr == nodesToValues.end()) {
+            return logError("Could not generate code for argument.");
+        }
+        arguments.push_back(itr->second);
+    }
+
+    llvm::Value *call = nullptr;
+    if (calleeFunc->getReturnType()->getTypeID() == llvm::Type::TypeID::VoidTyID) {
+        call = builder.CreateCall(calleeFunc, arguments);
+    } else {
+        call = builder.CreateCall(calleeFunc, arguments, "call");
+    }
+    nodesToValues[node] = call;
 }
 
 void IRGenerator::print(const bool writeToFile) {
