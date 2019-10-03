@@ -37,3 +37,13 @@ TEST_CASE("ASTGenerator can handle 'int a = 1 + 1 ; int b = a + 2 ;'") {
     std::vector<std::string> program = {"int a = 1 + 1 ; int b = a + 2 ;"};
     assertProgramCreatesAst(program, spec);
 }
+
+TEST_CASE("Function call") {
+    std::vector<AstNodeSpec> spec = {
+          {0, AstNode::SEQUENCE},
+          {1, AstNode::STATEMENT},
+          {2, AstNode::CALL},
+    };
+    std::vector<std::string> program = {"hello ( ) ;"};
+    assertProgramCreatesAst(program, spec);
+}

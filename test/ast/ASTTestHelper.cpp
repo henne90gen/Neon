@@ -1,6 +1,7 @@
 #include "ASTTestHelper.h"
 
 #include <catch2/catch.hpp>
+#include <iostream>
 
 void assertAstsAreEqual(SimpleTree *expected, SimpleTree *actual) {
     INFO(std::to_string(expected->type) + " | " + std::to_string(actual->type));
@@ -90,6 +91,12 @@ SimpleTree *createSimpleFromAssignment(AssignmentNode *node) {
     return result;
 }
 
+SimpleTree *createSimpleFromCall(CallNode *node) {
+    auto result = new SimpleTree();
+    result->type = node->getAstNodeType();
+    return result;
+}
+
 SimpleTree *createSimpleFromAst(AstNode *node) {
     switch (node->getAstNodeType()) {
     case AstNode::SEQUENCE:
@@ -110,7 +117,10 @@ SimpleTree *createSimpleFromAst(AstNode *node) {
         return createSimpleFromVariable((VariableNode *)node);
     case AstNode::ASSIGNMENT:
         return createSimpleFromAssignment((AssignmentNode *)node);
+    case AstNode::CALL:
+        return createSimpleFromCall((CallNode *)node);
     default:
+        std::cerr << "Could not create simple helper tree node for " << to_string(node->getAstNodeType()) << std::endl;
         return nullptr;
     }
 }

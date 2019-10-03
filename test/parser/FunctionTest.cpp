@@ -2,7 +2,7 @@
 
 #include <catch2/catch.hpp>
 
-TEST_CASE("Parser can handle 'fun helloWorld ( ) { }  '") {
+TEST_CASE("Function defintion") {
     std::vector<std::pair<int, GrammarSymbol>> parseTree = {
           {0, GrammarSymbol::PROGRAM},
           {1, GrammarSymbol::STMTS},
@@ -23,7 +23,7 @@ TEST_CASE("Parser can handle 'fun helloWorld ( ) { }  '") {
     assertProgramCreatesParseTree(program, parseTree);
 }
 
-TEST_CASE("Parser can handle 'fun hello ( int i ) float { }  '") {
+TEST_CASE("Function definition with argument and return type") {
     std::vector<std::pair<int, GrammarSymbol>> parseTree = {
           {0, GrammarSymbol::PROGRAM},       {1, GrammarSymbol::STMTS},
           {2, GrammarSymbol::STMT},          {3, GrammarSymbol::FUNCTION},
@@ -40,7 +40,7 @@ TEST_CASE("Parser can handle 'fun hello ( int i ) float { }  '") {
     assertProgramCreatesParseTree(program, parseTree);
 }
 
-TEST_CASE("Parser can handle 'fun hello ( int i , bool b ) float { }  '") {
+TEST_CASE("Function definition with multiple arguments and return type") {
     std::vector<std::pair<int, GrammarSymbol>> parseTree = {
           {0,  GrammarSymbol::PROGRAM},
           {1,  GrammarSymbol::STMTS},
@@ -71,7 +71,7 @@ TEST_CASE("Parser can handle 'fun hello ( int i , bool b ) float { }  '") {
     assertProgramCreatesParseTree(program, parseTree);
 }
 
-TEST_CASE("Parser can handle 'extern fun printf ( ) ;  '") {
+TEST_CASE("External function definition") {
     std::vector<std::pair<int, GrammarSymbol>> parseTree = {
           {0, GrammarSymbol::PROGRAM},
           {1, GrammarSymbol::STMTS},
@@ -87,11 +87,11 @@ TEST_CASE("Parser can handle 'extern fun printf ( ) ;  '") {
           {3, GrammarSymbol::SEMICOLON},
           {1, GrammarSymbol::ENDOFFILE},
     };
-    std::vector<std::string> program = {"extern fun printf ( ) ;  "};
+    std::vector<std::string> program = {"extern fun calc ( ) ;  "};
     assertProgramCreatesParseTree(program, parseTree);
 }
 
-TEST_CASE("Parser can handle 'extern fun calc ( ) int ;  '") {
+TEST_CASE("External function definition with return type") {
     std::vector<std::pair<int, GrammarSymbol>> parseTree = {
           {0, GrammarSymbol::PROGRAM},
           {1, GrammarSymbol::STMTS},
@@ -112,7 +112,7 @@ TEST_CASE("Parser can handle 'extern fun calc ( ) int ;  '") {
     assertProgramCreatesParseTree(program, parseTree);
 }
 
-TEST_CASE("Parser can handle 'extern fun calc ( float i ) int ;  '") {
+TEST_CASE("External function definition with arguments and return type") {
     std::vector<std::pair<int, GrammarSymbol>> parseTree = {
           {0, GrammarSymbol::PROGRAM},
           {1, GrammarSymbol::STMTS},
@@ -134,5 +134,22 @@ TEST_CASE("Parser can handle 'extern fun calc ( float i ) int ;  '") {
           {1, GrammarSymbol::ENDOFFILE},
     };
     std::vector<std::string> program = {"extern fun calc ( float i ) int ;  "};
+    assertProgramCreatesParseTree(program, parseTree);
+}
+
+TEST_CASE("Function call without arguments") {
+    std::vector<std::pair<int, GrammarSymbol>> parseTree = {
+          {0,  GrammarSymbol::PROGRAM},
+          {1,  GrammarSymbol::STMTS},
+          {2,  GrammarSymbol::STMT},
+          {3,  GrammarSymbol::CALL},
+          {4,  GrammarSymbol::VARIABLE_NAME},
+          {4,  GrammarSymbol::LEFT_PARAN},
+          {4,  GrammarSymbol::CALL_HEADER},
+          {5,  GrammarSymbol::RIGHT_PARAN},
+          {3,  GrammarSymbol::SEMICOLON},
+          {1,  GrammarSymbol::ENDOFFILE},
+    };
+    std::vector<std::string> program = {"hello ( ) ;"};
     assertProgramCreatesParseTree(program, parseTree);
 }

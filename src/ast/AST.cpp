@@ -20,6 +20,8 @@ std::string to_string(AstNode::AstNodeType type) {
         return "AstNode::VARIABLE";
     case AstNode::ASSIGNMENT:
         return "AstNode::ASSIGNMENT";
+    case AstNode::CALL:
+        return "AstNode::CALL";
     default:
         return "ERROR";
     }
