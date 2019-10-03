@@ -8,17 +8,10 @@
 #include "llvm/ADT/APFloat.h"
 #include "llvm/ADT/APInt.h"
 #include "llvm/ADT/StringRef.h"
-#include "llvm/ExecutionEngine/JITSymbol.h"
-#include "llvm/ExecutionEngine/Orc/CompileUtils.h"
-#include "llvm/ExecutionEngine/Orc/Core.h"
-#include "llvm/ExecutionEngine/Orc/ExecutionUtils.h"
-#include "llvm/ExecutionEngine/Orc/IRCompileLayer.h"
-#include "llvm/ExecutionEngine/Orc/JITTargetMachineBuilder.h"
-#include "llvm/ExecutionEngine/Orc/RTDyldObjectLinkingLayer.h"
-#include "llvm/ExecutionEngine/SectionMemoryManager.h"
 #include "llvm/IR/BasicBlock.h"
 #include "llvm/IR/Constants.h"
 #include "llvm/IR/DataLayout.h"
+#include "llvm/IR/GlobalVariable.h"
 #include "llvm/IR/IRBuilder.h"
 #include "llvm/IR/LLVMContext.h"
 #include "llvm/IR/Module.h"
@@ -35,6 +28,7 @@
 #include "llvm/Transforms/Scalar/GVN.h"
 #include "llvm/Transforms/Scalar/Reassociate.h"
 #include "llvm/Transforms/Scalar/SimplifyCFG.h"
+#include "llvm/Transforms/Utils/CtorUtils.h"
 #include "llvm/Transforms/Utils/Mem2Reg.h"
 
 class IRGenerator : public ASTVisitor {
@@ -68,12 +62,14 @@ class IRGenerator : public ASTVisitor {
     llvm::Module module;
 
     llvm::Function *currentFunction = nullptr;
+    bool isGlobalScope = false;
     std::unordered_map<AstNode *, llvm::Value *> nodesToValues = {};
-    std::unordered_map<std::string, llvm::AllocaInst *> definedVariables = {};
+    std::unordered_map<std::string, llvm::Value *> definedVariables = {};
 
     llvm::Type *getType(AstNode::DataType type);
     llvm::Function *getOrCreateFunction(const std::string &name, AstNode::DataType returnType,
                                         const std::vector<VariableDefinitionNode *> &arguments);
     llvm::AllocaInst *createEntryBlockAlloca(llvm::Type *type, const std::string &name);
     void finalizeFunction(llvm::Function *function, AstNode::DataType returnType);
+    llvm::Constant *getInitializer(const AstNode::DataType &dt);
 };

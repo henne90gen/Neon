@@ -33,7 +33,7 @@ void writeModuleToObjectFile(const Program &program, IRGenerator *irGenerator) {
 
     if (llvm::verifyModule((const llvm::Module &)module, &llvm::errs())) {
         irGenerator->print(false);
-        return;
+        exit(1);
     }
 
     std::error_code EC;

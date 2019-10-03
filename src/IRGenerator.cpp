@@ -1,6 +1,7 @@
 #include "IRGenerator.h"
 
 #include <iostream>
+#include <llvm/Support/FileSystem.h>
 
 #define LOG(msg)                                                                                                       \
     if (verbose) {                                                                                                     \
@@ -41,11 +42,14 @@ void IRGenerator::visitFunctionNode(FunctionNode *node) {
     LOG("Enter Function")
 
     llvm::Function *previousFunction = currentFunction;
+    bool previousGlobalScopeState = isGlobalScope;
+    isGlobalScope = false;
     currentFunction = getOrCreateFunction(node->getName(), node->getReturnType(), node->getArguments());
 
     node->getBody()->accept(this);
 
     finalizeFunction(currentFunction, node->getReturnType());
+    isGlobalScope = previousGlobalScopeState;
     currentFunction = previousFunction;
 
     LOG("Exit Function")
@@ -58,11 +62,11 @@ void IRGenerator::visitVariableNode(VariableNode *node) {
         return logError("Undefined variable " + node->getName());
     }
 
-    auto alloca = definedVariables[node->getName()];
-    if (alloca == nullptr) {
+    auto value = definedVariables[node->getName()];
+    if (value == nullptr) {
         return;
     }
-    nodesToValues[node] = builder.CreateLoad(alloca, node->getName());
+    nodesToValues[node] = builder.CreateLoad(value, node->getName());
 
     LOG("Exit Variable")
 }
@@ -70,11 +74,34 @@ void IRGenerator::visitVariableNode(VariableNode *node) {
 void IRGenerator::visitVariableDefinitionNode(VariableDefinitionNode *node) {
     LOG("Enter VariableDefinition")
 
-    auto alloca = createEntryBlockAlloca(getType(node->getType()), node->getName());
-    definedVariables[node->getName()] = alloca;
-    nodesToValues[node] = alloca;
+    llvm::Type *type = getType(node->getType());
+    std::string &name = node->getName();
+    llvm::Value *value = nullptr;
+    if (isGlobalScope) {
+        value = module.getOrInsertGlobal(name, type);
+        module.getNamedGlobal(name)->setDSOLocal(true);
+        module.getNamedGlobal(name)->setInitializer(getInitializer(node->getType()));
+    } else {
+        value = createEntryBlockAlloca(type, name);
+    }
+    definedVariables[name] = value;
+    nodesToValues[node] = value;
 
     LOG("Exit VariableDefinition")
+}
+
+llvm::Constant *IRGenerator::getInitializer(const AstNode::DataType &dt) {
+    llvm::Type *ty = getType(dt);
+    switch (dt) {
+    case AstNode::FLOAT:
+        return llvm::ConstantFP::get(ty, 0);
+    case AstNode::INT:
+    case AstNode::BOOL:
+        return llvm::ConstantInt::get(ty, 0);
+    case AstNode::VOID:
+    default:
+        return nullptr;
+    }
 }
 
 void IRGenerator::visitBinaryOperationNode(BinaryOperationNode *node) {
@@ -156,16 +183,16 @@ llvm::Function *IRGenerator::getOrCreateFunction(const std::string &name, AstNod
         }
     }
 
-    llvm::BasicBlock *BB = llvm::BasicBlock::Create(context, "entry" + std::to_string((long)currentFunction), function);
+    llvm::BasicBlock *BB = llvm::BasicBlock::Create(context, "entry-" + name, function);
     builder.SetInsertPoint(BB);
 
     for (auto &arg : function->args()) {
-        llvm::AllocaInst *allocaInst = createEntryBlockAlloca(arg.getType(), arg.getName());
+        auto value = createEntryBlockAlloca(arg.getType(), arg.getName());
 
         // store initial value
-        builder.CreateStore(&arg, allocaInst);
+        builder.CreateStore(&arg, value);
 
-        definedVariables[arg.getName()] = allocaInst;
+        definedVariables[arg.getName()] = value;
     }
 
     return function;
@@ -173,6 +200,7 @@ llvm::Function *IRGenerator::getOrCreateFunction(const std::string &name, AstNod
 
 void IRGenerator::finalizeFunction(llvm::Function *function, AstNode::DataType returnType) {
     if (returnType == AstNode::VOID) {
+        builder.SetInsertPoint(&function->getBasicBlockList().back());
         builder.CreateRetVoid();
     }
 
@@ -187,12 +215,12 @@ void IRGenerator::finalizeFunction(llvm::Function *function, AstNode::DataType r
     PB.registerFunctionAnalyses(functionAnalysisManager);
     functionPassManager = PB.buildFunctionSimplificationPipeline(llvm::PassBuilder::OptimizationLevel::O0,
                                                                  llvm::PassBuilder::ThinLTOPhase::None, true);
-    //    functionPassManager = llvm::FunctionPassManager();
-    functionPassManager.addPass(llvm::PromotePass());
-    functionPassManager.addPass(llvm::InstCombinePass());
-    //        functionPassManager.addPass(llvm::ReassociatePass()); // throws "out of memory" error
-    functionPassManager.addPass(llvm::GVN());
-    functionPassManager.addPass(llvm::SimplifyCFGPass());
+    // functionPassManager = llvm::FunctionPassManager();
+    //    functionPassManager.addPass(llvm::PromotePass());
+    //    functionPassManager.addPass(llvm::InstCombinePass());
+    // functionPassManager.addPass(llvm::ReassociatePass()); // throws "out of memory" error
+    //    functionPassManager.addPass(llvm::GVN());
+    //    functionPassManager.addPass(llvm::SimplifyCFGPass());
 
     functionPassManager.run(*function, functionAnalysisManager);
 }
@@ -203,8 +231,9 @@ void IRGenerator::visitSequenceNode(SequenceNode *node) {
     llvm::Function *initFunc = nullptr;
     if (currentFunction == nullptr) {
         // TODO make sure this function name does not collide with any user defined functions
-        initFunc = getOrCreateFunction("tmp", AstNode::DataType::VOID, {});
+        initFunc = getOrCreateFunction("__ctor", AstNode::DataType::VOID, {});
         currentFunction = initFunc;
+        isGlobalScope = true;
     }
 
     for (auto child : node->getChildren()) {
@@ -212,7 +241,23 @@ void IRGenerator::visitSequenceNode(SequenceNode *node) {
     }
 
     if (initFunc != nullptr) {
+        isGlobalScope = false;
         finalizeFunction(initFunc, AstNode::DataType::VOID);
+
+        std::vector<llvm::Type *> types = {llvm::Type::getInt32Ty(context), initFunc->getType(),
+                                           llvm::PointerType::getInt8PtrTy(context)};
+        auto structType = llvm::StructType::get(context, types);
+        module.getOrInsertGlobal("llvm.global_ctors", llvm::ArrayType::get(structType, 1));
+        llvm::GlobalVariable *ctorsVar = module.getGlobalVariable("llvm.global_ctors");
+        ctorsVar->setLinkage(llvm::GlobalValue::LinkageTypes::AppendingLinkage);
+        //        ctorsVar->setSection(".ctor");
+
+        llvm::ConstantInt *intValue = llvm::ConstantInt::get(llvm::Type::getInt32Ty(context), 65535);
+        llvm::ConstantPointerNull *nullValue = llvm::ConstantPointerNull::get(llvm::PointerType::getInt8PtrTy(context));
+        std::vector<llvm::Constant *> structValues = {intValue, initFunc, nullValue};
+        std::vector<llvm::Constant *> arrayValues = {llvm::ConstantStruct::get(structType, structValues)};
+        llvm::Constant *initializer = llvm::ConstantArray::get(llvm::ArrayType::get(structType, 1), arrayValues);
+        ctorsVar->setInitializer(initializer);
     }
 
     LOG("Exit Sequence")
