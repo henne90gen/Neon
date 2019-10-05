@@ -22,9 +22,13 @@ Neon is an experimental programming language.
 - Float (32 bit)
 - Booleans (1 bit)
 
+### Link external object files
+
+It is possible to link an object file with a program written in Neon,
+so that one can call functions that are contained in the externally linked object file.
+
 ## TODO / Ideas
 
-- importing functions from C
 - importing files
     - generate function in every module that contains all 'script' code
     - generate function call to that function in place of the import statement
