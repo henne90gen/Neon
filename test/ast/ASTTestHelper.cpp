@@ -4,7 +4,7 @@
 #include <iostream>
 
 void assertAstsAreEqual(SimpleTree *expected, SimpleTree *actual) {
-    INFO(std::to_string(expected->type) + " | " + std::to_string(actual->type));
+    INFO(to_string(expected->type) + " | " + to_string(actual->type));
     REQUIRE(expected->type == actual->type);
     REQUIRE(expected->children.size() == actual->children.size());
     for (unsigned long i = 0; i < expected->children.size(); i++) {
@@ -67,7 +67,9 @@ SimpleTree *createSimpleFromFunction(FunctionNode *node) {
     for (auto argument : node->getArguments()) {
         result->children.push_back(createSimpleFromAst(argument));
     }
-    result->children.push_back(createSimpleFromAst(node->getBody()));
+    if (!node->isExternal()) {
+        result->children.push_back(createSimpleFromAst(node->getBody()));
+    }
     return result;
 }
 
@@ -94,6 +96,9 @@ SimpleTree *createSimpleFromAssignment(AssignmentNode *node) {
 SimpleTree *createSimpleFromCall(CallNode *node) {
     auto result = new SimpleTree();
     result->type = node->getAstNodeType();
+    for (auto argument : node->getArguments()) {
+        result->children.push_back(createSimpleFromAst(argument));
+    }
     return result;
 }
 

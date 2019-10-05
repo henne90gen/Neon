@@ -7,7 +7,6 @@ stmts
 
 stmt
     call ;
-    return call ;
     external_function ;
     function
     assignment ;
@@ -63,6 +62,7 @@ assignment
     variable_name = expr
 
 expr
+    call
     disjunction
 
 disjunction

@@ -11,7 +11,7 @@ void Linker::link() {
     s += " -L/usr/lib/gcc/x86_64-pc-linux-gnu/9.1.0/";
     s += " -lc -lgcc -lgcc_s";
     s += " scripts/link-reverse.o";
-    s += " -o t.exe";
+    s += " -o main.exe";
     s += " main.ne.o";
     const char *command = s.c_str();
     system(command);

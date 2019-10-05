@@ -156,7 +156,7 @@ AstNode *createSequence(ParseTreeNode *node, SequenceNode *seqRoot = nullptr) {
     return seqRoot;
 }
 
-AstNode *createStatement(ParseTreeNode *node) {
+StatementNode *createStatement(ParseTreeNode *node) {
     auto statementNode = new StatementNode();
     if (node->children.empty()) {
         std::cout << "Statement did not contain anything." << std::endl;
@@ -205,7 +205,7 @@ AstNode *createExternalFunction(ParseTreeNode *node) {
     if (header->children[0]->symbol == GrammarSymbol::FUNCTION_ARGS) {
         // we have function arguments
         argumentsNode = header->children[0];
-        returnNode = header->children[2];
+        returnNode = header->children[1];
     } else {
         // we don't have function arguments
         returnNode = header->children[0];
@@ -300,7 +300,7 @@ void addArguments(CallNode *call, ParseTreeNode *root) {
             argNode = currentNode->children[2];
         }
 
-        auto argument = createVariableDefinition(argNode);
+        auto argument = createAstFromParseTree(argNode);
         call->getArguments().push_back(argument);
 
         if (currentNode->children.size() == 3) {
