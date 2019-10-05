@@ -2,6 +2,26 @@
 
 Neon is an experimental programming language.
 
+## Features
+
+### Variables
+
+- declaring new variables
+- reading variables
+- writing variables
+
+### Functions
+
+- declaring functions
+- calling functions
+- passing arguments to function calls
+
+### Data Types
+
+- Integer (32 bit)
+- Float (32 bit)
+- Booleans (1 bit)
+
 ## TODO / Ideas
 
 - importing files

@@ -263,6 +263,7 @@ void IRGenerator::visitSequenceNode(SequenceNode *node) {
     if (initFunc != nullptr) {
         isGlobalScope = false;
         finalizeFunction(initFunc, AstNode::DataType::VOID);
+        // TODO don't generate global init function, if there are no globals
         setupGlobalInitialization(initFunc);
     }
 
