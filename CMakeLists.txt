@@ -43,7 +43,8 @@ set(SOURCES
     ${CMAKE_CURRENT_SOURCE_DIR}/src/Program.cpp
     ${CMAKE_CURRENT_SOURCE_DIR}/src/ast/AST.cpp
     ${CMAKE_CURRENT_SOURCE_DIR}/src/ast/ASTTypeAnalyser.cpp
-    ${CMAKE_CURRENT_SOURCE_DIR}/src/ObjectFileWriter.cpp)
+    ${CMAKE_CURRENT_SOURCE_DIR}/src/ObjectFileWriter.cpp
+    ${CMAKE_CURRENT_SOURCE_DIR}/src/Linker.cpp)
 
 add_library(${PROJECT_NAME}_lib ${SOURCES})
 target_link_libraries(${PROJECT_NAME}_lib ${LLVM_LIBS})

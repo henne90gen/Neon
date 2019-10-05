@@ -1,5 +1,6 @@
 #include "IRGenerator.h"
 #include "Lexer.h"
+#include "Linker.h"
 #include "ObjectFileWriter.h"
 #include "Parser.h"
 #include "Program.h"
@@ -33,6 +34,9 @@ int main() {
     generator->run(astRoot);
 
     writeModuleToObjectFile(program, generator);
+
+    auto linker = new Linker(program);
+    linker->link();
 
     return 0;
 }
