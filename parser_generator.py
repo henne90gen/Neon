@@ -174,42 +174,55 @@ def extract_all_symbols(rules: dict):
             for symbol in rule:
                 if symbol not in symbols:
                     symbols.add(symbol)
+
     return symbols
 
 
-def construct_table(rules: dict, states: []):
-    all_symbols = extract_all_symbols(rules)
-    non_terminals = set(rules.keys())
-    terminals = all_symbols.difference(non_terminals)
-    all_symbols = sorted(all_symbols)
-    non_terminals = sorted(non_terminals)
-    terminals = sorted(terminals)
+class TableConstructor:
+    def __init__(self, rules: dict, states: List[State] = None):
+        if states is None:
+            states = []
+        self.states = states
+        self.all_symbols = extract_all_symbols(rules)
+        self.non_terminals = set(rules.keys())
+        self.terminals = self.all_symbols.difference(self.non_terminals)
+        self.all_symbols = sorted(self.all_symbols)
+        self.non_terminals = sorted(self.non_terminals)
+        self.terminals = sorted(self.terminals)
 
-    table = [[[] for _ in range(len(all_symbols))] for i in range(len(states))]
-    for state_index, state in enumerate(states):
+        self.table = [[[] for _ in range(len(self.all_symbols))] for i in range(len(states))]
+
+    def add_successors(self, state: State, state_index: int):
         for trans, trans_index in state.successors.items():
-            symbol_index = all_symbols.index(trans)
-            if trans in terminals:
-                table[state_index][symbol_index].append(f"s{trans_index}")
-            elif trans in non_terminals:
-                table[state_index][symbol_index].append(f"g{trans_index}")
+            symbol_index = self.all_symbols.index(trans)
+            if trans in self.terminals:
+                self.table[state_index][symbol_index].append(f"s{trans_index}")
+            elif trans in self.non_terminals:
+                self.table[state_index][symbol_index].append(f"g{trans_index}")
 
             for rule_name, rule_collection in state.rules.items():
                 for rule in rule_collection:
                     if len(rule) > 1 and rule[-2] == '.' and rule[-1] == END_OF_FILE and trans == END_OF_FILE:
-                        table[state_index][symbol_index].append("a")
+                        self.table[state_index][symbol_index].append("a")
 
+    def add_rules(self, state: State, state_index: int):
         for rule_name, rule_collection in state.rules.items():
             for rule in rule_collection:
-                if rule[-1] == '.':
-                    formatted_right_side = ' '.join(
-                        filter(lambda s: s != '.', rule))
-                    reduce_ = f"r:{rule_name}->{formatted_right_side}"
-                    for terminal in terminals:
-                        table[state_index][all_symbols.index(
-                            terminal)].append(reduce_)
+                if rule[-1] != '.':
+                    continue
 
-    return all_symbols, table
+                formatted_right_side = ' '.join(filter(lambda s: s != '.', rule))
+                reduce_ = f"r:{rule_name}->{formatted_right_side}"
+                for terminal in self.terminals:
+                    symbol_index = self.all_symbols.index(terminal)
+                    self.table[state_index][symbol_index].append(reduce_)
+
+    def construct_table(self):
+        for state_index, state in enumerate(self.states):
+            self.add_successors(state, state_index)
+            self.add_rules(state, state_index)
+
+        return self.all_symbols, self.table
 
 
 def create_table_row(row: List[List[str]]) -> str:
@@ -224,18 +237,21 @@ def get_grammar_symbol(symbol):
     for c in symbol:
         if not c.isalpha() and not c == "_":
             found_other_char = True
+
     if found_other_char:
         if symbol in SYMBOL_TO_ENUM_MAPPING:
             return SYMBOL_TO_ENUM_MAPPING[symbol]
         else:
             print(f"Could not find '{symbol}' in the symbol mapping table.")
             exit(1)
+
     return symbol.upper()
 
 
 def convert_to_state_transition(transition: str) -> str:
     t = transition[0]
     rest = transition[1:]
+
     if t == "r":
         index = rest.index(">")
         grammar_symbol = get_grammar_symbol(rest[1:index - 1])
@@ -245,12 +261,16 @@ def convert_to_state_transition(transition: str) -> str:
             map(lambda s: f"GrammarSymbol::{s}",
                 map(get_grammar_symbol, rest.split())))
         return f"{{StateTransitionType::REDUCE, -1, {rule_symbol}, {{{rule}}}}}"
+
     if t == "s":
         return f"{{StateTransitionType::SHIFT, {rest}}}"
+
     if t == "g":
         return f"{{StateTransitionType::GOTO, {rest}}}"
+
     if t == "a":
         return "{StateTransitionType::ACCEPT}"
+
     return "{}"
 
 
@@ -277,9 +297,9 @@ def create_switch_case_for_grammar_symbol(grammar_symbol: str):
     return f"  case {grammar_symbol}:\n    return \"{grammar_symbol}\";"
 
 
-def main(grammer_file: str = "grammar.txt", header_file: str = "src/Grammar.h", cpp_file: str = "src/Grammar.cpp",
+def main(grammar_file: str = "grammar.txt", header_file: str = "src/Grammar.h", cpp_file: str = "src/Grammar.cpp",
          verbose: bool = True):
-    with open(grammer_file) as f:
+    with open(grammar_file) as f:
         lines = f.readlines()
 
     rules = parse_rules(lines)
@@ -294,7 +314,7 @@ def main(grammer_file: str = "grammar.txt", header_file: str = "src/Grammar.h", 
             print(s)
         print()
 
-    header, table = construct_table(rules, states)
+    header, table = TableConstructor(rules, states).construct_table()
 
     if verbose:
         for row in [header, *table]:

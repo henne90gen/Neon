@@ -12,4 +12,3 @@ ld \
 	-lc -lgcc -lgcc_s \
   -o main \
 	main.ne.o
-
