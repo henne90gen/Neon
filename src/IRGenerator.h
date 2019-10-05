@@ -67,10 +67,10 @@ class IRGenerator : public ASTVisitor {
     std::unordered_map<std::string, llvm::Value *> definedVariables = {};
 
     llvm::Type *getType(AstNode::DataType type);
-    llvm::Function *getOrCreateFunction(const std::string &name, AstNode::DataType returnType,
+    llvm::Function *getOrCreateFunctionDefinition(const std::string &name, AstNode::DataType returnType,
                                         const std::vector<VariableDefinitionNode *> &arguments);
     llvm::AllocaInst *createEntryBlockAlloca(llvm::Type *type, const std::string &name);
-    void finalizeFunction(llvm::Function *function, AstNode::DataType returnType);
+    void finalizeFunction(llvm::Function *function, const AstNode::DataType returnType, const bool isExternalFunction);
     llvm::Constant *getInitializer(const AstNode::DataType &dt);
     void setupGlobalInitialization(llvm::Function *func);
 };

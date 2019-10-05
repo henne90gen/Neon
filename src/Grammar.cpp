@@ -57,8 +57,8 @@ std::string to_string(GrammarSymbol symbol) {
     return "EXTERN";
   case EXTERNAL_FUNCTION:
     return "EXTERNAL_FUNCTION";
-  case EXTERNAL_FUNCTION_ARGS:
-    return "EXTERNAL_FUNCTION_ARGS";
+  case EXTERNAL_FUNCTION_HEADER:
+    return "EXTERNAL_FUNCTION_HEADER";
   case EXTERNAL_FUNCTION_RETURN:
     return "EXTERNAL_FUNCTION_RETURN";
   case FACTOR:

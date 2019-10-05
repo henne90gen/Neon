@@ -7,7 +7,9 @@ void ASTTypeAnalyser::visitFunctionNode(FunctionNode *node) {
         argument->accept(this);
     }
     functionMap[node->getName()] = node->getReturnType();
-    node->getBody()->accept(this);
+    if (!node->isExternal()) {
+        node->getBody()->accept(this);
+    }
 }
 
 void ASTTypeAnalyser::visitCallNode(CallNode *node) {

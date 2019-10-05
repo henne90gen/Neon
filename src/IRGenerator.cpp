@@ -44,11 +44,25 @@ void IRGenerator::visitFunctionNode(FunctionNode *node) {
     llvm::Function *previousFunction = currentFunction;
     bool previousGlobalScopeState = isGlobalScope;
     isGlobalScope = false;
-    currentFunction = getOrCreateFunction(node->getName(), node->getReturnType(), node->getArguments());
+    currentFunction = getOrCreateFunctionDefinition(node->getName(), node->getReturnType(), node->getArguments());
 
-    node->getBody()->accept(this);
+    if (!node->isExternal()) {
+        llvm::BasicBlock *BB = llvm::BasicBlock::Create(context, "entry-" + node->getName(), currentFunction);
+        builder.SetInsertPoint(BB);
 
-    finalizeFunction(currentFunction, node->getReturnType());
+        for (auto &arg : currentFunction->args()) {
+            auto value = createEntryBlockAlloca(arg.getType(), arg.getName());
+
+            // store initial value
+            builder.CreateStore(&arg, value);
+
+            definedVariables[arg.getName()] = value;
+        }
+
+        node->getBody()->accept(this);
+    }
+
+    finalizeFunction(currentFunction, node->getReturnType(), node->isExternal());
 
     isGlobalScope = previousGlobalScopeState;
     currentFunction = previousFunction;
@@ -162,8 +176,8 @@ void IRGenerator::visitUnaryOperationNode(UnaryOperationNode *node) {
     LOG("Exit UnaryOperation")
 }
 
-llvm::Function *IRGenerator::getOrCreateFunction(const std::string &name, AstNode::DataType returnType,
-                                                 const std::vector<VariableDefinitionNode *> &arguments) {
+llvm::Function *IRGenerator::getOrCreateFunctionDefinition(const std::string &name, AstNode::DataType returnType,
+                                                           const std::vector<VariableDefinitionNode *> &arguments) {
     llvm::Function *function = module.getFunction(name);
     if (function == nullptr) {
         auto retType = getType(returnType);
@@ -187,23 +201,12 @@ llvm::Function *IRGenerator::getOrCreateFunction(const std::string &name, AstNod
         }
     }
 
-    llvm::BasicBlock *BB = llvm::BasicBlock::Create(context, "entry-" + name, function);
-    builder.SetInsertPoint(BB);
-
-    for (auto &arg : function->args()) {
-        auto value = createEntryBlockAlloca(arg.getType(), arg.getName());
-
-        // store initial value
-        builder.CreateStore(&arg, value);
-
-        definedVariables[arg.getName()] = value;
-    }
-
     return function;
 }
 
-void IRGenerator::finalizeFunction(llvm::Function *function, AstNode::DataType returnType) {
-    if (returnType == AstNode::VOID) {
+void IRGenerator::finalizeFunction(llvm::Function *function, const AstNode::DataType returnType,
+                                   const bool isExternalFunction) {
+    if (!isExternalFunction && returnType == AstNode::VOID) {
         builder.SetInsertPoint(&function->getBasicBlockList().back());
         builder.CreateRetVoid();
     }
@@ -213,20 +216,15 @@ void IRGenerator::finalizeFunction(llvm::Function *function, AstNode::DataType r
         return;
     }
 
-    llvm::FunctionAnalysisManager functionAnalysisManager = llvm::FunctionAnalysisManager();
-    llvm::FunctionPassManager functionPassManager;
-    llvm::PassBuilder PB;
-    PB.registerFunctionAnalyses(functionAnalysisManager);
-    functionPassManager = PB.buildFunctionSimplificationPipeline(llvm::PassBuilder::OptimizationLevel::O0,
-                                                                 llvm::PassBuilder::ThinLTOPhase::None);
-    // functionPassManager = llvm::FunctionPassManager();
-    //    functionPassManager.addPass(llvm::PromotePass());
-    //    functionPassManager.addPass(llvm::InstCombinePass());
-    // functionPassManager.addPass(llvm::ReassociatePass()); // throws "out of memory" error
-    //    functionPassManager.addPass(llvm::GVN());
-    //    functionPassManager.addPass(llvm::SimplifyCFGPass());
-
-    functionPassManager.run(*function, functionAnalysisManager);
+    if (!isExternalFunction) {
+        llvm::FunctionAnalysisManager functionAnalysisManager = llvm::FunctionAnalysisManager();
+        llvm::FunctionPassManager functionPassManager;
+        llvm::PassBuilder PB;
+        PB.registerFunctionAnalyses(functionAnalysisManager);
+        functionPassManager = PB.buildFunctionSimplificationPipeline(llvm::PassBuilder::OptimizationLevel::O0,
+                                                                     llvm::PassBuilder::ThinLTOPhase::None);
+        functionPassManager.run(*function, functionAnalysisManager);
+    }
 }
 
 void IRGenerator::setupGlobalInitialization(llvm::Function *func) {
@@ -251,7 +249,11 @@ void IRGenerator::visitSequenceNode(SequenceNode *node) {
     llvm::Function *initFunc = nullptr;
     if (currentFunction == nullptr) {
         // TODO make sure this function name does not collide with any user defined functions
-        initFunc = getOrCreateFunction("__ctor", AstNode::DataType::VOID, {});
+        initFunc = getOrCreateFunctionDefinition("__ctor", AstNode::DataType::VOID, {});
+
+        llvm::BasicBlock *BB = llvm::BasicBlock::Create(context, "entry-ctor", initFunc);
+        builder.SetInsertPoint(BB);
+
         currentFunction = initFunc;
         isGlobalScope = true;
     }
@@ -261,10 +263,10 @@ void IRGenerator::visitSequenceNode(SequenceNode *node) {
     }
 
     if (initFunc != nullptr) {
-        isGlobalScope = false;
-        finalizeFunction(initFunc, AstNode::DataType::VOID);
+        finalizeFunction(initFunc, AstNode::DataType::VOID, false);
         // TODO don't generate global init function, if there are no globals
         setupGlobalInitialization(initFunc);
+        isGlobalScope = false;
     }
 
     LOG("Exit Sequence")

@@ -7,6 +7,7 @@ stmts
 
 stmt
     call ;
+    return call ;
     external_function ;
     function
     assignment ;
@@ -14,9 +15,9 @@ stmt
     variable_definition ;
 
 external_function
-    extern fun variable_name ( external_function_args
+    extern fun variable_name ( external_function_header
 
-external_function_args
+external_function_header
     external_function_return
     function_args external_function_return
 

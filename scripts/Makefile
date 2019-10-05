@@ -7,4 +7,7 @@ llvm:
 link:
 	clang++ -O0 link.cpp -o link ../main.ne.o && ./link
 
+link-reverse:
+	clang++ -O0 -c link-reverse.cpp -o link-reverse.o
+
 .PHONY: compile llvm link

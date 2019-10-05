@@ -245,6 +245,8 @@ class FunctionNode : public AstNode {
 
     AstNode::DataType getReturnType() { return returnType; }
 
+    bool isExternal() { return body == nullptr; }
+
   private:
     std::string name;
     AstNode::DataType returnType;

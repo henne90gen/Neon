@@ -88,3 +88,21 @@ TEST_CASE("Parser can handle two lines") {
     std::vector<std::string> program = {"int a = 1 + 1 ; int b = a + 2 ;  "};
     assertProgramCreatesParseTree(program, parseTree);
 }
+
+TEST_CASE("Parser can handle return statements with function calls") {
+    std::vector<std::pair<int, GrammarSymbol>> parseTree = {
+          {0,  GrammarSymbol::PROGRAM},
+          {1,  GrammarSymbol::STMTS},
+          {2,  GrammarSymbol::STMT},
+          {3,  GrammarSymbol::RETURN},
+          {3,  GrammarSymbol::CALL},
+          {4,  GrammarSymbol::VARIABLE_NAME},
+          {4,  GrammarSymbol::LEFT_PARAN},
+          {4,  GrammarSymbol::CALL_HEADER},
+          {5,  GrammarSymbol::RIGHT_PARAN},
+          {3,  GrammarSymbol::SEMICOLON},
+          {1,  GrammarSymbol::ENDOFFILE},
+    };
+    std::vector<std::string> program = {"return hello ( ) ;"};
+    assertProgramCreatesParseTree(program, parseTree);
+}

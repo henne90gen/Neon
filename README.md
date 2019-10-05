@@ -24,6 +24,7 @@ Neon is an experimental programming language.
 
 ## TODO / Ideas
 
+- importing functions from C
 - importing files
     - generate function in every module that contains all 'script' code
     - generate function call to that function in place of the import statement

@@ -25,6 +25,8 @@ bool isStatement(ParseTreeNode *node) { return node->symbol == GrammarSymbol::ST
 
 bool isFunction(ParseTreeNode *node) { return node->symbol == GrammarSymbol::FUNCTION; }
 
+bool isExternalFunction(ParseTreeNode *node) { return node->symbol == GrammarSymbol::EXTERNAL_FUNCTION; }
+
 bool isCall(ParseTreeNode *node) { return node->symbol == GrammarSymbol::CALL; }
 
 bool isAssignment(ParseTreeNode *node) { return node->symbol == GrammarSymbol::ASSIGNMENT; }
@@ -195,13 +197,41 @@ void addArguments(FunctionNode *function, ParseTreeNode *root) {
     }
 }
 
-AstNode *createExternalFunction(ParseTreeNode *node) { return nullptr; }
-
-AstNode *createFunction(ParseTreeNode *node) {
-    if (node->children[0]->symbol == GrammarSymbol::EXTERN) {
-        return createExternalFunction(node);
+AstNode *createExternalFunction(ParseTreeNode *node) {
+    auto variableNameNode = node->children[2];
+    auto header = node->children[4];
+    ParseTreeNode *argumentsNode = nullptr;
+    ParseTreeNode *returnNode = nullptr;
+    if (header->children[0]->symbol == GrammarSymbol::FUNCTION_ARGS) {
+        // we have function arguments
+        argumentsNode = header->children[0];
+        returnNode = header->children[2];
+    } else {
+        // we don't have function arguments
+        returnNode = header->children[0];
     }
 
+    ParseTreeNode *returnTypeNode = nullptr;
+    if (returnNode->children.size() == 2) {
+        // we have a return type
+        returnTypeNode = returnNode->children[1];
+    } else {
+        // we don't have a return type (implicitly void)
+    }
+
+    auto returnType = AstNode::DataType::VOID;
+    if (returnTypeNode != nullptr) {
+        returnType = getDataType(returnTypeNode);
+    }
+
+    auto function = new FunctionNode(variableNameNode->token.content, returnType);
+    if (argumentsNode != nullptr) {
+        addArguments(function, argumentsNode);
+    }
+    return function;
+}
+
+AstNode *createFunction(ParseTreeNode *node) {
     auto variableNameNode = node->children[1];
     auto header = node->children[3];
     ParseTreeNode *argumentsNode = nullptr;
@@ -326,6 +356,10 @@ AstNode *createAstFromParseTree(ParseTreeNode *node) {
 
     if (isFunction(node)) {
         return createFunction(node);
+    }
+
+    if (isExternalFunction(node)) {
+        return createExternalFunction(node);
     }
 
     if (isCall(node)) {

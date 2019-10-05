@@ -12,7 +12,9 @@ void ASTTestCasePrinter::visitFunctionNode(FunctionNode *node) {
     for (auto argument : node->getArguments()) {
         argument->accept(this);
     }
-    node->getBody()->accept(this);
+    if (!node->isExternal()) {
+        node->getBody()->accept(this);
+    }
     indentation--;
 }
 
