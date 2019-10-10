@@ -38,4 +38,7 @@ so that one can call functions that are contained in the externally linked objec
     - deeply nested in multiple functions, etc.
     - make sure scoping of variables is done right.
     - basically every function is a lambda
-- using musl as the runtime library to create smaller binaries
+- use musl as the runtime library to create smaller binaries
+- add reflection capabilities
+    - inspect objects at runtime
+    - get information about types
