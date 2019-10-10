@@ -297,8 +297,8 @@ def create_switch_case_for_grammar_symbol(grammar_symbol: str):
     return f"  case {grammar_symbol}:\n    return \"{grammar_symbol}\";"
 
 
-def main(grammar_file: str = "grammar.txt", header_file: str = "src/Grammar.h", cpp_file: str = "src/Grammar.cpp",
-         verbose: bool = True):
+def main(grammar_file: str = "grammar.txt", header_file: str = "Grammar.h", cpp_file: str = "Grammar.cpp",
+         verbose: bool = False):
     with open(grammar_file) as f:
         lines = f.readlines()
 
