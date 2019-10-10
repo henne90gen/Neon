@@ -4,7 +4,7 @@ set(LIB_NAME ${EXECUTABLE_NAME}_lib)
 # run parser generator, when grammar.txt has changed
 add_custom_command(OUTPUT ${CMAKE_CURRENT_SOURCE_DIR}/Grammar.h
                           ${CMAKE_CURRENT_SOURCE_DIR}/Grammar.cpp
-                   COMMAND python ${PROJECT_SOURCE_DIR}/parser_generator.py
+                   COMMAND python ${PROJECT_SOURCE_DIR}/scripts/parser_generator.py
                    WORKING_DIRECTORY ${CMAKE_CURRENT_SOURCE_DIR}
                    MAIN_DEPENDENCY ${CMAKE_CURRENT_SOURCE_DIR}/grammar.txt)
 
@@ -57,6 +57,6 @@ endif()
 
 # TODO precompiled headers are coming in 3.16
 # target_precompile_headers(${LIB_NAME} PUBLIC ${CMAKE_CURRENT_SOURCE_DIR}/stdinc.h)
-set(CMAKE_CXX_FLAGS "${CMAKE_CXX_FLAGS} -include-pch ${CMAKE_CURRENT_BINARY_DIR}/stdinc.h.pch")
-add_custom_target(pch COMMAND clang -O3 -x c++-header -std=c++17 -std=gnu++17 ${CMAKE_CURRENT_SOURCE_DIR}/stdinc.h -o ${CMAKE_CURRENT_BINARY_DIR}/stdinc.h.pch)
-add_dependencies(${LIB_NAME} pch)
+#set(CMAKE_CXX_FLAGS "${CMAKE_CXX_FLAGS} -include-pch ${CMAKE_CURRENT_BINARY_DIR}/stdinc.h.pch")
+#add_custom_target(pch COMMAND clang -O3 -x c++-header -std=c++17 -std=gnu++17 ${CMAKE_CURRENT_SOURCE_DIR}/stdinc.h -o ${CMAKE_CURRENT_BINARY_DIR}/stdinc.h.pch)
+#add_dependencies(${LIB_NAME} pch)
