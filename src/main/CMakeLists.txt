@@ -16,7 +16,11 @@ set(SOURCES
     ${CMAKE_CURRENT_SOURCE_DIR}/ast/ASTInterpreter.cpp
     ${CMAKE_CURRENT_SOURCE_DIR}/ast/ASTPrinter.cpp
     ${CMAKE_CURRENT_SOURCE_DIR}/ast/ASTGenerator.cpp
-    ${CMAKE_CURRENT_SOURCE_DIR}/IRGenerator.cpp
+    ${CMAKE_CURRENT_SOURCE_DIR}/ir/IRGenerator.cpp
+    ${CMAKE_CURRENT_SOURCE_DIR}/ir/Operations.cpp
+    ${CMAKE_CURRENT_SOURCE_DIR}/ir/Functions.cpp
+    ${CMAKE_CURRENT_SOURCE_DIR}/ir/DataTypes.cpp
+    ${CMAKE_CURRENT_SOURCE_DIR}/ir/Variables.cpp
     ${CMAKE_CURRENT_SOURCE_DIR}/ast/ASTTestCasePrinter.cpp
     ${CMAKE_CURRENT_SOURCE_DIR}/Program.cpp
     ${CMAKE_CURRENT_SOURCE_DIR}/ast/AST.cpp

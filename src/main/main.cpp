@@ -1,4 +1,4 @@
-#include "IRGenerator.h"
+#include "ir/IRGenerator.h"
 #include "Lexer.h"
 #include "Linker.h"
 #include "ObjectFileWriter.h"
