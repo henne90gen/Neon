@@ -172,7 +172,7 @@ void Parser::executeReduce(std::vector<int> &states, StateTransition &action, st
     auto newNode = new ParseTreeNode(action.symbol);
     auto lastNode = nodes.back();
     nodes.pop_back();
-    for (auto &ruleElement : action.rule) {
+    for (unsigned long i = 0; i < action.rule.size(); i++) {
         auto lastN = nodes.back();
         newNode->children.push_back(lastN);
         nodes.pop_back();

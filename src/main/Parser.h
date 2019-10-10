@@ -30,7 +30,7 @@ class Parser {
     void executeShift(Token &token, std::vector<int> &states, StateTransition &action,
                       std::vector<ParseTreeNode *> &nodes);
 
-    void executeGoto(std::vector<int> &states, StateTransition &action);
+    static void executeGoto(std::vector<int> &states, StateTransition &action);
 
     void executeReduce(std::vector<int> &states, StateTransition &action, std::vector<ParseTreeNode *> &nodes);
 

@@ -22,7 +22,7 @@ void ASTInterpreter::printStatementResult(AstNode *child) {
 }
 
 CalculationResult getTypedResult(CalculationResult &left, CalculationResult &right) {
-    CalculationResult result = {CalculationResult::INTEGER};
+    CalculationResult result = {CalculationResult::INTEGER, 0};
     if (left.type == CalculationResult::FLOAT || right.type == CalculationResult::FLOAT) {
         result.type = CalculationResult::FLOAT;
     }
@@ -86,7 +86,7 @@ CalculationResult divide(CalculationResult &left, CalculationResult &right) {
 }
 
 CalculationResult negate(CalculationResult &calc) {
-    CalculationResult result = {CalculationResult::BOOL};
+    CalculationResult result = {CalculationResult::BOOL, false};
     if (calc.type == CalculationResult::BOOL) {
         result.boolResult = !calc.boolResult;
     }
@@ -172,19 +172,19 @@ void ASTInterpreter::visitVariableNode(VariableNode *node) {
 void ASTInterpreter::visitVariableDefinitionNode(VariableDefinitionNode *node) { variables[node->getName()] = node; }
 
 void ASTInterpreter::visitFloatNode(FloatNode *node) {
-    CalculationResult result = {CalculationResult::FLOAT};
+    CalculationResult result = {CalculationResult::FLOAT, 0};
     result.floatResult = node->getValue();
     calculationResults[node] = result;
 }
 
 void ASTInterpreter::visitIntegerNode(IntegerNode *node) {
-    CalculationResult result = {CalculationResult::INTEGER};
+    CalculationResult result = {CalculationResult::INTEGER, 0};
     result.intResult = node->getValue();
     calculationResults[node] = result;
 }
 
 void ASTInterpreter::visitBoolNode(BoolNode *node) {
-    CalculationResult result = {CalculationResult::BOOL};
+    CalculationResult result = {CalculationResult::BOOL, false};
     result.boolResult = node->getValue();
     calculationResults[node] = result;
 }
