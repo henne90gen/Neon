@@ -375,6 +375,8 @@ const std::vector<StateTransition> stateTransitionTable[{row_count}][{col_count}
 std::string to_string(GrammarSymbol symbol) {
   switch (symbol) {
 {grammar_symbol_switch_cases}
+    default:
+      return "ERROR";
   }
 }
 
@@ -389,6 +391,8 @@ std::string to_string(StateTransitionType transition) {
     case ACCEPT:
       return "ACCEPT";
     case ERROR:
+      return "ERROR";
+    default:
       return "ERROR";
   }
 }

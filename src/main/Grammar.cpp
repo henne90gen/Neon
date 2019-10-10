@@ -111,6 +111,8 @@ std::string to_string(GrammarSymbol symbol) {
     return "LEFT_CURLY_BRACE";
   case RIGHT_CURLY_BRACE:
     return "RIGHT_CURLY_BRACE";
+    default:
+      return "ERROR";
   }
 }
 
@@ -125,6 +127,8 @@ std::string to_string(StateTransitionType transition) {
     case ACCEPT:
       return "ACCEPT";
     case ERROR:
+      return "ERROR";
+    default:
       return "ERROR";
   }
 }
