@@ -1,5 +1,8 @@
 #include "IRGenerator.h"
 
+#include <llvm/IR/Verifier.h>
+#include <llvm/Passes/PassBuilder.h>
+
 void IRGenerator::visitFunctionNode(FunctionNode *node) {
     LOG("Enter Function")
 
@@ -43,7 +46,7 @@ llvm::Function *IRGenerator::getOrCreateFunctionDefinition(const std::string &na
 
         std::vector<llvm::Type *> argumentTypes = {};
         argumentTypes.reserve(arguments.size());
-for (auto &arg : arguments) {
+        for (auto &arg : arguments) {
             argumentTypes.push_back(getType(arg->getType()));
         }
 
@@ -91,11 +94,11 @@ void IRGenerator::visitCallNode(CallNode *node) {
     llvm::Function *calleeFunc = module.getFunction(node->getName());
     if (calleeFunc == nullptr) {
         return logError("Use of undeclared identifier " + node->getName());
-}
+    }
 
     if (calleeFunc->arg_size() != node->getArguments().size()) {
         return logError("Incorrect number arguments passed.");
-}
+    }
 
     std::vector<llvm::Value *> arguments;
     for (auto &argument : node->getArguments()) {

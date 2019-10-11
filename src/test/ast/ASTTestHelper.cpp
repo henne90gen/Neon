@@ -1,5 +1,7 @@
 #include "ASTTestHelper.h"
 
+#include "ast/nodes/AllNodes.h"
+
 #include <catch2/catch.hpp>
 #include <iostream>
 
@@ -117,27 +119,27 @@ SimpleTree *createSimpleFromIf(IfStatementNode *node) {
 
 SimpleTree *createSimpleFromAst(AstNode *node) {
     switch (node->getAstNodeType()) {
-    case AstNode::SEQUENCE:
+    case ast::NodeType::SEQUENCE:
         return createSimpleFromSequence((SequenceNode *)node);
-    case AstNode::STATEMENT:
+    case ast::NodeType::STATEMENT:
         return createSimpleFromStatement((StatementNode *)node);
-    case AstNode::LITERAL:
+    case ast::NodeType::LITERAL:
         return createSimpleFromLiteral((LiteralNode *)node);
-    case AstNode::UNARY_OPERATION:
+    case ast::NodeType::UNARY_OPERATION:
         return createSimpleFromUnary((UnaryOperationNode *)node);
-    case AstNode::BINARY_OPERATION:
+    case ast::NodeType::BINARY_OPERATION:
         return createSimpleFromBinary((BinaryOperationNode *)node);
-    case AstNode::FUNCTION:
+    case ast::NodeType::FUNCTION:
         return createSimpleFromFunction((FunctionNode *)node);
-    case AstNode::VARIABLE_DEFINITION:
+    case ast::NodeType::VARIABLE_DEFINITION:
         return createSimpleFromVariableDefinition((VariableDefinitionNode *)node);
-    case AstNode::VARIABLE:
+    case ast::NodeType::VARIABLE:
         return createSimpleFromVariable((VariableNode *)node);
-    case AstNode::ASSIGNMENT:
+    case ast::NodeType::ASSIGNMENT:
         return createSimpleFromAssignment((AssignmentNode *)node);
-    case AstNode::CALL:
+    case ast::NodeType::CALL:
         return createSimpleFromCall((CallNode *)node);
-    case AstNode::IF_STATEMENT:
+    case ast::NodeType::IF_STATEMENT:
         return createSimpleFromIf((IfStatementNode *)node);
     default:
         std::cerr << "Could not create simple helper tree node for " << to_string(node->getAstNodeType()) << std::endl;

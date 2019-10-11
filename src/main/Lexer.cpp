@@ -158,7 +158,7 @@ std::optional<Token> Lexer::matchWordToken() {
         return TOKEN(Token::FUN, "fun");
     } if (STARTS_WITH(currentWord, "int")) {
         return TOKEN(Token::DATA_TYPE, "int");
-    } else if (STARTS_WITH(currentWord, "float")) {
+    } if (STARTS_WITH(currentWord, "float")) {
         return TOKEN(Token::DATA_TYPE, "float");
     } else if (STARTS_WITH(currentWord, "bool")) {
         return TOKEN(Token::DATA_TYPE, "bool");
@@ -204,7 +204,7 @@ std::optional<Token> Lexer::matchOneCharacterToken() {
         return TOKEN(Token::PLUS, "+");
     } if (firstChar == '-') {
         return TOKEN(Token::MINUS, "-");
-    } else if (firstChar == '*') {
+    } if (firstChar == '*') {
         return TOKEN(Token::STAR, "*");
     } else if (firstChar == '/') {
         return TOKEN(Token::DIV, "/");

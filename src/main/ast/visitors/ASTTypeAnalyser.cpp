@@ -2,8 +2,8 @@
 
 #include <iostream>
 
-#include "../nodes/AllNodes.h"
 #include "../../Utils.h"
+#include "../nodes/AllNodes.h"
 
 void ASTTypeAnalyser::visitFunctionNode(FunctionNode *node) {
     for (auto &argument : node->getArguments()) {

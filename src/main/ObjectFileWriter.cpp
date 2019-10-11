@@ -6,6 +6,10 @@
 #include <llvm/Target/TargetOptions.h>
 #include <string>
 
+#include <llvm/IR/Verifier.h>
+#include <llvm/Support/TargetSelect.h>
+#include <llvm/Target/TargetMachine.h>
+
 void writeModuleToObjectFile(const Program &program, IRGenerator *irGenerator) {
     llvm::InitializeNativeTarget();
     llvm::InitializeNativeTargetAsmParser();

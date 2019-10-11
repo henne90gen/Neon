@@ -1,6 +1,16 @@
 #include "IRGenerator.h"
 
+#include <llvm/IR/BasicBlock.h>
+#include <llvm/IR/Constants.h>
+#include <llvm/IR/GlobalVariable.h>
+#include <llvm/IR/PassManager.h>
+#include <llvm/Passes/PassBuilder.h>
 #include <llvm/Support/FileSystem.h>
+#include <llvm/Support/TargetRegistry.h>
+#include <llvm/Support/raw_ostream.h>
+#include <llvm/Target/TargetOptions.h>
+#include <llvm/Transforms/Scalar/SimplifyCFG.h>
+
 #include <iostream>
 
 #include "../Utils.h"

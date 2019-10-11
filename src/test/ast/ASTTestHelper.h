@@ -7,11 +7,11 @@
 
 struct AstNodeSpec {
     int indentation;
-    AstNode::AstNodeType type;
+    ast::NodeType type;
 };
 
 struct SimpleTree {
-    AstNode::AstNodeType type = AstNode::AstNodeType::SEQUENCE;
+    ast::NodeType type = ast::NodeType::SEQUENCE;
     std::vector<SimpleTree *> children = {};
 };
 

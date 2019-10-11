@@ -1,7 +1,7 @@
 #include "ASTInterpreter.h"
 
-#include "../nodes/AllNodes.h"
 #include "../../Utils.h"
+#include "../nodes/AllNodes.h"
 
 #include <iostream>
 
