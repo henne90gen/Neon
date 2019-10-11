@@ -49,10 +49,12 @@ std::string to_string(GrammarSymbol symbol) {
     return "DATA_TYPE";
   case DISJUNCTION:
     return "DISJUNCTION";
+  case ELSE:
+    return "ELSE";
   case ENDOFFILE:
     return "ENDOFFILE";
-  case EXPR:
-    return "EXPR";
+  case EXPRESSION:
+    return "EXPRESSION";
   case EXTERN:
     return "EXTERN";
   case EXTERNAL_FUNCTION:
@@ -79,8 +81,16 @@ std::string to_string(GrammarSymbol symbol) {
     return "FUNCTION_HEADER";
   case FUNCTION_RETURN:
     return "FUNCTION_RETURN";
+  case IF:
+    return "IF";
   case IF_STATEMENT:
     return "IF_STATEMENT";
+  case IF_STATEMENT_BODY:
+    return "IF_STATEMENT_BODY";
+  case IF_STATEMENT_ELSE:
+    return "IF_STATEMENT_ELSE";
+  case IF_STATEMENT_ELSE_BODY:
+    return "IF_STATEMENT_ELSE_BODY";
   case INTEGER:
     return "INTEGER";
   case NEGATION:

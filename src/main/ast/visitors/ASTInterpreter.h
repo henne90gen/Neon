@@ -2,7 +2,7 @@
 
 #include <unordered_map>
 
-#include "AST.h"
+#include "../AST.h"
 
 struct CalculationResult {
     enum CalculationType { INTEGER, FLOAT, BOOL };
@@ -20,6 +20,7 @@ class ASTInterpreter : public ASTVisitor {
 
     void visitFunctionNode(FunctionNode *node) override;
     void visitCallNode(CallNode *node) override;
+    void visitIfStatementNode(IfStatementNode *node) override;
     void visitVariableNode(VariableNode *node) override;
     void visitVariableDefinitionNode(VariableDefinitionNode *node) override;
     void visitBinaryOperationNode(BinaryOperationNode *node) override;
@@ -37,7 +38,7 @@ class ASTInterpreter : public ASTVisitor {
     std::unordered_map<std::string, FunctionNode *> functions = {};
     std::unordered_map<std::string, VariableDefinitionNode *> variables = {};
 
-    void printStatementResult(AstNode *node);
+    void printStatementResult(AstNode *child);
 };
 
 void interpretAst(AstNode *node, bool verbose);

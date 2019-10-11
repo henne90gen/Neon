@@ -46,10 +46,9 @@ void ASTTypeAnalyser::visitBinaryOperationNode(BinaryOperationNode *node) {
         leftType == rightType) {
         typeMap[node] = leftType;
         return;
-    } else {
+    } 
         std::cerr << "Binary operation type mismatch: " << to_string(node->getAstNodeType()) << std::endl;
-        return;
-    }
+   
 }
 
 void ASTTypeAnalyser::visitUnaryOperationNode(UnaryOperationNode *node) {
@@ -58,11 +57,10 @@ void ASTTypeAnalyser::visitUnaryOperationNode(UnaryOperationNode *node) {
         typeMap[node->getChild()] == AstNode::DataType::BOOL) {
         typeMap[node] = AstNode::DataType::BOOL;
         return;
-    } else {
-        // TODO unary operators can also be of other types than bool, we need to add support for that as well
+    } 
+        // TODO(henne): unary operators can also be of other types than bool, we need to add support for that as well
         std::cerr << "Unary operation type mismatch: " << to_string(node->getAstNodeType()) << std::endl;
-        return;
-    }
+   
 }
 
 void ASTTypeAnalyser::visitAssignmentNode(AssignmentNode *node) {
@@ -97,6 +95,10 @@ void ASTTypeAnalyser::visitFloatNode(FloatNode *node) { typeMap[node] = AstNode:
 void ASTTypeAnalyser::visitIntegerNode(IntegerNode *node) { typeMap[node] = AstNode::DataType::INT; }
 
 void ASTTypeAnalyser::visitBoolNode(BoolNode *node) { typeMap[node] = AstNode::DataType::BOOL; }
+
+void ASTTypeAnalyser::visitIfStatementNode(IfStatementNode * /*node*/) {
+    NOT_IMPLEMENTED
+}
 
 void analyseTypes(AstNode *root) {
     if (root == nullptr) {

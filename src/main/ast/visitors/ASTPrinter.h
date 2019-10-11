@@ -1,6 +1,6 @@
 #pragma once
 
-#include "AST.h"
+#include "../AST.h"
 
 class ASTPrinter : public ASTVisitor {
   public:
@@ -8,6 +8,7 @@ class ASTPrinter : public ASTVisitor {
 
     void visitFunctionNode(FunctionNode *node) override;
     void visitCallNode(CallNode *node) override;
+    void visitIfStatementNode(IfStatementNode *node) override;
     void visitVariableNode(VariableNode *node) override;
     void visitVariableDefinitionNode(VariableDefinitionNode *node) override;
     void visitBinaryOperationNode(BinaryOperationNode *node) override;

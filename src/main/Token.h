@@ -34,6 +34,8 @@ struct Token {
         DATA_TYPE,
         RETURN,
         EXTERN,
+        IF,
+        ELSE,
         END_OF_FILE,
     };
 

@@ -138,6 +138,20 @@ void ASTPrinter::visitCallNode(CallNode *node) {
     indentation--;
 }
 
+void ASTPrinter::visitIfStatementNode(IfStatementNode *node) {
+    indent(indentation);
+    std::cout << "IfStatementNode()" << std::endl;
+    indentation++;
+    node->getCondition()->accept(this);
+    if (node->getIfBody() != nullptr) {
+        node->getIfBody()->accept(this);
+    }
+    if (node->getElseBody() != nullptr) {
+        node->getElseBody()->accept(this);
+    }
+    indentation--;
+}
+
 void printAst(AstNode *root) {
     if (root == nullptr) {
         std::cerr << "Could not print AST (nullptr)." << std::endl;

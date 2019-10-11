@@ -1,13 +1,13 @@
-#include "ir/IRGenerator.h"
 #include "Lexer.h"
 #include "Linker.h"
 #include "ObjectFileWriter.h"
 #include "Parser.h"
 #include "Program.h"
 #include "ast/ASTGenerator.h"
-#include "ast/ASTPrinter.h"
-#include "ast/ASTTestCasePrinter.h"
-#include "ast/ASTTypeAnalyser.h"
+#include "ast/visitors/ASTPrinter.h"
+#include "ast/visitors/ASTTestCasePrinter.h"
+#include "ast/visitors/ASTTypeAnalyser.h"
+#include "ir/IRGenerator.h"
 
 int main() {
     bool verbose = true;

@@ -22,7 +22,7 @@ void ASTInterpreter::printStatementResult(AstNode *child) {
 }
 
 CalculationResult getTypedResult(CalculationResult &left, CalculationResult &right) {
-    CalculationResult result = {CalculationResult::INTEGER, 0};
+    CalculationResult result = {CalculationResult::INTEGER, {0}};
     if (left.type == CalculationResult::FLOAT || right.type == CalculationResult::FLOAT) {
         result.type = CalculationResult::FLOAT;
     }
@@ -31,10 +31,10 @@ CalculationResult getTypedResult(CalculationResult &left, CalculationResult &rig
 
 float castToFloat(CalculationResult &result) {
     if (result.type == CalculationResult::INTEGER) {
-        return (float)result.intResult;
-    } else {
+        return static_cast<float>(result.intResult);
+    } 
         return result.floatResult;
-    }
+    
 }
 
 CalculationResult add(CalculationResult &left, CalculationResult &right) {
@@ -86,7 +86,7 @@ CalculationResult divide(CalculationResult &left, CalculationResult &right) {
 }
 
 CalculationResult negate(CalculationResult &calc) {
-    CalculationResult result = {CalculationResult::BOOL, false};
+    CalculationResult result = {CalculationResult::BOOL, {0}};
     if (calc.type == CalculationResult::BOOL) {
         result.boolResult = !calc.boolResult;
     }
@@ -172,19 +172,19 @@ void ASTInterpreter::visitVariableNode(VariableNode *node) {
 void ASTInterpreter::visitVariableDefinitionNode(VariableDefinitionNode *node) { variables[node->getName()] = node; }
 
 void ASTInterpreter::visitFloatNode(FloatNode *node) {
-    CalculationResult result = {CalculationResult::FLOAT, 0};
+    CalculationResult result = {CalculationResult::FLOAT, {0}};
     result.floatResult = node->getValue();
     calculationResults[node] = result;
 }
 
 void ASTInterpreter::visitIntegerNode(IntegerNode *node) {
-    CalculationResult result = {CalculationResult::INTEGER, 0};
+    CalculationResult result = {CalculationResult::INTEGER, {0}};
     result.intResult = node->getValue();
     calculationResults[node] = result;
 }
 
 void ASTInterpreter::visitBoolNode(BoolNode *node) {
-    CalculationResult result = {CalculationResult::BOOL, false};
+    CalculationResult result = {CalculationResult::BOOL, {0}};
     result.boolResult = node->getValue();
     calculationResults[node] = result;
 }
@@ -196,8 +196,12 @@ void ASTInterpreter::visitAssignmentNode(AssignmentNode *node) {
     calculationResults[node] = calculationResults[node->getRight()];
 }
 
-void ASTInterpreter::visitCallNode(CallNode *node) {
-    // TODO implement
+void ASTInterpreter::visitCallNode(CallNode * /*node*/) {
+    NOT_IMPLEMENTED
+}
+
+void ASTInterpreter::visitIfStatementNode(IfStatementNode * /*node*/) {
+    NOT_IMPLEMENTED
 }
 
 void interpretAst(AstNode *node, bool verbose) {

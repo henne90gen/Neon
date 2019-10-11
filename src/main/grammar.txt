@@ -10,9 +10,24 @@ statement
     external_function ;
     function
     assignment ;
-    return expr ;
+    return expression ;
     variable_definition ;
-    if_statement ;
+    if_statement
+
+if_statement
+    if ( expression ) { if_statement_body
+
+if_statement_body
+    if_statement_else
+    statements if_statement_else
+
+if_statement_else
+    }
+    } else { if_statement_else_body
+
+if_statement_else_body
+    }
+    statements }
 
 external_function
     extern fun variable_name ( external_function_header
@@ -55,14 +70,14 @@ call_header
     call_args )
 
 call_args
-    expr
-    call_args , expr
+    expression
+    call_args , expression
 
 assignment
-    variable_definition = expr
-    variable_name = expr
+    variable_definition = expression
+    variable_name = expression
 
-expr
+expression
     call
     disjunction
 
@@ -103,4 +118,4 @@ factor
     integer
     float
     variable_name
-    ( expr )
+    ( expression )

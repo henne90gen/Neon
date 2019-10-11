@@ -11,7 +11,7 @@ void IRGenerator::visitFloatNode(FloatNode *node) {
 }
 
 void IRGenerator::visitBoolNode(BoolNode *node) {
-    nodesToValues[node] = llvm::ConstantInt::get(context, llvm::APInt(1, node->getValue()));
+    nodesToValues[node] = llvm::ConstantInt::get(context, llvm::APInt(1, static_cast<uint64_t>(node->getValue())));
     LOG("Created Bool")
 }
 
@@ -22,7 +22,7 @@ void IRGenerator::visitAssignmentNode(AssignmentNode *node) {
         node->getLeft()->accept(this);
         dest = nodesToValues[node->getLeft()];
     } else {
-        auto variable = (VariableNode *)node->getLeft();
+        auto variable = dynamic_cast<VariableNode *>(node->getLeft());
         dest = definedVariables[variable->getName()];
     }
 

@@ -116,6 +116,10 @@ GrammarSymbol convertToGrammarSymbol(Token &token) {
         return GrammarSymbol::RETURN;
     case Token::EXTERN:
         return GrammarSymbol::EXTERN;
+    case Token::IF:
+        return GrammarSymbol::IF;
+    case Token::ELSE:
+        return GrammarSymbol::ELSE;
     default:
         std::cout << "Could not convert token " << to_string(token.type) << " to grammar symbol." << std::endl;
         exit(1);

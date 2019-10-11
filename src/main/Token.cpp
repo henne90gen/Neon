@@ -63,6 +63,6 @@ std::string to_string(Token::TokenType type) {
     case Token::EXTERN:
         return "EXTERN";
     default:
-        return "NOT IMPLEMENTED YET (" + std::to_string((int)type) + ")";
+        return "NOT IMPLEMENTED YET (" + std::to_string(static_cast<int>(type)) + ")";
     }
 }

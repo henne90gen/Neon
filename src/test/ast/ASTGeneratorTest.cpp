@@ -89,3 +89,25 @@ TEST_CASE("External function with argument") {
     std::vector<std::string> program = {"extern fun hello(int i);"};
     assertProgramCreatesAst(program, spec);
 }
+
+TEST_CASE("ASTGenerator can handle 'if ( true ) { }'") {
+    std::vector<AstNodeSpec> spec = {
+          {0, AstNode::SEQUENCE},
+          {1, AstNode::STATEMENT},
+          {2, AstNode::IF_STATEMENT},
+          {3, AstNode::LITERAL},
+    };
+    std::vector<std::string> program = {"if ( true ) { }"};
+    assertProgramCreatesAst(program, spec);
+}
+
+TEST_CASE("ASTGenerator can handle 'if ( true ) { } else { }'") {
+    std::vector<AstNodeSpec> spec = {
+          {0, AstNode::SEQUENCE},
+          {1, AstNode::STATEMENT},
+          {2, AstNode::IF_STATEMENT},
+          {3, AstNode::LITERAL},
+    };
+    std::vector<std::string> program = {"if ( true ) { } else { }"};
+    assertProgramCreatesAst(program, spec);
+}

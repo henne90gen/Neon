@@ -1,7 +1,7 @@
 #include "IRGenerator.h"
 
-#include <iostream>
 #include <llvm/Support/FileSystem.h>
+#include <iostream>
 
 IRGenerator::IRGenerator(const Program &program, const bool verbose = false)
     : program(program), verbose(verbose), builder(context), module(program.fileName, context) {}
@@ -68,7 +68,7 @@ void IRGenerator::visitSequenceNode(SequenceNode *node) {
 
     llvm::Function *initFunc = nullptr;
     if (currentFunction == nullptr) {
-        // TODO make sure this function name does not collide with any user defined functions
+        // TODO(henne): make sure this function name does not collide with any user defined functions
         initFunc = getOrCreateFunctionDefinition("__ctor", AstNode::DataType::VOID, {});
 
         llvm::BasicBlock *BB = llvm::BasicBlock::Create(context, "entry-ctor", initFunc);
@@ -84,7 +84,7 @@ void IRGenerator::visitSequenceNode(SequenceNode *node) {
 
     if (initFunc != nullptr) {
         finalizeFunction(initFunc, AstNode::DataType::VOID, false);
-        // TODO don't generate global init function, if there are no globals
+        // TODO(henne): don't generate global init function, if there are no globals
         setupGlobalInitialization(initFunc);
         isGlobalScope = false;
     }
@@ -115,6 +115,10 @@ void IRGenerator::print(const bool writeToFile) {
     if (writeToFile) {
         module.print(dest, nullptr);
     }
+}
+
+void IRGenerator::visitIfStatementNode(IfStatementNode * /*node*/) {
+    NOT_IMPLEMENTED
 }
 
 void IRGenerator::run(AstNode *root) {

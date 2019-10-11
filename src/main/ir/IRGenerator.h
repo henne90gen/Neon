@@ -3,8 +3,8 @@
 #include "../Program.h"
 #include "../ast/AST.h"
 
-#include <unordered_map>
 #include <iostream>
+#include <unordered_map>
 
 #include "llvm/ADT/APFloat.h"
 #include "llvm/ADT/APInt.h"
@@ -43,6 +43,7 @@ class IRGenerator : public ASTVisitor {
 
     void visitFunctionNode(FunctionNode *node) override;
     void visitCallNode(CallNode *node) override;
+    void visitIfStatementNode(IfStatementNode *node) override;
     void visitVariableNode(VariableNode *node) override;
     void visitVariableDefinitionNode(VariableDefinitionNode *node) override;
     void visitBinaryOperationNode(BinaryOperationNode *node) override;

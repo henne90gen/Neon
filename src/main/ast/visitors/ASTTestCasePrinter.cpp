@@ -69,9 +69,24 @@ void ASTTestCasePrinter::visitBoolNode(BoolNode *node) { printNode(node); }
 
 void ASTTestCasePrinter::visitCallNode(CallNode *node) {
     printNode(node);
+    indentation++;
     for (auto argument : node->getArguments()) {
         argument->accept(this);
     }
+    indentation--;
+}
+
+void ASTTestCasePrinter::visitIfStatementNode(IfStatementNode *node) {
+    printNode(node);
+    indentation++;
+    node->getCondition()->accept(this);
+    if (node->getIfBody() != nullptr) {
+        node->getIfBody()->accept(this);
+    }
+    if (node->getElseBody() != nullptr) {
+        node->getElseBody()->accept(this);
+    }
+    indentation--;
 }
 
 void printAstTestCase(const Program &program, AstNode *root) {

@@ -102,6 +102,19 @@ SimpleTree *createSimpleFromCall(CallNode *node) {
     return result;
 }
 
+SimpleTree *createSimpleFromIf(IfStatementNode *node) {
+    auto result = new SimpleTree();
+    result->type = node->getAstNodeType();
+    result->children.push_back(createSimpleFromAst(node->getCondition()));
+    if (node->getIfBody() != nullptr) {
+        result->children.push_back(createSimpleFromAst(node->getIfBody()));
+    }
+    if (node->getElseBody() != nullptr) {
+        result->children.push_back(createSimpleFromAst(node->getElseBody()));
+    }
+    return result;
+}
+
 SimpleTree *createSimpleFromAst(AstNode *node) {
     switch (node->getAstNodeType()) {
     case AstNode::SEQUENCE:
@@ -124,8 +137,11 @@ SimpleTree *createSimpleFromAst(AstNode *node) {
         return createSimpleFromAssignment((AssignmentNode *)node);
     case AstNode::CALL:
         return createSimpleFromCall((CallNode *)node);
+    case AstNode::IF_STATEMENT:
+        return createSimpleFromIf((IfStatementNode *)node);
     default:
         std::cerr << "Could not create simple helper tree node for " << to_string(node->getAstNodeType()) << std::endl;
+        exit(1);
         return nullptr;
     }
 }

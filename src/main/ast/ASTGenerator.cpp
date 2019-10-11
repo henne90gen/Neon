@@ -27,6 +27,8 @@ bool isFunction(ParseTreeNode *node) { return node->symbol == GrammarSymbol::FUN
 
 bool isExternalFunction(ParseTreeNode *node) { return node->symbol == GrammarSymbol::EXTERNAL_FUNCTION; }
 
+bool isIfStatement(ParseTreeNode *node) { return node->symbol == GrammarSymbol::IF_STATEMENT; }
+
 bool isCall(ParseTreeNode *node) { return node->symbol == GrammarSymbol::CALL; }
 
 bool isAssignment(ParseTreeNode *node) { return node->symbol == GrammarSymbol::ASSIGNMENT; }
@@ -122,9 +124,9 @@ AstNode::DataType getDataType(ParseTreeNode *node) {
 
     if (node->token.content == "int") {
         return AstNode::DataType::INT;
-    } else if (node->token.content == "float") {
+    } if (node->token.content == "float") {
         return AstNode::DataType::FLOAT;
-    } else if (node->token.content == "bool") {
+    } if (node->token.content == "bool") {
         return AstNode::DataType::BOOL;
     }
     return AstNode::DataType::VOID;
@@ -144,7 +146,7 @@ AstNode *createSequence(ParseTreeNode *node, SequenceNode *seqRoot = nullptr) {
 
     for (auto child : node->children) {
         if (isSequence(child)) {
-            seqRoot = (SequenceNode *)createSequence(child, seqRoot);
+            seqRoot = dynamic_cast<SequenceNode *>(createSequence(child, seqRoot));
             continue;
         }
         auto astChild = createAstFromParseTree(child);
@@ -197,7 +199,7 @@ void addArguments(FunctionNode *function, ParseTreeNode *root) {
     }
 }
 
-AstNode *createExternalFunction(ParseTreeNode *node) {
+FunctionNode *createExternalFunction(ParseTreeNode *node) {
     auto variableNameNode = node->children[2];
     auto header = node->children[4];
     ParseTreeNode *argumentsNode = nullptr;
@@ -231,7 +233,7 @@ AstNode *createExternalFunction(ParseTreeNode *node) {
     return function;
 }
 
-AstNode *createFunction(ParseTreeNode *node) {
+FunctionNode *createFunction(ParseTreeNode *node) {
     auto variableNameNode = node->children[1];
     auto header = node->children[3];
     ParseTreeNode *argumentsNode = nullptr;
@@ -276,7 +278,7 @@ AstNode *createFunction(ParseTreeNode *node) {
     return function;
 }
 
-AstNode *createAssignment(ParseTreeNode *node) {
+AssignmentNode *createAssignment(ParseTreeNode *node) {
     auto assignment = new AssignmentNode();
     if (node->children.size() != 3) {
         std::cout << "Assignment should always have 3 children" << std::endl;
@@ -321,6 +323,25 @@ CallNode *createCall(ParseTreeNode *node) {
     return call;
 }
 
+IfStatementNode *createIfStatement(ParseTreeNode *node) {
+    auto ifNode = new IfStatementNode();
+    AstNode *condition = createAstFromParseTree(node->children[2]);
+    ifNode->setCondition(condition);
+    auto ifBodyNode = node->children[5];
+    auto elseNode = ifBodyNode->children[0];
+    if (ifBodyNode->children.size() == 2) {
+        ifNode->setIfBody(createAstFromParseTree(ifBodyNode->children[0]));
+        elseNode = ifBodyNode->children[1];
+    }
+    if (elseNode->children.size() == 4) {
+        auto elseBodyNode = elseNode->children[3];
+        if (elseBodyNode->children.size() == 2) {
+            ifNode->setElseBody(createAstFromParseTree(elseBodyNode->children[0]));
+        }
+    }
+    return ifNode;
+}
+
 AstNode *createAstFromParseTree(ParseTreeNode *node) {
     if (node == nullptr) {
         return nullptr;
@@ -360,6 +381,10 @@ AstNode *createAstFromParseTree(ParseTreeNode *node) {
 
     if (isExternalFunction(node)) {
         return createExternalFunction(node);
+    }
+
+    if (isIfStatement(node)) {
+        return createIfStatement(node);
     }
 
     if (isCall(node)) {

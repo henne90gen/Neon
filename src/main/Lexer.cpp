@@ -114,9 +114,9 @@ Token Lexer::_getToken() {
 
         if (currentWord == previousWord) {
             break;
-        } else {
+        } 
             previousWord = currentWord;
-        }
+        
     }
 
     std::string invalidToken;
@@ -142,18 +142,18 @@ Token Lexer::getToken() {
 }
 
 #define STARTS_WITH(word, search) word.find(search) == 0
-#define TOKEN(type, content) std::optional<Token>({type, content});
+#define TOKEN(type, content) std::optional<Token>({type, content})
 
 std::optional<Token> Lexer::matchWordToken() {
     if (STARTS_WITH(currentWord, "true")) {
         return TOKEN(Token::TRUE, "true");
-    } else if (STARTS_WITH(currentWord, "false")) {
+    } if (STARTS_WITH(currentWord, "false")) {
         return TOKEN(Token::FALSE, "false");
-    } else if (STARTS_WITH(currentWord, "not")) {
+    } if (STARTS_WITH(currentWord, "not")) {
         return TOKEN(Token::NOT, "not");
-    } else if (STARTS_WITH(currentWord, "and")) {
+    } if (STARTS_WITH(currentWord, "and")) {
         return TOKEN(Token::AND, "and");
-    } else if (STARTS_WITH(currentWord, "or")) {
+    } if (STARTS_WITH(currentWord, "or")) {
         return TOKEN(Token::OR, "or");
     } else if (STARTS_WITH(currentWord, "fun")) {
         return TOKEN(Token::FUN, "fun");
@@ -167,6 +167,10 @@ std::optional<Token> Lexer::matchWordToken() {
         return TOKEN(Token::RETURN, "return");
     } else if (STARTS_WITH(currentWord, "extern")) {
         return TOKEN(Token::EXTERN, "extern");
+    } else if (STARTS_WITH(currentWord, "if")) {
+        return TOKEN(Token::IF, "if");
+    } else if (STARTS_WITH(currentWord, "else")) {
+        return TOKEN(Token::ELSE, "else");
     }
 
     return {};
@@ -175,11 +179,11 @@ std::optional<Token> Lexer::matchWordToken() {
 std::optional<Token> Lexer::matchTwoCharToken() {
     if (STARTS_WITH(currentWord, "!=")) {
         return TOKEN(Token::NOT_EQUALS, "!=");
-    } else if (STARTS_WITH(currentWord, "==")) {
+    } if (STARTS_WITH(currentWord, "==")) {
         return TOKEN(Token::DOUBLE_EQUALS, "==");
-    } else if (STARTS_WITH(currentWord, ">=")) {
+    } if (STARTS_WITH(currentWord, ">=")) {
         return TOKEN(Token::GREATER_EQUALS, ">=");
-    } else if (STARTS_WITH(currentWord, "<=")) {
+    } if (STARTS_WITH(currentWord, "<=")) {
         return TOKEN(Token::LESS_EQUALS, "<=");
     }
     return {};
@@ -189,13 +193,13 @@ std::optional<Token> Lexer::matchOneCharacterToken() {
     char firstChar = currentWord[0];
     if (firstChar == '(') {
         return TOKEN(Token::LEFT_PARAN, "(");
-    } else if (firstChar == ')') {
+    } if (firstChar == ')') {
         return TOKEN(Token::RIGHT_PARAN, ")");
-    } else if (firstChar == '{') {
+    } if (firstChar == '{') {
         return TOKEN(Token::LEFT_CURLY_BRACE, "{");
-    } else if (firstChar == '}') {
+    } if (firstChar == '}') {
         return TOKEN(Token::RIGHT_CURLY_BRACE, "}");
-    } else if (firstChar == '=') {
+    } if (firstChar == '=') {
         return TOKEN(Token::SINGLE_EQUALS, "=");
     } else if (firstChar == '+') {
         return TOKEN(Token::PLUS, "+");

@@ -47,7 +47,7 @@ TEST_CASE("Parser can handle two lines") {
           {6, GrammarSymbol::DATA_TYPE},
           {6, GrammarSymbol::VARIABLE_NAME},
           {5, GrammarSymbol::SINGLE_EQUALS},
-          {5, GrammarSymbol::EXPR},
+          {5, GrammarSymbol::EXPRESSION},
           {6, GrammarSymbol::DISJUNCTION},
           {7, GrammarSymbol::CONJUNCTION},
           {8, GrammarSymbol::NEGATION},
@@ -68,7 +68,7 @@ TEST_CASE("Parser can handle two lines") {
           {5, GrammarSymbol::DATA_TYPE},
           {5, GrammarSymbol::VARIABLE_NAME},
           {4, GrammarSymbol::SINGLE_EQUALS},
-          {4, GrammarSymbol::EXPR},
+          {4, GrammarSymbol::EXPRESSION},
           {5, GrammarSymbol::DISJUNCTION},
           {6, GrammarSymbol::CONJUNCTION},
           {7, GrammarSymbol::NEGATION},
@@ -91,19 +91,71 @@ TEST_CASE("Parser can handle two lines") {
 
 TEST_CASE("Parser can handle return statements with function calls") {
     std::vector<std::pair<int, GrammarSymbol>> parseTree = {
-          {0,  GrammarSymbol::PROGRAM},
-          {1,  GrammarSymbol::STATEMENTS},
-          {2,  GrammarSymbol::STATEMENT},
-          {3,  GrammarSymbol::RETURN},
-          {3,  GrammarSymbol::EXPR},
-          {4, GrammarSymbol::CALL},
-          {5,  GrammarSymbol::VARIABLE_NAME},
-          {5,  GrammarSymbol::LEFT_PARAN},
-          {5,  GrammarSymbol::CALL_HEADER},
-          {6,  GrammarSymbol::RIGHT_PARAN},
-          {3,  GrammarSymbol::SEMICOLON},
-          {1,  GrammarSymbol::ENDOFFILE},
+          {0, GrammarSymbol::PROGRAM},       {1, GrammarSymbol::STATEMENTS}, {2, GrammarSymbol::STATEMENT},
+          {3, GrammarSymbol::RETURN},        {3, GrammarSymbol::EXPRESSION}, {4, GrammarSymbol::CALL},
+          {5, GrammarSymbol::VARIABLE_NAME}, {5, GrammarSymbol::LEFT_PARAN}, {5, GrammarSymbol::CALL_HEADER},
+          {6, GrammarSymbol::RIGHT_PARAN},   {3, GrammarSymbol::SEMICOLON},  {1, GrammarSymbol::ENDOFFILE},
     };
     std::vector<std::string> program = {"return hello ( ) ;"};
+    assertProgramCreatesParseTree(program, parseTree);
+}
+
+TEST_CASE("Parser can handle 'if ( true ) { } else { }'") {
+    std::vector<std::pair<int, GrammarSymbol>> parseTree = {
+          {0, GrammarSymbol::PROGRAM},
+          {1, GrammarSymbol::STATEMENTS},
+          {2, GrammarSymbol::STATEMENT},
+          {3, GrammarSymbol::IF_STATEMENT},
+          {4, GrammarSymbol::IF},
+          {4, GrammarSymbol::LEFT_PARAN},
+          {4, GrammarSymbol::EXPRESSION},
+          {5, GrammarSymbol::DISJUNCTION},
+          {6, GrammarSymbol::CONJUNCTION},
+          {7, GrammarSymbol::NEGATION},
+          {8, GrammarSymbol::RELATION},
+          {9, GrammarSymbol::SUM},
+          {10, GrammarSymbol::TERM},
+          {11, GrammarSymbol::FACTOR},
+          {12, GrammarSymbol::TRUE},
+          {4, GrammarSymbol::RIGHT_PARAN},
+          {4, GrammarSymbol::LEFT_CURLY_BRACE},
+          {4, GrammarSymbol::IF_STATEMENT_BODY},
+          {5, GrammarSymbol::IF_STATEMENT_ELSE},
+          {6, GrammarSymbol::RIGHT_CURLY_BRACE},
+          {6, GrammarSymbol::ELSE},
+          {6, GrammarSymbol::LEFT_CURLY_BRACE},
+          {6, GrammarSymbol::IF_STATEMENT_ELSE_BODY},
+          {7, GrammarSymbol::RIGHT_CURLY_BRACE},
+          {1, GrammarSymbol::ENDOFFILE},
+    };
+    std::vector<std::string> program = {"if ( true ) { } else { }"};
+    assertProgramCreatesParseTree(program, parseTree);
+}
+
+TEST_CASE("Parser can handle 'if ( true ) { }'") {
+    std::vector<std::pair<int, GrammarSymbol>> parseTree = {
+          {0, GrammarSymbol::PROGRAM},
+          {1, GrammarSymbol::STATEMENTS},
+          {2, GrammarSymbol::STATEMENT},
+          {3, GrammarSymbol::IF_STATEMENT},
+          {4, GrammarSymbol::IF},
+          {4, GrammarSymbol::LEFT_PARAN},
+          {4, GrammarSymbol::EXPRESSION},
+          {5, GrammarSymbol::DISJUNCTION},
+          {6, GrammarSymbol::CONJUNCTION},
+          {7, GrammarSymbol::NEGATION},
+          {8, GrammarSymbol::RELATION},
+          {9, GrammarSymbol::SUM},
+          {10, GrammarSymbol::TERM},
+          {11, GrammarSymbol::FACTOR},
+          {12, GrammarSymbol::TRUE},
+          {4, GrammarSymbol::RIGHT_PARAN},
+          {4, GrammarSymbol::LEFT_CURLY_BRACE},
+          {4, GrammarSymbol::IF_STATEMENT_BODY},
+          {5, GrammarSymbol::IF_STATEMENT_ELSE},
+          {6, GrammarSymbol::RIGHT_CURLY_BRACE},
+          {1, GrammarSymbol::ENDOFFILE},
+    };
+    std::vector<std::string> program = {"if ( true ) { }"};
     assertProgramCreatesParseTree(program, parseTree);
 }

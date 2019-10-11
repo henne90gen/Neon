@@ -1,4 +1,5 @@
 #include "AST.h"
+#include <iostream>
 
 std::string to_string(AstNode::AstNodeType type) {
     switch (type) {
@@ -22,7 +23,11 @@ std::string to_string(AstNode::AstNodeType type) {
         return "AstNode::ASSIGNMENT";
     case AstNode::CALL:
         return "AstNode::CALL";
+    case AstNode::IF_STATEMENT:
+        return "AstNode::IF_STATEMENT";
     default:
+        std::cout << "Not implemented (AST.cpp - to_string)" << std::endl;
+        exit(1);
         return "ERROR";
     }
 }

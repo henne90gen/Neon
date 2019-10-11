@@ -16,7 +16,7 @@ void writeModuleToObjectFile(const Program &program, IRGenerator *irGenerator) {
     std::string Error;
     auto target = llvm::TargetRegistry::lookupTarget(targetTriple, Error);
 
-    if (!target) {
+    if (target == nullptr) {
         llvm::errs() << Error;
         exit(1);
     }

@@ -28,7 +28,7 @@ void IRGenerator::visitFunctionNode(FunctionNode *node) {
 
     isGlobalScope = previousGlobalScopeState;
     currentFunction = previousFunction;
-    // TODO this is a hack to enable us to get back to the previous functions insertion point
+    // TODO(henne): this is a hack to enable us to get back to the previous functions insertion point
     //      we should save that last insertion point somewhere, instead of guessing it here
     builder.SetInsertPoint(&currentFunction->getBasicBlockList().back());
 
@@ -42,7 +42,8 @@ llvm::Function *IRGenerator::getOrCreateFunctionDefinition(const std::string &na
         auto retType = getType(returnType);
 
         std::vector<llvm::Type *> argumentTypes = {};
-        for (auto &arg : arguments) {
+        argumentTypes.reserve(arguments.size());
+for (auto &arg : arguments) {
             argumentTypes.push_back(getType(arg->getType()));
         }
 
@@ -88,11 +89,13 @@ void IRGenerator::finalizeFunction(llvm::Function *function, const AstNode::Data
 
 void IRGenerator::visitCallNode(CallNode *node) {
     llvm::Function *calleeFunc = module.getFunction(node->getName());
-    if (!calleeFunc)
+    if (calleeFunc == nullptr) {
         return logError("Use of undeclared identifier " + node->getName());
+}
 
-    if (calleeFunc->arg_size() != node->getArguments().size())
+    if (calleeFunc->arg_size() != node->getArguments().size()) {
         return logError("Incorrect number arguments passed.");
+}
 
     std::vector<llvm::Value *> arguments;
     for (auto &argument : node->getArguments()) {

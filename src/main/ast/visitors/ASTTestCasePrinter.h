@@ -1,13 +1,13 @@
 #pragma once
 
-#include "AST.h"
+#include "../../Program.h"
+#include "../AST.h"
 
-#include <unordered_map>
-
-class ASTTypeAnalyser : public ASTVisitor {
+class ASTTestCasePrinter : public ASTVisitor {
   public:
     void visitFunctionNode(FunctionNode *node) override;
     void visitCallNode(CallNode *node) override;
+    void visitIfStatementNode(IfStatementNode *node) override;
     void visitVariableNode(VariableNode *node) override;
     void visitVariableDefinitionNode(VariableDefinitionNode *node) override;
     void visitBinaryOperationNode(BinaryOperationNode *node) override;
@@ -20,9 +20,9 @@ class ASTTypeAnalyser : public ASTVisitor {
     void visitBoolNode(BoolNode *node) override;
 
   private:
-    std::unordered_map<AstNode *, AstNode::DataType> typeMap = {};
-    std::unordered_map<std::string, AstNode::DataType> variableMap = {};
-    std::unordered_map<std::string, AstNode::DataType> functionMap = {};
+    int indentation = 0;
+
+    void printNode(AstNode *node);
 };
 
-void analyseTypes(AstNode *root);
+void printAstTestCase(const Program &program, AstNode *root);
