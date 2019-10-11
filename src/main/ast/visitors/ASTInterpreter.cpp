@@ -1,5 +1,8 @@
 #include "ASTInterpreter.h"
 
+#include "../nodes/AllNodes.h"
+#include "../../Utils.h"
+
 #include <iostream>
 
 void ASTInterpreter::printStatementResult(AstNode *child) {

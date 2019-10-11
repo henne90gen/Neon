@@ -2,7 +2,8 @@
 
 #include <unordered_map>
 
-#include "../AST.h"
+#include "../ASTVisitor.h"
+#include "../nodes/AstNode.h"
 
 struct CalculationResult {
     enum CalculationType { INTEGER, FLOAT, BOOL };

@@ -1,7 +1,7 @@
 #pragma once
 
 #include "Token.h"
-#include "ast/AST.h"
+#include "ast/nodes/AstNode.h"
 
 #include <algorithm>
 #include <vector>

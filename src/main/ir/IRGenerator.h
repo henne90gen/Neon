@@ -1,7 +1,8 @@
 #pragma once
 
 #include "../Program.h"
-#include "../ast/AST.h"
+#include "../ast/ASTVisitor.h"
+#include "../ast/nodes/AllNodes.h"
 
 #include <iostream>
 #include <unordered_map>
@@ -74,11 +75,11 @@ class IRGenerator : public ASTVisitor {
     std::unordered_map<std::string, llvm::Value *> definedVariables = {};
 
     static void logError(const std::string &msg);
-    llvm::Type *getType(AstNode::DataType type);
-    llvm::Function *getOrCreateFunctionDefinition(const std::string &name, AstNode::DataType returnType,
+    llvm::Type *getType(ast::DataType type);
+    llvm::Function *getOrCreateFunctionDefinition(const std::string &name, ast::DataType returnType,
                                                   const std::vector<VariableDefinitionNode *> &arguments);
     llvm::AllocaInst *createEntryBlockAlloca(llvm::Type *type, const std::string &name);
-    void finalizeFunction(llvm::Function *function, AstNode::DataType returnType, bool isExternalFunction);
-    llvm::Constant *getInitializer(const AstNode::DataType &dt);
+    void finalizeFunction(llvm::Function *function, ast::DataType returnType, bool isExternalFunction);
+    llvm::Constant *getInitializer(const ast::DataType &dt);
     void setupGlobalInitialization(llvm::Function *func);
 };

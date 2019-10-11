@@ -1,7 +1,7 @@
 #pragma once
 
-#include "../../Program.h"
-#include "../AST.h"
+#include "../ASTVisitor.h"
+#include "../nodes/AstNode.h"
 
 class ASTTestCasePrinter : public ASTVisitor {
   public:
@@ -24,5 +24,7 @@ class ASTTestCasePrinter : public ASTVisitor {
 
     void printNode(AstNode *node);
 };
+
+class Program;
 
 void printAstTestCase(const Program &program, AstNode *root);

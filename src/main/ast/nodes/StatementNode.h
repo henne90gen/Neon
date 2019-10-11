@@ -1,16 +1,18 @@
 #pragma once
 
+#include "AstNode.h"
+
 class StatementNode : public AstNode {
   public:
-    StatementNode() : AstNode(AstNode::STATEMENT) {}
+    StatementNode() : AstNode(ast::NodeType::STATEMENT) {}
 
-    void accept(ASTVisitor *v) override { v->visitStatementNode(this); };
+    void accept(ASTVisitor *v) override;
 
-    bool isReturnStatement() { return this->returnStatement; }
-    void setIsReturnStatement(bool returnStatement) { this->returnStatement = returnStatement; }
+    bool isReturnStatement();
+    void setIsReturnStatement(bool returnStatement);
 
-    AstNode *getChild() { return child; }
-    void setChild(AstNode *child) { this->child = child; }
+    AstNode *getChild();
+    void setChild(AstNode *child);
 
   private:
     bool returnStatement = false;

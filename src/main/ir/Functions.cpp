@@ -35,7 +35,7 @@ void IRGenerator::visitFunctionNode(FunctionNode *node) {
     LOG("Exit Function")
 }
 
-llvm::Function *IRGenerator::getOrCreateFunctionDefinition(const std::string &name, AstNode::DataType returnType,
+llvm::Function *IRGenerator::getOrCreateFunctionDefinition(const std::string &name, const ast::DataType returnType,
                                                            const std::vector<VariableDefinitionNode *> &arguments) {
     llvm::Function *function = module.getFunction(name);
     if (function == nullptr) {
@@ -64,9 +64,9 @@ for (auto &arg : arguments) {
     return function;
 }
 
-void IRGenerator::finalizeFunction(llvm::Function *function, const AstNode::DataType returnType,
+void IRGenerator::finalizeFunction(llvm::Function *function, const ast::DataType returnType,
                                    const bool isExternalFunction) {
-    if (!isExternalFunction && returnType == AstNode::VOID) {
+    if (!isExternalFunction && returnType == ast::DataType::VOID) {
         builder.SetInsertPoint(&function->getBasicBlockList().back());
         builder.CreateRetVoid();
     }

@@ -5,6 +5,8 @@
 #include <optional>
 #include <regex>
 
+#include "Utils.h"
+
 std::optional<std::string> StdInCodeProvider::getMoreCode() {
     std::string result;
     std::cin >> result;
@@ -141,9 +143,6 @@ Token Lexer::getToken() {
     return token;
 }
 
-#define STARTS_WITH(word, search) word.find(search) == 0
-#define TOKEN(type, content) std::optional<Token>({type, content})
-
 std::optional<Token> Lexer::matchWordToken() {
     if (STARTS_WITH(currentWord, "true")) {
         return TOKEN(Token::TRUE, "true");
@@ -155,9 +154,9 @@ std::optional<Token> Lexer::matchWordToken() {
         return TOKEN(Token::AND, "and");
     } if (STARTS_WITH(currentWord, "or")) {
         return TOKEN(Token::OR, "or");
-    } else if (STARTS_WITH(currentWord, "fun")) {
+    } if (STARTS_WITH(currentWord, "fun")) {
         return TOKEN(Token::FUN, "fun");
-    } else if (STARTS_WITH(currentWord, "int")) {
+    } if (STARTS_WITH(currentWord, "int")) {
         return TOKEN(Token::DATA_TYPE, "int");
     } else if (STARTS_WITH(currentWord, "float")) {
         return TOKEN(Token::DATA_TYPE, "float");
@@ -201,9 +200,9 @@ std::optional<Token> Lexer::matchOneCharacterToken() {
         return TOKEN(Token::RIGHT_CURLY_BRACE, "}");
     } if (firstChar == '=') {
         return TOKEN(Token::SINGLE_EQUALS, "=");
-    } else if (firstChar == '+') {
+    } if (firstChar == '+') {
         return TOKEN(Token::PLUS, "+");
-    } else if (firstChar == '-') {
+    } if (firstChar == '-') {
         return TOKEN(Token::MINUS, "-");
     } else if (firstChar == '*') {
         return TOKEN(Token::STAR, "*");

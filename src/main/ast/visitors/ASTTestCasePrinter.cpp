@@ -2,6 +2,9 @@
 
 #include <iostream>
 
+#include "../../Program.h"
+#include "../nodes/AllNodes.h"
+
 void ASTTestCasePrinter::printNode(AstNode *node) {
     std::cout << "        {" << indentation << ", " << to_string(node->getAstNodeType()) << "}," << std::endl;
 }

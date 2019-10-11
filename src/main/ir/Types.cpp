@@ -17,7 +17,7 @@ void IRGenerator::visitBoolNode(BoolNode *node) {
 
 void IRGenerator::visitAssignmentNode(AssignmentNode *node) {
     llvm::Value *dest = nullptr;
-    if (node->getLeft()->getAstNodeType() == AstNode::AstNodeType::VARIABLE_DEFINITION) {
+    if (node->getLeft()->getAstNodeType() == ast::NodeType::VARIABLE_DEFINITION) {
         // only generate variable definitions
         node->getLeft()->accept(this);
         dest = nodesToValues[node->getLeft()];

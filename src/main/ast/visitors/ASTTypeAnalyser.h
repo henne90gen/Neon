@@ -1,8 +1,10 @@
 #pragma once
 
-#include "../AST.h"
-
+#include "../ASTVisitor.h"
+#include "../Types.h"
 #include <unordered_map>
+
+class AstNode;
 
 class ASTTypeAnalyser : public ASTVisitor {
   public:
@@ -21,9 +23,9 @@ class ASTTypeAnalyser : public ASTVisitor {
     void visitBoolNode(BoolNode *node) override;
 
   private:
-    std::unordered_map<AstNode *, AstNode::DataType> typeMap = {};
-    std::unordered_map<std::string, AstNode::DataType> variableMap = {};
-    std::unordered_map<std::string, AstNode::DataType> functionMap = {};
+    std::unordered_map<AstNode *, ast::DataType> typeMap = {};
+    std::unordered_map<std::string, ast::DataType> variableMap = {};
+    std::unordered_map<std::string, ast::DataType> functionMap = {};
 };
 
 void analyseTypes(AstNode *root);

@@ -2,6 +2,8 @@
 
 #include <iostream>
 
+#include "nodes/AllNodes.h"
+
 bool isBinaryOperation(ParseTreeNode *node) {
     return (node->symbol == GrammarSymbol::SUM || node->symbol == GrammarSymbol::TERM) && node->children.size() == 3;
 }
@@ -117,25 +119,25 @@ AstNode *createLiteral(ParseTreeNode *node) {
 
 AstNode *createVariable(ParseTreeNode *node) { return new VariableNode(node->token.content); }
 
-AstNode::DataType getDataType(ParseTreeNode *node) {
+ast::DataType getDataType(ParseTreeNode *node) {
     if (node->token.type != Token::DATA_TYPE) {
-        return AstNode::DataType::VOID;
+        return ast::DataType::VOID;
     }
 
     if (node->token.content == "int") {
-        return AstNode::DataType::INT;
+        return ast::DataType::INT;
     } if (node->token.content == "float") {
-        return AstNode::DataType::FLOAT;
+        return ast::DataType::FLOAT;
     } if (node->token.content == "bool") {
-        return AstNode::DataType::BOOL;
+        return ast::DataType::BOOL;
     }
-    return AstNode::DataType::VOID;
+    return ast::DataType::VOID;
 }
 
 VariableDefinitionNode *createVariableDefinition(ParseTreeNode *node) {
     auto dataTypeNode = node->children[0];
     auto nameNode = node->children[1];
-    AstNode::DataType dataType = getDataType(dataTypeNode);
+    ast::DataType dataType = getDataType(dataTypeNode);
     return new VariableDefinitionNode(nameNode->token.content, dataType);
 }
 
@@ -221,7 +223,7 @@ FunctionNode *createExternalFunction(ParseTreeNode *node) {
         // we don't have a return type (implicitly void)
     }
 
-    auto returnType = AstNode::DataType::VOID;
+    auto returnType = ast::DataType::VOID;
     if (returnTypeNode != nullptr) {
         returnType = getDataType(returnTypeNode);
     }
@@ -258,7 +260,7 @@ FunctionNode *createFunction(ParseTreeNode *node) {
         bodyNode = returnNode->children[1];
     }
 
-    auto returnType = AstNode::DataType::VOID;
+    auto returnType = ast::DataType::VOID;
     if (returnTypeNode != nullptr) {
         returnType = getDataType(returnTypeNode);
     }

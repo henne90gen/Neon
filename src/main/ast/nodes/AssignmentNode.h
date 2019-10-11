@@ -1,16 +1,18 @@
 #pragma once
 
+#include "AstNode.h"
+
 class AssignmentNode : public AstNode {
   public:
-    explicit AssignmentNode() : AstNode(AstNode::ASSIGNMENT) {}
+    explicit AssignmentNode() : AstNode(ast::NodeType::ASSIGNMENT) {}
 
-    void accept(ASTVisitor *v) override { v->visitAssignmentNode(this); };
+    void accept(ASTVisitor *v) override;
 
-    AstNode *getLeft() { return left; }
-    void setLeft(AstNode *left) { this->left = left; }
+    AstNode *getLeft();
+    void setLeft(AstNode *left);
 
-    AstNode *getRight() { return right; }
-    void setRight(AstNode *right) { this->right = right; }
+    AstNode *getRight();
+    void setRight(AstNode *right);
 
   private:
     AstNode *left = nullptr;

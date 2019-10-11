@@ -2,6 +2,9 @@
 
 #include <iostream>
 
+#include "../nodes/AllNodes.h"
+#include "../../Utils.h"
+
 void ASTTypeAnalyser::visitFunctionNode(FunctionNode *node) {
     for (auto &argument : node->getArguments()) {
         argument->accept(this);
@@ -54,8 +57,8 @@ void ASTTypeAnalyser::visitBinaryOperationNode(BinaryOperationNode *node) {
 void ASTTypeAnalyser::visitUnaryOperationNode(UnaryOperationNode *node) {
     node->getChild()->accept(this);
     if (node->getType() == UnaryOperationNode::UnaryOperationType::NOT &&
-        typeMap[node->getChild()] == AstNode::DataType::BOOL) {
-        typeMap[node] = AstNode::DataType::BOOL;
+        typeMap[node->getChild()] == ast::DataType::BOOL) {
+        typeMap[node] = ast::DataType::BOOL;
         return;
     } 
         // TODO(henne): unary operators can also be of other types than bool, we need to add support for that as well
@@ -66,8 +69,8 @@ void ASTTypeAnalyser::visitUnaryOperationNode(UnaryOperationNode *node) {
 void ASTTypeAnalyser::visitAssignmentNode(AssignmentNode *node) {
     node->getRight()->accept(this);
     node->getLeft()->accept(this);
-    AstNode::DataType leftType = typeMap[node->getLeft()];
-    AstNode::DataType rightType = typeMap[node->getRight()];
+    ast::DataType leftType = typeMap[node->getLeft()];
+    ast::DataType rightType = typeMap[node->getRight()];
     if (leftType != rightType) {
         std::cerr << "Assignment type mismatch: " << to_string(node->getLeft()->getAstNodeType()) << " = "
                   << to_string(node->getRight()->getAstNodeType()) << std::endl;
@@ -90,11 +93,11 @@ void ASTTypeAnalyser::visitStatementNode(StatementNode *node) {
     typeMap[node] = typeMap[node->getChild()];
 }
 
-void ASTTypeAnalyser::visitFloatNode(FloatNode *node) { typeMap[node] = AstNode::DataType::FLOAT; }
+void ASTTypeAnalyser::visitFloatNode(FloatNode *node) { typeMap[node] = ast::DataType::FLOAT; }
 
-void ASTTypeAnalyser::visitIntegerNode(IntegerNode *node) { typeMap[node] = AstNode::DataType::INT; }
+void ASTTypeAnalyser::visitIntegerNode(IntegerNode *node) { typeMap[node] = ast::DataType::INT; }
 
-void ASTTypeAnalyser::visitBoolNode(BoolNode *node) { typeMap[node] = AstNode::DataType::BOOL; }
+void ASTTypeAnalyser::visitBoolNode(BoolNode *node) { typeMap[node] = ast::DataType::BOOL; }
 
 void ASTTypeAnalyser::visitIfStatementNode(IfStatementNode * /*node*/) {
     NOT_IMPLEMENTED

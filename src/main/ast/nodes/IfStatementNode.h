@@ -1,19 +1,21 @@
 #pragma once
 
+#include "AstNode.h"
+
 class IfStatementNode : public AstNode {
   public:
-    explicit IfStatementNode() : AstNode(AstNode::IF_STATEMENT) {}
+    explicit IfStatementNode() : AstNode(ast::NodeType::IF_STATEMENT) {}
 
-    void accept(ASTVisitor *v) override { v->visitIfStatementNode(this); }
+    void accept(ASTVisitor *v) override;
 
-    AstNode *getCondition() { return condition; }
-    void setCondition(AstNode *condition) { this->condition = condition; }
+    AstNode *getCondition();
+    void setCondition(AstNode *condition);
 
-    AstNode *getIfBody() { return ifBody; }
-    void setIfBody(AstNode *ifBody) { this->ifBody = ifBody; }
+    AstNode *getIfBody();
+    void setIfBody(AstNode *ifBody);
 
-    AstNode *getElseBody() { return elseBody; }
-    void setElseBody(AstNode *elseBody) { this->elseBody = elseBody; }
+    AstNode *getElseBody();
+    void setElseBody(AstNode *elseBody);
 
   private:
     AstNode *condition = nullptr;

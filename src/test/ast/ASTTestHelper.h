@@ -2,8 +2,8 @@
 
 #include "Parser.h"
 
-#include "ast/AST.h"
 #include "ast/ASTGenerator.h"
+#include "ast/nodes/AstNode.h"
 
 struct AstNodeSpec {
     int indentation;

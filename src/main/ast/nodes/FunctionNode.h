@@ -1,39 +1,44 @@
 #pragma once
 
+#include "AstNode.h"
+#include "VariableDefinitionNode.h"
+
+#include <vector>
+
 class FunctionNode : public AstNode {
   public:
-    explicit FunctionNode(std::string name, AstNode::DataType returnType)
-          : AstNode(AstNode::FUNCTION), name(std::move(name)), returnType(returnType) {}
+    explicit FunctionNode(std::string name, ast::DataType returnType)
+          : AstNode(ast::NodeType::FUNCTION), name(std::move(name)), returnType(returnType) {}
 
-    void accept(ASTVisitor *v) override { v->visitFunctionNode(this); };
+    void accept(ASTVisitor *v) override;
 
-    AstNode *getBody() { return body; }
-    void setBody(AstNode *body) { this->body = body; }
+    AstNode *getBody();
+    void setBody(AstNode *body);
 
-    std::vector<VariableDefinitionNode *> &getArguments() { return arguments; }
+    std::vector<VariableDefinitionNode *> &getArguments();
 
-    std::string &getName() { return name; }
+    std::string &getName();
 
-    AstNode::DataType getReturnType() { return returnType; }
+    ast::DataType getReturnType();
 
-    bool isExternal() { return body == nullptr; }
+    bool isExternal();
 
   private:
     std::string name;
-    AstNode::DataType returnType;
+    ast::DataType returnType;
     AstNode *body = nullptr;
     std::vector<VariableDefinitionNode *> arguments = {};
 };
 
 class CallNode : public AstNode {
   public:
-    explicit CallNode(std::string name) : AstNode(AstNode::CALL), name(std::move(name)) {}
+    explicit CallNode(std::string name) : AstNode(ast::NodeType::CALL), name(std::move(name)) {}
 
-    void accept(ASTVisitor *v) override { v->visitCallNode(this); }
+    void accept(ASTVisitor *v) override;
 
-    std::string &getName() { return name; }
+    std::string &getName();
 
-    std::vector<AstNode *> &getArguments() { return arguments; }
+    std::vector<AstNode *> &getArguments();
 
   private:
     std::string name;

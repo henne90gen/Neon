@@ -1,5 +1,7 @@
 #pragma once
 
+#include "AstNode.h"
+
 class BinaryOperationNode : public AstNode {
   public:
     enum BinaryOperationType {
@@ -9,17 +11,17 @@ class BinaryOperationNode : public AstNode {
         DIVISION,
     };
 
-    explicit BinaryOperationNode(BinaryOperationType type) : AstNode(AstNode::BINARY_OPERATION), type(type) {}
+    explicit BinaryOperationNode(BinaryOperationType type) : AstNode(ast::NodeType::BINARY_OPERATION), type(type) {}
 
-    void accept(ASTVisitor *v) override { v->visitBinaryOperationNode(this); };
+    void accept(ASTVisitor *v) override;
 
-    void setLeft(AstNode *left) { this->left = left; }
-    AstNode *getLeft() { return left; }
+    AstNode *getLeft();
+    void setLeft(AstNode *left);
 
-    void setRight(AstNode *right) { this->right = right; }
-    AstNode *getRight() { return right; }
+    void setRight(AstNode *right);
+    AstNode *getRight();
 
-    BinaryOperationType getType() { return type; }
+    BinaryOperationType getType();
 
   private:
     BinaryOperationType type;

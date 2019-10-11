@@ -3,20 +3,22 @@
 #include <llvm/Support/FileSystem.h>
 #include <iostream>
 
+#include "../Utils.h"
+
 IRGenerator::IRGenerator(const Program &program, const bool verbose = false)
     : program(program), verbose(verbose), builder(context), module(program.fileName, context) {}
 
 void IRGenerator::logError(const std::string &msg) { std::cerr << msg << std::endl; }
 
-llvm::Type *IRGenerator::getType(AstNode::DataType type) {
+llvm::Type *IRGenerator::getType(ast::DataType type) {
     switch (type) {
-    case AstNode::VOID:
+    case ast::DataType::VOID:
         return llvm::Type::getVoidTy(context);
-    case AstNode::INT:
+    case ast::DataType::INT:
         return llvm::Type::getInt32Ty(context);
-    case AstNode::FLOAT:
+    case ast::DataType::FLOAT:
         return llvm::Type::getFloatTy(context);
-    case AstNode::BOOL:
+    case ast::DataType::BOOL:
         return llvm::Type::getInt1Ty(context);
     default:
         return nullptr;
@@ -33,15 +35,15 @@ llvm::AllocaInst *IRGenerator::createEntryBlockAlloca(llvm::Type *type, const st
     return tmpB.CreateAlloca(type, nullptr, name);
 }
 
-llvm::Constant *IRGenerator::getInitializer(const AstNode::DataType &dt) {
+llvm::Constant *IRGenerator::getInitializer(const ast::DataType &dt) {
     llvm::Type *ty = getType(dt);
     switch (dt) {
-    case AstNode::FLOAT:
+    case ast::DataType::FLOAT:
         return llvm::ConstantFP::get(ty, 0);
-    case AstNode::INT:
-    case AstNode::BOOL:
+    case ast::DataType::INT:
+    case ast::DataType::BOOL:
         return llvm::ConstantInt::get(ty, 0);
-    case AstNode::VOID:
+    case ast::DataType::VOID:
     default:
         return nullptr;
     }
@@ -69,7 +71,7 @@ void IRGenerator::visitSequenceNode(SequenceNode *node) {
     llvm::Function *initFunc = nullptr;
     if (currentFunction == nullptr) {
         // TODO(henne): make sure this function name does not collide with any user defined functions
-        initFunc = getOrCreateFunctionDefinition("__ctor", AstNode::DataType::VOID, {});
+        initFunc = getOrCreateFunctionDefinition("__ctor", ast::DataType::VOID, {});
 
         llvm::BasicBlock *BB = llvm::BasicBlock::Create(context, "entry-ctor", initFunc);
         builder.SetInsertPoint(BB);
@@ -83,7 +85,7 @@ void IRGenerator::visitSequenceNode(SequenceNode *node) {
     }
 
     if (initFunc != nullptr) {
-        finalizeFunction(initFunc, AstNode::DataType::VOID, false);
+        finalizeFunction(initFunc, ast::DataType::VOID, false);
         // TODO(henne): don't generate global init function, if there are no globals
         setupGlobalInitialization(initFunc);
         isGlobalScope = false;
@@ -117,9 +119,7 @@ void IRGenerator::print(const bool writeToFile) {
     }
 }
 
-void IRGenerator::visitIfStatementNode(IfStatementNode * /*node*/) {
-    NOT_IMPLEMENTED
-}
+void IRGenerator::visitIfStatementNode(IfStatementNode * /*node*/) { NOT_IMPLEMENTED }
 
 void IRGenerator::run(AstNode *root) {
     if (root == nullptr) {

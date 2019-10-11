@@ -2,6 +2,8 @@
 
 #include <iostream>
 
+#include "../nodes/AllNodes.h"
+
 void indent(int indentation) {
     for (int i = 0; i < indentation; i++) {
         std::cout << "  ";

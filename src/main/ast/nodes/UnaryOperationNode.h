@@ -1,20 +1,22 @@
 #pragma once
 
+#include "AstNode.h"
+
 class UnaryOperationNode : public AstNode {
   public:
     enum UnaryOperationType {
         NOT,
     };
 
-    explicit UnaryOperationNode(UnaryOperationType type) : AstNode(AstNode::UNARY_OPERATION), type(type) {}
+    explicit UnaryOperationNode(UnaryOperationType type) : AstNode(ast::NodeType::UNARY_OPERATION), type(type) {}
 
-    void accept(ASTVisitor *v) override { v->visitUnaryOperationNode(this); };
+    void accept(ASTVisitor *v) override;
 
-    void setChild(AstNode *child) { this->child = child; }
+    AstNode *getChild();
 
-    AstNode *getChild() { return child; }
+    void setChild(AstNode *child);
 
-    UnaryOperationType getType() { return type; }
+    UnaryOperationType getType();
 
   private:
     UnaryOperationType type;

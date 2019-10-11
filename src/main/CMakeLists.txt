@@ -14,7 +14,7 @@ set(SOURCES
         ${CMAKE_CURRENT_SOURCE_DIR}/Token.cpp
         ${CMAKE_CURRENT_SOURCE_DIR}/Grammar.cpp
         ${CMAKE_CURRENT_SOURCE_DIR}/Program.cpp
-        ${CMAKE_CURRENT_SOURCE_DIR}/ast/AST.cpp
+        ast/nodes/AstNode.cpp
         ${CMAKE_CURRENT_SOURCE_DIR}/ast/ASTGenerator.cpp
         ${CMAKE_CURRENT_SOURCE_DIR}/ast/visitors/ASTInterpreter.cpp
         ${CMAKE_CURRENT_SOURCE_DIR}/ast/visitors/ASTPrinter.cpp
@@ -23,10 +23,10 @@ set(SOURCES
         ${CMAKE_CURRENT_SOURCE_DIR}/ir/IRGenerator.cpp
         ${CMAKE_CURRENT_SOURCE_DIR}/ir/Operations.cpp
         ${CMAKE_CURRENT_SOURCE_DIR}/ir/Functions.cpp
-        ${CMAKE_CURRENT_SOURCE_DIR}/ir/DataTypes.cpp
+        ${CMAKE_CURRENT_SOURCE_DIR}/ir/Types.cpp
         ${CMAKE_CURRENT_SOURCE_DIR}/ir/Variables.cpp
         ${CMAKE_CURRENT_SOURCE_DIR}/ObjectFileWriter.cpp
-        ${CMAKE_CURRENT_SOURCE_DIR}/Linker.cpp)
+        ${CMAKE_CURRENT_SOURCE_DIR}/Linker.cpp ast/nodes/AssignmentNode.cpp ast/nodes/BinaryOperationNode.cpp ast/nodes/FunctionNode.cpp ast/nodes/VariableDefinitionNode.cpp ast/nodes/AllNodes.h ast/nodes/IfStatementNode.cpp ast/nodes/LiteralNodes.cpp ast/nodes/SequenceNode.cpp ast/nodes/StatementNode.cpp ast/nodes/UnaryOperationNode.cpp ast/nodes/VariableNode.cpp)
 
 add_library(${LIB_NAME} ${SOURCES})
 target_link_libraries(${LIB_NAME} ${LLVM_LIBS})
@@ -45,11 +45,9 @@ else ()
     add_definitions(-std=c++17)
 endif ()
 
-set_target_properties(${LIB_NAME}
-        PROPERTIES CXX_STANDARD
-        17
-        CXX_STANDARD_REQUIRED
-        ON)
+set_target_properties(${LIB_NAME} PROPERTIES
+        CXX_STANDARD 17
+        CXX_STANDARD_REQUIRED ON)
 
 if ("${CMAKE_BUILD_TYPE}" STREQUAL "Debug")
     add_compile_definitions(DEBUG)

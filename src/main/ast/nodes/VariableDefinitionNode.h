@@ -1,17 +1,19 @@
 #pragma once
 
+#include "AstNode.h"
+
 class VariableDefinitionNode : public AstNode {
   public:
-    explicit VariableDefinitionNode(std::string name, DataType type)
-          : AstNode(AstNode::VARIABLE_DEFINITION), name(std::move(name)), type(type) {}
+    explicit VariableDefinitionNode(std::string name, ast::DataType type)
+          : AstNode(ast::NodeType::VARIABLE_DEFINITION), name(std::move(name)), type(type) {}
 
-    void accept(ASTVisitor *v) override { v->visitVariableDefinitionNode(this); };
+    void accept(ASTVisitor *v) override;
 
-    std::string &getName() { return name; }
+    std::string &getName();
 
-    DataType getType() { return type; }
+    ast::DataType getType();
 
   private:
     std::string name;
-    DataType type;
+    ast::DataType type;
 };
