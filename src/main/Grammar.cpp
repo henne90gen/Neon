@@ -79,6 +79,8 @@ std::string to_string(GrammarSymbol symbol) {
     return "FUNCTION_HEADER";
   case FUNCTION_RETURN:
     return "FUNCTION_RETURN";
+  case IF_STATEMENT:
+    return "IF_STATEMENT";
   case INTEGER:
     return "INTEGER";
   case NEGATION:
@@ -93,10 +95,10 @@ std::string to_string(GrammarSymbol symbol) {
     return "RELATION";
   case RETURN:
     return "RETURN";
-  case STMT:
-    return "STMT";
-  case STMTS:
-    return "STMTS";
+  case STATEMENT:
+    return "STATEMENT";
+  case STATEMENTS:
+    return "STATEMENTS";
   case SUM:
     return "SUM";
   case TERM:

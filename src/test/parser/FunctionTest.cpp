@@ -5,8 +5,8 @@
 TEST_CASE("Function defintion") {
     std::vector<std::pair<int, GrammarSymbol>> parseTree = {
           {0, GrammarSymbol::PROGRAM},
-          {1, GrammarSymbol::STMTS},
-          {2, GrammarSymbol::STMT},
+          {1, GrammarSymbol::STATEMENTS},
+          {2, GrammarSymbol::STATEMENT},
           {3, GrammarSymbol::FUNCTION},
           {4, GrammarSymbol::FUN},
           {4, GrammarSymbol::VARIABLE_NAME},
@@ -25,8 +25,8 @@ TEST_CASE("Function defintion") {
 
 TEST_CASE("Function definition with argument and return type") {
     std::vector<std::pair<int, GrammarSymbol>> parseTree = {
-          {0, GrammarSymbol::PROGRAM},       {1, GrammarSymbol::STMTS},
-          {2, GrammarSymbol::STMT},          {3, GrammarSymbol::FUNCTION},
+          {0, GrammarSymbol::PROGRAM},       {1, GrammarSymbol::STATEMENTS},
+          {2, GrammarSymbol::STATEMENT},     {3, GrammarSymbol::FUNCTION},
           {4, GrammarSymbol::FUN},           {4, GrammarSymbol::VARIABLE_NAME},
           {4, GrammarSymbol::LEFT_PARAN},    {4, GrammarSymbol::FUNCTION_HEADER},
           {5, GrammarSymbol::FUNCTION_ARGS}, {6, GrammarSymbol::VARIABLE_DEFINITION},
@@ -43,8 +43,8 @@ TEST_CASE("Function definition with argument and return type") {
 TEST_CASE("Function definition with multiple arguments and return type") {
     std::vector<std::pair<int, GrammarSymbol>> parseTree = {
           {0, GrammarSymbol::PROGRAM},
-          {1, GrammarSymbol::STMTS},
-          {2, GrammarSymbol::STMT},
+          {1, GrammarSymbol::STATEMENTS},
+          {2, GrammarSymbol::STATEMENT},
           {3, GrammarSymbol::FUNCTION},
           {4, GrammarSymbol::FUN},
           {4, GrammarSymbol::VARIABLE_NAME},
@@ -74,8 +74,8 @@ TEST_CASE("Function definition with multiple arguments and return type") {
 TEST_CASE("External function definition") {
     std::vector<std::pair<int, GrammarSymbol>> parseTree = {
           {0, GrammarSymbol::PROGRAM},
-          {1, GrammarSymbol::STMTS},
-          {2, GrammarSymbol::STMT},
+          {1, GrammarSymbol::STATEMENTS},
+          {2, GrammarSymbol::STATEMENT},
           {3, GrammarSymbol::EXTERNAL_FUNCTION},
           {4, GrammarSymbol::EXTERN},
           {4, GrammarSymbol::FUN},
@@ -94,8 +94,8 @@ TEST_CASE("External function definition") {
 TEST_CASE("External function definition with return type") {
     std::vector<std::pair<int, GrammarSymbol>> parseTree = {
           {0, GrammarSymbol::PROGRAM},
-          {1, GrammarSymbol::STMTS},
-          {2, GrammarSymbol::STMT},
+          {1, GrammarSymbol::STATEMENTS},
+          {2, GrammarSymbol::STATEMENT},
           {3, GrammarSymbol::EXTERNAL_FUNCTION},
           {4, GrammarSymbol::EXTERN},
           {4, GrammarSymbol::FUN},
@@ -115,8 +115,8 @@ TEST_CASE("External function definition with return type") {
 TEST_CASE("External function definition with arguments and return type") {
     std::vector<std::pair<int, GrammarSymbol>> parseTree = {
           {0, GrammarSymbol::PROGRAM},
-          {1, GrammarSymbol::STMTS},
-          {2, GrammarSymbol::STMT},
+          {1, GrammarSymbol::STATEMENTS},
+          {2, GrammarSymbol::STATEMENT},
           {3, GrammarSymbol::EXTERNAL_FUNCTION},
           {4, GrammarSymbol::EXTERN},
           {4, GrammarSymbol::FUN},
@@ -139,7 +139,7 @@ TEST_CASE("External function definition with arguments and return type") {
 
 TEST_CASE("Function call without arguments") {
     std::vector<std::pair<int, GrammarSymbol>> parseTree = {
-          {0, GrammarSymbol::PROGRAM},     {1, GrammarSymbol::STMTS},         {2, GrammarSymbol::STMT},
+          {0, GrammarSymbol::PROGRAM},     {1, GrammarSymbol::STATEMENTS},    {2, GrammarSymbol::STATEMENT},
           {3, GrammarSymbol::CALL},        {4, GrammarSymbol::VARIABLE_NAME}, {4, GrammarSymbol::LEFT_PARAN},
           {4, GrammarSymbol::CALL_HEADER}, {5, GrammarSymbol::RIGHT_PARAN},   {3, GrammarSymbol::SEMICOLON},
           {1, GrammarSymbol::ENDOFFILE},

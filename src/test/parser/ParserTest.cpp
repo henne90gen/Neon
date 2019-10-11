@@ -39,9 +39,9 @@ void assertProgramCreatesParseTree(const std::vector<std::string> &program,
 TEST_CASE("Parser can handle two lines") {
     std::vector<std::pair<int, GrammarSymbol>> parseTree = {
           {0, GrammarSymbol::PROGRAM},
-          {1, GrammarSymbol::STMTS},
-          {2, GrammarSymbol::STMTS},
-          {3, GrammarSymbol::STMT},
+          {1, GrammarSymbol::STATEMENTS},
+          {2, GrammarSymbol::STATEMENTS},
+          {3, GrammarSymbol::STATEMENT},
           {4, GrammarSymbol::ASSIGNMENT},
           {5, GrammarSymbol::VARIABLE_DEFINITION},
           {6, GrammarSymbol::DATA_TYPE},
@@ -62,7 +62,7 @@ TEST_CASE("Parser can handle two lines") {
           {12, GrammarSymbol::FACTOR},
           {13, GrammarSymbol::INTEGER},
           {4, GrammarSymbol::SEMICOLON},
-          {2, GrammarSymbol::STMT},
+          {2, GrammarSymbol::STATEMENT},
           {3, GrammarSymbol::ASSIGNMENT},
           {4, GrammarSymbol::VARIABLE_DEFINITION},
           {5, GrammarSymbol::DATA_TYPE},
@@ -92,8 +92,8 @@ TEST_CASE("Parser can handle two lines") {
 TEST_CASE("Parser can handle return statements with function calls") {
     std::vector<std::pair<int, GrammarSymbol>> parseTree = {
           {0,  GrammarSymbol::PROGRAM},
-          {1,  GrammarSymbol::STMTS},
-          {2,  GrammarSymbol::STMT},
+          {1,  GrammarSymbol::STATEMENTS},
+          {2,  GrammarSymbol::STATEMENT},
           {3,  GrammarSymbol::RETURN},
           {3,  GrammarSymbol::EXPR},
           {4, GrammarSymbol::CALL},

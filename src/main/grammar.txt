@@ -1,17 +1,18 @@
 program
-    stmts endoffile
+    statements endoffile
 
-stmts
-    stmt
-    stmts stmt
+statements
+    statement
+    statements statement
 
-stmt
+statement
     call ;
     external_function ;
     function
     assignment ;
     return expr ;
     variable_definition ;
+    if_statement ;
 
 external_function
     extern fun variable_name ( external_function_header
@@ -37,7 +38,7 @@ function_return
 
 function_body
     }
-    stmts }
+    statements }
 
 function_args
     variable_definition

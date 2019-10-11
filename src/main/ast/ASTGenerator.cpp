@@ -19,9 +19,9 @@ bool isVariable(ParseTreeNode *node) { return node->symbol == GrammarSymbol::VAR
 
 bool isVariableDefinition(ParseTreeNode *node) { return node->symbol == GrammarSymbol::VARIABLE_DEFINITION; }
 
-bool isSequence(ParseTreeNode *node) { return node->symbol == GrammarSymbol::STMTS; }
+bool isSequence(ParseTreeNode *node) { return node->symbol == GrammarSymbol::STATEMENTS; }
 
-bool isStatement(ParseTreeNode *node) { return node->symbol == GrammarSymbol::STMT; }
+bool isStatement(ParseTreeNode *node) { return node->symbol == GrammarSymbol::STATEMENT; }
 
 bool isFunction(ParseTreeNode *node) { return node->symbol == GrammarSymbol::FUNCTION; }
 

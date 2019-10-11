@@ -5,8 +5,8 @@
 TEST_CASE("Parser can handle 'int i = 1 + 1.5 ;  '") {
     std::vector<std::pair<int, GrammarSymbol>> parseTree = {
           {0, GrammarSymbol::PROGRAM},
-          {1, GrammarSymbol::STMTS},
-          {2, GrammarSymbol::STMT},
+          {1, GrammarSymbol::STATEMENTS},
+          {2, GrammarSymbol::STATEMENT},
           {3, GrammarSymbol::ASSIGNMENT},
           {4, GrammarSymbol::VARIABLE_DEFINITION},
           {5, GrammarSymbol::DATA_TYPE},
@@ -36,8 +36,8 @@ TEST_CASE("Parser can handle 'int i = 1 + 1.5 ;  '") {
 TEST_CASE("Parser can handle 'int i = 4 - 5 ;  '") {
     std::vector<std::pair<int, GrammarSymbol>> parseTree = {
           {0, GrammarSymbol::PROGRAM},
-          {1, GrammarSymbol::STMTS},
-          {2, GrammarSymbol::STMT},
+          {1, GrammarSymbol::STATEMENTS},
+          {2, GrammarSymbol::STATEMENT},
           {3, GrammarSymbol::ASSIGNMENT},
           {4, GrammarSymbol::VARIABLE_DEFINITION},
           {5, GrammarSymbol::DATA_TYPE},
@@ -67,8 +67,8 @@ TEST_CASE("Parser can handle 'int i = 4 - 5 ;  '") {
 TEST_CASE("Parser can handle 'bool b = not true ;  '") {
     std::vector<std::pair<int, GrammarSymbol>> parseTree = {
           {0, GrammarSymbol::PROGRAM},
-          {1, GrammarSymbol::STMTS},
-          {2, GrammarSymbol::STMT},
+          {1, GrammarSymbol::STATEMENTS},
+          {2, GrammarSymbol::STATEMENT},
           {3, GrammarSymbol::ASSIGNMENT},
           {4, GrammarSymbol::VARIABLE_DEFINITION},
           {5, GrammarSymbol::DATA_TYPE},
@@ -94,8 +94,8 @@ TEST_CASE("Parser can handle 'bool b = not true ;  '") {
 TEST_CASE("Parser can handle 'bool b = 7 < 8 ;  '") {
     std::vector<std::pair<int, GrammarSymbol>> parseTree = {
           {0, GrammarSymbol::PROGRAM},
-          {1, GrammarSymbol::STMTS},
-          {2, GrammarSymbol::STMT},
+          {1, GrammarSymbol::STATEMENTS},
+          {2, GrammarSymbol::STATEMENT},
           {3, GrammarSymbol::ASSIGNMENT},
           {4, GrammarSymbol::VARIABLE_DEFINITION},
           {5, GrammarSymbol::DATA_TYPE},
@@ -125,8 +125,8 @@ TEST_CASE("Parser can handle 'bool b = 7 < 8 ;  '") {
 TEST_CASE("Parser can handle 'bool b = not ( 1 < 2 ) ;  '") {
     std::vector<std::pair<int, GrammarSymbol>> parseTree = {
           {0, GrammarSymbol::PROGRAM},
-          {1, GrammarSymbol::STMTS},
-          {2, GrammarSymbol::STMT},
+          {1, GrammarSymbol::STATEMENTS},
+          {2, GrammarSymbol::STATEMENT},
           {3, GrammarSymbol::ASSIGNMENT},
           {4, GrammarSymbol::VARIABLE_DEFINITION},
           {5, GrammarSymbol::DATA_TYPE},
@@ -167,8 +167,8 @@ TEST_CASE("Parser can handle 'bool b = not ( 1 < 2 ) ;  '") {
 TEST_CASE("Parser can handle 'bool b = true and false ;  '") {
     std::vector<std::pair<int, GrammarSymbol>> parseTree = {
           {0, GrammarSymbol::PROGRAM},
-          {1, GrammarSymbol::STMTS},
-          {2, GrammarSymbol::STMT},
+          {1, GrammarSymbol::STATEMENTS},
+          {2, GrammarSymbol::STATEMENT},
           {3, GrammarSymbol::ASSIGNMENT},
           {4, GrammarSymbol::VARIABLE_DEFINITION},
           {5, GrammarSymbol::DATA_TYPE},
@@ -201,8 +201,8 @@ TEST_CASE("Parser can handle 'bool b = true and false ;  '") {
 TEST_CASE("Parser can handle 'a = 5 ;'") {
     std::vector<std::pair<int, GrammarSymbol>> parseTree = {
           {0,  GrammarSymbol::PROGRAM},
-          {1,  GrammarSymbol::STMTS},
-          {2,  GrammarSymbol::STMT},
+          {1,  GrammarSymbol::STATEMENTS},
+          {2,  GrammarSymbol::STATEMENT},
           {3,  GrammarSymbol::ASSIGNMENT},
           {4,  GrammarSymbol::VARIABLE_NAME},
           {4,  GrammarSymbol::SINGLE_EQUALS},
