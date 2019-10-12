@@ -19,15 +19,15 @@ std::string printUnaryOperationType(UnaryOperationNode::UnaryOperationType type)
     }
 }
 
-std::string printBinaryOperationType(BinaryOperationNode::BinaryOperationType type) {
+std::string printBinaryOperationType(ast::BinaryOperationType type) {
     switch (type) {
-    case BinaryOperationNode::ADDITION:
+    case ast::BinaryOperationType::ADDITION:
         return "ADDITION";
-    case BinaryOperationNode::MULTIPLICATION:
+    case ast::BinaryOperationType::MULTIPLICATION:
         return "MULTIPLICATION";
-    case BinaryOperationNode::SUBTRACTION:
+    case ast::BinaryOperationType::SUBTRACTION:
         return "SUBTRACTION";
-    case BinaryOperationNode::DIVISION:
+    case ast::BinaryOperationType::DIVISION:
         return "DIVISION";
     default:
         return "ERROR";

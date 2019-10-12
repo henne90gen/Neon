@@ -2,6 +2,26 @@
 
 #include <catch2/catch.hpp>
 
+TEST_CASE("ASTGenerator can handle arithmetic operations") {
+    std::vector<AstNodeSpec> spec = {
+          {0, ast::NodeType::SEQUENCE},         {1, ast::NodeType::STATEMENT},
+          {2, ast::NodeType::ASSIGNMENT},       {3, ast::NodeType::VARIABLE_DEFINITION},
+          {3, ast::NodeType::BINARY_OPERATION}, {4, ast::NodeType::LITERAL},
+          {4, ast::NodeType::LITERAL},          {1, ast::NodeType::STATEMENT},
+          {2, ast::NodeType::ASSIGNMENT},       {3, ast::NodeType::VARIABLE_DEFINITION},
+          {3, ast::NodeType::BINARY_OPERATION}, {4, ast::NodeType::LITERAL},
+          {4, ast::NodeType::LITERAL},          {1, ast::NodeType::STATEMENT},
+          {2, ast::NodeType::ASSIGNMENT},       {3, ast::NodeType::VARIABLE_DEFINITION},
+          {3, ast::NodeType::BINARY_OPERATION}, {4, ast::NodeType::LITERAL},
+          {4, ast::NodeType::LITERAL},          {1, ast::NodeType::STATEMENT},
+          {2, ast::NodeType::ASSIGNMENT},       {3, ast::NodeType::VARIABLE_DEFINITION},
+          {3, ast::NodeType::BINARY_OPERATION}, {4, ast::NodeType::LITERAL},
+          {4, ast::NodeType::LITERAL},
+    };
+    std::vector<std::string> program = {"int a = 1 + 1 ;", "int a = 1 - 1 ;", "int a = 1 / 1 ;", "int a = 1 * 1 ;"};
+    assertProgramCreatesAst(program, spec);
+}
+
 TEST_CASE("ASTGenerator can handle 'fun hello ( ) { }'") {
     std::vector<AstNodeSpec> spec = {
           {0, ast::NodeType::SEQUENCE},
@@ -10,31 +30,6 @@ TEST_CASE("ASTGenerator can handle 'fun hello ( ) { }'") {
           {3, ast::NodeType::SEQUENCE},
     };
     std::vector<std::string> program = {"fun hello ( ) { }"};
-    assertProgramCreatesAst(program, spec);
-}
-
-TEST_CASE("ASTGenerator can handle 'int a = 1 + 1 ;'") {
-    std::vector<AstNodeSpec> spec = {
-          {0, ast::NodeType::SEQUENCE},         {1, ast::NodeType::STATEMENT},
-          {2, ast::NodeType::ASSIGNMENT},       {3, ast::NodeType::VARIABLE_DEFINITION},
-          {3, ast::NodeType::BINARY_OPERATION}, {4, ast::NodeType::LITERAL},
-          {4, ast::NodeType::LITERAL},
-    };
-    std::vector<std::string> program = {"int a = 1 + 1 ;"};
-    assertProgramCreatesAst(program, spec);
-}
-
-TEST_CASE("ASTGenerator can handle 'int a = 1 + 1 ; int b = a + 2 ;'") {
-    std::vector<AstNodeSpec> spec = {
-          {0, ast::NodeType::SEQUENCE},         {1, ast::NodeType::STATEMENT},
-          {2, ast::NodeType::ASSIGNMENT},       {3, ast::NodeType::VARIABLE_DEFINITION},
-          {3, ast::NodeType::BINARY_OPERATION}, {4, ast::NodeType::LITERAL},
-          {4, ast::NodeType::LITERAL},          {1, ast::NodeType::STATEMENT},
-          {2, ast::NodeType::ASSIGNMENT},       {3, ast::NodeType::VARIABLE_DEFINITION},
-          {3, ast::NodeType::BINARY_OPERATION}, {4, ast::NodeType::VARIABLE},
-          {4, ast::NodeType::LITERAL},
-    };
-    std::vector<std::string> program = {"int a = 1 + 1 ; int b = a + 2 ;"};
     assertProgramCreatesAst(program, spec);
 }
 
@@ -109,5 +104,32 @@ TEST_CASE("ASTGenerator can handle 'if ( true ) { } else { }'") {
           {3, ast::NodeType::LITERAL},
     };
     std::vector<std::string> program = {"if ( true ) { } else { }"};
+    assertProgramCreatesAst(program, spec);
+}
+
+TEST_CASE("ASTGenerator can handle relational operations") {
+    std::vector<AstNodeSpec> spec = {
+          {0, ast::NodeType::SEQUENCE},         {1, ast::NodeType::STATEMENT},
+          {2, ast::NodeType::ASSIGNMENT},       {3, ast::NodeType::VARIABLE_DEFINITION},
+          {3, ast::NodeType::BINARY_OPERATION}, {4, ast::NodeType::LITERAL},
+          {4, ast::NodeType::LITERAL},          {1, ast::NodeType::STATEMENT},
+          {2, ast::NodeType::ASSIGNMENT},       {3, ast::NodeType::VARIABLE_DEFINITION},
+          {3, ast::NodeType::BINARY_OPERATION}, {4, ast::NodeType::LITERAL},
+          {4, ast::NodeType::LITERAL},          {1, ast::NodeType::STATEMENT},
+          {2, ast::NodeType::ASSIGNMENT},       {3, ast::NodeType::VARIABLE_DEFINITION},
+          {3, ast::NodeType::BINARY_OPERATION}, {4, ast::NodeType::LITERAL},
+          {4, ast::NodeType::LITERAL},          {1, ast::NodeType::STATEMENT},
+          {2, ast::NodeType::ASSIGNMENT},       {3, ast::NodeType::VARIABLE_DEFINITION},
+          {3, ast::NodeType::BINARY_OPERATION}, {4, ast::NodeType::LITERAL},
+          {4, ast::NodeType::LITERAL},          {1, ast::NodeType::STATEMENT},
+          {2, ast::NodeType::ASSIGNMENT},       {3, ast::NodeType::VARIABLE_DEFINITION},
+          {3, ast::NodeType::BINARY_OPERATION}, {4, ast::NodeType::LITERAL},
+          {4, ast::NodeType::LITERAL},          {1, ast::NodeType::STATEMENT},
+          {2, ast::NodeType::ASSIGNMENT},       {3, ast::NodeType::VARIABLE_DEFINITION},
+          {3, ast::NodeType::BINARY_OPERATION}, {4, ast::NodeType::LITERAL},
+          {4, ast::NodeType::LITERAL},
+    };
+    std::vector<std::string> program = {"bool a = 1 == 0 ;", "bool b = 1 <= 0 ;", "bool c = 1 < 0 ;",
+                                        "bool d = 1 >= 0 ;", "bool e = 1 > 0 ;",  "bool f = 1 != 0 ;"};
     assertProgramCreatesAst(program, spec);
 }

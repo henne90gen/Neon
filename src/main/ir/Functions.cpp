@@ -79,13 +79,16 @@ void IRGenerator::finalizeFunction(llvm::Function *function, const ast::DataType
         return;
     }
 
+    function->viewCFG();
+    print(false);
+
     if (!isExternalFunction) {
         llvm::FunctionAnalysisManager functionAnalysisManager = llvm::FunctionAnalysisManager();
         llvm::FunctionPassManager functionPassManager;
         llvm::PassBuilder PB;
         PB.registerFunctionAnalyses(functionAnalysisManager);
         functionPassManager = PB.buildFunctionSimplificationPipeline(llvm::PassBuilder::OptimizationLevel::O0,
-                                                                     llvm::PassBuilder::ThinLTOPhase::None);
+                                                                     llvm::PassBuilder::ThinLTOPhase::None, true);
         functionPassManager.run(*function, functionAnalysisManager);
     }
 }

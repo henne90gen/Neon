@@ -106,7 +106,7 @@ Token Lexer::_getToken() {
             return oneCharToken.value();
         }
 
-        std::regex varNameRegex("^[a-zA-Z_][-_a-zA-Z0-9]*");
+        std::regex varNameRegex("^[a-zA-Z_][_a-zA-Z0-9]*");
         itr = std::sregex_iterator(currentWord.begin(), currentWord.end(), varNameRegex);
         if (itr != std::sregex_iterator()) {
             auto content = static_cast<std::string>((*itr).str());

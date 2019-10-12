@@ -115,17 +115,18 @@ void ASTInterpreter::visitBinaryOperationNode(BinaryOperationNode *node) {
     auto leftResult = calculationResults[node->getLeft()];
     auto rightResult = calculationResults[node->getRight()];
     CalculationResult result = {};
+    NOT_IMPLEMENTED
     switch (node->getType()) {
-    case BinaryOperationNode::ADDITION:
+    case ast::BinaryOperationType::ADDITION:
         result = add(leftResult, rightResult);
         break;
-    case BinaryOperationNode::SUBTRACTION:
+    case ast::BinaryOperationType::SUBTRACTION:
         result = subtract(leftResult, rightResult);
         break;
-    case BinaryOperationNode::MULTIPLICATION:
+    case ast::BinaryOperationType::MULTIPLICATION:
         result = multiply(leftResult, rightResult);
         break;
-    case BinaryOperationNode::DIVISION:
+    case ast::BinaryOperationType::DIVISION:
         result = divide(leftResult, rightResult);
         break;
     }

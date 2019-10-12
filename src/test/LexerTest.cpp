@@ -76,7 +76,6 @@ TEST_CASE("Lexer can handle all tokens") {
           {"helloWorld", Token::VARIABLE_NAME},
           {"hello123World", Token::VARIABLE_NAME},
           {"_helloWorld", Token::VARIABLE_NAME},
-          {"hello-World", Token::VARIABLE_NAME},
           {"hello_World", Token::VARIABLE_NAME},
           {"int", Token::DATA_TYPE},
           {"float", Token::DATA_TYPE},

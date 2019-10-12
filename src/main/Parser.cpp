@@ -90,6 +90,8 @@ GrammarSymbol convertToGrammarSymbol(Token &token) {
         return GrammarSymbol::SINGLE_EQUALS;
     case Token::DOUBLE_EQUALS:
         return GrammarSymbol::DOUBLE_EQUALS;
+    case Token::NOT_EQUALS:
+        return GrammarSymbol::NOT_EQUALS;
     case Token::LESS_THAN:
         return GrammarSymbol::LESS_THAN;
     case Token::GREATER_THAN:

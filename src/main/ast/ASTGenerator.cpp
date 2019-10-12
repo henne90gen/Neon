@@ -5,7 +5,9 @@
 #include "nodes/AllNodes.h"
 
 bool isBinaryOperation(ParseTreeNode *node) {
-    return (node->symbol == GrammarSymbol::SUM || node->symbol == GrammarSymbol::TERM) && node->children.size() == 3;
+    return (node->symbol == GrammarSymbol::SUM || node->symbol == GrammarSymbol::TERM ||
+            node->symbol == GrammarSymbol::RELATION) &&
+           node->children.size() == 3;
 }
 
 bool isUnaryOperation(ParseTreeNode *node) {
@@ -39,20 +41,32 @@ bool isIgnored(ParseTreeNode *node) {
     return node->symbol == GrammarSymbol::SEMICOLON || node->symbol == GrammarSymbol::ENDOFFILE;
 }
 
-BinaryOperationNode::BinaryOperationType getBinaryOperationType(GrammarSymbol symbol) {
+ast::BinaryOperationType getBinaryOperationType(GrammarSymbol symbol) {
     switch (symbol) {
     case GrammarSymbol::PLUS:
-        return BinaryOperationNode::ADDITION;
+        return ast::BinaryOperationType::ADDITION;
     case GrammarSymbol::MINUS:
-        return BinaryOperationNode::SUBTRACTION;
+        return ast::BinaryOperationType::SUBTRACTION;
     case GrammarSymbol::STAR:
-        return BinaryOperationNode::MULTIPLICATION;
+        return ast::BinaryOperationType::MULTIPLICATION;
     case GrammarSymbol::DIV:
-        return BinaryOperationNode::DIVISION;
+        return ast::BinaryOperationType::DIVISION;
+    case GrammarSymbol::DOUBLE_EQUALS:
+        return ast::BinaryOperationType::EQUALS;
+    case GrammarSymbol::NOT_EQUALS:
+        return ast::BinaryOperationType::NOT_EQUALS;
+    case GrammarSymbol::LESS_EQUALS:
+        return ast::BinaryOperationType::LESS_EQUALS;
+    case GrammarSymbol::LESS_THAN:
+        return ast::BinaryOperationType::LESS_THAN;
+    case GrammarSymbol::GREATER_EQUALS:
+        return ast::BinaryOperationType::GREATER_EQUALS;
+    case GrammarSymbol::GREATER_THAN:
+        return ast::BinaryOperationType::GREATER_THAN;
     default:
-        std::cout << "Could not determine binary opartor type! (" << to_string(symbol) << ")" << std::endl;
+        std::cout << "Could not determine binary operator type! (" << to_string(symbol) << ")" << std::endl;
         exit(1);
-        return BinaryOperationNode::ADDITION;
+        return ast::BinaryOperationType::ADDITION;
     }
 }
 
@@ -61,7 +75,7 @@ UnaryOperationNode::UnaryOperationType getUnaryOperationType(GrammarSymbol symbo
     case GrammarSymbol::NOT:
         return UnaryOperationNode::NOT;
     default:
-        std::cout << "Could not determine unary opartor type! (" << to_string(symbol) << ")" << std::endl;
+        std::cout << "Could not determine unary operator type! (" << to_string(symbol) << ")" << std::endl;
         exit(1);
         return UnaryOperationNode::NOT;
     }
@@ -126,9 +140,11 @@ ast::DataType getDataType(ParseTreeNode *node) {
 
     if (node->token.content == "int") {
         return ast::DataType::INT;
-    } if (node->token.content == "float") {
+    }
+    if (node->token.content == "float") {
         return ast::DataType::FLOAT;
-    } if (node->token.content == "bool") {
+    }
+    if (node->token.content == "bool") {
         return ast::DataType::BOOL;
     }
     return ast::DataType::VOID;

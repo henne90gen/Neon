@@ -1,4 +1,5 @@
 #include "BinaryOperationNode.h"
+
 #include "../ASTVisitor.h"
 
 void BinaryOperationNode::accept(ASTVisitor *v) { v->visitBinaryOperationNode(this); }
@@ -11,4 +12,4 @@ AstNode *BinaryOperationNode::getRight() { return right; }
 
 void BinaryOperationNode::setRight(AstNode *right) { this->right = right; }
 
-BinaryOperationNode::BinaryOperationType BinaryOperationNode::getType() { return type; }
+ast::BinaryOperationType BinaryOperationNode::getType() { return type; }

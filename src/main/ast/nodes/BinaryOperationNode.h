@@ -1,17 +1,12 @@
 #pragma once
 
 #include "AstNode.h"
+#include "../Types.h"
 
 class BinaryOperationNode : public AstNode {
   public:
-    enum BinaryOperationType {
-        ADDITION,
-        MULTIPLICATION,
-        SUBTRACTION,
-        DIVISION,
-    };
 
-    explicit BinaryOperationNode(BinaryOperationType type) : AstNode(ast::NodeType::BINARY_OPERATION), type(type) {}
+    explicit BinaryOperationNode(ast::BinaryOperationType type) : AstNode(ast::NodeType::BINARY_OPERATION), type(type) {}
 
     void accept(ASTVisitor *v) override;
 
@@ -21,10 +16,10 @@ class BinaryOperationNode : public AstNode {
     void setRight(AstNode *right);
     AstNode *getRight();
 
-    BinaryOperationType getType();
+    ast::BinaryOperationType getType();
 
   private:
-    BinaryOperationType type;
+    ast::BinaryOperationType type;
     AstNode *left = nullptr;
     AstNode *right = nullptr;
 };

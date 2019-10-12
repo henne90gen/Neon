@@ -18,4 +18,17 @@ enum NodeType {
     IF_STATEMENT,
 };
 
+enum BinaryOperationType {
+    ADDITION,
+    MULTIPLICATION,
+    SUBTRACTION,
+    DIVISION,
+    EQUALS,
+    NOT_EQUALS,
+    LESS_EQUALS,
+    LESS_THAN,
+    GREATER_EQUALS,
+    GREATER_THAN,
+};
+
 }

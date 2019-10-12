@@ -94,9 +94,13 @@ void IRGenerator::visitSequenceNode(SequenceNode *node) {
         child->accept(this);
     }
 
+    if (!node->getChildren().empty()) {
+        nodesToValues[node] = nodesToValues[node->getChildren().back()];
+    }
+
     if (initFunc != nullptr) {
         finalizeFunction(initFunc, ast::DataType::VOID, false);
-        // TODO(henne): don't generate global init function, if there are no globals
+        // TODO henne: don't generate global init function, if there are no globals
         setupGlobalInitialization(initFunc);
         isGlobalScope = false;
     }
@@ -112,11 +116,50 @@ void IRGenerator::visitStatementNode(StatementNode *node) {
     }
 
     node->getChild()->accept(this);
+    auto value = nodesToValues[node->getChild()];
     if (node->isReturnStatement()) {
-        builder.CreateRet(nodesToValues[node->getChild()]);
+        builder.CreateRet(value);
     }
+    nodesToValues[node] = value;
 
     LOG("Exit Statement")
+}
+
+void IRGenerator::visitIfStatementNode(IfStatementNode *node) {
+    LOG("Enter IfStatement")
+
+    node->getCondition()->accept(this);
+    auto condition = nodesToValues[node->getCondition()];
+    llvm::Function *function = builder.GetInsertBlock()->getParent();
+
+    llvm::BasicBlock *thenBB = llvm::BasicBlock::Create(context, "then", function);
+    llvm::BasicBlock *elseBB = llvm::BasicBlock::Create(context, "else");
+    llvm::BasicBlock *mergeBB = llvm::BasicBlock::Create(context, "if_merge");
+
+    builder.CreateCondBr(condition, thenBB, elseBB);
+
+    builder.SetInsertPoint(thenBB);
+    if (node->getIfBody() != nullptr) {
+        node->getIfBody()->accept(this);
+        // TODO henne: Make sure that CreateBr is not called if we emitted a return statement at the end of the if-body.
+        //  We need scoping, for this to work.
+    }
+    builder.CreateBr(mergeBB);
+
+    function->getBasicBlockList().push_back(elseBB);
+    builder.SetInsertPoint(elseBB);
+
+    if (node->getElseBody() != nullptr) {
+        node->getElseBody()->accept(this);
+        // TODO henne: Make sure that CreateBr is not called if we emitted a return statement at the end of the if-body.
+        //  We need scoping, for this to work.
+    }
+    builder.CreateBr(mergeBB);
+
+    function->getBasicBlockList().push_back(mergeBB);
+    builder.SetInsertPoint(mergeBB);
+
+    LOG("Exit IfStatement")
 }
 
 void IRGenerator::print(const bool writeToFile) {
@@ -128,8 +171,6 @@ void IRGenerator::print(const bool writeToFile) {
         module.print(dest, nullptr);
     }
 }
-
-void IRGenerator::visitIfStatementNode(IfStatementNode * /*node*/) { NOT_IMPLEMENTED }
 
 void IRGenerator::run(AstNode *root) {
     if (root == nullptr) {
