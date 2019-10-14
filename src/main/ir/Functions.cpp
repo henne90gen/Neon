@@ -104,11 +104,11 @@ void IRGenerator::finalizeFunction(llvm::Function *function, const ast::DataType
 void IRGenerator::visitCallNode(CallNode *node) {
     llvm::Function *calleeFunc = module.getFunction(node->getName());
     if (calleeFunc == nullptr) {
-        return logError("Use of undeclared identifier " + node->getName());
+        return logError("Undefined function " + node->getName());
     }
 
     if (calleeFunc->arg_size() != node->getArguments().size()) {
-        return logError("Incorrect number arguments passed.");
+        return logError("Wrong number of arguments passed.");
     }
 
     std::vector<llvm::Value *> arguments;

@@ -203,6 +203,23 @@ void IRGenerator::print(const bool writeToFile) {
     }
 }
 
+void IRGenerator::generateDummyMain() {
+    if (module.getFunction("main") != nullptr) {
+        return;
+    }
+
+    auto zero = new IntegerNode(0);
+
+    auto returnStatement = new StatementNode();
+    returnStatement->setIsReturnStatement(true);
+    returnStatement->setChild(zero);
+
+    auto function = new FunctionNode("main", ast::DataType::INT);
+    function->setBody(returnStatement);
+
+    visitFunctionNode(function);
+}
+
 void IRGenerator::run(AstNode *root) {
     if (root == nullptr) {
         return;
@@ -210,7 +227,7 @@ void IRGenerator::run(AstNode *root) {
 
     root->accept(this);
 
-    // TODO(henne): add code to generate a dummy main, if the user didn't define one
+    generateDummyMain();
 
     this->print();
 }

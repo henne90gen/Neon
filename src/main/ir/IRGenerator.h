@@ -60,4 +60,5 @@ class IRGenerator : public ASTVisitor {
     void finalizeFunction(llvm::Function *function, ast::DataType returnType, bool isExternalFunction);
     llvm::Constant *getInitializer(const ast::DataType &dt);
     void setupGlobalInitialization(llvm::Function *func);
+    void generateDummyMain();
 };

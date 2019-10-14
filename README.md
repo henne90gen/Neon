@@ -33,6 +33,7 @@ so that one can call functions that are contained in the externally linked objec
 
 - if statements work just like in C
 - if/else statements work just like in C
+- TODO if/else-if/…/else
 
 #### For loops
 
