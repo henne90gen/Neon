@@ -125,6 +125,35 @@ void IRGenerator::visitStatementNode(StatementNode *node) {
     LOG("Exit Statement")
 }
 
+bool hasReturnStatement(AstNode *node) {
+    if (node == nullptr) {
+        return false;
+    }
+    switch (node->getAstNodeType()) {
+    case ast::SEQUENCE: {
+        auto children = ((SequenceNode *)node)->getChildren();
+        if (!children.empty()) {
+            return hasReturnStatement(children[children.size() - 1]);
+        }
+        return false;
+    }
+    case ast::STATEMENT: {
+        return ((StatementNode *)node)->isReturnStatement();
+    }
+    case ast::LITERAL:
+    case ast::UNARY_OPERATION:
+    case ast::BINARY_OPERATION:
+    case ast::FUNCTION:
+    case ast::CALL:
+    case ast::VARIABLE_DEFINITION:
+    case ast::VARIABLE:
+    case ast::ASSIGNMENT:
+    case ast::IF_STATEMENT:
+    default:
+        return false;
+    }
+}
+
 void IRGenerator::visitIfStatementNode(IfStatementNode *node) {
     LOG("Enter IfStatement")
 
@@ -141,20 +170,22 @@ void IRGenerator::visitIfStatementNode(IfStatementNode *node) {
     builder.SetInsertPoint(thenBB);
     if (node->getIfBody() != nullptr) {
         node->getIfBody()->accept(this);
-        // TODO(henne): henne: Make sure that CreateBr is not called if we emitted a return statement at the end of the if-body.
-        //  We need scoping, for this to work.
     }
-    builder.CreateBr(mergeBB);
+    if (!hasReturnStatement(node->getIfBody())) {
+        // create branch instruction to jump to the merge block
+        builder.CreateBr(mergeBB);
+    }
 
     function->getBasicBlockList().push_back(elseBB);
     builder.SetInsertPoint(elseBB);
 
     if (node->getElseBody() != nullptr) {
         node->getElseBody()->accept(this);
-        // TODO(henne): henne: Make sure that CreateBr is not called if we emitted a return statement at the end of the if-body.
-        //  We need scoping, for this to work.
     }
-    builder.CreateBr(mergeBB);
+    if (!hasReturnStatement(node->getElseBody())) {
+        // create branch instruction to jump to the merge block
+        builder.CreateBr(mergeBB);
+    }
 
     function->getBasicBlockList().push_back(mergeBB);
     builder.SetInsertPoint(mergeBB);
@@ -178,6 +209,8 @@ void IRGenerator::run(AstNode *root) {
     }
 
     root->accept(this);
+
+    // TODO(henne): add code to generate a dummy main, if the user didn't define one
 
     this->print();
 }

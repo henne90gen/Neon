@@ -39,7 +39,8 @@ void IRGenerator::visitFunctionNode(FunctionNode *node) {
 }
 
 auto IRGenerator::getOrCreateFunctionDefinition(const std::string &name, const ast::DataType returnType,
-                                                           const std::vector<VariableDefinitionNode *> &arguments) -> llvm::Function * {
+                                                const std::vector<VariableDefinitionNode *> &arguments)
+      -> llvm::Function * {
     llvm::Function *function = module.getFunction(name);
     if (function == nullptr) {
         auto retType = getType(returnType);
@@ -57,13 +58,6 @@ auto IRGenerator::getOrCreateFunctionDefinition(const std::string &name, const a
             logError("Could not create function");
             return nullptr;
         }
-
-        // TODO(henne): henne: clang applies these attributes somehow. But doing it here does not work
-        //  llvm::AttributeList attrs = {};
-        //  attrs = attrs.addAttribute(context, 0, llvm::Attribute::AttrKind::NoInline);
-        //  attrs = attrs.addAttribute(context, 0, llvm::Attribute::AttrKind::OptimizeNone);
-        //  attrs = attrs.addAttribute(context, 0, llvm::Attribute::AttrKind::UWTable);
-        //  function->setAttributes(attrs);
 
         unsigned int i = 0;
         for (auto &arg : function->args()) {
@@ -90,12 +84,19 @@ void IRGenerator::finalizeFunction(llvm::Function *function, const ast::DataType
     print(false);
 
     if (!isExternalFunction) {
-        llvm::FunctionAnalysisManager functionAnalysisManager = llvm::FunctionAnalysisManager();
-        llvm::FunctionPassManager functionPassManager;
-        llvm::PassBuilder PB;
-        PB.registerFunctionAnalyses(functionAnalysisManager);
-        functionPassManager = PB.buildFunctionSimplificationPipeline(llvm::PassBuilder::OptimizationLevel::O0,
-                                                                     llvm::PassBuilder::ThinLTOPhase::None, true);
+        llvm::LoopAnalysisManager loopAnalysisManager(verbose);
+        llvm::FunctionAnalysisManager functionAnalysisManager(verbose);
+        llvm::CGSCCAnalysisManager cgsccAnalysisManager(verbose);
+        llvm::ModuleAnalysisManager moduleAnalysisManager(verbose);
+        llvm::PassBuilder passBuilder;
+        passBuilder.registerModuleAnalyses(moduleAnalysisManager);
+        passBuilder.registerCGSCCAnalyses(cgsccAnalysisManager);
+        passBuilder.registerFunctionAnalyses(functionAnalysisManager);
+        passBuilder.registerLoopAnalyses(loopAnalysisManager);
+        passBuilder.crossRegisterProxies(loopAnalysisManager, functionAnalysisManager, cgsccAnalysisManager,
+                                         moduleAnalysisManager);
+        llvm::FunctionPassManager functionPassManager = passBuilder.buildFunctionSimplificationPipeline(
+              llvm::PassBuilder::OptimizationLevel::O0, llvm::PassBuilder::ThinLTOPhase::None, verbose);
         functionPassManager.run(*function, functionAnalysisManager);
     }
 }
