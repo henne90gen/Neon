@@ -78,7 +78,6 @@ assignment
     variable_name = expression
 
 expression
-    call
     disjunction
 
 disjunction
@@ -117,5 +116,6 @@ factor
     false
     integer
     float
+    call
     variable_name
     ( expression )

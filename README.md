@@ -53,4 +53,3 @@ TODO
 - add reflection capabilities
     - inspect objects at runtime
     - get information about types
-- make recursive function calls work

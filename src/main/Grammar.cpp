@@ -1,7 +1,7 @@
 
 #include "Grammar.h"
 
-auto to_string(GrammarSymbol symbol) -> std::string {
+std::string to_string(GrammarSymbol symbol) {
   switch (symbol) {
   case NOT_EQUALS:
     return "NOT_EQUALS";
@@ -128,7 +128,7 @@ auto to_string(GrammarSymbol symbol) -> std::string {
   }
 }
 
-auto to_string(StateTransitionType transition) -> std::string {
+std::string to_string(StateTransitionType transition) {
   switch (transition) {
     case SHIFT:
       return "SHIFT";
@@ -145,7 +145,7 @@ auto to_string(StateTransitionType transition) -> std::string {
   }
 }
 
-auto to_string(StateTransition &action) -> std::string {
+std::string to_string(StateTransition &action) {
   std::string info = "UNKNOWN";
   if (action.type == StateTransitionType::ACCEPT) {
     info = "ACCEPT";

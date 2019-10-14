@@ -62,6 +62,10 @@ auto to_string(Token::TokenType type) -> std::string {
         return "RETURN";
     case Token::EXTERN:
         return "EXTERN";
+    case Token::IF:
+        return "IF";
+    case Token::ELSE:
+        return "ELSE";
     default:
         return "NOT IMPLEMENTED YET (" + std::to_string(static_cast<int>(type)) + ")";
     }

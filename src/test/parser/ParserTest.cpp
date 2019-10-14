@@ -91,12 +91,34 @@ TEST_CASE("Parser can handle two lines") {
 
 TEST_CASE("Parser can handle return statements with function calls") {
     std::vector<std::pair<int, GrammarSymbol>> parseTree = {
-          {0, GrammarSymbol::PROGRAM},       {1, GrammarSymbol::STATEMENTS}, {2, GrammarSymbol::STATEMENT},
-          {3, GrammarSymbol::RETURN},        {3, GrammarSymbol::EXPRESSION}, {4, GrammarSymbol::CALL},
-          {5, GrammarSymbol::VARIABLE_NAME}, {5, GrammarSymbol::LEFT_PARAN}, {5, GrammarSymbol::CALL_HEADER},
-          {6, GrammarSymbol::RIGHT_PARAN},   {3, GrammarSymbol::SEMICOLON},  {1, GrammarSymbol::ENDOFFILE},
+          {0, GrammarSymbol::PROGRAM},      {1, GrammarSymbol::STATEMENTS},     {2, GrammarSymbol::STATEMENT},
+          {3, GrammarSymbol::RETURN},       {3, GrammarSymbol::EXPRESSION},     {4, GrammarSymbol::DISJUNCTION},
+          {5, GrammarSymbol::CONJUNCTION},  {6, GrammarSymbol::NEGATION},       {7, GrammarSymbol::RELATION},
+          {8, GrammarSymbol::SUM},          {9, GrammarSymbol::TERM},           {10, GrammarSymbol::FACTOR},
+          {11, GrammarSymbol::CALL},        {12, GrammarSymbol::VARIABLE_NAME}, {12, GrammarSymbol::LEFT_PARAN},
+          {12, GrammarSymbol::CALL_HEADER}, {13, GrammarSymbol::RIGHT_PARAN},   {3, GrammarSymbol::SEMICOLON},
+          {1, GrammarSymbol::ENDOFFILE},
     };
     std::vector<std::string> program = {"return hello ( ) ;"};
+    assertProgramCreatesParseTree(program, parseTree);
+}
+
+TEST_CASE("Parser can handle return statements with function calls and variable arguments") {
+    std::vector<std::pair<int, GrammarSymbol>> parseTree = {
+          {0, GrammarSymbol::PROGRAM},      {1, GrammarSymbol::STATEMENTS},     {2, GrammarSymbol::STATEMENT},
+          {3, GrammarSymbol::RETURN},       {3, GrammarSymbol::EXPRESSION},     {4, GrammarSymbol::DISJUNCTION},
+          {5, GrammarSymbol::CONJUNCTION},  {6, GrammarSymbol::NEGATION},       {7, GrammarSymbol::RELATION},
+          {8, GrammarSymbol::SUM},          {9, GrammarSymbol::TERM},           {10, GrammarSymbol::FACTOR},
+          {11, GrammarSymbol::CALL},        {12, GrammarSymbol::VARIABLE_NAME}, {12, GrammarSymbol::LEFT_PARAN},
+          {12, GrammarSymbol::CALL_HEADER}, {13, GrammarSymbol::CALL_ARGS},     {14, GrammarSymbol::EXPRESSION},
+          {15, GrammarSymbol::DISJUNCTION}, {16, GrammarSymbol::CONJUNCTION},   {17, GrammarSymbol::NEGATION},
+          {18, GrammarSymbol::RELATION},    {19, GrammarSymbol::SUM},           {20, GrammarSymbol::SUM},
+          {21, GrammarSymbol::TERM},        {22, GrammarSymbol::FACTOR},        {23, GrammarSymbol::VARIABLE_NAME},
+          {20, GrammarSymbol::MINUS},       {20, GrammarSymbol::TERM},          {21, GrammarSymbol::FACTOR},
+          {22, GrammarSymbol::INTEGER},     {13, GrammarSymbol::RIGHT_PARAN},   {3, GrammarSymbol::SEMICOLON},
+          {1, GrammarSymbol::ENDOFFILE},
+    };
+    std::vector<std::string> program = {"return hello ( world - 1 ) ;"};
     assertProgramCreatesParseTree(program, parseTree);
 }
 
