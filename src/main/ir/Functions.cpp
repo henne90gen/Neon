@@ -58,6 +58,13 @@ llvm::Function *IRGenerator::getOrCreateFunctionDefinition(const std::string &na
             return nullptr;
         }
 
+        // TODO henne: clang applies these attributes somehow. But doing it here does not work
+        //  llvm::AttributeList attrs = {};
+        //  attrs = attrs.addAttribute(context, 0, llvm::Attribute::AttrKind::NoInline);
+        //  attrs = attrs.addAttribute(context, 0, llvm::Attribute::AttrKind::OptimizeNone);
+        //  attrs = attrs.addAttribute(context, 0, llvm::Attribute::AttrKind::UWTable);
+        //  function->setAttributes(attrs);
+
         unsigned int i = 0;
         for (auto &arg : function->args()) {
             arg.setName(arguments[i++]->getName());
@@ -79,7 +86,7 @@ void IRGenerator::finalizeFunction(llvm::Function *function, const ast::DataType
         return;
     }
 
-    function->viewCFG();
+    //    function->viewCFG();
     print(false);
 
     if (!isExternalFunction) {
