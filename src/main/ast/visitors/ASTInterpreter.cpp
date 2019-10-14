@@ -24,7 +24,7 @@ void ASTInterpreter::printStatementResult(AstNode *child) {
     }
 }
 
-CalculationResult getTypedResult(CalculationResult &left, CalculationResult &right) {
+auto getTypedResult(CalculationResult &left, CalculationResult &right) -> CalculationResult {
     CalculationResult result = {CalculationResult::INTEGER, {0}};
     if (left.type == CalculationResult::FLOAT || right.type == CalculationResult::FLOAT) {
         result.type = CalculationResult::FLOAT;
@@ -32,7 +32,7 @@ CalculationResult getTypedResult(CalculationResult &left, CalculationResult &rig
     return result;
 }
 
-float castToFloat(CalculationResult &result) {
+auto castToFloat(CalculationResult &result) -> float {
     if (result.type == CalculationResult::INTEGER) {
         return static_cast<float>(result.intResult);
     } 
@@ -40,7 +40,7 @@ float castToFloat(CalculationResult &result) {
     
 }
 
-CalculationResult add(CalculationResult &left, CalculationResult &right) {
+auto add(CalculationResult &left, CalculationResult &right) -> CalculationResult {
     CalculationResult result = getTypedResult(left, right);
     if (result.type == CalculationResult::FLOAT) {
         float l = castToFloat(left);
@@ -52,7 +52,7 @@ CalculationResult add(CalculationResult &left, CalculationResult &right) {
     return result;
 }
 
-CalculationResult subtract(CalculationResult &left, CalculationResult &right) {
+auto subtract(CalculationResult &left, CalculationResult &right) -> CalculationResult {
     CalculationResult result = getTypedResult(left, right);
     if (result.type == CalculationResult::FLOAT) {
         float l = castToFloat(left);
@@ -64,7 +64,7 @@ CalculationResult subtract(CalculationResult &left, CalculationResult &right) {
     return result;
 }
 
-CalculationResult multiply(CalculationResult &left, CalculationResult &right) {
+auto multiply(CalculationResult &left, CalculationResult &right) -> CalculationResult {
     CalculationResult result = getTypedResult(left, right);
     if (result.type == CalculationResult::FLOAT) {
         float l = castToFloat(left);
@@ -76,7 +76,7 @@ CalculationResult multiply(CalculationResult &left, CalculationResult &right) {
     return result;
 }
 
-CalculationResult divide(CalculationResult &left, CalculationResult &right) {
+auto divide(CalculationResult &left, CalculationResult &right) -> CalculationResult {
     CalculationResult result = getTypedResult(left, right);
     if (result.type == CalculationResult::FLOAT) {
         float l = castToFloat(left);
@@ -88,7 +88,7 @@ CalculationResult divide(CalculationResult &left, CalculationResult &right) {
     return result;
 }
 
-CalculationResult negate(CalculationResult &calc) {
+auto negate(CalculationResult &calc) -> CalculationResult {
     CalculationResult result = {CalculationResult::BOOL, {0}};
     if (calc.type == CalculationResult::BOOL) {
         result.boolResult = !calc.boolResult;

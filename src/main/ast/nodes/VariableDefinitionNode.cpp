@@ -4,6 +4,6 @@
 
 void VariableDefinitionNode::accept(ASTVisitor *v) { v->visitVariableDefinitionNode(this); }
 
-std::string &VariableDefinitionNode::getName() { return name; }
+auto VariableDefinitionNode::getName() -> std::string & { return name; }
 
-ast::DataType VariableDefinitionNode::getType() { return type; }
+auto VariableDefinitionNode::getType() -> ast::DataType { return type; }

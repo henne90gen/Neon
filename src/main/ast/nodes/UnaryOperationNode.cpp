@@ -4,8 +4,8 @@
 
 void UnaryOperationNode::accept(ASTVisitor *v) { v->visitUnaryOperationNode(this); }
 
-AstNode *UnaryOperationNode::getChild() { return child; }
+auto UnaryOperationNode::getChild() -> AstNode * { return child; }
 
 void UnaryOperationNode::setChild(AstNode *child) { this->child = child; }
 
-UnaryOperationNode::UnaryOperationType UnaryOperationNode::getType() { return type; }
+auto UnaryOperationNode::getType() -> UnaryOperationNode::UnaryOperationType { return type; }

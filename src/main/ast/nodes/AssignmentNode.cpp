@@ -4,10 +4,10 @@
 
 void AssignmentNode::accept(ASTVisitor *v) { v->visitAssignmentNode(this); }
 
-AstNode *AssignmentNode::getLeft() { return left; }
+auto AssignmentNode::getLeft() -> AstNode * { return left; }
 
 void AssignmentNode::setLeft(AstNode *left) { this->left = left; }
 
-AstNode *AssignmentNode::getRight() { return right; }
+auto AssignmentNode::getRight() -> AstNode * { return right; }
 
 void AssignmentNode::setRight(AstNode *right) { this->right = right; }

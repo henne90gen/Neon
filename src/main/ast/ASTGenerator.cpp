@@ -4,44 +4,44 @@
 
 #include "nodes/AllNodes.h"
 
-bool isBinaryOperation(ParseTreeNode *node) {
+auto isBinaryOperation(ParseTreeNode *node) -> bool {
     return (node->symbol == GrammarSymbol::SUM || node->symbol == GrammarSymbol::TERM ||
             node->symbol == GrammarSymbol::RELATION) &&
            node->children.size() == 3;
 }
 
-bool isUnaryOperation(ParseTreeNode *node) {
+auto isUnaryOperation(ParseTreeNode *node) -> bool {
     return (node->symbol == GrammarSymbol::NEGATION) && node->children.size() == 2;
 }
 
-bool isLiteral(ParseTreeNode *node) {
+auto isLiteral(ParseTreeNode *node) -> bool {
     return node->symbol == GrammarSymbol::INTEGER || node->symbol == GrammarSymbol::FLOAT ||
            node->symbol == GrammarSymbol::TRUE || node->symbol == GrammarSymbol::FALSE;
 }
 
-bool isVariable(ParseTreeNode *node) { return node->symbol == GrammarSymbol::VARIABLE_NAME; }
+auto isVariable(ParseTreeNode *node) -> bool { return node->symbol == GrammarSymbol::VARIABLE_NAME; }
 
-bool isVariableDefinition(ParseTreeNode *node) { return node->symbol == GrammarSymbol::VARIABLE_DEFINITION; }
+auto isVariableDefinition(ParseTreeNode *node) -> bool { return node->symbol == GrammarSymbol::VARIABLE_DEFINITION; }
 
-bool isSequence(ParseTreeNode *node) { return node->symbol == GrammarSymbol::STATEMENTS; }
+auto isSequence(ParseTreeNode *node) -> bool { return node->symbol == GrammarSymbol::STATEMENTS; }
 
-bool isStatement(ParseTreeNode *node) { return node->symbol == GrammarSymbol::STATEMENT; }
+auto isStatement(ParseTreeNode *node) -> bool { return node->symbol == GrammarSymbol::STATEMENT; }
 
-bool isFunction(ParseTreeNode *node) { return node->symbol == GrammarSymbol::FUNCTION; }
+auto isFunction(ParseTreeNode *node) -> bool { return node->symbol == GrammarSymbol::FUNCTION; }
 
-bool isExternalFunction(ParseTreeNode *node) { return node->symbol == GrammarSymbol::EXTERNAL_FUNCTION; }
+auto isExternalFunction(ParseTreeNode *node) -> bool { return node->symbol == GrammarSymbol::EXTERNAL_FUNCTION; }
 
-bool isIfStatement(ParseTreeNode *node) { return node->symbol == GrammarSymbol::IF_STATEMENT; }
+auto isIfStatement(ParseTreeNode *node) -> bool { return node->symbol == GrammarSymbol::IF_STATEMENT; }
 
-bool isCall(ParseTreeNode *node) { return node->symbol == GrammarSymbol::CALL; }
+auto isCall(ParseTreeNode *node) -> bool { return node->symbol == GrammarSymbol::CALL; }
 
-bool isAssignment(ParseTreeNode *node) { return node->symbol == GrammarSymbol::ASSIGNMENT; }
+auto isAssignment(ParseTreeNode *node) -> bool { return node->symbol == GrammarSymbol::ASSIGNMENT; }
 
-bool isIgnored(ParseTreeNode *node) {
+auto isIgnored(ParseTreeNode *node) -> bool {
     return node->symbol == GrammarSymbol::SEMICOLON || node->symbol == GrammarSymbol::ENDOFFILE;
 }
 
-ast::BinaryOperationType getBinaryOperationType(GrammarSymbol symbol) {
+auto getBinaryOperationType(GrammarSymbol symbol) -> ast::BinaryOperationType {
     switch (symbol) {
     case GrammarSymbol::PLUS:
         return ast::BinaryOperationType::ADDITION;
@@ -70,7 +70,7 @@ ast::BinaryOperationType getBinaryOperationType(GrammarSymbol symbol) {
     }
 }
 
-UnaryOperationNode::UnaryOperationType getUnaryOperationType(GrammarSymbol symbol) {
+auto getUnaryOperationType(GrammarSymbol symbol) -> UnaryOperationNode::UnaryOperationType {
     switch (symbol) {
     case GrammarSymbol::NOT:
         return UnaryOperationNode::NOT;
@@ -81,7 +81,7 @@ UnaryOperationNode::UnaryOperationType getUnaryOperationType(GrammarSymbol symbo
     }
 }
 
-AstNode *createBinaryOperation(ParseTreeNode *node) {
+auto createBinaryOperation(ParseTreeNode *node) -> AstNode * {
     auto nodeType = getBinaryOperationType(node->children[1]->symbol);
     auto astNode = new BinaryOperationNode(nodeType);
 
@@ -93,7 +93,7 @@ AstNode *createBinaryOperation(ParseTreeNode *node) {
     return astNode;
 }
 
-AstNode *createUnaryOperation(ParseTreeNode *node) {
+auto createUnaryOperation(ParseTreeNode *node) -> AstNode * {
     auto nodeType = getUnaryOperationType(node->children[0]->symbol);
     auto unaryOperationNode = new UnaryOperationNode(nodeType);
 
@@ -102,7 +102,7 @@ AstNode *createUnaryOperation(ParseTreeNode *node) {
     return unaryOperationNode;
 }
 
-AstNode *createLiteral(ParseTreeNode *node) {
+auto createLiteral(ParseTreeNode *node) -> AstNode * {
     if (node->token.content.empty()) {
         std::cout << "Missing token content. Can't create a literal." << std::endl;
         return nullptr;
@@ -131,9 +131,9 @@ AstNode *createLiteral(ParseTreeNode *node) {
     }
 }
 
-AstNode *createVariable(ParseTreeNode *node) { return new VariableNode(node->token.content); }
+auto createVariable(ParseTreeNode *node) -> AstNode * { return new VariableNode(node->token.content); }
 
-ast::DataType getDataType(ParseTreeNode *node) {
+auto getDataType(ParseTreeNode *node) -> ast::DataType {
     if (node->token.type != Token::DATA_TYPE) {
         return ast::DataType::VOID;
     }
@@ -150,14 +150,14 @@ ast::DataType getDataType(ParseTreeNode *node) {
     return ast::DataType::VOID;
 }
 
-VariableDefinitionNode *createVariableDefinition(ParseTreeNode *node) {
+auto createVariableDefinition(ParseTreeNode *node) -> VariableDefinitionNode * {
     auto dataTypeNode = node->children[0];
     auto nameNode = node->children[1];
     ast::DataType dataType = getDataType(dataTypeNode);
     return new VariableDefinitionNode(nameNode->token.content, dataType);
 }
 
-AstNode *createSequence(ParseTreeNode *node, SequenceNode *seqRoot = nullptr) {
+auto createSequence(ParseTreeNode *node, SequenceNode *seqRoot = nullptr) -> AstNode * {
     if (seqRoot == nullptr) {
         seqRoot = new SequenceNode();
     }
@@ -176,7 +176,7 @@ AstNode *createSequence(ParseTreeNode *node, SequenceNode *seqRoot = nullptr) {
     return seqRoot;
 }
 
-StatementNode *createStatement(ParseTreeNode *node) {
+auto createStatement(ParseTreeNode *node) -> StatementNode * {
     auto statementNode = new StatementNode();
     if (node->children.empty()) {
         std::cout << "Statement did not contain anything." << std::endl;
@@ -217,7 +217,7 @@ void addArguments(FunctionNode *function, ParseTreeNode *root) {
     }
 }
 
-FunctionNode *createExternalFunction(ParseTreeNode *node) {
+auto createExternalFunction(ParseTreeNode *node) -> FunctionNode * {
     auto variableNameNode = node->children[2];
     auto header = node->children[4];
     ParseTreeNode *argumentsNode = nullptr;
@@ -251,7 +251,7 @@ FunctionNode *createExternalFunction(ParseTreeNode *node) {
     return function;
 }
 
-FunctionNode *createFunction(ParseTreeNode *node) {
+auto createFunction(ParseTreeNode *node) -> FunctionNode * {
     auto variableNameNode = node->children[1];
     auto header = node->children[3];
     ParseTreeNode *argumentsNode = nullptr;
@@ -296,7 +296,7 @@ FunctionNode *createFunction(ParseTreeNode *node) {
     return function;
 }
 
-AssignmentNode *createAssignment(ParseTreeNode *node) {
+auto createAssignment(ParseTreeNode *node) -> AssignmentNode * {
     auto assignment = new AssignmentNode();
     if (node->children.size() != 3) {
         std::cout << "Assignment should always have 3 children" << std::endl;
@@ -331,7 +331,7 @@ void addArguments(CallNode *call, ParseTreeNode *root) {
     }
 }
 
-CallNode *createCall(ParseTreeNode *node) {
+auto createCall(ParseTreeNode *node) -> CallNode * {
     std::string name = node->children[0]->token.content;
     auto call = new CallNode(name);
     auto call_header = node->children[2];
@@ -341,7 +341,7 @@ CallNode *createCall(ParseTreeNode *node) {
     return call;
 }
 
-IfStatementNode *createIfStatement(ParseTreeNode *node) {
+auto createIfStatement(ParseTreeNode *node) -> IfStatementNode * {
     auto ifNode = new IfStatementNode();
     AstNode *condition = createAstFromParseTree(node->children[2]);
     ifNode->setCondition(condition);
@@ -360,7 +360,7 @@ IfStatementNode *createIfStatement(ParseTreeNode *node) {
     return ifNode;
 }
 
-AstNode *createAstFromParseTree(ParseTreeNode *node) {
+auto createAstFromParseTree(ParseTreeNode *node) -> AstNode * {
     if (node == nullptr) {
         return nullptr;
     }

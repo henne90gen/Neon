@@ -15,12 +15,12 @@
 
 #include "../Utils.h"
 
-IRGenerator::IRGenerator(const Program &program, const bool verbose = false)
+IRGenerator::IRGenerator(const Program &program, const bool verbose)
     : program(program), verbose(verbose), builder(context), module(program.fileName, context) {}
 
 void IRGenerator::logError(const std::string &msg) { std::cerr << msg << std::endl; }
 
-llvm::Type *IRGenerator::getType(ast::DataType type) {
+auto IRGenerator::getType(ast::DataType type) -> llvm::Type * {
     switch (type) {
     case ast::DataType::VOID:
         return llvm::Type::getVoidTy(context);
@@ -35,7 +35,7 @@ llvm::Type *IRGenerator::getType(ast::DataType type) {
     }
 }
 
-llvm::AllocaInst *IRGenerator::createEntryBlockAlloca(llvm::Type *type, const std::string &name) {
+auto IRGenerator::createEntryBlockAlloca(llvm::Type *type, const std::string &name) -> llvm::AllocaInst * {
     llvm::BasicBlock *block = builder.GetInsertBlock();
     if (block == nullptr) {
         return nullptr;
@@ -45,7 +45,7 @@ llvm::AllocaInst *IRGenerator::createEntryBlockAlloca(llvm::Type *type, const st
     return tmpB.CreateAlloca(type, nullptr, name);
 }
 
-llvm::Constant *IRGenerator::getInitializer(const ast::DataType &dt) {
+auto IRGenerator::getInitializer(const ast::DataType &dt) -> llvm::Constant * {
     llvm::Type *ty = getType(dt);
     switch (dt) {
     case ast::DataType::FLOAT:
@@ -100,7 +100,7 @@ void IRGenerator::visitSequenceNode(SequenceNode *node) {
 
     if (initFunc != nullptr) {
         finalizeFunction(initFunc, ast::DataType::VOID, false);
-        // TODO henne: don't generate global init function, if there are no globals
+        // TODO(henne): henne: don't generate global init function, if there are no globals
         setupGlobalInitialization(initFunc);
         isGlobalScope = false;
     }
@@ -141,7 +141,7 @@ void IRGenerator::visitIfStatementNode(IfStatementNode *node) {
     builder.SetInsertPoint(thenBB);
     if (node->getIfBody() != nullptr) {
         node->getIfBody()->accept(this);
-        // TODO henne: Make sure that CreateBr is not called if we emitted a return statement at the end of the if-body.
+        // TODO(henne): henne: Make sure that CreateBr is not called if we emitted a return statement at the end of the if-body.
         //  We need scoping, for this to work.
     }
     builder.CreateBr(mergeBB);
@@ -151,7 +151,7 @@ void IRGenerator::visitIfStatementNode(IfStatementNode *node) {
 
     if (node->getElseBody() != nullptr) {
         node->getElseBody()->accept(this);
-        // TODO henne: Make sure that CreateBr is not called if we emitted a return statement at the end of the if-body.
+        // TODO(henne): henne: Make sure that CreateBr is not called if we emitted a return statement at the end of the if-body.
         //  We need scoping, for this to work.
     }
     builder.CreateBr(mergeBB);

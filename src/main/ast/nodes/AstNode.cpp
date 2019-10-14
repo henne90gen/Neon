@@ -2,7 +2,7 @@
 
 #include <iostream>
 
-std::string to_string(ast::NodeType type) {
+auto to_string(ast::NodeType type) -> std::string {
     switch (type) {
     case ast::NodeType::SEQUENCE:
         return "ast::NodeType::SEQUENCE";

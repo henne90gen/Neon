@@ -7,7 +7,7 @@
 
 #include "Utils.h"
 
-std::optional<std::string> StdInCodeProvider::getMoreCode() {
+auto StdInCodeProvider::getMoreCode() -> std::optional<std::string> {
     std::string result;
     std::cin >> result;
     if (result.empty()) {
@@ -16,7 +16,7 @@ std::optional<std::string> StdInCodeProvider::getMoreCode() {
     return std::optional(result);
 }
 
-std::optional<std::string> FileCodeProvider::getMoreCode() {
+auto FileCodeProvider::getMoreCode() -> std::optional<std::string> {
     if (!fileHasBeenRead) {
         fileHasBeenRead = true;
         std::ifstream infile(fileName);
@@ -38,7 +38,7 @@ std::optional<std::string> FileCodeProvider::getMoreCode() {
     return std::optional(result);
 }
 
-std::optional<std::string> StringCodeProvider::getMoreCode() {
+auto StringCodeProvider::getMoreCode() -> std::optional<std::string> {
     if (lines.empty()) {
         return {};
     }
@@ -53,7 +53,7 @@ void removeLeadingWhitespace(std::string &str) {
     }
 }
 
-Token Lexer::_getToken() {
+auto Lexer::_getToken() -> Token {
     std::string previousWord = currentWord;
     while (true) {
         if (currentWord.empty()) {
@@ -116,9 +116,8 @@ Token Lexer::_getToken() {
 
         if (currentWord == previousWord) {
             break;
-        } 
-            previousWord = currentWord;
-        
+        }
+        previousWord = currentWord;
     }
 
     std::string invalidToken;
@@ -137,84 +136,111 @@ Token Lexer::_getToken() {
     return {Token::END_OF_FILE, invalidToken};
 }
 
-Token Lexer::getToken() {
+auto Lexer::getToken() -> Token {
     auto token = _getToken();
     program.tokens.push_back(token);
     return token;
 }
 
-std::optional<Token> Lexer::matchWordToken() {
+auto Lexer::matchWordToken() -> std::optional<Token> {
     if (STARTS_WITH(currentWord, "true")) {
         return TOKEN(Token::TRUE, "true");
-    } if (STARTS_WITH(currentWord, "false")) {
+    }
+    if (STARTS_WITH(currentWord, "false")) {
         return TOKEN(Token::FALSE, "false");
-    } if (STARTS_WITH(currentWord, "not")) {
+    }
+    if (STARTS_WITH(currentWord, "not")) {
         return TOKEN(Token::NOT, "not");
-    } if (STARTS_WITH(currentWord, "and")) {
+    }
+    if (STARTS_WITH(currentWord, "and")) {
         return TOKEN(Token::AND, "and");
-    } if (STARTS_WITH(currentWord, "or")) {
+    }
+    if (STARTS_WITH(currentWord, "or")) {
         return TOKEN(Token::OR, "or");
-    } if (STARTS_WITH(currentWord, "fun")) {
+    }
+    if (STARTS_WITH(currentWord, "fun")) {
         return TOKEN(Token::FUN, "fun");
-    } if (STARTS_WITH(currentWord, "int")) {
+    }
+    if (STARTS_WITH(currentWord, "int")) {
         return TOKEN(Token::DATA_TYPE, "int");
-    } if (STARTS_WITH(currentWord, "float")) {
+    }
+    if (STARTS_WITH(currentWord, "float")) {
         return TOKEN(Token::DATA_TYPE, "float");
-    } else if (STARTS_WITH(currentWord, "bool")) {
+    }
+    if (STARTS_WITH(currentWord, "bool")) {
         return TOKEN(Token::DATA_TYPE, "bool");
-    } else if (STARTS_WITH(currentWord, "return")) {
+    }
+    if (STARTS_WITH(currentWord, "return")) {
         return TOKEN(Token::RETURN, "return");
-    } else if (STARTS_WITH(currentWord, "extern")) {
+    }
+    if (STARTS_WITH(currentWord, "extern")) {
         return TOKEN(Token::EXTERN, "extern");
-    } else if (STARTS_WITH(currentWord, "if")) {
+    }
+    if (STARTS_WITH(currentWord, "if")) {
         return TOKEN(Token::IF, "if");
-    } else if (STARTS_WITH(currentWord, "else")) {
+    }
+    if (STARTS_WITH(currentWord, "else")) {
         return TOKEN(Token::ELSE, "else");
     }
 
     return {};
 }
 
-std::optional<Token> Lexer::matchTwoCharToken() {
+auto Lexer::matchTwoCharToken() -> std::optional<Token> {
     if (STARTS_WITH(currentWord, "!=")) {
         return TOKEN(Token::NOT_EQUALS, "!=");
-    } if (STARTS_WITH(currentWord, "==")) {
+    }
+    if (STARTS_WITH(currentWord, "==")) {
         return TOKEN(Token::DOUBLE_EQUALS, "==");
-    } if (STARTS_WITH(currentWord, ">=")) {
+    }
+    if (STARTS_WITH(currentWord, ">=")) {
         return TOKEN(Token::GREATER_EQUALS, ">=");
-    } if (STARTS_WITH(currentWord, "<=")) {
+    }
+    if (STARTS_WITH(currentWord, "<=")) {
         return TOKEN(Token::LESS_EQUALS, "<=");
     }
     return {};
 }
 
-std::optional<Token> Lexer::matchOneCharacterToken() {
+auto Lexer::matchOneCharacterToken() -> std::optional<Token> {
     char firstChar = currentWord[0];
     if (firstChar == '(') {
         return TOKEN(Token::LEFT_PARAN, "(");
-    } if (firstChar == ')') {
+    }
+    if (firstChar == ')') {
         return TOKEN(Token::RIGHT_PARAN, ")");
-    } if (firstChar == '{') {
+    }
+    if (firstChar == '{') {
         return TOKEN(Token::LEFT_CURLY_BRACE, "{");
-    } if (firstChar == '}') {
+    }
+    if (firstChar == '}') {
         return TOKEN(Token::RIGHT_CURLY_BRACE, "}");
-    } if (firstChar == '=') {
+    }
+    if (firstChar == '=') {
         return TOKEN(Token::SINGLE_EQUALS, "=");
-    } if (firstChar == '+') {
+    }
+    if (firstChar == '+') {
         return TOKEN(Token::PLUS, "+");
-    } if (firstChar == '-') {
+    }
+    if (firstChar == '-') {
         return TOKEN(Token::MINUS, "-");
-    } if (firstChar == '*') {
+    }
+    if (firstChar == '*') {
         return TOKEN(Token::STAR, "*");
-    } else if (firstChar == '/') {
+    }
+    if (firstChar == '/') {
         return TOKEN(Token::DIV, "/");
-    } else if (firstChar == ',') {
+    }
+    if (firstChar == ',') {
         return TOKEN(Token::COMMA, ",");
-    } else if (firstChar == ';') {
+    }
+    if (firstChar == ';') {
         return TOKEN(Token::SEMICOLON, ";");
-    } else if (firstChar == '<') {
+    }
+    if (firstChar == '<') {
         return TOKEN(Token::LESS_THAN, "<");
-    } else if (firstChar == '>') {
+    }
+    if (firstChar == '>') {
         return TOKEN(Token::GREATER_THAN, ">");
     }
     return {};

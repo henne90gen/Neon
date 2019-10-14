@@ -4,10 +4,10 @@
 
 void StatementNode::accept(ASTVisitor *v) { v->visitStatementNode(this); }
 
-bool StatementNode::isReturnStatement() { return this->returnStatement; }
+auto StatementNode::isReturnStatement() -> bool { return this->returnStatement; }
 
 void StatementNode::setIsReturnStatement(bool returnStatement) { this->returnStatement = returnStatement; }
 
-AstNode *StatementNode::getChild() { return child; }
+auto StatementNode::getChild() -> AstNode * { return child; }
 
 void StatementNode::setChild(AstNode *child) { this->child = child; }

@@ -56,7 +56,7 @@ void printCurrentParseState(StateTransition &action, std::vector<int> &states, s
     std::cout << std::endl;
 }
 
-GrammarSymbol convertToGrammarSymbol(Token &token) {
+auto convertToGrammarSymbol(Token &token) -> GrammarSymbol {
     switch (token.type) {
     case Token::INTEGER:
         return GrammarSymbol::INTEGER;
@@ -129,7 +129,7 @@ GrammarSymbol convertToGrammarSymbol(Token &token) {
     return GrammarSymbol::ENDOFFILE;
 }
 
-std::optional<StateTransition> Parser::getNextAction(int rowIndex, int columnIndex) {
+auto Parser::getNextAction(int rowIndex, int columnIndex) -> std::optional<StateTransition> {
     auto actions = stateTransitionTable[rowIndex][columnIndex];
     if (actions.empty()) {
         return {};
@@ -211,7 +211,7 @@ void Parser::executeReduce(std::vector<int> &states, StateTransition &action, st
  *       - Compute new state M[S_top, A] = goto S_z, and push to stack
  *   - If act = error/accept: Report and stop
  */
-ParseTreeNode *Parser::createParseTree() {
+auto Parser::createParseTree() -> ParseTreeNode * {
     std::vector<ParseTreeNode *> nodes = {};
     std::vector<int> states = {};
     states.push_back(0);

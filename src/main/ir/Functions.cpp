@@ -38,8 +38,8 @@ void IRGenerator::visitFunctionNode(FunctionNode *node) {
     LOG("Exit Function")
 }
 
-llvm::Function *IRGenerator::getOrCreateFunctionDefinition(const std::string &name, const ast::DataType returnType,
-                                                           const std::vector<VariableDefinitionNode *> &arguments) {
+auto IRGenerator::getOrCreateFunctionDefinition(const std::string &name, const ast::DataType returnType,
+                                                           const std::vector<VariableDefinitionNode *> &arguments) -> llvm::Function * {
     llvm::Function *function = module.getFunction(name);
     if (function == nullptr) {
         auto retType = getType(returnType);
@@ -58,7 +58,7 @@ llvm::Function *IRGenerator::getOrCreateFunctionDefinition(const std::string &na
             return nullptr;
         }
 
-        // TODO henne: clang applies these attributes somehow. But doing it here does not work
+        // TODO(henne): henne: clang applies these attributes somehow. But doing it here does not work
         //  llvm::AttributeList attrs = {};
         //  attrs = attrs.addAttribute(context, 0, llvm::Attribute::AttrKind::NoInline);
         //  attrs = attrs.addAttribute(context, 0, llvm::Attribute::AttrKind::OptimizeNone);

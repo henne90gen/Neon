@@ -4,20 +4,20 @@
 
 void FunctionNode::accept(ASTVisitor *v) { v->visitFunctionNode(this); }
 
-AstNode *FunctionNode::getBody() { return body; }
+auto FunctionNode::getBody() -> AstNode * { return body; }
 
 void FunctionNode::setBody(AstNode *body) { this->body = body; }
 
-std::vector<VariableDefinitionNode *> &FunctionNode::getArguments() { return arguments; }
+auto FunctionNode::getArguments() -> std::vector<VariableDefinitionNode *> & { return arguments; }
 
-std::string &FunctionNode::getName() { return name; }
+auto FunctionNode::getName() -> std::string & { return name; }
 
-ast::DataType FunctionNode::getReturnType() { return returnType; }
+auto FunctionNode::getReturnType() -> ast::DataType { return returnType; }
 
-bool FunctionNode::isExternal() { return body == nullptr; }
+auto FunctionNode::isExternal() -> bool { return body == nullptr; }
 
 void CallNode::accept(ASTVisitor *v) { v->visitCallNode(this); }
 
-std::string &CallNode::getName() { return name; }
+auto CallNode::getName() -> std::string & { return name; }
 
-std::vector<AstNode *> &CallNode::getArguments() { return arguments; }
+auto CallNode::getArguments() -> std::vector<AstNode *> & { return arguments; }
