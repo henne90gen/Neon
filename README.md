@@ -18,8 +18,8 @@ It has C-like syntax and is easily interoperable with C/C++.
 
 ### Data Types
 
-- Integer (32 bit): `int i = 0;`
-- Float (32 bit): `float f = 0.0;`
+- Integer (64 bit): `int i = 0;`
+- Float (64 bit): `float f = 0.0;`
 - Booleans (1 bit): `bool b = true;`
 
 ### Link external object files

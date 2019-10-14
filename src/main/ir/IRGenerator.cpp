@@ -25,9 +25,9 @@ auto IRGenerator::getType(ast::DataType type) -> llvm::Type * {
     case ast::DataType::VOID:
         return llvm::Type::getVoidTy(context);
     case ast::DataType::INT:
-        return llvm::Type::getInt32Ty(context);
+        return llvm::Type::getInt64Ty(context);
     case ast::DataType::FLOAT:
-        return llvm::Type::getFloatTy(context);
+        return llvm::Type::getDoubleTy(context);
     case ast::DataType::BOOL:
         return llvm::Type::getInt1Ty(context);
     default:
