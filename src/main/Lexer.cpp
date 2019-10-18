@@ -182,6 +182,9 @@ std::optional<Token> Lexer::matchWordToken() {
     if (STARTS_WITH(currentWord, "else")) {
         return TOKEN(Token::ELSE, "else");
     }
+    if (STARTS_WITH(currentWord, "for")) {
+        return TOKEN(Token::FOR, "for");
+    }
 
     return {};
 }

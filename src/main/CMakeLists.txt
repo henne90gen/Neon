@@ -9,24 +9,35 @@ add_custom_command(OUTPUT ${CMAKE_CURRENT_SOURCE_DIR}/Grammar.h
         MAIN_DEPENDENCY ${CMAKE_CURRENT_SOURCE_DIR}/grammar.txt)
 
 set(SOURCES
-        ${CMAKE_CURRENT_SOURCE_DIR}/Lexer.cpp
-        ${CMAKE_CURRENT_SOURCE_DIR}/Parser.cpp
-        ${CMAKE_CURRENT_SOURCE_DIR}/Token.cpp
         ${CMAKE_CURRENT_SOURCE_DIR}/Grammar.cpp
+        ${CMAKE_CURRENT_SOURCE_DIR}/Lexer.cpp
+        ${CMAKE_CURRENT_SOURCE_DIR}/Linker.cpp
+        ${CMAKE_CURRENT_SOURCE_DIR}/ObjectFileWriter.cpp
+        ${CMAKE_CURRENT_SOURCE_DIR}/Parser.cpp
         ${CMAKE_CURRENT_SOURCE_DIR}/Program.cpp
-        ast/nodes/AstNode.cpp
+        ${CMAKE_CURRENT_SOURCE_DIR}/Token.cpp
         ${CMAKE_CURRENT_SOURCE_DIR}/ast/ASTGenerator.cpp
         ${CMAKE_CURRENT_SOURCE_DIR}/ast/visitors/ASTInterpreter.cpp
         ${CMAKE_CURRENT_SOURCE_DIR}/ast/visitors/ASTPrinter.cpp
         ${CMAKE_CURRENT_SOURCE_DIR}/ast/visitors/ASTTestCasePrinter.cpp
         ${CMAKE_CURRENT_SOURCE_DIR}/ast/visitors/ASTTypeAnalyser.cpp
+        ${CMAKE_CURRENT_SOURCE_DIR}/ast/nodes/AssignmentNode.cpp
+        ${CMAKE_CURRENT_SOURCE_DIR}/ast/nodes/AstNode.cpp
+        ${CMAKE_CURRENT_SOURCE_DIR}/ast/nodes/BinaryOperationNode.cpp
+        ${CMAKE_CURRENT_SOURCE_DIR}/ast/nodes/ForStatementNode.cpp
+        ${CMAKE_CURRENT_SOURCE_DIR}/ast/nodes/FunctionNode.cpp
+        ${CMAKE_CURRENT_SOURCE_DIR}/ast/nodes/IfStatementNode.cpp
+        ${CMAKE_CURRENT_SOURCE_DIR}/ast/nodes/LiteralNodes.cpp
+        ${CMAKE_CURRENT_SOURCE_DIR}/ast/nodes/SequenceNode.cpp
+        ${CMAKE_CURRENT_SOURCE_DIR}/ast/nodes/StatementNode.cpp
+        ${CMAKE_CURRENT_SOURCE_DIR}/ast/nodes/UnaryOperationNode.cpp
+        ${CMAKE_CURRENT_SOURCE_DIR}/ast/nodes/VariableDefinitionNode.cpp
+        ${CMAKE_CURRENT_SOURCE_DIR}/ast/nodes/VariableNode.cpp
+        ${CMAKE_CURRENT_SOURCE_DIR}/ir/Functions.cpp
         ${CMAKE_CURRENT_SOURCE_DIR}/ir/IRGenerator.cpp
         ${CMAKE_CURRENT_SOURCE_DIR}/ir/Operations.cpp
-        ${CMAKE_CURRENT_SOURCE_DIR}/ir/Functions.cpp
         ${CMAKE_CURRENT_SOURCE_DIR}/ir/Types.cpp
-        ${CMAKE_CURRENT_SOURCE_DIR}/ir/Variables.cpp
-        ${CMAKE_CURRENT_SOURCE_DIR}/ObjectFileWriter.cpp
-        ${CMAKE_CURRENT_SOURCE_DIR}/Linker.cpp ast/nodes/AssignmentNode.cpp ast/nodes/BinaryOperationNode.cpp ast/nodes/FunctionNode.cpp ast/nodes/VariableDefinitionNode.cpp ast/nodes/AllNodes.h ast/nodes/IfStatementNode.cpp ast/nodes/LiteralNodes.cpp ast/nodes/SequenceNode.cpp ast/nodes/StatementNode.cpp ast/nodes/UnaryOperationNode.cpp ast/nodes/VariableNode.cpp)
+        ${CMAKE_CURRENT_SOURCE_DIR}/ir/Variables.cpp)
 
 add_library(${LIB_NAME} ${SOURCES})
 target_link_libraries(${LIB_NAME} ${LLVM_LIBS})

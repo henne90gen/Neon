@@ -36,6 +36,7 @@ struct Token {
         EXTERN,
         IF,
         ELSE,
+        FOR,
         END_OF_FILE,
     };
 

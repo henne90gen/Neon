@@ -37,6 +37,8 @@ bool isCall(ParseTreeNode *node) { return node->symbol == GrammarSymbol::CALL; }
 
 bool isAssignment(ParseTreeNode *node) { return node->symbol == GrammarSymbol::ASSIGNMENT; }
 
+bool isForStatement(ParseTreeNode *node) { return node->symbol == GrammarSymbol::FOR_STATEMENT; }
+
 bool isIgnored(ParseTreeNode *node) {
     return node->symbol == GrammarSymbol::SEMICOLON || node->symbol == GrammarSymbol::ENDOFFILE;
 }
@@ -360,6 +362,8 @@ IfStatementNode *createIfStatement(ParseTreeNode *node) {
     return ifNode;
 }
 
+ForStatementNode *createForStatement(ParseTreeNode *node) { return nullptr; }
+
 AstNode *createAstFromParseTree(ParseTreeNode *node) {
     if (node == nullptr) {
         return nullptr;
@@ -411,6 +415,10 @@ AstNode *createAstFromParseTree(ParseTreeNode *node) {
 
     if (isAssignment(node)) {
         return createAssignment(node);
+    }
+
+    if (isForStatement(node)) {
+        return createForStatement(node);
     }
 
     if (node->children.size() == 1 || node->symbol == GrammarSymbol::PROGRAM) {

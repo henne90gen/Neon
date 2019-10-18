@@ -69,6 +69,12 @@ std::string to_string(GrammarSymbol symbol) {
         return "FALSE";
     case FLOAT:
         return "FLOAT";
+    case FOR:
+        return "FOR";
+    case FOR_STATEMENT:
+        return "FOR_STATEMENT";
+    case FOR_STATEMENT_BODY:
+        return "FOR_STATEMENT_BODY";
     case FUN:
         return "FUN";
     case FUNCTION:

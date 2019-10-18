@@ -13,6 +13,14 @@ statement
     return expression ;
     variable_definition ;
     if_statement
+    for_statement
+
+for_statement
+    for assignment ; expression ; assignment { for_statement_body
+
+for_statement_body
+    }
+    statements }
 
 if_statement
     if expression { if_statement_body

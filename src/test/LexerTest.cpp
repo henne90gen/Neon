@@ -84,6 +84,7 @@ TEST_CASE("Lexer can handle all tokens") {
           {"extern", Token::EXTERN},
           {"if", Token::IF},
           {"else", Token::ELSE},
+          {"for", Token::FOR},
     };
     std::vector<std::string> lines;
     lines.reserve(tokens.size());

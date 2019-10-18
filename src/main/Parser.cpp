@@ -123,6 +123,8 @@ GrammarSymbol convertToGrammarSymbol(const Token &token) {
         return GrammarSymbol::IF;
     case Token::ELSE:
         return GrammarSymbol::ELSE;
+    case Token::FOR:
+        return GrammarSymbol::FOR;
     default:
         std::cout << "Could not convert token " << to_string(token.type) << " to grammar symbol." << std::endl;
         exit(1);
