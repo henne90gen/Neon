@@ -13,4 +13,7 @@ run: build
 clang-tidy: clean
 	mkdir -p build; cd build; cmake -G"Ninja" -DRUN_CLANG_TIDY=ON ..; ninja
 
-.PHONY: build
+docs:
+	doxygen
+
+.PHONY: build docs
