@@ -1,7 +1,9 @@
 #include "IRGenerator.h"
 
+const int bitsOfInt = 64;
+
 void IRGenerator::visitIntegerNode(IntegerNode *node) {
-    nodesToValues[node] = llvm::ConstantInt::get(context, llvm::APInt(64, node->getValue()));
+    nodesToValues[node] = llvm::ConstantInt::get(context, llvm::APInt(bitsOfInt, node->getValue()));
     LOG("Created Integer")
 }
 

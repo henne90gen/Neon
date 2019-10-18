@@ -7,7 +7,7 @@
 
 #include "Utils.h"
 
-auto StdInCodeProvider::getMoreCode() -> std::optional<std::string> {
+std::optional<std::string> StdInCodeProvider::getMoreCode() {
     std::string result;
     std::cin >> result;
     if (result.empty()) {
@@ -16,7 +16,7 @@ auto StdInCodeProvider::getMoreCode() -> std::optional<std::string> {
     return std::optional(result);
 }
 
-auto FileCodeProvider::getMoreCode() -> std::optional<std::string> {
+std::optional<std::string> FileCodeProvider::getMoreCode() {
     if (!fileHasBeenRead) {
         fileHasBeenRead = true;
         std::ifstream infile(fileName);
@@ -38,7 +38,7 @@ auto FileCodeProvider::getMoreCode() -> std::optional<std::string> {
     return std::optional(result);
 }
 
-auto StringCodeProvider::getMoreCode() -> std::optional<std::string> {
+std::optional<std::string> StringCodeProvider::getMoreCode() {
     if (lines.empty()) {
         return {};
     }
@@ -53,7 +53,7 @@ void removeLeadingWhitespace(std::string &str) {
     }
 }
 
-auto Lexer::_getToken() -> Token {
+Token Lexer::_getToken() {
     std::string previousWord = currentWord;
     while (true) {
         if (currentWord.empty()) {
@@ -136,13 +136,13 @@ auto Lexer::_getToken() -> Token {
     return {Token::END_OF_FILE, invalidToken};
 }
 
-auto Lexer::getToken() -> Token {
+Token Lexer::getToken() {
     auto token = _getToken();
     program.tokens.push_back(token);
     return token;
 }
 
-auto Lexer::matchWordToken() -> std::optional<Token> {
+std::optional<Token> Lexer::matchWordToken() {
     if (STARTS_WITH(currentWord, "true")) {
         return TOKEN(Token::TRUE, "true");
     }
@@ -186,7 +186,7 @@ auto Lexer::matchWordToken() -> std::optional<Token> {
     return {};
 }
 
-auto Lexer::matchTwoCharToken() -> std::optional<Token> {
+std::optional<Token> Lexer::matchTwoCharToken() {
     if (STARTS_WITH(currentWord, "!=")) {
         return TOKEN(Token::NOT_EQUALS, "!=");
     }
@@ -202,7 +202,7 @@ auto Lexer::matchTwoCharToken() -> std::optional<Token> {
     return {};
 }
 
-auto Lexer::matchOneCharacterToken() -> std::optional<Token> {
+std::optional<Token> Lexer::matchOneCharacterToken() {
     char firstChar = currentWord[0];
     if (firstChar == '(') {
         return TOKEN(Token::LEFT_PARAN, "(");

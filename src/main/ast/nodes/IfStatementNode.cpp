@@ -4,14 +4,14 @@
 
 void IfStatementNode::accept(ASTVisitor *v) { v->visitIfStatementNode(this); }
 
-auto IfStatementNode::getCondition() -> AstNode * { return condition; }
+AstNode *IfStatementNode::getCondition() { return condition; }
 
 void IfStatementNode::setCondition(AstNode *condition) { this->condition = condition; }
 
-auto IfStatementNode::getIfBody() -> AstNode * { return ifBody; }
+AstNode *IfStatementNode::getIfBody() { return ifBody; }
 
 void IfStatementNode::setIfBody(AstNode *ifBody) { this->ifBody = ifBody; }
 
-auto IfStatementNode::getElseBody() -> AstNode * { return elseBody; }
+AstNode *IfStatementNode::getElseBody() { return elseBody; }
 
 void IfStatementNode::setElseBody(AstNode *elseBody) { this->elseBody = elseBody; }
