@@ -15,7 +15,7 @@ statement
     if_statement
 
 if_statement
-    if ( expression ) { if_statement_body
+    if expression { if_statement_body
 
 if_statement_body
     if_statement_else

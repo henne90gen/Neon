@@ -343,9 +343,9 @@ auto createCall(ParseTreeNode *node) -> CallNode * {
 
 auto createIfStatement(ParseTreeNode *node) -> IfStatementNode * {
     auto ifNode = new IfStatementNode();
-    AstNode *condition = createAstFromParseTree(node->children[2]);
+    AstNode *condition = createAstFromParseTree(node->children[1]);
     ifNode->setCondition(condition);
-    auto ifBodyNode = node->children[5];
+    auto ifBodyNode = node->children[3];
     auto elseNode = ifBodyNode->children[0];
     if (ifBodyNode->children.size() == 2) {
         ifNode->setIfBody(createAstFromParseTree(ifBodyNode->children[0]));

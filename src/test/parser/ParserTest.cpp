@@ -122,14 +122,13 @@ TEST_CASE("Parser can handle return statements with function calls and variable 
     assertProgramCreatesParseTree(program, parseTree);
 }
 
-TEST_CASE("Parser can handle 'if ( true ) { } else { }'") {
+TEST_CASE("Parser can handle 'if true { } else { }'") {
     std::vector<std::pair<int, GrammarSymbol>> parseTree = {
           {0, GrammarSymbol::PROGRAM},
           {1, GrammarSymbol::STATEMENTS},
           {2, GrammarSymbol::STATEMENT},
           {3, GrammarSymbol::IF_STATEMENT},
           {4, GrammarSymbol::IF},
-          {4, GrammarSymbol::LEFT_PARAN},
           {4, GrammarSymbol::EXPRESSION},
           {5, GrammarSymbol::DISJUNCTION},
           {6, GrammarSymbol::CONJUNCTION},
@@ -139,7 +138,6 @@ TEST_CASE("Parser can handle 'if ( true ) { } else { }'") {
           {10, GrammarSymbol::TERM},
           {11, GrammarSymbol::FACTOR},
           {12, GrammarSymbol::TRUE},
-          {4, GrammarSymbol::RIGHT_PARAN},
           {4, GrammarSymbol::LEFT_CURLY_BRACE},
           {4, GrammarSymbol::IF_STATEMENT_BODY},
           {5, GrammarSymbol::IF_STATEMENT_ELSE},
@@ -150,18 +148,17 @@ TEST_CASE("Parser can handle 'if ( true ) { } else { }'") {
           {7, GrammarSymbol::RIGHT_CURLY_BRACE},
           {1, GrammarSymbol::ENDOFFILE},
     };
-    std::vector<std::string> program = {"if ( true ) { } else { }"};
+    std::vector<std::string> program = {"if true { } else { }"};
     assertProgramCreatesParseTree(program, parseTree);
 }
 
-TEST_CASE("Parser can handle 'if ( true ) { }'") {
+TEST_CASE("Parser can handle 'if true { }'") {
     std::vector<std::pair<int, GrammarSymbol>> parseTree = {
           {0, GrammarSymbol::PROGRAM},
           {1, GrammarSymbol::STATEMENTS},
           {2, GrammarSymbol::STATEMENT},
           {3, GrammarSymbol::IF_STATEMENT},
           {4, GrammarSymbol::IF},
-          {4, GrammarSymbol::LEFT_PARAN},
           {4, GrammarSymbol::EXPRESSION},
           {5, GrammarSymbol::DISJUNCTION},
           {6, GrammarSymbol::CONJUNCTION},
@@ -171,13 +168,12 @@ TEST_CASE("Parser can handle 'if ( true ) { }'") {
           {10, GrammarSymbol::TERM},
           {11, GrammarSymbol::FACTOR},
           {12, GrammarSymbol::TRUE},
-          {4, GrammarSymbol::RIGHT_PARAN},
           {4, GrammarSymbol::LEFT_CURLY_BRACE},
           {4, GrammarSymbol::IF_STATEMENT_BODY},
           {5, GrammarSymbol::IF_STATEMENT_ELSE},
           {6, GrammarSymbol::RIGHT_CURLY_BRACE},
           {1, GrammarSymbol::ENDOFFILE},
     };
-    std::vector<std::string> program = {"if ( true ) { }"};
+    std::vector<std::string> program = {"if true { }"};
     assertProgramCreatesParseTree(program, parseTree);
 }
