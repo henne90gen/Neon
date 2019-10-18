@@ -2,7 +2,7 @@
 
 #include <string>
 
-auto to_string(Token::TokenType type) -> std::string {
+std::string to_string(Token::TokenType type) {
     switch (type) {
     case Token::LEFT_PARAN:
         return "LEFT_PARAN";

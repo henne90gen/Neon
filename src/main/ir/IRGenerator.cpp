@@ -20,7 +20,7 @@ IRGenerator::IRGenerator(const Program &program, const bool verbose)
 
 void IRGenerator::logError(const std::string &msg) { std::cerr << msg << std::endl; }
 
-auto IRGenerator::getType(ast::DataType type) -> llvm::Type * {
+llvm::Type *IRGenerator::getType(ast::DataType type) {
     switch (type) {
     case ast::DataType::VOID:
         return llvm::Type::getVoidTy(context);
@@ -35,7 +35,7 @@ auto IRGenerator::getType(ast::DataType type) -> llvm::Type * {
     }
 }
 
-auto IRGenerator::createEntryBlockAlloca(llvm::Type *type, const std::string &name) -> llvm::AllocaInst * {
+llvm::AllocaInst *IRGenerator::createEntryBlockAlloca(llvm::Type *type, const std::string &name) {
     llvm::BasicBlock *block = builder.GetInsertBlock();
     if (block == nullptr) {
         return nullptr;
@@ -45,7 +45,7 @@ auto IRGenerator::createEntryBlockAlloca(llvm::Type *type, const std::string &na
     return tmpB.CreateAlloca(type, nullptr, name);
 }
 
-auto IRGenerator::getInitializer(const ast::DataType &dt) -> llvm::Constant * {
+llvm::Constant *IRGenerator::getInitializer(const ast::DataType &dt) {
     llvm::Type *ty = getType(dt);
     switch (dt) {
     case ast::DataType::FLOAT:
@@ -67,7 +67,8 @@ void IRGenerator::setupGlobalInitialization(llvm::Function *func) {
     llvm::GlobalVariable *ctorsVar = module.getGlobalVariable("llvm.global_ctors");
     ctorsVar->setLinkage(llvm::GlobalValue::LinkageTypes::AppendingLinkage);
 
-    llvm::ConstantInt *intValue = llvm::ConstantInt::get(llvm::Type::getInt32Ty(context), 65535);
+    const int globalInitializerNumber = 65535;
+    llvm::ConstantInt *intValue = llvm::ConstantInt::get(llvm::Type::getInt32Ty(context), globalInitializerNumber);
     llvm::ConstantPointerNull *nullValue = llvm::ConstantPointerNull::get(llvm::PointerType::getInt8PtrTy(context));
     std::vector<llvm::Constant *> structValues = {intValue, func, nullValue};
     std::vector<llvm::Constant *> arrayValues = {llvm::ConstantStruct::get(structType, structValues)};
@@ -131,14 +132,14 @@ bool hasReturnStatement(AstNode *node) {
     }
     switch (node->getAstNodeType()) {
     case ast::SEQUENCE: {
-        auto children = ((SequenceNode *)node)->getChildren();
+        auto children = (dynamic_cast<SequenceNode *>(node))->getChildren();
         if (!children.empty()) {
             return hasReturnStatement(children[children.size() - 1]);
         }
         return false;
     }
     case ast::STATEMENT: {
-        return ((StatementNode *)node)->isReturnStatement();
+        return (dynamic_cast<StatementNode *>(node))->isReturnStatement();
     }
     case ast::LITERAL:
     case ast::UNARY_OPERATION:

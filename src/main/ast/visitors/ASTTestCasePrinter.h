@@ -25,6 +25,6 @@ class ASTTestCasePrinter : public ASTVisitor {
     void printNode(AstNode *node);
 };
 
-class Program;
+struct Program;
 
 void printAstTestCase(const Program &program, AstNode *root);

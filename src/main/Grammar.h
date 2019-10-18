@@ -85,7 +85,7 @@ struct StateTransition {
   std::vector<GrammarSymbol> rule = {};
 };
 
-std::string to_string(StateTransition &action);
+std::string to_string(const StateTransition &action);
 
 const std::vector<StateTransition> stateTransitionTable[119][60] = {
   { {}, {}, {}, {}, {}, {}, {}, {}, {}, {}, {}, {}, {}, {}, {}, {}, {{StateTransitionType::GOTO, 6}}, {{StateTransitionType::GOTO, 3}}, {}, {}, {}, {{StateTransitionType::SHIFT, 13}}, {}, {}, {}, {}, {{StateTransitionType::SHIFT, 11}}, {{StateTransitionType::GOTO, 4}}, {}, {}, {}, {}, {}, {{StateTransitionType::SHIFT, 12}}, {{StateTransitionType::GOTO, 5}}, {}, {}, {}, {}, {{StateTransitionType::SHIFT, 14}}, {{StateTransitionType::GOTO, 9}}, {}, {}, {}, {}, {}, {}, {}, {}, {}, {{StateTransitionType::SHIFT, 7}}, {{StateTransitionType::GOTO, 2}}, {{StateTransitionType::GOTO, 1}}, {}, {}, {}, {{StateTransitionType::GOTO, 8}}, {{StateTransitionType::SHIFT, 10}}, {}, {} },

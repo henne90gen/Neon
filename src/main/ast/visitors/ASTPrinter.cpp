@@ -10,16 +10,14 @@ void indent(int indentation) {
     }
 }
 
-auto printUnaryOperationType(UnaryOperationNode::UnaryOperationType type) -> std::string {
-    switch (type) {
-    case UnaryOperationNode::NOT:
+std::string printUnaryOperationType(UnaryOperationNode::UnaryOperationType type) {
+    if (type == UnaryOperationNode::NOT) {
         return "NOT";
-    default:
-        return "ERROR";
     }
+    return "ERROR";
 }
 
-auto printBinaryOperationType(ast::BinaryOperationType type) -> std::string {
+std::string printBinaryOperationType(ast::BinaryOperationType type) {
     switch (type) {
     case ast::BinaryOperationType::ADDITION:
         return "ADDITION";

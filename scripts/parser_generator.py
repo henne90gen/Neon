@@ -294,7 +294,7 @@ def create_grammar_symbol_switch_cases(header: List[str]) -> str:
 
 
 def create_switch_case_for_grammar_symbol(grammar_symbol: str):
-    return f"  case {grammar_symbol}:\n    return \"{grammar_symbol}\";"
+    return f"    case {grammar_symbol}:\n        return \"{grammar_symbol}\";"
 
 
 def main(grammar_file: str = "grammar.txt", header_file: str = "Grammar.h", cpp_file: str = "Grammar.cpp",
@@ -352,7 +352,7 @@ struct StateTransition {
   std::vector<GrammarSymbol> rule = {};
 };
 
-std::string to_string(StateTransition &action);
+std::string to_string(const StateTransition &action);
 
 const std::vector<StateTransition> stateTransitionTable[{row_count}][{col_count}] = {
 {table_content}
@@ -376,51 +376,51 @@ std::string to_string(GrammarSymbol symbol) {
   switch (symbol) {
 {grammar_symbol_switch_cases}
     default:
-      return "ERROR";
-  }
+        return "ERROR";
+    }
 }
 
 std::string to_string(StateTransitionType transition) {
   switch (transition) {
     case SHIFT:
-      return "SHIFT";
+        return "SHIFT";
     case GOTO:
-      return "GOTO";
+        return "GOTO";
     case REDUCE:
-      return "REDUCE";
+        return "REDUCE";
     case ACCEPT:
-      return "ACCEPT";
+        return "ACCEPT";
     case ERROR:
-      return "ERROR";
+        return "ERROR";
     default:
-      return "ERROR";
-  }
+        return "ERROR";
+    }
 }
 
-std::string to_string(StateTransition &action) {
-  std::string info = "UNKNOWN";
-  if (action.type == StateTransitionType::ACCEPT) {
-    info = "ACCEPT";
-  } else if (action.type == StateTransitionType::ERROR) {
-    info = "ERROR";
-  } else if (action.type == StateTransitionType::GOTO) {
-    info = "GOTO";
-    info += ":" + std::to_string(action.nextStateIndex);
-  } else if (action.type == StateTransitionType::SHIFT) {
-    info = "SHIFT";
-    info += ":" + std::to_string(action.nextStateIndex);
-  } else if (action.type == StateTransitionType::REDUCE) {
-    info = "REDUCE";
-    info += ":" + to_string(action.symbol) + "->";
-    for (auto rule : action.rule) {
-      info += to_string(rule) + " ";
+std::string to_string(const StateTransition &action) {
+    std::string info = "UNKNOWN";
+    if (action.type == StateTransitionType::ACCEPT) {
+        info = "ACCEPT";
+    } else if (action.type == StateTransitionType::ERROR) {
+        info = "ERROR";
+    } else if (action.type == StateTransitionType::GOTO) {
+        info = "GOTO";
+        info += ":" + std::to_string(action.nextStateIndex);
+    } else if (action.type == StateTransitionType::SHIFT) {
+        info = "SHIFT";
+        info += ":" + std::to_string(action.nextStateIndex);
+    } else if (action.type == StateTransitionType::REDUCE) {
+        info = "REDUCE";
+        info += ":" + to_string(action.symbol) + "->";
+        for (auto rule : action.rule) {
+            info += to_string(rule) + " ";
+        }
+        if (info[info.length() - 1] == ' ') {
+            info = info.substr(0, info.length() - 1);
+        }
     }
-    if (info[info.length() - 1] == ' ') {
-      info = info.substr(0, info.length() - 1);
-    }
-  }
-  std::string result = "Action (" + info + ")";
-  return result;
+    std::string result = "Action (" + info + ")";
+    return result;
 }
 """
     grammar_symbol_switch_cases = create_grammar_symbol_switch_cases(header)

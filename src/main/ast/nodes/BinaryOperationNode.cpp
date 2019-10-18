@@ -4,12 +4,12 @@
 
 void BinaryOperationNode::accept(ASTVisitor *v) { v->visitBinaryOperationNode(this); }
 
-auto BinaryOperationNode::getLeft() -> AstNode * { return left; }
+AstNode *BinaryOperationNode::getLeft() { return left; }
 
 void BinaryOperationNode::setLeft(AstNode *left) { this->left = left; }
 
-auto BinaryOperationNode::getRight() -> AstNode * { return right; }
+AstNode *BinaryOperationNode::getRight() { return right; }
 
 void BinaryOperationNode::setRight(AstNode *right) { this->right = right; }
 
-auto BinaryOperationNode::getType() -> ast::BinaryOperationType { return type; }
+ast::BinaryOperationType BinaryOperationNode::getType() { return type; }

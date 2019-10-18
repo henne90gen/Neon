@@ -38,9 +38,8 @@ void IRGenerator::visitFunctionNode(FunctionNode *node) {
     LOG("Exit Function")
 }
 
-auto IRGenerator::getOrCreateFunctionDefinition(const std::string &name, const ast::DataType returnType,
-                                                const std::vector<VariableDefinitionNode *> &arguments)
-      -> llvm::Function * {
+llvm::Function *IRGenerator::getOrCreateFunctionDefinition(const std::string &name, const ast::DataType returnType,
+                                                           const std::vector<VariableDefinitionNode *> &arguments) {
     llvm::Function *function = module.getFunction(name);
     if (function == nullptr) {
         auto retType = getType(returnType);

@@ -24,7 +24,7 @@ void ASTInterpreter::printStatementResult(AstNode *child) {
     }
 }
 
-auto getTypedResult(CalculationResult &left, CalculationResult &right) -> CalculationResult {
+CalculationResult getTypedResult(const CalculationResult &left, const CalculationResult &right) {
     CalculationResult result = {CalculationResult::INTEGER, {0}};
     if (left.type == CalculationResult::FLOAT || right.type == CalculationResult::FLOAT) {
         result.type = CalculationResult::FLOAT;
@@ -32,15 +32,14 @@ auto getTypedResult(CalculationResult &left, CalculationResult &right) -> Calcul
     return result;
 }
 
-auto castToFloat(CalculationResult &result) -> float {
+float castToFloat(const CalculationResult &result) {
     if (result.type == CalculationResult::INTEGER) {
         return static_cast<float>(result.intResult);
-    } 
-        return result.floatResult;
-    
+    }
+    return result.floatResult;
 }
 
-auto add(CalculationResult &left, CalculationResult &right) -> CalculationResult {
+CalculationResult add(const CalculationResult &left, const CalculationResult &right) {
     CalculationResult result = getTypedResult(left, right);
     if (result.type == CalculationResult::FLOAT) {
         float l = castToFloat(left);
@@ -52,7 +51,7 @@ auto add(CalculationResult &left, CalculationResult &right) -> CalculationResult
     return result;
 }
 
-auto subtract(CalculationResult &left, CalculationResult &right) -> CalculationResult {
+CalculationResult subtract(const CalculationResult &left, const CalculationResult &right) {
     CalculationResult result = getTypedResult(left, right);
     if (result.type == CalculationResult::FLOAT) {
         float l = castToFloat(left);
@@ -64,7 +63,7 @@ auto subtract(CalculationResult &left, CalculationResult &right) -> CalculationR
     return result;
 }
 
-auto multiply(CalculationResult &left, CalculationResult &right) -> CalculationResult {
+CalculationResult multiply(const CalculationResult &left, const CalculationResult &right) {
     CalculationResult result = getTypedResult(left, right);
     if (result.type == CalculationResult::FLOAT) {
         float l = castToFloat(left);
@@ -76,7 +75,7 @@ auto multiply(CalculationResult &left, CalculationResult &right) -> CalculationR
     return result;
 }
 
-auto divide(CalculationResult &left, CalculationResult &right) -> CalculationResult {
+CalculationResult divide(const CalculationResult &left, const CalculationResult &right) {
     CalculationResult result = getTypedResult(left, right);
     if (result.type == CalculationResult::FLOAT) {
         float l = castToFloat(left);
@@ -88,7 +87,7 @@ auto divide(CalculationResult &left, CalculationResult &right) -> CalculationRes
     return result;
 }
 
-auto negate(CalculationResult &calc) -> CalculationResult {
+CalculationResult negate(const CalculationResult &calc) {
     CalculationResult result = {CalculationResult::BOOL, {0}};
     if (calc.type == CalculationResult::BOOL) {
         result.boolResult = !calc.boolResult;
@@ -200,13 +199,9 @@ void ASTInterpreter::visitAssignmentNode(AssignmentNode *node) {
     calculationResults[node] = calculationResults[node->getRight()];
 }
 
-void ASTInterpreter::visitCallNode(CallNode * /*node*/) {
-    NOT_IMPLEMENTED
-}
+void ASTInterpreter::visitCallNode(CallNode * /*node*/) { NOT_IMPLEMENTED }
 
-void ASTInterpreter::visitIfStatementNode(IfStatementNode * /*node*/) {
-    NOT_IMPLEMENTED
-}
+void ASTInterpreter::visitIfStatementNode(IfStatementNode * /*node*/) { NOT_IMPLEMENTED }
 
 void interpretAst(AstNode *node, bool verbose) {
     if (node == nullptr) {

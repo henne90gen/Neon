@@ -4,44 +4,44 @@
 
 #include "nodes/AllNodes.h"
 
-auto isBinaryOperation(ParseTreeNode *node) -> bool {
+bool isBinaryOperation(ParseTreeNode *node) {
     return (node->symbol == GrammarSymbol::SUM || node->symbol == GrammarSymbol::TERM ||
             node->symbol == GrammarSymbol::RELATION) &&
            node->children.size() == 3;
 }
 
-auto isUnaryOperation(ParseTreeNode *node) -> bool {
+bool isUnaryOperation(ParseTreeNode *node) {
     return (node->symbol == GrammarSymbol::NEGATION) && node->children.size() == 2;
 }
 
-auto isLiteral(ParseTreeNode *node) -> bool {
+bool isLiteral(ParseTreeNode *node) {
     return node->symbol == GrammarSymbol::INTEGER || node->symbol == GrammarSymbol::FLOAT ||
            node->symbol == GrammarSymbol::TRUE || node->symbol == GrammarSymbol::FALSE;
 }
 
-auto isVariable(ParseTreeNode *node) -> bool { return node->symbol == GrammarSymbol::VARIABLE_NAME; }
+bool isVariable(ParseTreeNode *node) { return node->symbol == GrammarSymbol::VARIABLE_NAME; }
 
-auto isVariableDefinition(ParseTreeNode *node) -> bool { return node->symbol == GrammarSymbol::VARIABLE_DEFINITION; }
+bool isVariableDefinition(ParseTreeNode *node) { return node->symbol == GrammarSymbol::VARIABLE_DEFINITION; }
 
-auto isSequence(ParseTreeNode *node) -> bool { return node->symbol == GrammarSymbol::STATEMENTS; }
+bool isSequence(ParseTreeNode *node) { return node->symbol == GrammarSymbol::STATEMENTS; }
 
-auto isStatement(ParseTreeNode *node) -> bool { return node->symbol == GrammarSymbol::STATEMENT; }
+bool isStatement(ParseTreeNode *node) { return node->symbol == GrammarSymbol::STATEMENT; }
 
-auto isFunction(ParseTreeNode *node) -> bool { return node->symbol == GrammarSymbol::FUNCTION; }
+bool isFunction(ParseTreeNode *node) { return node->symbol == GrammarSymbol::FUNCTION; }
 
-auto isExternalFunction(ParseTreeNode *node) -> bool { return node->symbol == GrammarSymbol::EXTERNAL_FUNCTION; }
+bool isExternalFunction(ParseTreeNode *node) { return node->symbol == GrammarSymbol::EXTERNAL_FUNCTION; }
 
-auto isIfStatement(ParseTreeNode *node) -> bool { return node->symbol == GrammarSymbol::IF_STATEMENT; }
+bool isIfStatement(ParseTreeNode *node) { return node->symbol == GrammarSymbol::IF_STATEMENT; }
 
-auto isCall(ParseTreeNode *node) -> bool { return node->symbol == GrammarSymbol::CALL; }
+bool isCall(ParseTreeNode *node) { return node->symbol == GrammarSymbol::CALL; }
 
-auto isAssignment(ParseTreeNode *node) -> bool { return node->symbol == GrammarSymbol::ASSIGNMENT; }
+bool isAssignment(ParseTreeNode *node) { return node->symbol == GrammarSymbol::ASSIGNMENT; }
 
-auto isIgnored(ParseTreeNode *node) -> bool {
+bool isIgnored(ParseTreeNode *node) {
     return node->symbol == GrammarSymbol::SEMICOLON || node->symbol == GrammarSymbol::ENDOFFILE;
 }
 
-auto getBinaryOperationType(GrammarSymbol symbol) -> ast::BinaryOperationType {
+ast::BinaryOperationType getBinaryOperationType(GrammarSymbol symbol) {
     switch (symbol) {
     case GrammarSymbol::PLUS:
         return ast::BinaryOperationType::ADDITION;
@@ -70,7 +70,7 @@ auto getBinaryOperationType(GrammarSymbol symbol) -> ast::BinaryOperationType {
     }
 }
 
-auto getUnaryOperationType(GrammarSymbol symbol) -> UnaryOperationNode::UnaryOperationType {
+UnaryOperationNode::UnaryOperationType getUnaryOperationType(GrammarSymbol symbol) {
     switch (symbol) {
     case GrammarSymbol::NOT:
         return UnaryOperationNode::NOT;
@@ -81,7 +81,7 @@ auto getUnaryOperationType(GrammarSymbol symbol) -> UnaryOperationNode::UnaryOpe
     }
 }
 
-auto createBinaryOperation(ParseTreeNode *node) -> AstNode * {
+AstNode *createBinaryOperation(ParseTreeNode *node) {
     auto nodeType = getBinaryOperationType(node->children[1]->symbol);
     auto astNode = new BinaryOperationNode(nodeType);
 
@@ -93,7 +93,7 @@ auto createBinaryOperation(ParseTreeNode *node) -> AstNode * {
     return astNode;
 }
 
-auto createUnaryOperation(ParseTreeNode *node) -> AstNode * {
+AstNode *createUnaryOperation(ParseTreeNode *node) {
     auto nodeType = getUnaryOperationType(node->children[0]->symbol);
     auto unaryOperationNode = new UnaryOperationNode(nodeType);
 
@@ -102,7 +102,7 @@ auto createUnaryOperation(ParseTreeNode *node) -> AstNode * {
     return unaryOperationNode;
 }
 
-auto createLiteral(ParseTreeNode *node) -> AstNode * {
+AstNode *createLiteral(ParseTreeNode *node) {
     if (node->token.content.empty()) {
         std::cout << "Missing token content. Can't create a literal." << std::endl;
         return nullptr;
@@ -131,9 +131,9 @@ auto createLiteral(ParseTreeNode *node) -> AstNode * {
     }
 }
 
-auto createVariable(ParseTreeNode *node) -> AstNode * { return new VariableNode(node->token.content); }
+AstNode *createVariable(ParseTreeNode *node) { return new VariableNode(node->token.content); }
 
-auto getDataType(ParseTreeNode *node) -> ast::DataType {
+ast::DataType getDataType(ParseTreeNode *node) {
     if (node->token.type != Token::DATA_TYPE) {
         return ast::DataType::VOID;
     }
@@ -150,14 +150,14 @@ auto getDataType(ParseTreeNode *node) -> ast::DataType {
     return ast::DataType::VOID;
 }
 
-auto createVariableDefinition(ParseTreeNode *node) -> VariableDefinitionNode * {
+VariableDefinitionNode *createVariableDefinition(ParseTreeNode *node) {
     auto dataTypeNode = node->children[0];
     auto nameNode = node->children[1];
     ast::DataType dataType = getDataType(dataTypeNode);
     return new VariableDefinitionNode(nameNode->token.content, dataType);
 }
 
-auto createSequence(ParseTreeNode *node, SequenceNode *seqRoot = nullptr) -> AstNode * {
+AstNode *createSequence(ParseTreeNode *node, SequenceNode *seqRoot) {
     if (seqRoot == nullptr) {
         seqRoot = new SequenceNode();
     }
@@ -176,7 +176,7 @@ auto createSequence(ParseTreeNode *node, SequenceNode *seqRoot = nullptr) -> Ast
     return seqRoot;
 }
 
-auto createStatement(ParseTreeNode *node) -> StatementNode * {
+StatementNode *createStatement(ParseTreeNode *node) {
     auto statementNode = new StatementNode();
     if (node->children.empty()) {
         std::cout << "Statement did not contain anything." << std::endl;
@@ -217,7 +217,7 @@ void addArguments(FunctionNode *function, ParseTreeNode *root) {
     }
 }
 
-auto createExternalFunction(ParseTreeNode *node) -> FunctionNode * {
+FunctionNode *createExternalFunction(ParseTreeNode *node) {
     auto variableNameNode = node->children[2];
     auto header = node->children[4];
     ParseTreeNode *argumentsNode = nullptr;
@@ -251,7 +251,7 @@ auto createExternalFunction(ParseTreeNode *node) -> FunctionNode * {
     return function;
 }
 
-auto createFunction(ParseTreeNode *node) -> FunctionNode * {
+FunctionNode *createFunction(ParseTreeNode *node) {
     auto variableNameNode = node->children[1];
     auto header = node->children[3];
     ParseTreeNode *argumentsNode = nullptr;
@@ -296,7 +296,7 @@ auto createFunction(ParseTreeNode *node) -> FunctionNode * {
     return function;
 }
 
-auto createAssignment(ParseTreeNode *node) -> AssignmentNode * {
+AssignmentNode *createAssignment(ParseTreeNode *node) {
     auto assignment = new AssignmentNode();
     if (node->children.size() != 3) {
         std::cout << "Assignment should always have 3 children" << std::endl;
@@ -331,7 +331,7 @@ void addArguments(CallNode *call, ParseTreeNode *root) {
     }
 }
 
-auto createCall(ParseTreeNode *node) -> CallNode * {
+CallNode *createCall(ParseTreeNode *node) {
     std::string name = node->children[0]->token.content;
     auto call = new CallNode(name);
     auto call_header = node->children[2];
@@ -341,7 +341,7 @@ auto createCall(ParseTreeNode *node) -> CallNode * {
     return call;
 }
 
-auto createIfStatement(ParseTreeNode *node) -> IfStatementNode * {
+IfStatementNode *createIfStatement(ParseTreeNode *node) {
     auto ifNode = new IfStatementNode();
     AstNode *condition = createAstFromParseTree(node->children[1]);
     ifNode->setCondition(condition);
@@ -360,7 +360,7 @@ auto createIfStatement(ParseTreeNode *node) -> IfStatementNode * {
     return ifNode;
 }
 
-auto createAstFromParseTree(ParseTreeNode *node) -> AstNode * {
+AstNode *createAstFromParseTree(ParseTreeNode *node) {
     if (node == nullptr) {
         return nullptr;
     }
@@ -378,7 +378,7 @@ auto createAstFromParseTree(ParseTreeNode *node) -> AstNode * {
     }
 
     if (isSequence(node)) {
-        return createSequence(node);
+        return createSequence(node, nullptr);
     }
 
     if (isStatement(node)) {
