@@ -7,8 +7,8 @@ set(TEST_SOURCES
     ${CMAKE_CURRENT_SOURCE_DIR}/parser/ParserTest.cpp
     ${CMAKE_CURRENT_SOURCE_DIR}/parser/FunctionTest.cpp
     ${CMAKE_CURRENT_SOURCE_DIR}/parser/OperationTest.cpp
-    ${CMAKE_CURRENT_SOURCE_DIR}/ast/ASTGeneratorTest.cpp
-    ${CMAKE_CURRENT_SOURCE_DIR}/ast/ASTTestHelper.cpp)
+        ${CMAKE_CURRENT_SOURCE_DIR}/ast/AstGeneratorTest.cpp
+        ${CMAKE_CURRENT_SOURCE_DIR}/ast/AstTestHelper.cpp)
 
 add_executable(Tests ${TEST_SOURCES})
 target_include_directories(Tests

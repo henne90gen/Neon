@@ -1,5 +1,5 @@
 #include "VariableNode.h"
 
-#include "../ASTVisitor.h"
+#include "../AstVisitor.h"
 
-void VariableNode::accept(ASTVisitor *v) { v->visitVariableNode(this); }
+void VariableNode::accept(AstVisitor *v) { v->visitVariableNode(this); }

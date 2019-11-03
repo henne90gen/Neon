@@ -10,7 +10,7 @@ class UnaryOperationNode : public AstNode {
 
     explicit UnaryOperationNode(UnaryOperationType type) : AstNode(ast::NodeType::UNARY_OPERATION), type(type) {}
 
-    void accept(ASTVisitor *v) override;
+    void accept(AstVisitor *v) override;
 
     AstNode *getChild();
 

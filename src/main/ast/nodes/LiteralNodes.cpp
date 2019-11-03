@@ -1,9 +1,9 @@
 #include "LiteralNodes.h"
 
-#include "../ASTVisitor.h"
+#include "../AstVisitor.h"
 
-void IntegerNode::accept(ASTVisitor *v) { v->visitIntegerNode(this); }
+void IntegerNode::accept(AstVisitor *v) { v->visitIntegerNode(this); }
 
-void FloatNode::accept(ASTVisitor *v) { v->visitFloatNode(this); }
+void FloatNode::accept(AstVisitor *v) { v->visitFloatNode(this); }
 
-void BoolNode::accept(ASTVisitor *v) { v->visitBoolNode(this); }
+void BoolNode::accept(AstVisitor *v) { v->visitBoolNode(this); }

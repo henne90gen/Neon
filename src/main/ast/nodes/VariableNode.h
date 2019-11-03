@@ -6,7 +6,7 @@ class VariableNode : public AstNode {
   public:
     explicit VariableNode(std::string name) : AstNode(ast::NodeType::VARIABLE), name(std::move(name)) {}
 
-    void accept(ASTVisitor *v) override;
+    void accept(AstVisitor *v) override;
 
     std::string &getName() { return name; }
 

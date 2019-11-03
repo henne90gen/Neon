@@ -8,7 +8,7 @@ class SequenceNode : public AstNode {
   public:
     SequenceNode() : AstNode(ast::NodeType::SEQUENCE) {}
 
-    void accept(ASTVisitor *v) override;
+    void accept(AstVisitor *v) override;
 
     std::vector<AstNode *> &getChildren() { return children; }
 

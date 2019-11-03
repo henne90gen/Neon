@@ -1,8 +1,8 @@
 #include "BinaryOperationNode.h"
 
-#include "../ASTVisitor.h"
+#include "../AstVisitor.h"
 
-void BinaryOperationNode::accept(ASTVisitor *v) { v->visitBinaryOperationNode(this); }
+void BinaryOperationNode::accept(AstVisitor *v) { v->visitBinaryOperationNode(this); }
 
 AstNode *BinaryOperationNode::getLeft() { return left; }
 

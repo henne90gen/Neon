@@ -1,4 +1,4 @@
-#include "ASTTestCasePrinter.h"
+#include "AstTestCasePrinter.h"
 
 #include <iostream>
 
@@ -6,11 +6,11 @@
 #include "../../Utils.h"
 #include "../nodes/AllNodes.h"
 
-void ASTTestCasePrinter::printNode(AstNode *node) {
+void AstTestCasePrinter::printNode(AstNode *node) {
     std::cout << "        {" << indentation << ", " << to_string(node->getAstNodeType()) << "}," << std::endl;
 }
 
-void ASTTestCasePrinter::visitFunctionNode(FunctionNode *node) {
+void AstTestCasePrinter::visitFunctionNode(FunctionNode *node) {
     printNode(node);
     indentation++;
     for (auto argument : node->getArguments()) {
@@ -22,11 +22,11 @@ void ASTTestCasePrinter::visitFunctionNode(FunctionNode *node) {
     indentation--;
 }
 
-void ASTTestCasePrinter::visitVariableNode(VariableNode *node) { printNode(node); }
+void AstTestCasePrinter::visitVariableNode(VariableNode *node) { printNode(node); }
 
-void ASTTestCasePrinter::visitVariableDefinitionNode(VariableDefinitionNode *node) { printNode(node); }
+void AstTestCasePrinter::visitVariableDefinitionNode(VariableDefinitionNode *node) { printNode(node); }
 
-void ASTTestCasePrinter::visitBinaryOperationNode(BinaryOperationNode *node) {
+void AstTestCasePrinter::visitBinaryOperationNode(BinaryOperationNode *node) {
     printNode(node);
     indentation++;
     node->getLeft()->accept(this);
@@ -34,14 +34,14 @@ void ASTTestCasePrinter::visitBinaryOperationNode(BinaryOperationNode *node) {
     indentation--;
 }
 
-void ASTTestCasePrinter::visitUnaryOperationNode(UnaryOperationNode *node) {
+void AstTestCasePrinter::visitUnaryOperationNode(UnaryOperationNode *node) {
     printNode(node);
     indentation++;
     node->getChild()->accept(this);
     indentation--;
 }
 
-void ASTTestCasePrinter::visitAssignmentNode(AssignmentNode *node) {
+void AstTestCasePrinter::visitAssignmentNode(AssignmentNode *node) {
     printNode(node);
     indentation++;
     node->getLeft()->accept(this);
@@ -49,7 +49,7 @@ void ASTTestCasePrinter::visitAssignmentNode(AssignmentNode *node) {
     indentation--;
 }
 
-void ASTTestCasePrinter::visitSequenceNode(SequenceNode *node) {
+void AstTestCasePrinter::visitSequenceNode(SequenceNode *node) {
     printNode(node);
     indentation++;
     for (auto child : node->getChildren()) {
@@ -58,20 +58,20 @@ void ASTTestCasePrinter::visitSequenceNode(SequenceNode *node) {
     indentation--;
 }
 
-void ASTTestCasePrinter::visitStatementNode(StatementNode *node) {
+void AstTestCasePrinter::visitStatementNode(StatementNode *node) {
     printNode(node);
     indentation++;
     node->getChild()->accept(this);
     indentation--;
 }
 
-void ASTTestCasePrinter::visitFloatNode(FloatNode *node) { printNode(node); }
+void AstTestCasePrinter::visitFloatNode(FloatNode *node) { printNode(node); }
 
-void ASTTestCasePrinter::visitIntegerNode(IntegerNode *node) { printNode(node); }
+void AstTestCasePrinter::visitIntegerNode(IntegerNode *node) { printNode(node); }
 
-void ASTTestCasePrinter::visitBoolNode(BoolNode *node) { printNode(node); }
+void AstTestCasePrinter::visitBoolNode(BoolNode *node) { printNode(node); }
 
-void ASTTestCasePrinter::visitCallNode(CallNode *node) {
+void AstTestCasePrinter::visitCallNode(CallNode *node) {
     printNode(node);
     indentation++;
     for (auto argument : node->getArguments()) {
@@ -80,7 +80,7 @@ void ASTTestCasePrinter::visitCallNode(CallNode *node) {
     indentation--;
 }
 
-void ASTTestCasePrinter::visitIfStatementNode(IfStatementNode *node) {
+void AstTestCasePrinter::visitIfStatementNode(IfStatementNode *node) {
     printNode(node);
     indentation++;
     node->getCondition()->accept(this);
@@ -93,7 +93,7 @@ void ASTTestCasePrinter::visitIfStatementNode(IfStatementNode *node) {
     indentation--;
 }
 
-void ASTTestCasePrinter::visitForStatementNode(ForStatementNode *node) {
+void AstTestCasePrinter::visitForStatementNode(ForStatementNode *node) {
     printNode(node);
     indentation++;
     if (node->getInit() != nullptr) {
@@ -121,7 +121,7 @@ void printAstTestCase(const Program &program, AstNode *root) {
     std::cout << "TEST_CASE(\"ASTGenerator can handle '" << program.toString() << "'\") {" << std::endl;
     std::cout << "    std::vector<AstNodeSpec> spec = {" << std::endl;
 
-    auto testCasePrinter = new ASTTestCasePrinter();
+    auto testCasePrinter = new AstTestCasePrinter();
     root->accept(testCasePrinter);
 
     std::cout << "    };" << std::endl;

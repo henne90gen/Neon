@@ -6,7 +6,7 @@ class ForStatementNode : public AstNode {
   public:
     explicit ForStatementNode() : AstNode(ast::NodeType::FOR_STATEMENT) {}
 
-    void accept(ASTVisitor *v) override;
+    void accept(AstVisitor *v) override;
 
     AstNode *getInit() { return init; }
     void setInit(AstNode *init) { this->init = init; }

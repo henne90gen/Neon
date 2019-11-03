@@ -6,7 +6,7 @@ class IfStatementNode : public AstNode {
   public:
     explicit IfStatementNode() : AstNode(ast::NodeType::IF_STATEMENT) {}
 
-    void accept(ASTVisitor *v) override;
+    void accept(AstVisitor *v) override;
 
     AstNode *getCondition();
     void setCondition(AstNode *condition);

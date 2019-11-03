@@ -2,7 +2,7 @@
 
 #include "Parser.h"
 
-#include "ast/ASTGenerator.h"
+#include "ast/AstGenerator.h"
 #include "ast/nodes/AstNode.h"
 
 struct AstNodeSpec {

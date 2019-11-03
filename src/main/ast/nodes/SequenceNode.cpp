@@ -1,5 +1,5 @@
 #include "SequenceNode.h"
 
-#include "../ASTVisitor.h"
+#include "../AstVisitor.h"
 
-void SequenceNode::accept(ASTVisitor *v) { v->visitSequenceNode(this); }
+void SequenceNode::accept(AstVisitor *v) { v->visitSequenceNode(this); }

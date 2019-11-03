@@ -8,7 +8,7 @@ class BinaryOperationNode : public AstNode {
 
     explicit BinaryOperationNode(ast::BinaryOperationType type) : AstNode(ast::NodeType::BINARY_OPERATION), type(type) {}
 
-    void accept(ASTVisitor *v) override;
+    void accept(AstVisitor *v) override;
 
     AstNode *getLeft();
     void setLeft(AstNode *left);

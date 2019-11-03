@@ -1,4 +1,4 @@
-#include "ASTTestHelper.h"
+#include "AstTestHelper.h"
 
 #include "ast/nodes/AllNodes.h"
 

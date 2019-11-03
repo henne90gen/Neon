@@ -1,8 +1,8 @@
 #include "UnaryOperationNode.h"
 
-#include "../ASTVisitor.h"
+#include "../AstVisitor.h"
 
-void UnaryOperationNode::accept(ASTVisitor *v) { v->visitUnaryOperationNode(this); }
+void UnaryOperationNode::accept(AstVisitor *v) { v->visitUnaryOperationNode(this); }
 
 AstNode *UnaryOperationNode::getChild() { return child; }
 

@@ -1,8 +1,8 @@
 #include "IfStatementNode.h"
 
-#include "../ASTVisitor.h"
+#include "../AstVisitor.h"
 
-void IfStatementNode::accept(ASTVisitor *v) { v->visitIfStatementNode(this); }
+void IfStatementNode::accept(AstVisitor *v) { v->visitIfStatementNode(this); }
 
 AstNode *IfStatementNode::getCondition() { return condition; }
 

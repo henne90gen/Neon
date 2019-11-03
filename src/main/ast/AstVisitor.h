@@ -15,7 +15,7 @@ class UnaryOperationNode;
 class VariableDefinitionNode;
 class VariableNode;
 
-class ASTVisitor {
+class AstVisitor {
   public:
     virtual void visitAssignmentNode(AssignmentNode *node) = 0;
     virtual void visitBinaryOperationNode(BinaryOperationNode *node) = 0;

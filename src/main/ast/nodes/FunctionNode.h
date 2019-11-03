@@ -10,7 +10,7 @@ class FunctionNode : public AstNode {
     explicit FunctionNode(std::string name, ast::DataType returnType)
           : AstNode(ast::NodeType::FUNCTION), name(std::move(name)), returnType(returnType) {}
 
-    void accept(ASTVisitor *v) override;
+    void accept(AstVisitor *v) override;
 
     AstNode *getBody();
     void setBody(AstNode *body);
@@ -34,7 +34,7 @@ class CallNode : public AstNode {
   public:
     explicit CallNode(std::string name) : AstNode(ast::NodeType::CALL), name(std::move(name)) {}
 
-    void accept(ASTVisitor *v) override;
+    void accept(AstVisitor *v) override;
 
     std::string &getName();
 

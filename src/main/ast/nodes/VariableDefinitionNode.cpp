@@ -1,8 +1,8 @@
 #include "VariableDefinitionNode.h"
 
-#include "../ASTVisitor.h"
+#include "../AstVisitor.h"
 
-void VariableDefinitionNode::accept(ASTVisitor *v) { v->visitVariableDefinitionNode(this); }
+void VariableDefinitionNode::accept(AstVisitor *v) { v->visitVariableDefinitionNode(this); }
 
 std::string &VariableDefinitionNode::getName() { return name; }
 

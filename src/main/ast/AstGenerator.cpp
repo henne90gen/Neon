@@ -1,4 +1,4 @@
-#include "ASTGenerator.h"
+#include "AstGenerator.h"
 
 #include <iostream>
 

@@ -1,11 +1,11 @@
-#include "ASTTypeAnalyser.h"
+#include "AstTypeAnalyser.h"
 
 #include <iostream>
 
 #include "../../Utils.h"
 #include "../nodes/AllNodes.h"
 
-void ASTTypeAnalyser::visitFunctionNode(FunctionNode *node) {
+void AstTypeAnalyser::visitFunctionNode(FunctionNode *node) {
     for (auto &argument : node->getArguments()) {
         argument->accept(this);
     }
@@ -15,7 +15,7 @@ void ASTTypeAnalyser::visitFunctionNode(FunctionNode *node) {
     }
 }
 
-void ASTTypeAnalyser::visitCallNode(CallNode *node) {
+void AstTypeAnalyser::visitCallNode(CallNode *node) {
     const auto &itr = functionMap.find(node->getName());
     if (itr == functionMap.end()) {
         std::cerr << "Undefined function " << node->getName() << std::endl;
@@ -23,7 +23,7 @@ void ASTTypeAnalyser::visitCallNode(CallNode *node) {
     typeMap[node] = itr->second;
 }
 
-void ASTTypeAnalyser::visitVariableNode(VariableNode *node) {
+void AstTypeAnalyser::visitVariableNode(VariableNode *node) {
     const auto &itr = variableMap.find(node->getName());
     if (itr == variableMap.end()) {
         std::cerr << "Undefined variable " << node->getName() << std::endl;
@@ -32,12 +32,12 @@ void ASTTypeAnalyser::visitVariableNode(VariableNode *node) {
     typeMap[node] = itr->second;
 }
 
-void ASTTypeAnalyser::visitVariableDefinitionNode(VariableDefinitionNode *node) {
+void AstTypeAnalyser::visitVariableDefinitionNode(VariableDefinitionNode *node) {
     typeMap[node] = node->getType();
     variableMap[node->getName()] = node->getType();
 }
 
-void ASTTypeAnalyser::visitBinaryOperationNode(BinaryOperationNode *node) {
+void AstTypeAnalyser::visitBinaryOperationNode(BinaryOperationNode *node) {
     node->getLeft()->accept(this);
     node->getRight()->accept(this);
     auto leftType = typeMap[node->getLeft()];
@@ -61,7 +61,7 @@ void ASTTypeAnalyser::visitBinaryOperationNode(BinaryOperationNode *node) {
     std::cerr << "Binary operation type mismatch: " << to_string(node->getAstNodeType()) << std::endl;
 }
 
-void ASTTypeAnalyser::visitUnaryOperationNode(UnaryOperationNode *node) {
+void AstTypeAnalyser::visitUnaryOperationNode(UnaryOperationNode *node) {
     node->getChild()->accept(this);
     if (node->getType() == UnaryOperationNode::UnaryOperationType::NOT &&
         typeMap[node->getChild()] == ast::DataType::BOOL) {
@@ -72,7 +72,7 @@ void ASTTypeAnalyser::visitUnaryOperationNode(UnaryOperationNode *node) {
     std::cerr << "Unary operation type mismatch: " << to_string(node->getAstNodeType()) << std::endl;
 }
 
-void ASTTypeAnalyser::visitAssignmentNode(AssignmentNode *node) {
+void AstTypeAnalyser::visitAssignmentNode(AssignmentNode *node) {
     node->getRight()->accept(this);
     node->getLeft()->accept(this);
     ast::DataType leftType = typeMap[node->getLeft()];
@@ -85,13 +85,13 @@ void ASTTypeAnalyser::visitAssignmentNode(AssignmentNode *node) {
     }
 }
 
-void ASTTypeAnalyser::visitSequenceNode(SequenceNode *node) {
+void AstTypeAnalyser::visitSequenceNode(SequenceNode *node) {
     for (auto child : node->getChildren()) {
         child->accept(this);
     }
 }
 
-void ASTTypeAnalyser::visitStatementNode(StatementNode *node) {
+void AstTypeAnalyser::visitStatementNode(StatementNode *node) {
     if (node->getChild() == nullptr) {
         return;
     }
@@ -99,13 +99,13 @@ void ASTTypeAnalyser::visitStatementNode(StatementNode *node) {
     typeMap[node] = typeMap[node->getChild()];
 }
 
-void ASTTypeAnalyser::visitFloatNode(FloatNode *node) { typeMap[node] = ast::DataType::FLOAT; }
+void AstTypeAnalyser::visitFloatNode(FloatNode *node) { typeMap[node] = ast::DataType::FLOAT; }
 
-void ASTTypeAnalyser::visitIntegerNode(IntegerNode *node) { typeMap[node] = ast::DataType::INT; }
+void AstTypeAnalyser::visitIntegerNode(IntegerNode *node) { typeMap[node] = ast::DataType::INT; }
 
-void ASTTypeAnalyser::visitBoolNode(BoolNode *node) { typeMap[node] = ast::DataType::BOOL; }
+void AstTypeAnalyser::visitBoolNode(BoolNode *node) { typeMap[node] = ast::DataType::BOOL; }
 
-void ASTTypeAnalyser::visitIfStatementNode(IfStatementNode *node) {
+void AstTypeAnalyser::visitIfStatementNode(IfStatementNode *node) {
     node->getCondition()->accept(this);
     if (typeMap[node->getCondition()] != ast::DataType::BOOL) {
         std::cerr << "If condition is not of type bool" << std::endl;
@@ -119,12 +119,30 @@ void ASTTypeAnalyser::visitIfStatementNode(IfStatementNode *node) {
     }
 }
 
-void ASTTypeAnalyser::visitForStatementNode(ForStatementNode *node) { NOT_IMPLEMENTED }
+void AstTypeAnalyser::visitForStatementNode(ForStatementNode *node) {
+    if (node->getInit() != nullptr) {
+        node->getInit()->accept(this);
+    }
+
+    node->getCondition()->accept(this);
+    if (typeMap[node->getCondition()] != ast::DataType::BOOL) {
+        std::cerr << "For condition is not of type bool" << std::endl;
+        return;
+    }
+
+    if (node->getUpdate() != nullptr) {
+        node->getUpdate()->accept(this);
+    }
+
+    if (node->getBody() != nullptr) {
+        node->getBody()->accept(this);
+    }
+}
 
 void analyseTypes(AstNode *root) {
     if (root == nullptr) {
         return;
     }
-    auto analyser = new ASTTypeAnalyser();
+    auto analyser = new AstTypeAnalyser();
     root->accept(analyser);
 }

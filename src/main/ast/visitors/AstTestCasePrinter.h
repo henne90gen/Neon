@@ -1,9 +1,9 @@
 #pragma once
 
-#include "../ASTVisitor.h"
+#include "../AstVisitor.h"
 #include "../nodes/AstNode.h"
 
-class ASTTestCasePrinter : public ASTVisitor {
+class AstTestCasePrinter : public AstVisitor {
   public:
 
     void visitAssignmentNode(AssignmentNode *node) override;

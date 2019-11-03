@@ -1,5 +1,5 @@
 #include "ForStatementNode.h"
 
-#include "../ASTVisitor.h"
+#include "../AstVisitor.h"
 
-void ForStatementNode::accept(ASTVisitor *v) { v->visitForStatementNode(this); }
+void ForStatementNode::accept(AstVisitor *v) { v->visitForStatementNode(this); }

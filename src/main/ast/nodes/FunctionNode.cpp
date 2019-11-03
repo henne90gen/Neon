@@ -1,8 +1,8 @@
 #include "FunctionNode.h"
 
-#include "../ASTVisitor.h"
+#include "../AstVisitor.h"
 
-void FunctionNode::accept(ASTVisitor *v) { v->visitFunctionNode(this); }
+void FunctionNode::accept(AstVisitor *v) { v->visitFunctionNode(this); }
 
 AstNode *FunctionNode::getBody() { return body; }
 
@@ -16,7 +16,7 @@ ast::DataType FunctionNode::getReturnType() { return returnType; }
 
 bool FunctionNode::isExternal() { return body == nullptr; }
 
-void CallNode::accept(ASTVisitor *v) { v->visitCallNode(this); }
+void CallNode::accept(AstVisitor *v) { v->visitCallNode(this); }
 
 std::string &CallNode::getName() { return name; }
 

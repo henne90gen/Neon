@@ -6,7 +6,7 @@ class StatementNode : public AstNode {
   public:
     StatementNode() : AstNode(ast::NodeType::STATEMENT) {}
 
-    void accept(ASTVisitor *v) override;
+    void accept(AstVisitor *v) override;
 
     bool isReturnStatement();
     void setIsReturnStatement(bool returnStatement);

@@ -1,8 +1,8 @@
 #include "AssignmentNode.h"
 
-#include "../ASTVisitor.h"
+#include "../AstVisitor.h"
 
-void AssignmentNode::accept(ASTVisitor *v) { v->visitAssignmentNode(this); }
+void AssignmentNode::accept(AstVisitor *v) { v->visitAssignmentNode(this); }
 
 AstNode *AssignmentNode::getLeft() { return left; }
 

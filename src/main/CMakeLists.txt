@@ -16,11 +16,11 @@ set(SOURCES
         ${CMAKE_CURRENT_SOURCE_DIR}/Parser.cpp
         ${CMAKE_CURRENT_SOURCE_DIR}/Program.cpp
         ${CMAKE_CURRENT_SOURCE_DIR}/Token.cpp
-        ${CMAKE_CURRENT_SOURCE_DIR}/ast/ASTGenerator.cpp
-        ${CMAKE_CURRENT_SOURCE_DIR}/ast/visitors/ASTInterpreter.cpp
-        ${CMAKE_CURRENT_SOURCE_DIR}/ast/visitors/ASTPrinter.cpp
-        ${CMAKE_CURRENT_SOURCE_DIR}/ast/visitors/ASTTestCasePrinter.cpp
-        ${CMAKE_CURRENT_SOURCE_DIR}/ast/visitors/ASTTypeAnalyser.cpp
+        ${CMAKE_CURRENT_SOURCE_DIR}/ast/AstGenerator.cpp
+        ${CMAKE_CURRENT_SOURCE_DIR}/ast/visitors/AstInterpreter.cpp
+        ${CMAKE_CURRENT_SOURCE_DIR}/ast/visitors/AstPrinter.cpp
+        ${CMAKE_CURRENT_SOURCE_DIR}/ast/visitors/AstTestCasePrinter.cpp
+        ${CMAKE_CURRENT_SOURCE_DIR}/ast/visitors/AstTypeAnalyser.cpp
         ${CMAKE_CURRENT_SOURCE_DIR}/ast/nodes/AssignmentNode.cpp
         ${CMAKE_CURRENT_SOURCE_DIR}/ast/nodes/AstNode.cpp
         ${CMAKE_CURRENT_SOURCE_DIR}/ast/nodes/BinaryOperationNode.cpp

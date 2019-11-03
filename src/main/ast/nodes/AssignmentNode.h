@@ -6,7 +6,7 @@ class AssignmentNode : public AstNode {
   public:
     explicit AssignmentNode() : AstNode(ast::NodeType::ASSIGNMENT) {}
 
-    void accept(ASTVisitor *v) override;
+    void accept(AstVisitor *v) override;
 
     AstNode *getLeft();
     void setLeft(AstNode *left);

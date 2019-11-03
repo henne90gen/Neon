@@ -7,7 +7,7 @@ class VariableDefinitionNode : public AstNode {
     explicit VariableDefinitionNode(std::string name, ast::DataType type)
           : AstNode(ast::NodeType::VARIABLE_DEFINITION), name(std::move(name)), type(type) {}
 
-    void accept(ASTVisitor *v) override;
+    void accept(AstVisitor *v) override;
 
     std::string &getName();
 

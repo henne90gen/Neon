@@ -1,11 +1,11 @@
-#include "ASTInterpreter.h"
+#include "AstInterpreter.h"
 
 #include "../../Utils.h"
 #include "../nodes/AllNodes.h"
 
 #include <iostream>
 
-void ASTInterpreter::printStatementResult(AstNode *child) {
+void AstInterpreter::printStatementResult(AstNode *child) {
     if (calculationResults.find(child) == calculationResults.end()) {
         std::cout << "Calculation did not produce a result." << std::endl;
         return;
@@ -95,7 +95,7 @@ CalculationResult negate(const CalculationResult &calc) {
     return result;
 }
 
-void ASTInterpreter::visitFunctionNode(FunctionNode *node) {
+void AstInterpreter::visitFunctionNode(FunctionNode *node) {
     if (functions.find(node->getName()) != functions.end()) {
         std::cout << "Redefinition of function " << node->getName() << "!" << std::endl;
     } else {
@@ -103,7 +103,7 @@ void ASTInterpreter::visitFunctionNode(FunctionNode *node) {
     }
 }
 
-void ASTInterpreter::visitBinaryOperationNode(BinaryOperationNode *node) {
+void AstInterpreter::visitBinaryOperationNode(BinaryOperationNode *node) {
     if (calculationResults.find(node->getLeft()) == calculationResults.end()) {
         node->getLeft()->accept(this);
     }
@@ -132,7 +132,7 @@ void ASTInterpreter::visitBinaryOperationNode(BinaryOperationNode *node) {
     calculationResults[node] = result;
 }
 
-void ASTInterpreter::visitUnaryOperationNode(UnaryOperationNode *node) {
+void AstInterpreter::visitUnaryOperationNode(UnaryOperationNode *node) {
     auto child = node->getChild();
     if (calculationResults.find(child) == calculationResults.end()) {
         child->accept(this);
@@ -149,13 +149,13 @@ void ASTInterpreter::visitUnaryOperationNode(UnaryOperationNode *node) {
     calculationResults[node] = result;
 }
 
-void ASTInterpreter::visitSequenceNode(SequenceNode *node) {
+void AstInterpreter::visitSequenceNode(SequenceNode *node) {
     for (auto child : node->getChildren()) {
         child->accept(this);
     }
 }
 
-void ASTInterpreter::visitStatementNode(StatementNode *node) {
+void AstInterpreter::visitStatementNode(StatementNode *node) {
     if (node->getChild() == nullptr) {
         std::cout << "Could not interpret child of StatementNode." << std::endl;
         return;
@@ -164,7 +164,7 @@ void ASTInterpreter::visitStatementNode(StatementNode *node) {
     printStatementResult(node->getChild());
 }
 
-void ASTInterpreter::visitVariableNode(VariableNode *node) {
+void AstInterpreter::visitVariableNode(VariableNode *node) {
     if (variables.find(node->getName()) == variables.end()) {
         std::cout << "Use of undefined variable." << std::endl;
         return;
@@ -172,36 +172,36 @@ void ASTInterpreter::visitVariableNode(VariableNode *node) {
     calculationResults[node] = calculationResults[variables[node->getName()]];
 }
 
-void ASTInterpreter::visitVariableDefinitionNode(VariableDefinitionNode *node) { variables[node->getName()] = node; }
+void AstInterpreter::visitVariableDefinitionNode(VariableDefinitionNode *node) { variables[node->getName()] = node; }
 
-void ASTInterpreter::visitFloatNode(FloatNode *node) {
+void AstInterpreter::visitFloatNode(FloatNode *node) {
     CalculationResult result = {CalculationResult::FLOAT, {0}};
     result.floatResult = node->getValue();
     calculationResults[node] = result;
 }
 
-void ASTInterpreter::visitIntegerNode(IntegerNode *node) {
+void AstInterpreter::visitIntegerNode(IntegerNode *node) {
     CalculationResult result = {CalculationResult::INTEGER, {0}};
     result.intResult = node->getValue();
     calculationResults[node] = result;
 }
 
-void ASTInterpreter::visitBoolNode(BoolNode *node) {
+void AstInterpreter::visitBoolNode(BoolNode *node) {
     CalculationResult result = {CalculationResult::BOOL, {0}};
     result.boolResult = node->getValue();
     calculationResults[node] = result;
 }
 
-void ASTInterpreter::visitAssignmentNode(AssignmentNode *node) {
+void AstInterpreter::visitAssignmentNode(AssignmentNode *node) {
     if (calculationResults.find(node->getRight()) == calculationResults.end()) {
         node->getRight()->accept(this);
     }
     calculationResults[node] = calculationResults[node->getRight()];
 }
 
-void ASTInterpreter::visitCallNode(CallNode * /*node*/) { NOT_IMPLEMENTED }
-void ASTInterpreter::visitIfStatementNode(IfStatementNode * /*node*/) { NOT_IMPLEMENTED }
-void ASTInterpreter::visitForStatementNode(ForStatementNode *node) { NOT_IMPLEMENTED }
+void AstInterpreter::visitCallNode(CallNode * /*node*/) { NOT_IMPLEMENTED }
+void AstInterpreter::visitIfStatementNode(IfStatementNode * /*node*/) { NOT_IMPLEMENTED }
+void AstInterpreter::visitForStatementNode(ForStatementNode *node) { NOT_IMPLEMENTED }
 
 void interpretAst(AstNode *node, bool verbose) {
     if (node == nullptr) {
@@ -209,6 +209,6 @@ void interpretAst(AstNode *node, bool verbose) {
         return;
     }
 
-    auto interpreter = new ASTInterpreter(verbose);
+    auto interpreter = new AstInterpreter(verbose);
     node->accept(interpreter);
 }

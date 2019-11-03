@@ -3,10 +3,10 @@
 #include "ObjectFileWriter.h"
 #include "Parser.h"
 #include "Program.h"
-#include "ast/ASTGenerator.h"
-#include "ast/visitors/ASTPrinter.h"
-#include "ast/visitors/ASTTestCasePrinter.h"
-#include "ast/visitors/ASTTypeAnalyser.h"
+#include "ast/AstGenerator.h"
+#include "ast/visitors/AstPrinter.h"
+#include "ast/visitors/AstTestCasePrinter.h"
+#include "ast/visitors/AstTypeAnalyser.h"
 #include "ir/IRGenerator.h"
 
 int main() {

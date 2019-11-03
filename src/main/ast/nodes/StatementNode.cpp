@@ -1,8 +1,8 @@
 #include "StatementNode.h"
 
-#include "../ASTVisitor.h"
+#include "../AstVisitor.h"
 
-void StatementNode::accept(ASTVisitor *v) { v->visitStatementNode(this); }
+void StatementNode::accept(AstVisitor *v) { v->visitStatementNode(this); }
 
 bool StatementNode::isReturnStatement() { return this->returnStatement; }
 

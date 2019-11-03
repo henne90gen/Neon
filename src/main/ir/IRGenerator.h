@@ -1,7 +1,7 @@
 #pragma once
 
 #include "../Program.h"
-#include "../ast/ASTVisitor.h"
+#include "../ast/AstVisitor.h"
 #include "../ast/nodes/AllNodes.h"
 
 #include <iostream>
@@ -16,7 +16,7 @@
         std::cout << msg << std::endl;                                                                                 \
     }
 
-class IRGenerator : public ASTVisitor {
+class IRGenerator : public AstVisitor {
   public:
     explicit IRGenerator(const Program &program, bool verbose);
 

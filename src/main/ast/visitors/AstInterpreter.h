@@ -2,7 +2,7 @@
 
 #include <unordered_map>
 
-#include "../ASTVisitor.h"
+#include "../AstVisitor.h"
 #include "../nodes/AstNode.h"
 
 struct CalculationResult {
@@ -15,9 +15,9 @@ struct CalculationResult {
     };
 };
 
-class ASTInterpreter : public ASTVisitor {
+class AstInterpreter : public AstVisitor {
   public:
-    explicit ASTInterpreter(const bool verbose) : verbose(verbose) {}
+    explicit AstInterpreter(const bool verbose) : verbose(verbose) {}
 
     void visitAssignmentNode(AssignmentNode *node) override;
     void visitBinaryOperationNode(BinaryOperationNode *node) override;
