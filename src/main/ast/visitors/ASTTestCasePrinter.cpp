@@ -3,6 +3,7 @@
 #include <iostream>
 
 #include "../../Program.h"
+#include "../../Utils.h"
 #include "../nodes/AllNodes.h"
 
 void ASTTestCasePrinter::printNode(AstNode *node) {
@@ -88,6 +89,24 @@ void ASTTestCasePrinter::visitIfStatementNode(IfStatementNode *node) {
     }
     if (node->getElseBody() != nullptr) {
         node->getElseBody()->accept(this);
+    }
+    indentation--;
+}
+
+void ASTTestCasePrinter::visitForStatementNode(ForStatementNode *node) {
+    printNode(node);
+    indentation++;
+    if (node->getInit() != nullptr) {
+        node->getInit()->accept(this);
+    }
+    if (node->getCondition() != nullptr) {
+        node->getCondition()->accept(this);
+    }
+    if (node->getUpdate() != nullptr) {
+        node->getUpdate()->accept(this);
+    }
+    if (node->getBody() != nullptr) {
+        node->getBody()->accept(this);
     }
     indentation--;
 }

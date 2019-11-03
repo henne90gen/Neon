@@ -178,7 +178,7 @@ TEST_CASE("Parser can handle 'if true { }'") {
     assertProgramCreatesParseTree(program, parseTree);
 }
 
-TEST_CASE("Parser can handle 'for int i = 0 ; i < 10 ; i = i + 1 { }'") {
+TEST_CASE("Parser can handle 'for int i = 0; i < 10; i = i + 1 { }'") {
     std::vector<std::pair<int, GrammarSymbol>> parseTree = {
           {0,  GrammarSymbol::PROGRAM},
           {1,  GrammarSymbol::STATEMENTS},
@@ -237,6 +237,6 @@ TEST_CASE("Parser can handle 'for int i = 0 ; i < 10 ; i = i + 1 { }'") {
           {5,  GrammarSymbol::RIGHT_CURLY_BRACE},
           {1,  GrammarSymbol::ENDOFFILE},
     };
-    std::vector<std::string> program = {"for int i = 0 ; i < 10 ; i = i + 1 { }"};
+    std::vector<std::string> program = {"for int i = 0; i < 10; i = i + 1 { }"};
     assertProgramCreatesParseTree(program, parseTree);
 }

@@ -119,6 +119,8 @@ void ASTTypeAnalyser::visitIfStatementNode(IfStatementNode *node) {
     }
 }
 
+void ASTTypeAnalyser::visitForStatementNode(ForStatementNode *node) { NOT_IMPLEMENTED }
+
 void analyseTypes(AstNode *root) {
     if (root == nullptr) {
         return;

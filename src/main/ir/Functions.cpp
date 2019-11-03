@@ -1,3 +1,4 @@
+#include "../Utils.h"
 #include "IRGenerator.h"
 
 #include <llvm/IR/Verifier.h>
@@ -128,3 +129,5 @@ void IRGenerator::visitCallNode(CallNode *node) {
     }
     nodesToValues[node] = call;
 }
+
+void IRGenerator::visitForStatementNode(ForStatementNode *node) { NOT_IMPLEMENTED }

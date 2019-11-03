@@ -362,7 +362,35 @@ IfStatementNode *createIfStatement(ParseTreeNode *node) {
     return ifNode;
 }
 
-ForStatementNode *createForStatement(ParseTreeNode *node) { return nullptr; }
+ForStatementNode *createForStatement(ParseTreeNode *node) {
+    // FOR
+    // ASSIGNMENT
+    // SEMICOLON
+    // EXPRESSION
+    // SEMICOLON
+    // ASSIGNMENT
+    // LEFT_CURLY_BRACE
+    // FOR_STATEMENT_BODY
+    //     STATEMENTS
+    //     RIGHT_CURLY_BRACE
+    auto result = new ForStatementNode();
+
+    auto init = node->children[1];
+    result->setInit(createAstFromParseTree(init));
+
+    auto condition = node->children[3];
+    result->setCondition(createAstFromParseTree(condition));
+
+    auto update = node->children[5];
+    result->setUpdate(createAstFromParseTree(update));
+
+    auto bodyNode = node->children[7];
+    if (bodyNode->children.size() > 1) {
+        auto body = bodyNode->children[0];
+        result->setBody(createAstFromParseTree(body));
+    }
+    return result;
+}
 
 AstNode *createAstFromParseTree(ParseTreeNode *node) {
     if (node == nullptr) {

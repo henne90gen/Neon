@@ -2,6 +2,7 @@
 
 #include <iostream>
 
+#include "../../Utils.h"
 #include "../nodes/AllNodes.h"
 
 void indent(int indentation) {
@@ -148,6 +149,25 @@ void ASTPrinter::visitIfStatementNode(IfStatementNode *node) {
     }
     if (node->getElseBody() != nullptr) {
         node->getElseBody()->accept(this);
+    }
+    indentation--;
+}
+
+void ASTPrinter::visitForStatementNode(ForStatementNode *node) {
+    indent(indentation);
+    std::cout << "ForStatementNode()" << std::endl;
+    indentation++;
+    if (node->getInit() != nullptr) {
+        node->getInit()->accept(this);
+    }
+    if (node->getCondition() != nullptr) {
+        node->getCondition()->accept(this);
+    }
+    if (node->getUpdate() != nullptr) {
+        node->getUpdate()->accept(this);
+    }
+    if (node->getBody() != nullptr) {
+        node->getBody()->accept(this);
     }
     indentation--;
 }

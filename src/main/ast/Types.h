@@ -16,6 +16,7 @@ enum NodeType {
     VARIABLE,
     ASSIGNMENT,
     IF_STATEMENT,
+    FOR_STATEMENT,
 };
 
 enum BinaryOperationType {

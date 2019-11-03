@@ -200,8 +200,8 @@ void ASTInterpreter::visitAssignmentNode(AssignmentNode *node) {
 }
 
 void ASTInterpreter::visitCallNode(CallNode * /*node*/) { NOT_IMPLEMENTED }
-
 void ASTInterpreter::visitIfStatementNode(IfStatementNode * /*node*/) { NOT_IMPLEMENTED }
+void ASTInterpreter::visitForStatementNode(ForStatementNode *node) { NOT_IMPLEMENTED }
 
 void interpretAst(AstNode *node, bool verbose) {
     if (node == nullptr) {
