@@ -36,6 +36,7 @@ set(SOURCES
         ${CMAKE_CURRENT_SOURCE_DIR}/ir/Functions.cpp
         ${CMAKE_CURRENT_SOURCE_DIR}/ir/IRGenerator.cpp
         ${CMAKE_CURRENT_SOURCE_DIR}/ir/Operations.cpp
+        ${CMAKE_CURRENT_SOURCE_DIR}/ir/Statements.cpp
         ${CMAKE_CURRENT_SOURCE_DIR}/ir/Types.cpp
         ${CMAKE_CURRENT_SOURCE_DIR}/ir/Variables.cpp)
 
