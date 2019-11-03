@@ -160,8 +160,8 @@ void IRGenerator::visitIfStatementNode(IfStatementNode *node) {
 
     node->getCondition()->accept(this);
     auto condition = nodesToValues[node->getCondition()];
-    llvm::Function *function = builder.GetInsertBlock()->getParent();
 
+    llvm::Function *function = builder.GetInsertBlock()->getParent();
     llvm::BasicBlock *thenBB = llvm::BasicBlock::Create(context, "then", function);
     llvm::BasicBlock *elseBB = llvm::BasicBlock::Create(context, "else");
     llvm::BasicBlock *mergeBB = llvm::BasicBlock::Create(context, "if_merge");
@@ -192,6 +192,18 @@ void IRGenerator::visitIfStatementNode(IfStatementNode *node) {
     builder.SetInsertPoint(mergeBB);
 
     LOG("Exit IfStatement")
+}
+
+void IRGenerator::visitForStatementNode(ForStatementNode *node) {
+    LOG("Enter ForStatement");
+    node->getInit()->accept(this);
+
+    node->getCondition()->accept(this);
+    auto condition = nodesToValues[node->getCondition()];
+
+    // FIXME implement for loop here
+
+    LOG("Exit ForStatement");
 }
 
 void IRGenerator::print(const bool writeToFile) {

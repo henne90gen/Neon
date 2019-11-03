@@ -83,7 +83,9 @@ void IRGenerator::finalizeFunction(llvm::Function *function, const ast::DataType
     //    function->viewCFG();
     print(false);
 
+#if 0
     if (!isExternalFunction) {
+        bool verbose = false;
         llvm::LoopAnalysisManager loopAnalysisManager(verbose);
         llvm::FunctionAnalysisManager functionAnalysisManager(verbose);
         llvm::CGSCCAnalysisManager cgsccAnalysisManager(verbose);
@@ -99,6 +101,7 @@ void IRGenerator::finalizeFunction(llvm::Function *function, const ast::DataType
               llvm::PassBuilder::OptimizationLevel::O0, llvm::PassBuilder::ThinLTOPhase::None, verbose);
         functionPassManager.run(*function, functionAnalysisManager);
     }
+#endif
 }
 
 void IRGenerator::visitCallNode(CallNode *node) {
@@ -129,5 +132,3 @@ void IRGenerator::visitCallNode(CallNode *node) {
     }
     nodesToValues[node] = call;
 }
-
-void IRGenerator::visitForStatementNode(ForStatementNode *node) { NOT_IMPLEMENTED }
