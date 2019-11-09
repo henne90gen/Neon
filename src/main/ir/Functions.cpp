@@ -82,6 +82,7 @@ void IRGenerator::finalizeFunction(llvm::Function *function, const ast::DataType
     //    function->viewCFG();
     print(false);
 
+    // FIXME create command line option to switch optimizations on/off
 #if 0
     if (!isExternalFunction) {
         bool verbose = false;
