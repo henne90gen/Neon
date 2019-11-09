@@ -89,10 +89,31 @@ void IRGenerator::visitForStatementNode(ForStatementNode *node) {
     LOG("Enter ForStatement");
     node->getInit()->accept(this);
 
+    llvm::Function *function = builder.GetInsertBlock()->getParent();
+    llvm::BasicBlock *loopHeaderBB = llvm::BasicBlock::Create(context, "loop-header", function);
+    llvm::BasicBlock *loopBB = llvm::BasicBlock::Create(context, "loop-body", function);
+    llvm::BasicBlock *loopExitBB = llvm::BasicBlock::Create(context, "loop-exit", function);
+    builder.CreateBr(loopHeaderBB);
+    builder.SetInsertPoint(loopHeaderBB);
+
     node->getCondition()->accept(this);
     auto condition = nodesToValues[node->getCondition()];
 
-    // FIXME implement for loop here
+    builder.CreateCondBr(condition, loopBB, loopExitBB);
+
+    // Start the PHI node with an entry for Start.
+    // llvm::PHINode *variable = builder.CreatePHI(llvm::Type::getDoubleTy(context), 2, "loop-index");
+    // variable->addIncoming(startValue, preHeaderBB);
+
+    builder.SetInsertPoint(loopBB);
+
+    if (node->getBody() != nullptr) {
+        node->getBody()->accept(this);
+    }
+
+    node->getUpdate()->accept(this);
+
+    builder.CreateBr(loopHeaderBB);
 
     LOG("Exit ForStatement");
 }
