@@ -101,10 +101,6 @@ void IRGenerator::visitForStatementNode(ForStatementNode *node) {
 
     builder.CreateCondBr(condition, loopBB, loopExitBB);
 
-    // Start the PHI node with an entry for Start.
-    // llvm::PHINode *variable = builder.CreatePHI(llvm::Type::getDoubleTy(context), 2, "loop-index");
-    // variable->addIncoming(startValue, preHeaderBB);
-
     builder.SetInsertPoint(loopBB);
 
     if (node->getBody() != nullptr) {
