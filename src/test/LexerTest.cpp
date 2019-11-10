@@ -31,6 +31,16 @@ TEST_CASE("Lexer can handle spaces between tokens") {
     REQUIRE(token.content == "5");
 }
 
+TEST_CASE("Lexer can handle tabs") {
+    std::vector<std::string> lines = {"\t1"};
+    CodeProvider *codeProvider = new StringCodeProvider(lines);
+    Program program = {};
+    auto lexer = Lexer(codeProvider, program);
+    auto token = lexer.getToken();
+    REQUIRE(token.content == "1");
+    REQUIRE(token.type == Token::INTEGER);
+}
+
 TEST_CASE("Lexer can handle no spaces between tokens") {
     std::vector<std::string> lines = {"1-5"};
     CodeProvider *codeProvider = new StringCodeProvider(lines);

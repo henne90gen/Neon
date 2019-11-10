@@ -48,7 +48,7 @@ std::optional<std::string> StringCodeProvider::getMoreCode() {
 }
 
 void removeLeadingWhitespace(std::string &str) {
-    while (!str.empty() && str[0] == ' ') {
+    while (!str.empty() && (str[0] == ' ' || str[0] == '\t')) {
         str = str.substr(1, str.length());
     }
 }
