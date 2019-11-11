@@ -10,6 +10,9 @@ It has C-like syntax and is easily interoperable with C/C++.
 -   declaring new variables: `int i = 0;`
 -   writing variables: `i = 5;`
 -   reading variables: `i = i + 5;`
+-   variable scoping
+    -   variables that are defined inside of a scope are not accessible from outside that scope
+    -   variables that are overriden in a scope are available again after that scope
 
 ### Functions
 
@@ -41,12 +44,10 @@ TODO
 
 ## TODO / Ideas
 
--   add proper scoping of variables and functions
-    -   variables that are defined inside of a scope should not be accessible from outside that scope
-    -   variables that are overriden in a scope should be available again after that scope
 -   importing files
     -   generate function in every module that contains all 'script' code
     -   generate function call to that function in place of the import statement
+    -   make code from other file available
 -   allow functions to be placed anywhere
     -   in global scope
     -   in function scope

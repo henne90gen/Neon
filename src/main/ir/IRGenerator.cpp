@@ -16,9 +16,11 @@
 #include "../Utils.h"
 
 IRGenerator::IRGenerator(const Program &program, const bool verbose)
-    : program(program), verbose(verbose), builder(context), module(program.fileName, context) {}
+    : program(program), verbose(verbose), builder(context), module(program.fileName, context) {
+    pushScope();
+}
 
-void IRGenerator::logError(const std::string &msg) { std::cerr << msg << std::endl; }
+void IRGenerator::logError(const std::string &msg) { errors.push_back(msg); }
 
 llvm::Type *IRGenerator::getType(ast::DataType type) {
     switch (type) {
@@ -145,5 +147,61 @@ void IRGenerator::run(AstNode *root) {
 
     generateDummyMain();
 
-    this->print();
+    this->printMetrics();
+    if (!errors.empty()) {
+        printErrors();
+        exit(1);
+    } else {
+        this->print();
+    }
+}
+
+llvm::Value *IRGenerator::findVariable(const std::string &name) {
+    metrics["variableLookups"]++;
+
+    int currentScope = definedVariables.size() - 1;
+    while (currentScope >= 0) {
+        auto &scope = definedVariables[currentScope];
+        auto result = scope.find(name);
+        if (result != scope.end()) {
+
+            metrics["variableLookupsSuccessful"]++;
+
+            return result->second;
+        }
+        currentScope--;
+    }
+
+    metrics["variableLookupsFailure"]++;
+
+    return nullptr;
+}
+
+std::unordered_map<std::string, llvm::Value *> &IRGenerator::currentScope() {
+    return definedVariables[definedVariables.size() - 1];
+}
+
+void IRGenerator::pushScope() { definedVariables.emplace_back(); }
+
+void IRGenerator::popScope() { definedVariables.pop_back(); }
+
+void IRGenerator::withScope(const std::function<void(void)> &func) {
+    pushScope();
+    func();
+    popScope();
+}
+
+void IRGenerator::printMetrics() {
+    for (auto metric : metrics) {
+        std::cout << metric.first << ": " << metric.second << std::endl;
+    }
+}
+
+void IRGenerator::printErrors() {
+    std::cerr << std::endl;
+    std::cerr << "The following errors occured:" << std::endl;
+    for (auto msg : errors) {
+        std::cerr << "\t" << msg << std::endl;
+    }
+    std::cerr << std::endl;
 }

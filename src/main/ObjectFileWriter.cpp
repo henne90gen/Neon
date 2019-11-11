@@ -36,7 +36,6 @@ void writeModuleToObjectFile(const Program &program, IRGenerator *irGenerator) {
     module.setTargetTriple(targetTriple);
 
     if (llvm::verifyModule(module, &llvm::errs())) {
-        irGenerator->print(false);
         exit(1);
     }
 

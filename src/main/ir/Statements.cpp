@@ -61,7 +61,7 @@ void IRGenerator::visitIfStatementNode(IfStatementNode *node) {
 
     builder.SetInsertPoint(thenBB);
     if (node->getIfBody() != nullptr) {
-        node->getIfBody()->accept(this);
+        withScope([this, &node]() { node->getIfBody()->accept(this); });
     }
     if (!hasReturnStatement(node->getIfBody())) {
         // create branch instruction to jump to the merge block
@@ -72,7 +72,7 @@ void IRGenerator::visitIfStatementNode(IfStatementNode *node) {
     builder.SetInsertPoint(elseBB);
 
     if (node->getElseBody() != nullptr) {
-        node->getElseBody()->accept(this);
+        withScope([this, &node]() { node->getElseBody()->accept(this); });
     }
     if (!hasReturnStatement(node->getElseBody())) {
         // create branch instruction to jump to the merge block
@@ -87,6 +87,7 @@ void IRGenerator::visitIfStatementNode(IfStatementNode *node) {
 
 void IRGenerator::visitForStatementNode(ForStatementNode *node) {
     LOG("Enter ForStatement");
+    pushScope();
     node->getInit()->accept(this);
 
     llvm::Function *function = builder.GetInsertBlock()->getParent();
@@ -111,5 +112,6 @@ void IRGenerator::visitForStatementNode(ForStatementNode *node) {
 
     builder.CreateBr(loopHeaderBB);
 
+    popScope();
     LOG("Exit ForStatement");
 }

@@ -1,9 +1,9 @@
 #include "IRGenerator.h"
 
-const int bitsOfInt = 64;
+const int NUM_BITS_OF_INT = 64;
 
 void IRGenerator::visitIntegerNode(IntegerNode *node) {
-    nodesToValues[node] = llvm::ConstantInt::get(context, llvm::APInt(bitsOfInt, node->getValue()));
+    nodesToValues[node] = llvm::ConstantInt::get(context, llvm::APInt(NUM_BITS_OF_INT, node->getValue()));
     LOG("Created Integer")
 }
 
@@ -25,7 +25,7 @@ void IRGenerator::visitAssignmentNode(AssignmentNode *node) {
         dest = nodesToValues[node->getLeft()];
     } else {
         auto variable = dynamic_cast<VariableNode *>(node->getLeft());
-        dest = definedVariables[variable->getName()];
+        dest = findVariable(variable->getName());
     }
 
     node->getRight()->accept(this);
@@ -34,4 +34,5 @@ void IRGenerator::visitAssignmentNode(AssignmentNode *node) {
         return logError("Could not create assignment.");
     }
     nodesToValues[node] = builder.CreateStore(src, dest);
+    LOG("Created Assignment");
 }

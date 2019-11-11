@@ -3,14 +3,11 @@
 void IRGenerator::visitVariableNode(VariableNode *node) {
     LOG("Enter Variable")
 
-    if (definedVariables.find(node->getName()) == definedVariables.end()) {
-        return logError("Undefined variable " + node->getName());
+    auto value = findVariable(node->getName());
+    if (value == nullptr) {
+        return logError("Undefined variable '" + node->getName() + "'");
     }
 
-    auto value = definedVariables[node->getName()];
-    if (value == nullptr) {
-        return;
-    }
     nodesToValues[node] = builder.CreateLoad(value, node->getName());
 
     LOG("Exit Variable")
@@ -29,7 +26,7 @@ void IRGenerator::visitVariableDefinitionNode(VariableDefinitionNode *node) {
     } else {
         value = createEntryBlockAlloca(type, name);
     }
-    definedVariables[name] = value;
+    currentScope()[name] = value;
     nodesToValues[node] = value;
 
     LOG("Exit VariableDefinition")

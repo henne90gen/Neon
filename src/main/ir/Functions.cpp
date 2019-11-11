@@ -15,16 +15,19 @@ void IRGenerator::visitFunctionNode(FunctionNode *node) {
         llvm::BasicBlock *BB = llvm::BasicBlock::Create(context, "entry-" + node->getName(), currentFunction);
         builder.SetInsertPoint(BB);
 
-        for (auto &arg : currentFunction->args()) {
-            auto value = createEntryBlockAlloca(arg.getType(), arg.getName());
+        withScope([this, &node]() {
+            for (auto &arg : currentFunction->args()) {
+                auto value = createEntryBlockAlloca(arg.getType(), arg.getName());
 
-            // store initial value
-            builder.CreateStore(&arg, value);
+                // store initial value
+                builder.CreateStore(&arg, value);
 
-            definedVariables[arg.getName()] = value;
-        }
+                definedVariables[definedVariables.size() - 1][arg.getName()] = value;
+            }
 
-        node->getBody()->accept(this);
+            node->getBody()->accept(this);
+        });
+
     }
 
     finalizeFunction(currentFunction, node->getReturnType(), node->isExternal());
@@ -75,12 +78,10 @@ void IRGenerator::finalizeFunction(llvm::Function *function, const ast::DataType
     }
 
     if (llvm::verifyFunction(*function, &llvm::errs())) {
-        print(false);
         return;
     }
 
     //    function->viewCFG();
-    print(false);
 
     // FIXME create command line option to switch optimizations on/off
 #if 0
@@ -107,7 +108,7 @@ void IRGenerator::finalizeFunction(llvm::Function *function, const ast::DataType
 void IRGenerator::visitCallNode(CallNode *node) {
     llvm::Function *calleeFunc = module.getFunction(node->getName());
     if (calleeFunc == nullptr) {
-        return logError("Undefined function " + node->getName());
+        return logError("Undefined function '" + node->getName() + "'");
     }
 
     if (calleeFunc->arg_size() != node->getArguments().size()) {
