@@ -1,8 +1,11 @@
 clean:
 	rm build -rf
 
+cmake:
+	mkdir -p build; cd build; cmake -G"Ninja" -DRUN_CLANG_TIDY=OFF -DCMAKE_BUILD_TYPE=Debug ..;
+
 build:
-	mkdir -p build; cd build; cmake -G"Ninja" -DRUN_CLANG_TIDY=OFF ..; ninja
+	cd build; ninja
 
 test: build
 	cd build; ninja test
