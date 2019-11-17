@@ -1,8 +1,8 @@
 set(EXECUTABLE_NAME ${PROJECT_NAME})
 
 # run parser generator, when grammar.txt has changed
-add_custom_command(OUTPUT ${CMAKE_CURRENT_SOURCE_DIR}/Grammar.h
-        ${CMAKE_CURRENT_SOURCE_DIR}/Grammar.cpp
+add_custom_command(
+        OUTPUT ${CMAKE_CURRENT_SOURCE_DIR}/Grammar.h ${CMAKE_CURRENT_SOURCE_DIR}/Grammar.cpp
         COMMAND python ${PROJECT_SOURCE_DIR}/scripts/parser_generator.py
         WORKING_DIRECTORY ${CMAKE_CURRENT_SOURCE_DIR}
         MAIN_DEPENDENCY ${CMAKE_CURRENT_SOURCE_DIR}/grammar.txt)
@@ -15,7 +15,6 @@ set(SOURCES_PARSER
         ${CMAKE_CURRENT_SOURCE_DIR}/Program.cpp)
 
 set(SOURCES_AST_GENERATOR
-        ${CMAKE_CURRENT_SOURCE_DIR}/Grammar.h # this adds the dependency to our custom target
         ${CMAKE_CURRENT_SOURCE_DIR}/ast/AstGenerator.cpp
         ${CMAKE_CURRENT_SOURCE_DIR}/ast/visitors/AstInterpreter.cpp
         ${CMAKE_CURRENT_SOURCE_DIR}/ast/visitors/AstPrinter.cpp
@@ -36,7 +35,6 @@ set(SOURCES_AST_GENERATOR
         ${CMAKE_CURRENT_SOURCE_DIR}/ast/nodes/VariableNode.cpp)
 
 set(SOURCES_IR_GENERATOR
-        ${CMAKE_CURRENT_SOURCE_DIR}/Grammar.cpp
         ${CMAKE_CURRENT_SOURCE_DIR}/ir/Functions.cpp
         ${CMAKE_CURRENT_SOURCE_DIR}/ir/IrGenerator.cpp
         ${CMAKE_CURRENT_SOURCE_DIR}/ir/Operations.cpp
@@ -45,15 +43,18 @@ set(SOURCES_IR_GENERATOR
         ${CMAKE_CURRENT_SOURCE_DIR}/ir/Variables.cpp)
 
 set(SOURCES
-        ${CMAKE_CURRENT_SOURCE_DIR}/Grammar.cpp
         ${CMAKE_CURRENT_SOURCE_DIR}/Linker.cpp
         ${CMAKE_CURRENT_SOURCE_DIR}/ObjectFileWriter.cpp)
 
 add_library(NeonParser ${SOURCES_PARSER})
 add_library(NeonAstGenerator ${SOURCES_AST_GENERATOR})
-add_library(NeonOther ${SOURCES})
 add_library(NeonIrGenerator ${SOURCES_IR_GENERATOR})
+add_library(NeonOther ${SOURCES})
 add_executable(${EXECUTABLE_NAME} ${CMAKE_CURRENT_SOURCE_DIR}/main.cpp)
+
+add_dependencies(NeonAstGenerator NeonParser)
+add_dependencies(NeonIrGenerator NeonParser)
+add_dependencies(NeonOther NeonParser)
 
 target_link_libraries(NeonIrGenerator ${LLVM_LIBS})
 target_link_libraries(${EXECUTABLE_NAME}

@@ -41,6 +41,8 @@ std::string to_string(GrammarSymbol symbol) {
         return "AND";
     case ARRAY_ACCESS:
         return "ARRAY_ACCESS";
+    case ARRAY_DEFINITION:
+        return "ARRAY_DEFINITION";
     case ASSIGNMENT:
         return "ASSIGNMENT";
     case CALL:
@@ -53,6 +55,8 @@ std::string to_string(GrammarSymbol symbol) {
         return "CONJUNCTION";
     case DATA_TYPE:
         return "DATA_TYPE";
+    case DEFINITION:
+        return "DEFINITION";
     case DISJUNCTION:
         return "DISJUNCTION";
     case ELSE:

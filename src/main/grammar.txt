@@ -11,7 +11,7 @@ statement
     function
     assignment ;
     return expression ;
-    variable_definition ;
+    definition ;
     if_statement
     for_statement
 
@@ -64,15 +64,18 @@ function_body
     statements }
 
 function_args
+    definition
+    function_args , definition
+
+definition
+    array_definition
     variable_definition
-    function_args , variable_definition
+
+array_definition
+    data_type [ integer ] variable_name
 
 variable_definition
     data_type variable_name
-
-#data_type
-#    simple_data_type
-#    simple_data_type [ integer ]
 
 call
     variable_name ( call_header
@@ -86,7 +89,7 @@ call_args
     call_args , expression
 
 assignment
-    variable_definition = expression
+    definition = expression
     variable_name = expression
 
 expression
