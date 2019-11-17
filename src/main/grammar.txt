@@ -91,6 +91,7 @@ call_args
 assignment
     definition = expression
     variable_name = expression
+    variable_name [ integer ] = expression
 
 expression
     disjunction
