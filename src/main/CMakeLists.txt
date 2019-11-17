@@ -1,5 +1,4 @@
 set(EXECUTABLE_NAME ${PROJECT_NAME})
-set(LIB_NAME ${EXECUTABLE_NAME}_lib)
 
 # run parser generator, when grammar.txt has changed
 add_custom_command(OUTPUT ${CMAKE_CURRENT_SOURCE_DIR}/Grammar.h
@@ -8,19 +7,21 @@ add_custom_command(OUTPUT ${CMAKE_CURRENT_SOURCE_DIR}/Grammar.h
         WORKING_DIRECTORY ${CMAKE_CURRENT_SOURCE_DIR}
         MAIN_DEPENDENCY ${CMAKE_CURRENT_SOURCE_DIR}/grammar.txt)
 
-set(SOURCES
+set(SOURCES_PARSER
         ${CMAKE_CURRENT_SOURCE_DIR}/Grammar.cpp
         ${CMAKE_CURRENT_SOURCE_DIR}/Lexer.cpp
-        ${CMAKE_CURRENT_SOURCE_DIR}/Linker.cpp
-        ${CMAKE_CURRENT_SOURCE_DIR}/ObjectFileWriter.cpp
         ${CMAKE_CURRENT_SOURCE_DIR}/Parser.cpp
-        ${CMAKE_CURRENT_SOURCE_DIR}/Program.cpp
         ${CMAKE_CURRENT_SOURCE_DIR}/Token.cpp
+        ${CMAKE_CURRENT_SOURCE_DIR}/Program.cpp)
+
+set(SOURCES_AST_GENERATOR
+        ${CMAKE_CURRENT_SOURCE_DIR}/Grammar.h # this adds the dependency to our custom target
         ${CMAKE_CURRENT_SOURCE_DIR}/ast/AstGenerator.cpp
         ${CMAKE_CURRENT_SOURCE_DIR}/ast/visitors/AstInterpreter.cpp
         ${CMAKE_CURRENT_SOURCE_DIR}/ast/visitors/AstPrinter.cpp
         ${CMAKE_CURRENT_SOURCE_DIR}/ast/visitors/AstTestCasePrinter.cpp
         ${CMAKE_CURRENT_SOURCE_DIR}/ast/visitors/AstTypeAnalyser.cpp
+        ${CMAKE_CURRENT_SOURCE_DIR}/ast/nodes/ArrayAccessNode.cpp
         ${CMAKE_CURRENT_SOURCE_DIR}/ast/nodes/AssignmentNode.cpp
         ${CMAKE_CURRENT_SOURCE_DIR}/ast/nodes/AstNode.cpp
         ${CMAKE_CURRENT_SOURCE_DIR}/ast/nodes/BinaryOperationNode.cpp
@@ -32,24 +33,39 @@ set(SOURCES
         ${CMAKE_CURRENT_SOURCE_DIR}/ast/nodes/StatementNode.cpp
         ${CMAKE_CURRENT_SOURCE_DIR}/ast/nodes/UnaryOperationNode.cpp
         ${CMAKE_CURRENT_SOURCE_DIR}/ast/nodes/VariableDefinitionNode.cpp
-        ${CMAKE_CURRENT_SOURCE_DIR}/ast/nodes/VariableNode.cpp
+        ${CMAKE_CURRENT_SOURCE_DIR}/ast/nodes/VariableNode.cpp)
+
+set(SOURCES_IR_GENERATOR
+        ${CMAKE_CURRENT_SOURCE_DIR}/Grammar.cpp
         ${CMAKE_CURRENT_SOURCE_DIR}/ir/Functions.cpp
-        ${CMAKE_CURRENT_SOURCE_DIR}/ir/IRGenerator.cpp
+        ${CMAKE_CURRENT_SOURCE_DIR}/ir/IrGenerator.cpp
         ${CMAKE_CURRENT_SOURCE_DIR}/ir/Operations.cpp
         ${CMAKE_CURRENT_SOURCE_DIR}/ir/Statements.cpp
         ${CMAKE_CURRENT_SOURCE_DIR}/ir/Types.cpp
         ${CMAKE_CURRENT_SOURCE_DIR}/ir/Variables.cpp)
 
-add_library(${LIB_NAME} ${SOURCES})
-target_link_libraries(${LIB_NAME} ${LLVM_LIBS})
+set(SOURCES
+        ${CMAKE_CURRENT_SOURCE_DIR}/Grammar.cpp
+        ${CMAKE_CURRENT_SOURCE_DIR}/Linker.cpp
+        ${CMAKE_CURRENT_SOURCE_DIR}/ObjectFileWriter.cpp)
 
+add_library(NeonParser ${SOURCES_PARSER})
+add_library(NeonAstGenerator ${SOURCES_AST_GENERATOR})
+add_library(NeonOther ${SOURCES})
+add_library(NeonIrGenerator ${SOURCES_IR_GENERATOR})
 add_executable(${EXECUTABLE_NAME} ${CMAKE_CURRENT_SOURCE_DIR}/main.cpp)
-target_link_libraries(${EXECUTABLE_NAME} ${LIB_NAME})
+
+target_link_libraries(NeonIrGenerator ${LLVM_LIBS})
+target_link_libraries(${EXECUTABLE_NAME}
+        NeonParser
+        NeonAstGenerator
+        NeonIrGenerator
+        NeonOther)
 
 if (${CMAKE_SYSTEM_NAME} STREQUAL "Windows")
-    target_compile_options(${LIB_NAME} PRIVATE /std:c++17)
+    add_compile_options(${LIB_NAME} PRIVATE /std:c++17)
 else ()
-    target_compile_options(${LIB_NAME}
+    add_compile_options(${LIB_NAME}
             PRIVATE -Wall
             -Wextra
             -pedantic
@@ -57,9 +73,10 @@ else ()
     add_definitions(-std=c++17)
 endif ()
 
-set_target_properties(${LIB_NAME} PROPERTIES
-        CXX_STANDARD 17
-        CXX_STANDARD_REQUIRED ON)
+# TODO investigate how to do this for all lib targets or whether this is necessary at all
+#set_target_properties(NeonAstGenerator PROPERTIES
+#        CXX_STANDARD 17
+#        CXX_STANDARD_REQUIRED ON)
 
 if ("${CMAKE_BUILD_TYPE}" STREQUAL "Debug")
     add_compile_definitions(DEBUG)

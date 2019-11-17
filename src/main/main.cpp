@@ -7,7 +7,7 @@
 #include "ast/visitors/AstPrinter.h"
 #include "ast/visitors/AstTestCasePrinter.h"
 #include "ast/visitors/AstTypeAnalyser.h"
-#include "ir/IRGenerator.h"
+#include "ir/IrGenerator.h"
 
 int main() {
     bool verbose = true;
@@ -30,7 +30,7 @@ int main() {
 
     analyseTypes(astRoot);
 
-    auto generator = new IRGenerator(program, verbose);
+    auto generator = new IrGenerator(program, verbose);
     generator->run(astRoot);
 
     writeModuleToObjectFile(program, generator);

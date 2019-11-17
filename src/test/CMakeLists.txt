@@ -14,5 +14,5 @@ add_executable(Tests ${TEST_SOURCES})
 target_include_directories(Tests
                            PRIVATE ${CATCH_INCLUDE_DIR}
                                    ${PROJECT_SOURCE_DIR}/src/main)
-target_link_libraries(Tests ${PROJECT_NAME}_lib)
+target_link_libraries(Tests NeonParser NeonAstGenerator)
 catch_discover_tests(Tests)

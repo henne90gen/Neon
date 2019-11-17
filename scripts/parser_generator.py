@@ -1,6 +1,16 @@
 import copy
-from typing import List
+import logging
+import sys
 from dataclasses import dataclass
+from typing import List
+
+LOG = logging.getLogger()
+LOG.setLevel(logging.INFO)
+handler = logging.StreamHandler(sys.stdout)
+handler.setLevel(logging.DEBUG)
+formatter = logging.Formatter('%(asctime)s [%(levelname)s] | %(message)s')
+handler.setFormatter(formatter)
+LOG.addHandler(handler)
 
 END_OF_FILE = "endoffile"
 
@@ -9,6 +19,8 @@ SYMBOL_TO_ENUM_MAPPING = {
     ')': 'RIGHT_PARAN',
     '{': 'LEFT_CURLY_BRACE',
     '}': 'RIGHT_CURLY_BRACE',
+    '[': 'LEFT_BRACKET',
+    ']': 'RIGHT_BRACKET',
     '*': 'STAR',
     '+': 'PLUS',
     '-': 'MINUS',
@@ -32,7 +44,7 @@ def parse_rules(lines: List[str]) -> dict:
         if not line.strip() or line.startswith("#"):
             continue
 
-        if not line.startswith(" "):
+        if not line.startswith(" ") and not line.startswith("\t"):
             current_rule = line.strip()
             rules[current_rule] = []
             continue
@@ -40,7 +52,7 @@ def parse_rules(lines: List[str]) -> dict:
         if current_rule:
             rules[current_rule].append(line.strip().split())
         else:
-            print("Could not associate this line with a rule.")
+            LOG.error("Could not associate this line with a rule.")
 
     return rules
 
@@ -242,7 +254,7 @@ def get_grammar_symbol(symbol):
         if symbol in SYMBOL_TO_ENUM_MAPPING:
             return SYMBOL_TO_ENUM_MAPPING[symbol]
         else:
-            print(f"Could not find '{symbol}' in the symbol mapping table.")
+            LOG.error(f"Could not find '{symbol}' in the symbol mapping table.")
             exit(1)
 
     return symbol.upper()
@@ -284,7 +296,9 @@ def convert_to_state_transitions(elem: List[str]) -> str:
 
 
 def create_grammar_symbols(header: List[str]) -> str:
-    return ",\n".join(map(lambda e: f"  {get_grammar_symbol(e[1])} = {e[0]}", enumerate(header)))
+    # do NOT sort this! the order matters
+    grammar_symbols = enumerate(map(get_grammar_symbol, header))
+    return ",\n".join(map(lambda e: f"  {e[1]} = {e[0]}", grammar_symbols))
 
 
 def create_grammar_symbol_switch_cases(header: List[str]) -> str:
@@ -297,29 +311,25 @@ def create_switch_case_for_grammar_symbol(grammar_symbol: str):
     return f"    case {grammar_symbol}:\n        return \"{grammar_symbol}\";"
 
 
-def main(grammar_file: str = "grammar.txt", header_file: str = "Grammar.h", cpp_file: str = "Grammar.cpp",
-         verbose: bool = False):
+def main(grammar_file: str = "grammar.txt", header_file: str = "Grammar.h", cpp_file: str = "Grammar.cpp"):
     with open(grammar_file) as f:
         lines = f.readlines()
 
     rules = parse_rules(lines)
-    if verbose:
-        print(rules)
-        print()
+    for rule in sorted(rules):
+        LOG.info("Found rule: " + rule + " -> " + str(rules[rule]))
 
     states = construct_dfa_states(rules)
 
-    if verbose:
-        for s in states:
-            print(s)
-        print()
+    for s in states:
+        LOG.debug(str(s))
+    LOG.debug("")
 
     header, table = TableConstructor(rules, states).construct_table()
 
-    if verbose:
-        for row in [header, *table]:
-            print(row)
-        print()
+    for row in [header, *table]:
+        LOG.debug(str(row))
+    LOG.debug("")
 
     table_content = ",\n".join(map(create_table_row, table))
     grammar_symbols = create_grammar_symbols(header)
@@ -364,8 +374,7 @@ const std::vector<StateTransition> stateTransitionTable[{row_count}][{col_count}
     header_template = header_template.replace("{col_count}", str(len(header)))
     header_template = header_template.replace("{table_content}", table_content)
 
-    if verbose:
-        print(header_template)
+    LOG.debug(header_template)
     with open(header_file, "w") as f:
         f.write(header_template)
 
@@ -427,8 +436,7 @@ std::string to_string(const StateTransition &action) {
     cpp_template = cpp_template.replace(
         "{grammar_symbol_switch_cases}", grammar_symbol_switch_cases)
 
-    if verbose:
-        print(cpp_template)
+    LOG.debug(cpp_template)
     with open(cpp_file, "w") as f:
         f.write(cpp_template)
 

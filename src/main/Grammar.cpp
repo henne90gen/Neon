@@ -33,8 +33,14 @@ std::string to_string(GrammarSymbol symbol) {
         return "GREATER_THAN";
     case GREATER_EQUALS:
         return "GREATER_EQUALS";
+    case LEFT_BRACKET:
+        return "LEFT_BRACKET";
+    case RIGHT_BRACKET:
+        return "RIGHT_BRACKET";
     case AND:
         return "AND";
+    case ARRAY_ACCESS:
+        return "ARRAY_ACCESS";
     case ASSIGNMENT:
         return "ASSIGNMENT";
     case CALL:

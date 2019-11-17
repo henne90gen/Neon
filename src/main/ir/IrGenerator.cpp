@@ -1,4 +1,4 @@
-#include "IRGenerator.h"
+#include "IrGenerator.h"
 
 #include <llvm/IR/BasicBlock.h>
 #include <llvm/IR/Constants.h>
@@ -15,14 +15,14 @@
 
 #include "../Utils.h"
 
-IRGenerator::IRGenerator(const Program &program, const bool verbose)
+IrGenerator::IrGenerator(const Program &program, const bool verbose)
     : program(program), verbose(verbose), builder(context), module(program.fileName, context) {
     pushScope();
 }
 
-void IRGenerator::logError(const std::string &msg) { errors.push_back(msg); }
+void IrGenerator::logError(const std::string &msg) { errors.push_back(msg); }
 
-llvm::Type *IRGenerator::getType(ast::DataType type) {
+llvm::Type *IrGenerator::getType(ast::DataType type) {
     switch (type) {
     case ast::DataType::VOID:
         return llvm::Type::getVoidTy(context);
@@ -37,7 +37,7 @@ llvm::Type *IRGenerator::getType(ast::DataType type) {
     }
 }
 
-llvm::AllocaInst *IRGenerator::createEntryBlockAlloca(llvm::Type *type, const std::string &name) {
+llvm::AllocaInst *IrGenerator::createEntryBlockAlloca(llvm::Type *type, const std::string &name) {
     llvm::BasicBlock *block = builder.GetInsertBlock();
     if (block == nullptr) {
         return nullptr;
@@ -47,7 +47,7 @@ llvm::AllocaInst *IRGenerator::createEntryBlockAlloca(llvm::Type *type, const st
     return tmpB.CreateAlloca(type, nullptr, name);
 }
 
-llvm::Constant *IRGenerator::getInitializer(const ast::DataType &dt) {
+llvm::Constant *IrGenerator::getInitializer(const ast::DataType &dt) {
     llvm::Type *ty = getType(dt);
     switch (dt) {
     case ast::DataType::FLOAT:
@@ -61,7 +61,7 @@ llvm::Constant *IRGenerator::getInitializer(const ast::DataType &dt) {
     }
 }
 
-void IRGenerator::setupGlobalInitialization(llvm::Function *func) {
+void IrGenerator::setupGlobalInitialization(llvm::Function *func) {
     std::vector<llvm::Type *> types = {llvm::Type::getInt32Ty(context), func->getType(),
                                        llvm::PointerType::getInt8PtrTy(context)};
     auto structType = llvm::StructType::get(context, types);
@@ -78,7 +78,7 @@ void IRGenerator::setupGlobalInitialization(llvm::Function *func) {
     ctorsVar->setInitializer(initializer);
 }
 
-void IRGenerator::visitSequenceNode(SequenceNode *node) {
+void IrGenerator::visitSequenceNode(SequenceNode *node) {
     LOG("Enter Sequence")
 
     llvm::Function *initFunc = nullptr;
@@ -111,7 +111,7 @@ void IRGenerator::visitSequenceNode(SequenceNode *node) {
     LOG("Exit Sequence")
 }
 
-void IRGenerator::print(const bool writeToFile) {
+void IrGenerator::print(const bool writeToFile) {
     std::string fileName = program.fileName + ".llvm";
     std::error_code EC;
     llvm::raw_fd_ostream dest(fileName, EC, llvm::sys::fs::OF_None);
@@ -121,7 +121,7 @@ void IRGenerator::print(const bool writeToFile) {
     }
 }
 
-void IRGenerator::generateDummyMain() {
+void IrGenerator::generateDummyMain() {
     if (module.getFunction("main") != nullptr) {
         return;
     }
@@ -138,7 +138,7 @@ void IRGenerator::generateDummyMain() {
     visitFunctionNode(function);
 }
 
-void IRGenerator::run(AstNode *root) {
+void IrGenerator::run(AstNode *root) {
     if (root == nullptr) {
         return;
     }
@@ -156,7 +156,7 @@ void IRGenerator::run(AstNode *root) {
     }
 }
 
-llvm::Value *IRGenerator::findVariable(const std::string &name) {
+llvm::Value *IrGenerator::findVariable(const std::string &name) {
     metrics["variableLookups"]++;
 
     int currentScope = definedVariables.size() - 1;
@@ -177,27 +177,27 @@ llvm::Value *IRGenerator::findVariable(const std::string &name) {
     return nullptr;
 }
 
-std::unordered_map<std::string, llvm::Value *> &IRGenerator::currentScope() {
+std::unordered_map<std::string, llvm::Value *> &IrGenerator::currentScope() {
     return definedVariables[definedVariables.size() - 1];
 }
 
-void IRGenerator::pushScope() { definedVariables.emplace_back(); }
+void IrGenerator::pushScope() { definedVariables.emplace_back(); }
 
-void IRGenerator::popScope() { definedVariables.pop_back(); }
+void IrGenerator::popScope() { definedVariables.pop_back(); }
 
-void IRGenerator::withScope(const std::function<void(void)> &func) {
+void IrGenerator::withScope(const std::function<void(void)> &func) {
     pushScope();
     func();
     popScope();
 }
 
-void IRGenerator::printMetrics() {
+void IrGenerator::printMetrics() {
     for (auto metric : metrics) {
         std::cout << metric.first << ": " << metric.second << std::endl;
     }
 }
 
-void IRGenerator::printErrors() {
+void IrGenerator::printErrors() {
     std::cerr << std::endl;
     std::cerr << "The following errors occured:" << std::endl;
     for (auto msg : errors) {

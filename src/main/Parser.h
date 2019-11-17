@@ -4,17 +4,7 @@
 
 #include "Grammar.h"
 #include "Lexer.h"
-
-class ParseTreeNode {
-  public:
-    explicit ParseTreeNode(GrammarSymbol symbol) : symbol(symbol) {}
-
-    ParseTreeNode(GrammarSymbol symbol, Token token) : symbol(symbol), token(std::move(token)) {}
-
-    GrammarSymbol symbol;
-    Token token;
-    std::vector<ParseTreeNode *> children = {};
-};
+#include "ParseTreeNode.h"
 
 class Parser {
   public:

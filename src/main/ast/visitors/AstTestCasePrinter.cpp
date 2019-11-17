@@ -111,6 +111,8 @@ void AstTestCasePrinter::visitForStatementNode(ForStatementNode *node) {
     indentation--;
 }
 
+void AstTestCasePrinter::visitArrayAccessNode(ArrayAccessNode *node) {}
+
 void printAstTestCase(const Program &program, AstNode *root) {
     if (root == nullptr) {
         std::cerr << "Could not print AST test case (nullptr)." << std::endl;

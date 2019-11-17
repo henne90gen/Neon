@@ -1,6 +1,6 @@
-#include "IRGenerator.h"
+#include "IrGenerator.h"
 
-void IRGenerator::visitVariableNode(VariableNode *node) {
+void IrGenerator::visitVariableNode(VariableNode *node) {
     LOG("Enter Variable")
 
     auto value = findVariable(node->getName());
@@ -13,7 +13,7 @@ void IRGenerator::visitVariableNode(VariableNode *node) {
     LOG("Exit Variable")
 }
 
-void IRGenerator::visitVariableDefinitionNode(VariableDefinitionNode *node) {
+void IrGenerator::visitVariableDefinitionNode(VariableDefinitionNode *node) {
     LOG("Enter VariableDefinition")
 
     llvm::Type *type = getType(node->getType());

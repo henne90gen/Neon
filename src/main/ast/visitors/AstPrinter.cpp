@@ -172,6 +172,8 @@ void AstPrinter::visitForStatementNode(ForStatementNode *node) {
     indentation--;
 }
 
+void AstPrinter::visitArrayAccessNode(ArrayAccessNode *node) {}
+
 void printAst(AstNode *root) {
     if (root == nullptr) {
         std::cerr << "Could not print AST (nullptr)." << std::endl;

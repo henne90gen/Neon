@@ -1,6 +1,6 @@
-#include "IRGenerator.h"
+#include "IrGenerator.h"
 
-void IRGenerator::visitStatementNode(StatementNode *node) {
+void IrGenerator::visitStatementNode(StatementNode *node) {
     LOG("Enter Statement")
 
     if (node->getChild() == nullptr) {
@@ -46,7 +46,7 @@ bool hasReturnStatement(AstNode *node) {
     }
 }
 
-void IRGenerator::visitIfStatementNode(IfStatementNode *node) {
+void IrGenerator::visitIfStatementNode(IfStatementNode *node) {
     LOG("Enter IfStatement")
 
     node->getCondition()->accept(this);
@@ -85,7 +85,7 @@ void IRGenerator::visitIfStatementNode(IfStatementNode *node) {
     LOG("Exit IfStatement")
 }
 
-void IRGenerator::visitForStatementNode(ForStatementNode *node) {
+void IrGenerator::visitForStatementNode(ForStatementNode *node) {
     LOG("Enter ForStatement");
     pushScope();
     node->getInit()->accept(this);

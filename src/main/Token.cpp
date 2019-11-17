@@ -48,12 +48,16 @@ std::string to_string(Token::TokenType type) {
         return "FUN";
     case Token::VARIABLE_NAME:
         return "VARIABLE_NAME";
-    case Token::DATA_TYPE:
-        return "DATA_TYPE";
+    case Token::SIMPLE_DATA_TYPE:
+        return "SIMPLE_DATA_TYPE";
     case Token::LEFT_CURLY_BRACE:
         return "LEFT_CURLY_BRACE";
     case Token::RIGHT_CURLY_BRACE:
         return "RIGHT_CURLY_BRACE";
+    case Token::LEFT_BRACKET:
+        return "LEFT_BRACKET";
+    case Token::RIGHT_BRACKET:
+        return "RIGHT_BRACKET";
     case Token::COMMA:
         return "COMMA";
     case Token::SEMICOLON:

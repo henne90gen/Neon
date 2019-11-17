@@ -109,12 +109,16 @@ GrammarSymbol convertToGrammarSymbol(const Token &token) {
         return GrammarSymbol::FUN;
     case Token::VARIABLE_NAME:
         return GrammarSymbol::VARIABLE_NAME;
-    case Token::DATA_TYPE:
+    case Token::SIMPLE_DATA_TYPE:
         return GrammarSymbol::DATA_TYPE;
     case Token::LEFT_CURLY_BRACE:
         return GrammarSymbol::LEFT_CURLY_BRACE;
     case Token::RIGHT_CURLY_BRACE:
         return GrammarSymbol::RIGHT_CURLY_BRACE;
+    case Token::LEFT_BRACKET:
+        return GrammarSymbol::LEFT_BRACKET;
+    case Token::RIGHT_BRACKET:
+        return GrammarSymbol::RIGHT_BRACKET;
     case Token::RETURN:
         return GrammarSymbol::RETURN;
     case Token::EXTERN:
@@ -171,14 +175,18 @@ void Parser::executeShift(Token &token, std::vector<int> &states, StateTransitio
     token = lexer.getToken();
 
     states.push_back(action.nextStateIndex);
-    auto newNode = new ParseTreeNode(convertToGrammarSymbol(token), token);
+    auto newNode = new ParseTreeNode();
+    newNode->symbol = convertToGrammarSymbol(token);
+    newNode->token = token;
     nodes.push_back(newNode);
 }
 
 void Parser::executeGoto(std::vector<int> &states, StateTransition &action) { states.push_back(action.nextStateIndex); }
 
 void Parser::executeReduce(std::vector<int> &states, StateTransition &action, std::vector<ParseTreeNode *> &nodes) {
-    auto newNode = new ParseTreeNode(action.symbol);
+    auto newNode = new ParseTreeNode();
+    newNode->symbol = action.symbol;
+
     auto lastNode = nodes.back();
     nodes.pop_back();
     for (unsigned long i = 0; i < action.rule.size(); i++) {
@@ -219,7 +227,10 @@ ParseTreeNode *Parser::createParseTree() {
     std::vector<int> states = {};
     states.push_back(0);
     auto token = lexer.getToken();
-    nodes.push_back(new ParseTreeNode(convertToGrammarSymbol(token), token));
+    auto node = new ParseTreeNode();
+    node->symbol = convertToGrammarSymbol(token);
+    node->token = token;
+    nodes.push_back(node);
 
     while (true) {
         int rowIndex = states.back();
@@ -246,7 +257,8 @@ ParseTreeNode *Parser::createParseTree() {
             executeReduce(states, action, nodes);
         } break;
         case ACCEPT: {
-            auto root = new ParseTreeNode(GrammarSymbol::PROGRAM);
+            auto root = new ParseTreeNode();
+            root->symbol = GrammarSymbol::PROGRAM;
             for (auto node : nodes) {
                 root->children.push_back(node);
             }

@@ -16,10 +16,11 @@
         std::cout << msg << std::endl;                                                                                 \
     }
 
-class IRGenerator : public AstVisitor {
+class IrGenerator : public AstVisitor {
   public:
-    explicit IRGenerator(const Program &program, bool verbose);
+    explicit IrGenerator(const Program &program, bool verbose);
 
+    void visitArrayAccessNode(ArrayAccessNode *node) override;
     void visitAssignmentNode(AssignmentNode *node) override;
     void visitBinaryOperationNode(BinaryOperationNode *node) override;
     void visitBoolNode(BoolNode *node) override;

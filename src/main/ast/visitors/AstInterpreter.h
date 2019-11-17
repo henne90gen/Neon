@@ -19,6 +19,7 @@ class AstInterpreter : public AstVisitor {
   public:
     explicit AstInterpreter(const bool verbose) : verbose(verbose) {}
 
+    void visitArrayAccessNode(ArrayAccessNode *node) override;
     void visitAssignmentNode(AssignmentNode *node) override;
     void visitBinaryOperationNode(BinaryOperationNode *node) override;
     void visitBoolNode(BoolNode *node) override;

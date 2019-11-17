@@ -70,6 +70,10 @@ function_args
 variable_definition
     data_type variable_name
 
+#data_type
+#    simple_data_type
+#    simple_data_type [ integer ]
+
 call
     variable_name ( call_header
 
@@ -124,6 +128,10 @@ factor
     false
     integer
     float
+    array_access
     call
     variable_name
     ( expression )
+
+array_access
+    variable_name [ integer ]

@@ -139,6 +139,8 @@ void AstTypeAnalyser::visitForStatementNode(ForStatementNode *node) {
     }
 }
 
+void AstTypeAnalyser::visitArrayAccessNode(ArrayAccessNode *node) {}
+
 void analyseTypes(AstNode *root) {
     if (root == nullptr) {
         return;

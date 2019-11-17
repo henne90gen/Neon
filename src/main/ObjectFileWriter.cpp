@@ -10,7 +10,7 @@
 #include <llvm/Support/TargetSelect.h>
 #include <llvm/Target/TargetMachine.h>
 
-void writeModuleToObjectFile(const Program &program, IRGenerator *irGenerator) {
+void writeModuleToObjectFile(const Program &program, IrGenerator *irGenerator) {
     llvm::InitializeNativeTarget();
     llvm::InitializeNativeTargetAsmParser();
     llvm::InitializeNativeTargetAsmPrinter();

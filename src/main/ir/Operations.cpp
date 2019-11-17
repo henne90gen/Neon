@@ -1,6 +1,6 @@
-#include "IRGenerator.h"
+#include "IrGenerator.h"
 
-void IRGenerator::visitBinaryOperationNode(BinaryOperationNode *node) {
+void IrGenerator::visitBinaryOperationNode(BinaryOperationNode *node) {
     LOG("Enter BinaryOperation")
 
     node->getLeft()->accept(this);
@@ -51,7 +51,7 @@ void IRGenerator::visitBinaryOperationNode(BinaryOperationNode *node) {
     LOG("Exit BinaryOperation")
 }
 
-void IRGenerator::visitUnaryOperationNode(UnaryOperationNode *node) {
+void IrGenerator::visitUnaryOperationNode(UnaryOperationNode *node) {
     LOG("Enter UnaryOperation")
 
     node->getChild()->accept(this);

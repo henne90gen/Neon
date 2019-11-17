@@ -136,7 +136,7 @@ AstNode *createLiteral(ParseTreeNode *node) {
 AstNode *createVariable(ParseTreeNode *node) { return new VariableNode(node->token.content); }
 
 ast::DataType getDataType(ParseTreeNode *node) {
-    if (node->token.type != Token::DATA_TYPE) {
+    if (node->token.type != Token::SIMPLE_DATA_TYPE) {
         return ast::DataType::VOID;
     }
 

@@ -1,9 +1,9 @@
-#include "IRGenerator.h"
+#include "IrGenerator.h"
 
 #include <llvm/IR/Verifier.h>
 #include <llvm/Passes/PassBuilder.h>
 
-void IRGenerator::visitFunctionNode(FunctionNode *node) {
+void IrGenerator::visitFunctionNode(FunctionNode *node) {
     LOG("Enter Function")
 
     llvm::Function *previousFunction = currentFunction;
@@ -41,7 +41,7 @@ void IRGenerator::visitFunctionNode(FunctionNode *node) {
     LOG("Exit Function")
 }
 
-llvm::Function *IRGenerator::getOrCreateFunctionDefinition(const std::string &name, const ast::DataType returnType,
+llvm::Function *IrGenerator::getOrCreateFunctionDefinition(const std::string &name, const ast::DataType returnType,
                                                            const std::vector<VariableDefinitionNode *> &arguments) {
     llvm::Function *function = module.getFunction(name);
     if (function == nullptr) {
@@ -70,7 +70,7 @@ llvm::Function *IRGenerator::getOrCreateFunctionDefinition(const std::string &na
     return function;
 }
 
-void IRGenerator::finalizeFunction(llvm::Function *function, const ast::DataType returnType,
+void IrGenerator::finalizeFunction(llvm::Function *function, const ast::DataType returnType,
                                    const bool isExternalFunction) {
     if (!isExternalFunction && returnType == ast::DataType::VOID) {
         builder.SetInsertPoint(&function->getBasicBlockList().back());
@@ -105,7 +105,7 @@ void IRGenerator::finalizeFunction(llvm::Function *function, const ast::DataType
 #endif
 }
 
-void IRGenerator::visitCallNode(CallNode *node) {
+void IrGenerator::visitCallNode(CallNode *node) {
     llvm::Function *calleeFunc = module.getFunction(node->getName());
     if (calleeFunc == nullptr) {
         return logError("Undefined function '" + node->getName() + "'");
@@ -133,3 +133,5 @@ void IRGenerator::visitCallNode(CallNode *node) {
     }
     nodesToValues[node] = call;
 }
+
+void IrGenerator::visitArrayAccessNode(ArrayAccessNode *node) {}

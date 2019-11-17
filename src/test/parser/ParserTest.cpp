@@ -5,7 +5,8 @@
 ParseTreeNode *createParseTree(const std::vector<std::pair<int, GrammarSymbol>> &tree, int &index,
                                int indentation = 0) {
     auto firstLine = tree[index];
-    auto node = new ParseTreeNode(firstLine.second);
+    auto node = new ParseTreeNode();
+    node->symbol = firstLine.second;
     while (index + 1 < tree.size() && tree[index + 1].first > indentation) {
         index++;
         auto child = createParseTree(tree, index, indentation + 1);
@@ -85,7 +86,7 @@ TEST_CASE("Parser can handle two lines") {
           {3, GrammarSymbol::SEMICOLON},
           {1, GrammarSymbol::ENDOFFILE},
     };
-    std::vector<std::string> program = {"int a = 1 + 1 ; int b = a + 2 ;  "};
+    std::vector<std::string> program = {"int a = 1 + 1 ; int b = a + 2 ;"};
     assertProgramCreatesParseTree(program, parseTree);
 }
 

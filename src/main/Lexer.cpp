@@ -162,13 +162,13 @@ std::optional<Token> Lexer::matchWordToken() {
         return TOKEN(Token::FUN, "fun");
     }
     if (STARTS_WITH(currentWord, "int")) {
-        return TOKEN(Token::DATA_TYPE, "int");
+        return TOKEN(Token::SIMPLE_DATA_TYPE, "int");
     }
     if (STARTS_WITH(currentWord, "float")) {
-        return TOKEN(Token::DATA_TYPE, "float");
+        return TOKEN(Token::SIMPLE_DATA_TYPE, "float");
     }
     if (STARTS_WITH(currentWord, "bool")) {
-        return TOKEN(Token::DATA_TYPE, "bool");
+        return TOKEN(Token::SIMPLE_DATA_TYPE, "bool");
     }
     if (STARTS_WITH(currentWord, "return")) {
         return TOKEN(Token::RETURN, "return");
@@ -218,6 +218,12 @@ std::optional<Token> Lexer::matchOneCharacterToken() {
     }
     if (firstChar == '}') {
         return TOKEN(Token::RIGHT_CURLY_BRACE, "}");
+    }
+    if (firstChar == '[') {
+        return TOKEN(Token::LEFT_BRACKET, "[");
+    }
+    if (firstChar == ']') {
+        return TOKEN(Token::RIGHT_BRACKET, "]");
     }
     if (firstChar == '=') {
         return TOKEN(Token::SINGLE_EQUALS, "=");
