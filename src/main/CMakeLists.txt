@@ -16,11 +16,6 @@ set(SOURCES_PARSER
 
 set(SOURCES_AST_GENERATOR
         ${CMAKE_CURRENT_SOURCE_DIR}/ast/AstGenerator.cpp
-        ${CMAKE_CURRENT_SOURCE_DIR}/ast/visitors/AstInterpreter.cpp
-        ${CMAKE_CURRENT_SOURCE_DIR}/ast/visitors/AstPrinter.cpp
-        ${CMAKE_CURRENT_SOURCE_DIR}/ast/visitors/AstTestCasePrinter.cpp
-        ${CMAKE_CURRENT_SOURCE_DIR}/ast/visitors/AstTypeAnalyser.cpp
-        ${CMAKE_CURRENT_SOURCE_DIR}/ast/nodes/ArrayAccessNode.cpp
         ${CMAKE_CURRENT_SOURCE_DIR}/ast/nodes/AssignmentNode.cpp
         ${CMAKE_CURRENT_SOURCE_DIR}/ast/nodes/AstNode.cpp
         ${CMAKE_CURRENT_SOURCE_DIR}/ast/nodes/BinaryOperationNode.cpp
@@ -32,7 +27,11 @@ set(SOURCES_AST_GENERATOR
         ${CMAKE_CURRENT_SOURCE_DIR}/ast/nodes/StatementNode.cpp
         ${CMAKE_CURRENT_SOURCE_DIR}/ast/nodes/UnaryOperationNode.cpp
         ${CMAKE_CURRENT_SOURCE_DIR}/ast/nodes/VariableDefinitionNode.cpp
-        ${CMAKE_CURRENT_SOURCE_DIR}/ast/nodes/VariableNode.cpp)
+        ${CMAKE_CURRENT_SOURCE_DIR}/ast/nodes/VariableNode.cpp
+        ${CMAKE_CURRENT_SOURCE_DIR}/ast/visitors/AstInterpreter.cpp
+        ${CMAKE_CURRENT_SOURCE_DIR}/ast/visitors/AstPrinter.cpp
+        ${CMAKE_CURRENT_SOURCE_DIR}/ast/visitors/AstTestCasePrinter.cpp
+        ${CMAKE_CURRENT_SOURCE_DIR}/ast/visitors/AstTypeAnalyser.cpp)
 
 set(SOURCES_IR_GENERATOR
         ${CMAKE_CURRENT_SOURCE_DIR}/ir/Functions.cpp

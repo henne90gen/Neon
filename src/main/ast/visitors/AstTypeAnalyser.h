@@ -9,7 +9,6 @@ class AstNode;
 class AstTypeAnalyser : public AstVisitor {
   public:
 
-    void visitArrayAccessNode(ArrayAccessNode *node) override;
     void visitAssignmentNode(AssignmentNode *node) override;
     void visitBinaryOperationNode(BinaryOperationNode *node) override;
     void visitBoolNode(BoolNode *node) override;

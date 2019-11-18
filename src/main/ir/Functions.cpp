@@ -133,5 +133,3 @@ void IrGenerator::visitCallNode(CallNode *node) {
     }
     nodesToValues[node] = call;
 }
-
-void IrGenerator::visitArrayAccessNode(ArrayAccessNode *node) {}

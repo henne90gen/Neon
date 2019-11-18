@@ -7,7 +7,6 @@ class AstPrinter : public AstVisitor {
   public:
     explicit AstPrinter() = default;
 
-    void visitArrayAccessNode(ArrayAccessNode *node) override;
     void visitAssignmentNode(AssignmentNode *node) override;
     void visitBinaryOperationNode(BinaryOperationNode *node) override;
     void visitBoolNode(BoolNode *node) override;

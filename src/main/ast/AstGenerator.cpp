@@ -19,9 +19,11 @@ bool isLiteral(ParseTreeNode *node) {
            node->symbol == GrammarSymbol::TRUE || node->symbol == GrammarSymbol::FALSE;
 }
 
-bool isVariable(ParseTreeNode *node) { return node->symbol == GrammarSymbol::VARIABLE_NAME; }
+bool isVariable(ParseTreeNode *node) {
+    return node->symbol == GrammarSymbol::VARIABLE_NAME || node->symbol == GrammarSymbol::ARRAY_ACCESS;
+}
 
-bool isVariableDefinition(ParseTreeNode *node) { return node->symbol == GrammarSymbol::VARIABLE_DEFINITION; }
+bool isVariableDefinition(ParseTreeNode *node) { return node->symbol == GrammarSymbol::DEFINITION; }
 
 bool isSequence(ParseTreeNode *node) { return node->symbol == GrammarSymbol::STATEMENTS; }
 
@@ -133,7 +135,16 @@ AstNode *createLiteral(ParseTreeNode *node) {
     }
 }
 
-AstNode *createVariable(ParseTreeNode *node) { return new VariableNode(node->token.content); }
+VariableNode *createVariable(ParseTreeNode *node) {
+    if (node->children.empty()) {
+        return new VariableNode(node->token.content);
+    }
+
+    auto result = new VariableNode(node->children[0]->token.content);
+    const int arrayIndex = std::stoi(node->children[2]->token.content);
+    result->setArrayIndex(arrayIndex);
+    return result;
+}
 
 ast::DataType getDataType(ParseTreeNode *node) {
     if (node->token.type != Token::SIMPLE_DATA_TYPE) {
@@ -153,10 +164,24 @@ ast::DataType getDataType(ParseTreeNode *node) {
 }
 
 VariableDefinitionNode *createVariableDefinition(ParseTreeNode *node) {
+    if (node->children.size() == 1) {
+        return createVariableDefinition(node->children[0]);
+    }
+
     auto dataTypeNode = node->children[0];
-    auto nameNode = node->children[1];
     ast::DataType dataType = getDataType(dataTypeNode);
-    return new VariableDefinitionNode(nameNode->token.content, dataType);
+    int variableNameIndex = 1;
+    unsigned int arraySize = 0;
+    if (node->symbol == GrammarSymbol::ARRAY_DEFINITION) {
+        variableNameIndex = 4;
+        if (node->children[2]->symbol != GrammarSymbol::INTEGER) {
+            std::cout << "Array size has to be an integer" << std::endl;
+            return nullptr;
+        }
+        arraySize = std::stoi(node->children[2]->token.content);
+    }
+    auto nameNode = node->children[variableNameIndex];
+    return new VariableDefinitionNode(nameNode->token.content, dataType, arraySize);
 }
 
 AstNode *createSequence(ParseTreeNode *node, SequenceNode *seqRoot) {
@@ -299,15 +324,22 @@ FunctionNode *createFunction(ParseTreeNode *node) {
 }
 
 AssignmentNode *createAssignment(ParseTreeNode *node) {
-    auto assignment = new AssignmentNode();
-    if (node->children.size() != 3) {
-        std::cout << "Assignment should always have 3 children" << std::endl;
-        return assignment;
+    VariableNode *left = nullptr;
+    AstNode *right = nullptr;
+    if (node->children.size() == 3) {
+        left = createVariable(node->children[0]);
+        right = createAstFromParseTree(node->children[2]);
+    } else if (node->children.size() == 6) {
+        left = new VariableNode(node->children[0]->token.content);
+        int arrayIndex = std::stoi(node->children[2]->token.content);
+        left->setArrayIndex(arrayIndex);
+        right = createAstFromParseTree(node->children[5]);
+    } else {
+        std::cout << "Invalid assignment node" << std::endl;
+        return nullptr;
     }
-
-    auto left = createAstFromParseTree(node->children[0]);
+    auto assignment = new AssignmentNode();
     assignment->setLeft(left);
-    auto right = createAstFromParseTree(node->children[2]);
     assignment->setRight(right);
     return assignment;
 }
@@ -450,6 +482,7 @@ AstNode *createAstFromParseTree(ParseTreeNode *node) {
     }
 
     if (node->children.size() == 1 || node->symbol == GrammarSymbol::PROGRAM) {
+        // ignores nodes that have only one child
         return createAstFromParseTree(node->children[0]);
     }
 

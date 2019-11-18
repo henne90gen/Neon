@@ -1,6 +1,5 @@
 #pragma once
 
-class ArrayAccessNode;
 class AssignmentNode;
 class BinaryOperationNode;
 class BoolNode;
@@ -18,7 +17,6 @@ class VariableNode;
 
 class AstVisitor {
   public:
-    virtual void visitArrayAccessNode(ArrayAccessNode *node) = 0;
     virtual void visitAssignmentNode(AssignmentNode *node) = 0;
     virtual void visitBinaryOperationNode(BinaryOperationNode *node) = 0;
     virtual void visitBoolNode(BoolNode *node) = 0;

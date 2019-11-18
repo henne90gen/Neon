@@ -20,7 +20,6 @@ class IrGenerator : public AstVisitor {
   public:
     explicit IrGenerator(const Program &program, bool verbose);
 
-    void visitArrayAccessNode(ArrayAccessNode *node) override;
     void visitAssignmentNode(AssignmentNode *node) override;
     void visitBinaryOperationNode(BinaryOperationNode *node) override;
     void visitBoolNode(BoolNode *node) override;

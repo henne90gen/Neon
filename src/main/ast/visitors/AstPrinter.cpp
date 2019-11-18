@@ -49,13 +49,14 @@ void AstPrinter::visitFunctionNode(FunctionNode *node) {
 
 void AstPrinter::visitVariableNode(VariableNode *node) {
     indent(indentation);
-    std::cout << "VariableNode(name='" << node->getName() << "')" << std::endl;
+    std::cout << "VariableNode(name='" << node->getName() << "', isArrayAccess='" << node->isArrayAccess()
+              << "', arrayIndex='" << node->getArrayIndex() << "')" << std::endl;
 }
 
 void AstPrinter::visitVariableDefinitionNode(VariableDefinitionNode *node) {
     indent(indentation);
-    std::cout << "VariableDefinitionNode(type='" << node->getType() << "', name='" << node->getName() << "')"
-              << std::endl;
+    std::cout << "VariableDefinitionNode(type='" << node->getType() << "', name='" << node->getName() << "', isArray='"
+              << node->isArray() << "', arraySize='" << node->getArraySize() << "')" << std::endl;
 }
 
 void AstPrinter::visitBinaryOperationNode(BinaryOperationNode *node) {
@@ -171,8 +172,6 @@ void AstPrinter::visitForStatementNode(ForStatementNode *node) {
     }
     indentation--;
 }
-
-void AstPrinter::visitArrayAccessNode(ArrayAccessNode *node) {}
 
 void printAst(AstNode *root) {
     if (root == nullptr) {
