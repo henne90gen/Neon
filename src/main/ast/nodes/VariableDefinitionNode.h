@@ -4,8 +4,7 @@
 
 class VariableDefinitionNode : public AstNode {
   public:
-    explicit VariableDefinitionNode(std::string name, ast::DataType type, unsigned int arraySize)
-        : AstNode(ast::NodeType::VARIABLE_DEFINITION), name(std::move(name)), type(type), arraySize(arraySize) {}
+    explicit VariableDefinitionNode(std::string name, ast::DataType type, unsigned int arraySize);
 
     void accept(AstVisitor *v) override;
 
@@ -13,9 +12,9 @@ class VariableDefinitionNode : public AstNode {
 
     ast::DataType getType();
 
-    unsigned int getArraySize() { return this->arraySize; }
+    unsigned int getArraySize();
 
-    bool isArray() { return this->arraySize > 0; }
+    bool isArray();
 
   private:
     std::string name;
