@@ -1,6 +1,8 @@
+#define CATCH_CONFIG_MAIN
+#include <catch2/catch.hpp>
+
 #include "Lexer.h"
 
-#include <catch2/catch.hpp>
 #include <unordered_map>
 
 TEST_CASE("Lexer can handle lots of spaces") {

@@ -1,6 +1,7 @@
-#include "ParserTest.h"
-
+#define CATCH_CONFIG_MAIN
 #include <catch2/catch.hpp>
+
+#include "ParserTest.h"
 
 ParseTreeNode *createParseTree(const std::vector<std::pair<int, GrammarSymbol>> &tree, int &index,
                                int indentation = 0) {

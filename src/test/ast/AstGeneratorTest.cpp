@@ -1,6 +1,7 @@
-#include "AstTestHelper.h"
-
+#define CATCH_CONFIG_MAIN
 #include <catch2/catch.hpp>
+
+#include "AstTestHelper.h"
 
 TEST_CASE("ASTGenerator can handle arithmetic operations") {
     std::vector<AstNodeSpec> spec = {

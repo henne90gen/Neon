@@ -324,15 +324,19 @@ FunctionNode *createFunction(ParseTreeNode *node) {
 }
 
 AssignmentNode *createAssignment(ParseTreeNode *node) {
-    VariableNode *left = nullptr;
+    AstNode *left = nullptr;
     AstNode *right = nullptr;
     if (node->children.size() == 3) {
-        left = createVariable(node->children[0]);
+        if (node->children[0]->symbol == GrammarSymbol::DEFINITION) {
+            left = createVariableDefinition(node->children[0]);
+        } else {
+            left = createVariable(node->children[0]);
+        }
         right = createAstFromParseTree(node->children[2]);
     } else if (node->children.size() == 6) {
         left = new VariableNode(node->children[0]->token.content);
         int arrayIndex = std::stoi(node->children[2]->token.content);
-        left->setArrayIndex(arrayIndex);
+        ((VariableNode *)left)->setArrayIndex(arrayIndex);
         right = createAstFromParseTree(node->children[5]);
     } else {
         std::cout << "Invalid assignment node" << std::endl;
