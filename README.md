@@ -40,10 +40,15 @@ This makes it possible to call functions that are contained in the externally li
 
 #### For loops
 
-TODO
+-   for loops work just like in C
+-   e.g. for int i = 0; i < 5; i = i + 1 { … }
 
 ## TODO / Ideas
 
+-   split variable read and variable write into two different AstNodes
+-   complex types
+    -   arrays
+    -   compound types (structs)
 -   add comments (# or //)
     -   single line
     -   multi line
