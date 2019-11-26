@@ -47,17 +47,23 @@ llvm::AllocaInst *IrGenerator::createEntryBlockAlloca(llvm::Type *type, const st
     return tmpB.CreateAlloca(type, nullptr, name);
 }
 
-llvm::Constant *IrGenerator::getInitializer(const ast::DataType &dt) {
-    llvm::Type *ty = getType(dt);
-    switch (dt) {
-    case ast::DataType::FLOAT:
-        return llvm::ConstantFP::get(ty, 0);
-    case ast::DataType::INT:
-    case ast::DataType::BOOL:
-        return llvm::ConstantInt::get(ty, 0);
-    case ast::DataType::VOID:
-    default:
-        return nullptr;
+llvm::Constant *IrGenerator::getInitializer(const ast::DataType &dt, bool isArray, unsigned int arraySize) {
+    // TODO refactor this method once we have a solid type system
+    if (isArray) {
+        llvm::ArrayType *ty = llvm::ArrayType::get(getType(dt), arraySize);
+        return llvm::ConstantAggregateZero::get(ty);
+    } else {
+        llvm::Type *ty = getType(dt);
+        switch (dt) {
+        case ast::DataType::FLOAT:
+            return llvm::ConstantFP::get(ty, 0);
+        case ast::DataType::INT:
+        case ast::DataType::BOOL:
+            return llvm::ConstantInt::get(ty, 0);
+        case ast::DataType::VOID:
+        default:
+            return nullptr;
+        }
     }
 }
 
@@ -159,7 +165,7 @@ void IrGenerator::run(AstNode *root) {
 llvm::Value *IrGenerator::findVariable(const std::string &name) {
     metrics["variableLookups"]++;
 
-    int currentScope = definedVariables.size() - 1;
+    unsigned long currentScope = definedVariables.size() - 1;
     while (currentScope >= 0) {
         auto &scope = definedVariables[currentScope];
         auto result = scope.find(name);

@@ -71,7 +71,7 @@ class IrGenerator : public AstVisitor {
                                                   const std::vector<VariableDefinitionNode *> &arguments);
     llvm::AllocaInst *createEntryBlockAlloca(llvm::Type *type, const std::string &name);
     void finalizeFunction(llvm::Function *function, ast::DataType returnType, bool isExternalFunction);
-    llvm::Constant *getInitializer(const ast::DataType &dt);
+    llvm::Constant *getInitializer(const ast::DataType &dt, bool isArray, unsigned int arraySize);
     void setupGlobalInitialization(llvm::Function *func);
     void generateDummyMain();
 };
