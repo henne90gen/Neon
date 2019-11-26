@@ -3,6 +3,8 @@
 #include <llvm/IR/Verifier.h>
 #include <llvm/Passes/PassBuilder.h>
 
+#define ENABLE_OPTIMIZATIONS 0
+
 void IrGenerator::visitFunctionNode(FunctionNode *node) {
     LOG("Enter Function")
 
@@ -84,7 +86,7 @@ void IrGenerator::finalizeFunction(llvm::Function *function, const ast::DataType
     //    function->viewCFG();
 
     // FIXME create command line option to switch optimizations on/off
-#if 0
+#if ENABLE_OPTIMIZATIONS
     if (!isExternalFunction) {
         bool verbose = false;
         llvm::LoopAnalysisManager loopAnalysisManager(verbose);
