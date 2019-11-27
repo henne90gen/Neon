@@ -10,14 +10,15 @@ void IrGenerator::visitVariableNode(VariableNode *node) {
         return logError("Undefined variable '" + node->getName() + "'");
     }
 
-    llvm::Value *loadedValue = builder.CreateLoad(value, node->getName());
     if (node->isArrayAccess()) {
         node->getArrayIndex()->accept(this);
         llvm::Value *indexOfArray = llvm::ConstantInt::get(llvm::Type::getInt64Ty(context), 0);
         auto arrayIndex = nodesToValues[node->getArrayIndex()];
         std::vector<llvm::Value *> indices = {indexOfArray, arrayIndex};
-        nodesToValues[node] = builder.CreateInBoundsGEP(loadedValue, indices);
+        auto elementPtr = builder.CreateInBoundsGEP(value, indices);
+        nodesToValues[node] = builder.CreateLoad(elementPtr);
     } else {
+        llvm::Value *loadedValue = builder.CreateLoad(value, node->getName());
         nodesToValues[node] = loadedValue;
     }
 
@@ -67,7 +68,7 @@ void IrGenerator::visitAssignmentNode(AssignmentNode *node) {
             llvm::Value *indexOfArray = llvm::ConstantInt::get(llvm::Type::getInt64Ty(context), 0);
             // and then indexes into the array
             llvm::Value *indexInsideArray = nodesToValues[variable->getArrayIndex()];
-            // for multi dimensional
+            // for multi dimensional array access
             std::vector<llvm::Value *> indices = {indexOfArray, indexInsideArray};
             dest = builder.CreateInBoundsGEP(dest, indices);
         }
@@ -80,7 +81,5 @@ void IrGenerator::visitAssignmentNode(AssignmentNode *node) {
     }
     nodesToValues[node] = builder.CreateStore(src, dest);
 
-    print(false);
-
-    LOG("Exit Assignment");
+    LOG("Exit Assignment")
 }
