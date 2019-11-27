@@ -2,7 +2,7 @@ import copy
 import logging
 import sys
 from dataclasses import dataclass
-from typing import List, Tuple, Set
+from typing import List, Tuple, Set, Dict
 
 LOG = logging.getLogger()
 LOG.setLevel(logging.INFO)
@@ -37,7 +37,7 @@ SYMBOL_TO_ENUM_MAPPING = {
 }
 
 
-def parse_rules(lines: List[str]) -> dict:
+def parse_rules(lines: List[str]) -> Dict[str, List[List[str]]]:
     rules = {}
     current_rule = ""
     for line in lines:
@@ -57,7 +57,37 @@ def parse_rules(lines: List[str]) -> dict:
     return rules
 
 
-def construct_dfa_states(rules: dict):
+@dataclass
+class State:
+    index: int
+    predecessors: list
+    rules: dict
+    successors: dict
+    expanded: bool = False
+
+    def __ne__(self, other):
+        return not self.__eq__(other)
+
+    def __eq__(self, other):
+        for key, rules in self.rules.items():
+            if key not in other.rules:
+                return False
+            for r1 in rules:
+                found_one = False
+                for r2 in other.rules[key]:
+                    broke = False
+                    for v1, v2 in zip(r1, r2):
+                        if v1 != v2:
+                            broke = True
+                            break
+                    if not broke:
+                        found_one = True
+                if not found_one:
+                    return False
+        return True
+
+
+def construct_dfa_states(rules: Dict[str, List[List[str]]]) -> List[State]:
     working_rules = {"program": copy.deepcopy(rules["program"])}
     for rule in working_rules["program"]:
         rule.insert(0, '.')
@@ -115,7 +145,7 @@ def construct_dfa_states(rules: dict):
     return states
 
 
-def closure(rules, working_rules):
+def closure(rules: Dict[str, List[List[str]]], working_rules):
     working_rules = copy.deepcopy(working_rules)
     has_changed = True
     while has_changed:
@@ -149,36 +179,6 @@ def closure(rules, working_rules):
     return working_rules
 
 
-@dataclass
-class State:
-    index: int
-    predecessors: list
-    rules: dict
-    successors: dict
-    expanded: bool = False
-
-    def __ne__(self, other):
-        return not self.__eq__(other)
-
-    def __eq__(self, other):
-        for key, rules in self.rules.items():
-            if key not in other.rules:
-                return False
-            for r1 in rules:
-                found_one = False
-                for r2 in other.rules[key]:
-                    broke = False
-                    for v1, v2 in zip(r1, r2):
-                        if v1 != v2:
-                            broke = True
-                            break
-                    if not broke:
-                        found_one = True
-                if not found_one:
-                    return False
-        return True
-
-
 def extract_all_symbols(rules: dict):
     symbols = {"program"}
     for rule_collection in rules.values():
@@ -191,7 +191,7 @@ def extract_all_symbols(rules: dict):
 
 
 class TableConstructor:
-    def __init__(self, rules: dict, states: List[State] = None):
+    def __init__(self, rules: Dict[str, List[List[str]]], states: List[State] = None):
         if states is None:
             states = []
         self.states = states
@@ -485,12 +485,14 @@ def main(grammar_file: str = "grammar.txt", header_file: str = "Grammar.h", cpp_
     for rule in sorted(rules):
         LOG.info("Found rule: " + rule + " -> " + str(rules[rule]))
 
+    # TODO create data structures for header and table, or one for both
     states = construct_dfa_states(rules)
 
     for s in states:
         LOG.debug(str(s))
     LOG.debug("")
 
+    # TODO create data structures for header and table, or one for both
     header, table = TableConstructor(rules, states).construct_table()
 
     for row in [header, *table]:
