@@ -73,11 +73,6 @@ else ()
     add_definitions(-std=c++17)
 endif ()
 
-# TODO investigate how to do this for all lib targets or whether this is necessary at all
-#set_target_properties(NeonAstGenerator PROPERTIES
-#        CXX_STANDARD 17
-#        CXX_STANDARD_REQUIRED ON)
-
 if ("${CMAKE_BUILD_TYPE}" STREQUAL "Debug")
     add_compile_definitions(DEBUG)
 endif ()

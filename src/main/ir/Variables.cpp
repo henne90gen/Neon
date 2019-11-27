@@ -12,7 +12,11 @@ void IrGenerator::visitVariableNode(VariableNode *node) {
 
     llvm::Value *loadedValue = builder.CreateLoad(value, node->getName());
     if (node->isArrayAccess()) {
-        nodesToValues[node] = builder.CreateExtractValue(loadedValue, node->getArrayIndex());
+        node->getArrayIndex()->accept(this);
+        llvm::Value *indexOfArray = llvm::ConstantInt::get(llvm::Type::getInt64Ty(context), 0);
+        auto arrayIndex = nodesToValues[node->getArrayIndex()];
+        std::vector<llvm::Value *> indices = {indexOfArray, arrayIndex};
+        nodesToValues[node] = builder.CreateInBoundsGEP(loadedValue, indices);
     } else {
         nodesToValues[node] = loadedValue;
     }
@@ -57,11 +61,12 @@ void IrGenerator::visitAssignmentNode(AssignmentNode *node) {
         auto variable = dynamic_cast<VariableNode *>(node->getLeft());
         dest = findVariable(variable->getName());
         if (variable->isArrayAccess()) {
+            variable->getArrayIndex()->accept(this);
+
             // This first accesses the array
             llvm::Value *indexOfArray = llvm::ConstantInt::get(llvm::Type::getInt64Ty(context), 0);
             // and then indexes into the array
-            llvm::Value *indexInsideArray =
-                  llvm::ConstantInt::get(llvm::Type::getInt64Ty(context), variable->getArrayIndex());
+            llvm::Value *indexInsideArray = nodesToValues[variable->getArrayIndex()];
             // for multi dimensional
             std::vector<llvm::Value *> indices = {indexOfArray, indexInsideArray};
             dest = builder.CreateInBoundsGEP(dest, indices);

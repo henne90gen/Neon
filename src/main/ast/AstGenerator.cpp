@@ -141,8 +141,7 @@ VariableNode *createVariable(ParseTreeNode *node) {
     }
 
     auto result = new VariableNode(node->children[0]->token.content);
-    const int arrayIndex = std::stoi(node->children[2]->token.content);
-    result->setArrayIndex(arrayIndex);
+    result->setArrayIndex(createAstFromParseTree(node->children[2]));
     return result;
 }
 
@@ -335,7 +334,7 @@ AssignmentNode *createAssignment(ParseTreeNode *node) {
         right = createAstFromParseTree(node->children[2]);
     } else if (node->children.size() == 6) {
         left = new VariableNode(node->children[0]->token.content);
-        int arrayIndex = std::stoi(node->children[2]->token.content);
+        auto arrayIndex = createAstFromParseTree(node->children[2]);
         ((VariableNode *)left)->setArrayIndex(arrayIndex);
         right = createAstFromParseTree(node->children[5]);
     } else {

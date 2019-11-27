@@ -1,5 +1,7 @@
+
 int main() {
-    int myInts[3];
-    myInts[0] = 1;
+    int myInts[5];
+    myInts[0] = 5;
     myInts[1] = myInts[0];
+    return myInts[1];
 }

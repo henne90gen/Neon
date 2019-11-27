@@ -137,37 +137,41 @@ GrammarSymbol convertToGrammarSymbol(const Token &token) {
 }
 
 std::optional<StateTransition> Parser::getNextAction(int rowIndex, int columnIndex) {
-    auto actions = stateTransitionTable[rowIndex][columnIndex];
-    if (actions.empty()) {
+    auto rootAction = stateTransitionTable[rowIndex][columnIndex];
+    if (rootAction == nullptr) {
         return {};
     }
 
-    if (actions.size() == 1) {
-        return std::optional(actions[0]);
+    if (rootAction->next == nullptr) {
+        return std::optional(*rootAction);
     }
 
-    for (auto &action : actions) {
-        if (action.type == StateTransitionType::ACCEPT) {
+    auto currentAction = rootAction;
+    while (currentAction != nullptr) {
+        if (currentAction->type == StateTransitionType::ACCEPT) {
             if (verbose) {
                 std::cout << "Found ACCEPT" << std::endl;
             }
-            return std::optional(action);
+            return std::optional(*currentAction);
         }
+        currentAction = currentAction->next;
     }
 
-    for (auto &action : actions) {
-        if (action.type == StateTransitionType::SHIFT) {
+    currentAction = rootAction;
+    while (currentAction != nullptr) {
+        if (currentAction->type == StateTransitionType::SHIFT) {
             if (verbose) {
                 std::cout << "Preferring SHIFT over REDUCE" << std::endl;
             }
-            return std::optional(action);
+            return std::optional(*currentAction);
         }
+        currentAction = currentAction->next;
     }
 
     if (verbose) {
         std::cout << "Choosing first action instead of best one" << std::endl;
     }
-    return std::optional(actions[0]);
+    return std::optional(*rootAction);
 }
 
 void Parser::executeShift(Token &token, std::vector<int> &states, StateTransition &action,
@@ -189,7 +193,7 @@ void Parser::executeReduce(std::vector<int> &states, StateTransition &action, st
 
     auto lastNode = nodes.back();
     nodes.pop_back();
-    for (unsigned long i = 0; i < action.rule.size(); i++) {
+    for (unsigned long i = 0; i < action.numRules; i++) {
         auto lastN = nodes.back();
         newNode->children.push_back(lastN);
         nodes.pop_back();
@@ -223,6 +227,8 @@ void Parser::executeReduce(std::vector<int> &states, StateTransition &action, st
  *   - If act = error/accept: Report and stop
  */
 ParseTreeNode *Parser::createParseTree() {
+    initializeStateTransitionTable();
+
     std::vector<ParseTreeNode *> nodes = {};
     std::vector<int> states = {};
     states.push_back(0);

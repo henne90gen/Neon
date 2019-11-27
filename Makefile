@@ -13,6 +13,9 @@ test: build
 run: build
 	./build/src/main/Neon
 
+generate-parser:
+	cd src/main && python ../../scripts/parser_generator.py
+
 clang-tidy: clean
 	mkdir -p build; cd build; cmake -G"Ninja" -DRUN_CLANG_TIDY=ON ..; ninja
 

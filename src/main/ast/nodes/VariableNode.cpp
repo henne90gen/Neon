@@ -8,11 +8,10 @@ void VariableNode::accept(AstVisitor *v) { v->visitVariableNode(this); }
 
 std::string &VariableNode::getName() { return name; }
 
-bool VariableNode::isArrayAccess() { return arrayAccess; }
+bool VariableNode::isArrayAccess() { return arrayIndex != nullptr; }
 
-int VariableNode::getArrayIndex() { return this->arrayIndex; }
+AstNode* VariableNode::getArrayIndex() { return this->arrayIndex; }
 
-void VariableNode::setArrayIndex(int arrayIndex) {
+void VariableNode::setArrayIndex(AstNode* arrayIndex) {
     this->arrayIndex = arrayIndex;
-    this->arrayAccess = true;
 }

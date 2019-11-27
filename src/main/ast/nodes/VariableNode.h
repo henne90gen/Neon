@@ -12,14 +12,12 @@ class VariableNode : public AstNode {
 
     bool isArrayAccess();
 
-    int getArrayIndex();
+    AstNode* getArrayIndex();
 
-    void setArrayIndex(int arrayIndex);
+    void setArrayIndex(AstNode* arrayIndex);
 
   private:
     std::string name;
 
-    bool arrayAccess = false;
-    // TODO should indices that are too large, wrap around to the beginning?
-    int arrayIndex = 0; // negative array indices wrap around the end
+    AstNode* arrayIndex = nullptr;
 };

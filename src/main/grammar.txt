@@ -91,7 +91,7 @@ call_args
 assignment
     definition = expression
     variable_name = expression
-    variable_name [ integer ] = expression
+    variable_name [ expression ] = expression
 
 expression
     disjunction
@@ -138,4 +138,4 @@ factor
     ( expression )
 
 array_access
-    variable_name [ integer ]
+    variable_name [ expression ]
