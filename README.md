@@ -24,6 +24,8 @@ It has C-like syntax and is easily interoperable with C/C++.
 -   Integer (64 bit): `int i = 0;`
 -   Float (64 bit): `float f = 0.0;`
 -   Booleans (1 bit): `bool b = true;`
+-   Arrays
+    -   one dimensional arrays of all the basic data types are fully supported: `int[5] a;`
 
 ### Link external object files
 
@@ -45,10 +47,18 @@ This makes it possible to call functions that are contained in the externally li
 
 ## TODO / Ideas
 
--   split variable read and variable write into two different AstNodes
+-   refactor parser generator to use more well defined data structures
+    -   stop passing around `List[List[str]]` for example
+    -   replace with real data structures and attach appropriate methods to them
+-   split variable read and variable write into two different AstNodes?
 -   complex types
     -   arrays
     -   compound types (structs)
+-   think about interface definitions
+    -   how to create them
+    -   how to implement them
+    -   how to match types that implement the same interface
+    -   maybe a mixture between Go and Java?
 -   add comments (# or //)
     -   single line
     -   multi line
