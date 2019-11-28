@@ -47,6 +47,7 @@ This makes it possible to call functions that are contained in the externally li
 
 ## TODO / Ideas
 
+-   fix ParserTest for array example (also add test for AstGenerator that covers an array example)
 -   refactor parser generator to use more well defined data structures
     -   stop passing around `List[List[str]]` for example
     -   replace with real data structures and attach appropriate methods to them
