@@ -240,6 +240,50 @@ class StateTransitionTable:
     def col_count(self):
         return len(self.header)
 
+    def create_grammar_symbols(self) -> str:
+        # TODO rename this method!
+        # do NOT sort this! the order matters
+        grammar_symbols = enumerate(map(get_grammar_symbol, self.header))
+        return ",\n".join(map(lambda e: f"    {e[1]} = {e[0]}", grammar_symbols))
+
+    def get_max_num_rules(self):
+        max_num_rules = 0
+        for row in self.table:
+            for col in row:
+                for transition in col:
+                    if transition.type != StateTransitionType.REDUCE:
+                        continue
+                    if len(transition.rule) > max_num_rules:
+                        max_num_rules = len(transition.rule)
+        return max_num_rules
+
+    def create_init_state_transitions_code(self):
+        init_state_transitions_code = ""
+        for row_idx, row in enumerate(self.table):
+            for col_idx, col in enumerate(row):
+                if not col:
+                    continue
+                transitions = convert_to_state_transitions(col)
+                state_transition = f"createStateTransition(&data, {transitions})"
+                init_state_transitions_code += f"    stateTransitionTable[{row_idx}][{col_idx}] = {state_transition};\n"
+        init_state_transitions_code = init_state_transitions_code[:-1]
+        return init_state_transitions_code
+
+    def get_number_of_state_transitions(self):
+        num_state_transitions = 0
+        num_empty_slots = 0
+        for row_idx, row in enumerate(self.table):
+            for col_idx, col in enumerate(row):
+                num_state_transitions += len(col)
+                if not col:
+                    num_empty_slots += 1
+        return num_state_transitions, num_empty_slots
+
+    def create_grammar_symbol_switch_cases(self) -> str:
+        return "\n".join(
+            map(create_switch_case_for_grammar_symbol,
+                map(get_grammar_symbol, self.header)))
+
 
 class TableConstructor:
     def __init__(self, rules: Rules, states: List[State] = None):
@@ -357,18 +401,6 @@ def create_table_content(table: List[List[List[str]]]):
     return ",\n".join(map(create_table_row, table))
 
 
-def create_grammar_symbols(header: List[str]) -> str:
-    # do NOT sort this! the order matters
-    grammar_symbols = enumerate(map(get_grammar_symbol, header))
-    return ",\n".join(map(lambda e: f"    {e[1]} = {e[0]}", grammar_symbols))
-
-
-def create_grammar_symbol_switch_cases(header: List[str]) -> str:
-    return "\n".join(
-        map(create_switch_case_for_grammar_symbol,
-            map(get_grammar_symbol, header)))
-
-
 def create_switch_case_for_grammar_symbol(grammar_symbol: str):
     return f"    case {grammar_symbol}:\n        return \"{grammar_symbol}\";"
 
@@ -425,7 +457,8 @@ extern const StateTransition *stateTransitionTable[{row_count}][{col_count}];
         f.write(result)
 
 
-def write_cpp_file(cpp_file: str, header: List[str], num_state_transitions: int, row_count: int, col_count: int,
+def write_cpp_file(cpp_file: str, grammar_symbol_switch_cases: str, num_state_transitions: int, row_count: int,
+                   col_count: int,
                    init_transition_code: str):
     cpp_template = Template("""#include "Grammar.h"
 
@@ -506,7 +539,6 @@ void initializeStateTransitionTable() {
 {init_transition_code}
 }
 """)
-    grammar_symbol_switch_cases = create_grammar_symbol_switch_cases(header)
     result = cpp_template.finish({
         "grammar_symbol_switch_cases": grammar_symbol_switch_cases,
         "num_state_transitions": num_state_transitions,
@@ -518,18 +550,6 @@ void initializeStateTransitionTable() {
     LOG.debug(result)
     with open(cpp_file, "w") as f:
         f.write(result)
-
-
-def get_max_num_rules(table: List[List[List[StateTransition]]]):
-    max_num_rules = 0
-    for row in table:
-        for col in row:
-            for transition in col:
-                if transition.type != StateTransitionType.REDUCE:
-                    continue
-                if len(transition.rule) > max_num_rules:
-                    max_num_rules = len(transition.rule)
-    return max_num_rules
 
 
 def main(grammar_file: str = "grammar.txt", header_file: str = "Grammar.h", cpp_file: str = "Grammar.cpp"):
@@ -552,15 +572,19 @@ def main(grammar_file: str = "grammar.txt", header_file: str = "Grammar.h", cpp_
 
     table.print()
 
+    # write header file
     row_count = table.row_count()
     col_count = table.col_count()
-    grammar_symbols = create_grammar_symbols(table.header)
-    max_num_rules = get_max_num_rules(table.table)
+    grammar_symbols = table.create_grammar_symbols()
+    max_num_rules = table.get_max_num_rules()
     write_header_file(header_file, grammar_symbols, row_count, col_count, max_num_rules)
 
-    num_state_transitions, num_empty_slots = get_number_of_state_transitions(table.table)
-    init_state_transitions_code = create_init_state_transitions_code(table.table)
-    write_cpp_file(cpp_file, table.header, num_state_transitions, row_count, col_count, init_state_transitions_code)
+    # write cpp file
+    grammar_symbol_switch_cases = table.create_grammar_symbol_switch_cases()
+    num_state_transitions, num_empty_slots = table.get_number_of_state_transitions()
+    init_state_transitions_code = table.create_init_state_transitions_code()
+    write_cpp_file(cpp_file, grammar_symbol_switch_cases, num_state_transitions, row_count, col_count,
+                   init_state_transitions_code)
 
     LOG.info("Generated parser:")
     table_size = row_count * col_count
@@ -571,30 +595,6 @@ def main(grammar_file: str = "grammar.txt", header_file: str = "Grammar.h", cpp_
     LOG.info("  Size of parse table: %dx%d=%d (%.2f KB)", row_count, col_count, table_size, table_size_in_kb)
     LOG.info("  Number of empty table slots: %d", num_empty_slots)
     LOG.info("  Number of state transitions: %d (%d KB)", num_state_transitions, state_transitions_size)
-
-
-def create_init_state_transitions_code(table: List[List[List[StateTransition]]]):
-    init_state_transitions_code = ""
-    for row_idx, row in enumerate(table):
-        for col_idx, col in enumerate(row):
-            if not col:
-                continue
-            transitions = convert_to_state_transitions(col)
-            state_transition = f"createStateTransition(&data, {transitions})"
-            init_state_transitions_code += f"    stateTransitionTable[{row_idx}][{col_idx}] = {state_transition};\n"
-    init_state_transitions_code = init_state_transitions_code[:-1]
-    return init_state_transitions_code
-
-
-def get_number_of_state_transitions(table: List[List[List[Any]]]):
-    num_state_transitions = 0
-    num_empty_slots = 0
-    for row_idx, row in enumerate(table):
-        for col_idx, col in enumerate(row):
-            num_state_transitions += len(col)
-            if not col:
-                num_empty_slots += 1
-    return num_state_transitions, num_empty_slots
 
 
 if __name__ == "__main__":
