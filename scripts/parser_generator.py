@@ -2,7 +2,8 @@ import copy
 import logging
 import sys
 from dataclasses import dataclass
-from typing import List, Tuple, Set, Dict
+from enum import Enum
+from typing import List, Tuple, Set, Dict, Union, Any
 
 LOG = logging.getLogger()
 LOG.setLevel(logging.INFO)
@@ -37,24 +38,75 @@ SYMBOL_TO_ENUM_MAPPING = {
 }
 
 
-def parse_rules(lines: List[str]) -> Dict[str, List[List[str]]]:
-    rules = {}
-    current_rule = ""
-    for line in lines:
-        if not line.strip() or line.startswith("#"):
-            continue
+class Rules:
+    def __init__(self):
+        self.rules: Dict[str, List[List[str]]] = {}
 
-        if not line.startswith(" ") and not line.startswith("\t"):
-            current_rule = line.strip()
-            rules[current_rule] = []
-            continue
+    def parse_lines(self, lines: List[str]):
+        current_rule = ""
+        for line in lines:
+            if not line.strip() or line.startswith("#"):
+                continue
 
-        if current_rule:
-            rules[current_rule].append(line.strip().split())
-        else:
-            LOG.error("Could not associate this line with a rule.")
+            if not line.startswith(" ") and not line.startswith("\t"):
+                current_rule = line.strip()
+                self.rules[current_rule] = []
+                continue
 
-    return rules
+            if current_rule:
+                self.rules[current_rule].append(line.strip().split())
+            else:
+                LOG.error("Could not associate this line with a rule.")
+
+    def closure(self, working_rules):
+        working_rules = copy.deepcopy(working_rules)
+        has_changed = True
+        while has_changed:
+            has_changed = False
+            for rule_collection in list(working_rules.values()):
+                for rule in rule_collection:
+                    idx = rule.index('.')
+                    if idx + 1 >= len(rule):
+                        continue
+
+                    symbol = rule[idx + 1]
+                    if symbol not in self.rules:
+                        continue
+
+                    for other_rule in self.rules[symbol]:
+                        if symbol not in working_rules:
+                            working_rules[symbol] = []
+                        new_rule = ['.']
+                        new_rule += other_rule
+                        found_it = False
+                        for r in working_rules[symbol]:
+                            if r == new_rule:
+                                found_it = True
+                                break
+                        if found_it:
+                            continue
+
+                        has_changed = True
+                        working_rules[symbol].append(new_rule)
+
+        return working_rules
+
+    def get_all_symbols(self) -> Set[str]:
+        symbols = {"program"}
+        for rule_collection in self.rules.values():
+            for rule in rule_collection:
+                for symbol in rule:
+                    if symbol not in symbols:
+                        symbols.add(symbol)
+
+        return symbols
+
+    def get_non_terminals(self) -> Set[str]:
+        return set(self.rules.keys())
+
+    def print(self):
+        for rule in sorted(self.rules):
+            LOG.info("Found rule: " + rule + " -> " + str(self.rules[rule]))
 
 
 @dataclass
@@ -87,12 +139,12 @@ class State:
         return True
 
 
-def construct_dfa_states(rules: Dict[str, List[List[str]]]) -> List[State]:
-    working_rules = {"program": copy.deepcopy(rules["program"])}
+def construct_dfa_states(rules: Rules) -> List[State]:
+    working_rules = {"program": copy.deepcopy(rules.rules["program"])}
     for rule in working_rules["program"]:
         rule.insert(0, '.')
 
-    states = [State(0, [], closure(rules, working_rules), {})]
+    states = [State(0, [], rules.closure(working_rules), {})]
 
     has_changed = True
     while has_changed:
@@ -126,8 +178,7 @@ def construct_dfa_states(rules: Dict[str, List[List[str]]]) -> List[State]:
                     transitions[symbol][rule_name].append(rule)
 
             for key, value in transitions.items():
-                new_state = State(len(states),
-                                  [i], closure(rules, value), {})
+                new_state = State(len(states), [i], rules.closure(value), {})
 
                 found_idx = None
                 for idx, state in enumerate(states):
@@ -145,78 +196,79 @@ def construct_dfa_states(rules: Dict[str, List[List[str]]]) -> List[State]:
     return states
 
 
-def closure(rules: Dict[str, List[List[str]]], working_rules):
-    working_rules = copy.deepcopy(working_rules)
-    has_changed = True
-    while has_changed:
-        has_changed = False
-        for rule_collection in list(working_rules.values()):
-            for rule in rule_collection:
-                idx = rule.index('.')
-                if idx + 1 >= len(rule):
-                    continue
-
-                symbol = rule[idx + 1]
-                if symbol not in rules:
-                    continue
-
-                for other_rule in rules[symbol]:
-                    if symbol not in working_rules:
-                        working_rules[symbol] = []
-                    new_rule = ['.']
-                    new_rule += other_rule
-                    found_it = False
-                    for r in working_rules[symbol]:
-                        if r == new_rule:
-                            found_it = True
-                            break
-                    if found_it:
-                        continue
-
-                    has_changed = True
-                    working_rules[symbol].append(new_rule)
-
-    return working_rules
+class StateTransitionType(Enum):
+    SHIFT = 0
+    GOTO = 1
+    REDUCE = 2
+    ACCEPT = 3
+    ERROR = 4
 
 
-def extract_all_symbols(rules: dict):
-    symbols = {"program"}
-    for rule_collection in rules.values():
-        for rule in rule_collection:
-            for symbol in rule:
-                if symbol not in symbols:
-                    symbols.add(symbol)
+class StateTransition:
+    def __init__(self, transition_type: StateTransitionType, transition_index: int = -1, rule_name: str = None,
+                 rule: List[str] = None):
+        self.type = transition_type
+        self.transition_index = transition_index
+        self.rule_name = rule_name
 
-    return symbols
+        if rule is None:
+            rule = []
+        self.rule = rule
+        if '.' in self.rule:
+            self.rule.remove('.')
+
+    def __str__(self):
+        return f"ST(type={self.type}, index={self.transition_index}, rule_name={self.rule_name}, rule={self.rule})"
+
+    def __repr__(self):
+        return self.__str__()
+
+
+class StateTransitionTable:
+    def __init__(self, header: List[str], table: List[List[List[StateTransition]]]):
+        self.header = header
+        self.table = table
+
+    def print(self):
+        for row in [self.header, *self.table]:
+            LOG.debug(str(row))
+        LOG.debug("")
+
+    def row_count(self):
+        return len(self.table)
+
+    def col_count(self):
+        return len(self.header)
 
 
 class TableConstructor:
-    def __init__(self, rules: Dict[str, List[List[str]]], states: List[State] = None):
+    def __init__(self, rules: Rules, states: List[State] = None):
         if states is None:
             states = []
         self.states = states
-        self.non_terminals = set(rules.keys())
+        self.non_terminals = rules.get_non_terminals()
 
-        all_symbols_set: Set[str] = extract_all_symbols(rules)
+        all_symbols_set: Set[str] = rules.get_all_symbols()
         self.terminals = all_symbols_set.difference(self.non_terminals)
         self.terminals = sorted(self.terminals)
         self.non_terminals = sorted(self.non_terminals)
         self.all_symbols: List[str] = sorted(all_symbols_set)
 
-        self.table = [[[] for _ in range(len(self.all_symbols))] for i in range(len(states))]
+        self.table: List[List[List[StateTransition]]] = [[[] for _ in range(len(self.all_symbols))] for i in
+                                                         range(len(states))]
 
     def add_successors(self, state: State, state_index: int):
         for trans, trans_index in state.successors.items():
             symbol_index = self.all_symbols.index(trans)
             if trans in self.terminals:
-                self.table[state_index][symbol_index].append(f"s{trans_index}")
+                self.table[state_index][symbol_index].append(StateTransition(StateTransitionType.SHIFT, trans_index))
             elif trans in self.non_terminals:
-                self.table[state_index][symbol_index].append(f"g{trans_index}")
+                self.table[state_index][symbol_index].append(StateTransition(StateTransitionType.GOTO, trans_index))
 
             for rule_name, rule_collection in state.rules.items():
                 for rule in rule_collection:
                     if len(rule) > 1 and rule[-2] == '.' and rule[-1] == END_OF_FILE and trans == END_OF_FILE:
-                        self.table[state_index][symbol_index].append("a")
+                        self.table[state_index][symbol_index].append(StateTransition(StateTransitionType.ACCEPT))
 
     def add_rules(self, state: State, state_index: int):
         for rule_name, rule_collection in state.rules.items():
@@ -225,17 +277,28 @@ class TableConstructor:
                     continue
 
                 formatted_right_side = ' '.join(filter(lambda s: s != '.', rule))
-                reduce_ = f"r:{rule_name}->{formatted_right_side}"
+                transition = StateTransition(StateTransitionType.REDUCE, -1, rule_name, rule)
                 for terminal in self.terminals:
                     symbol_index = self.all_symbols.index(terminal)
-                    self.table[state_index][symbol_index].append(reduce_)
+                    self.table[state_index][symbol_index].append(transition)
 
-    def construct_table(self) -> Tuple[List[str], List[List[List[str]]]]:
+    def construct_table(self) -> StateTransitionTable:
         for state_index, state in enumerate(self.states):
             self.add_successors(state, state_index)
             self.add_rules(state, state_index)
 
-        return self.all_symbols, self.table
+        return StateTransitionTable(self.all_symbols, self.table)
+
+
+class Template:
+    def __init__(self, template_str: str):
+        self.template_str = template_str
+
+    def finish(self, replacements: Dict[str, Union[str, int, float]]) -> str:
+        result = self.template_str
+        for repl in replacements:
+            result = result.replace("{" + repl + "}", str(replacements[repl]))
+        return result
 
 
 def create_table_row(row: List[List[str]]) -> str:
@@ -261,38 +324,27 @@ def get_grammar_symbol(symbol):
     return symbol.upper()
 
 
-def extract_reduce(rest: str):
-    index = rest.index(">")
-    grammar_symbol = get_grammar_symbol(rest[1:index - 1])
-    rule_symbol = f"GrammarSymbol::{grammar_symbol}"
-    rest = rest[index + 1:]
-    rule_list = list(map(lambda s: f"GrammarSymbol::{s}",
-                         map(get_grammar_symbol, rest.split())))
-    return rule_symbol, rule_list
-
-
-def convert_to_state_transition(transition: str) -> str:
-    t = transition[0]
-    rest = transition[1:]
-
-    if t == "r":
-        rule_symbol, rule_list = extract_reduce(rest)
+def convert_to_state_transition(transition: StateTransition) -> str:
+    if transition.type == StateTransitionType.REDUCE:
+        grammar_symbol = get_grammar_symbol(transition.rule_name)
+        rule_symbol = f"GrammarSymbol::{grammar_symbol}"
+        rule_list = list(map(lambda s: f"GrammarSymbol::{s}", map(get_grammar_symbol, transition.rule)))
         rule = ', '.join(rule_list)
-        return f"{{StateTransitionType::REDUCE, -1, {rule_symbol}, {len(rule_list)}, {{{rule}}}}}"
+        return f"{{StateTransitionType::REDUCE, -1, {rule_symbol}, {len(transition.rule)}, {{{rule}}}}}"
 
-    if t == "s":
-        return f"{{StateTransitionType::SHIFT, {rest}}}"
+    if transition.type == StateTransitionType.SHIFT:
+        return f"{{StateTransitionType::SHIFT, {transition.transition_index}}}"
 
-    if t == "g":
-        return f"{{StateTransitionType::GOTO, {rest}}}"
+    if transition.type == StateTransitionType.GOTO:
+        return f"{{StateTransitionType::GOTO, {transition.transition_index}}}"
 
-    if t == "a":
+    if transition.type == StateTransitionType.ACCEPT:
         return "{StateTransitionType::ACCEPT}"
 
     return "{}"
 
 
-def convert_to_state_transitions(elem: List[str]) -> str:
+def convert_to_state_transitions(elem: List[StateTransition]) -> str:
     if not elem:
         return "{}"
     result = "{"
@@ -323,7 +375,7 @@ def create_switch_case_for_grammar_symbol(grammar_symbol: str):
 
 def write_header_file(header_file: str, grammar_symbols_str: str, row_count: int, column_count: int,
                       max_num_rules: int):
-    header_template = """#pragma once
+    header_template = Template("""#pragma once
 
 #include <vector>
 #include <string>
@@ -360,20 +412,22 @@ std::string to_string(const StateTransition &action);
 void initializeStateTransitionTable();
 
 extern const StateTransition *stateTransitionTable[{row_count}][{col_count}];
-"""
-    header_template = header_template.replace("{grammar_symbols}", grammar_symbols_str)
-    header_template = header_template.replace("{row_count}", str(row_count))
-    header_template = header_template.replace("{col_count}", str(column_count))
-    header_template = header_template.replace("{max_num_rules}", str(max_num_rules))
+""")
+    result = header_template.finish({
+        "grammar_symbols": grammar_symbols_str,
+        "row_count": row_count,
+        "col_count": column_count,
+        "max_num_rules": max_num_rules
+    })
 
-    LOG.debug(header_template)
+    LOG.debug(result)
     with open(header_file, "w") as f:
-        f.write(header_template)
+        f.write(result)
 
 
 def write_cpp_file(cpp_file: str, header: List[str], num_state_transitions: int, row_count: int, col_count: int,
                    init_transition_code: str):
-    cpp_template = """#include "Grammar.h"
+    cpp_template = Template("""#include "Grammar.h"
 
 std::string to_string(GrammarSymbol symbol) {
     switch (symbol) {
@@ -451,29 +505,30 @@ void initializeStateTransitionTable() {
 
 {init_transition_code}
 }
-"""
+""")
     grammar_symbol_switch_cases = create_grammar_symbol_switch_cases(header)
-    cpp_template = cpp_template.replace("{grammar_symbol_switch_cases}", grammar_symbol_switch_cases)
-    cpp_template = cpp_template.replace("{num_state_transitions}", str(num_state_transitions))
-    cpp_template = cpp_template.replace("{row_count}", str(row_count))
-    cpp_template = cpp_template.replace("{col_count}", str(col_count))
-    cpp_template = cpp_template.replace("{init_transition_code}", init_transition_code)
+    result = cpp_template.finish({
+        "grammar_symbol_switch_cases": grammar_symbol_switch_cases,
+        "num_state_transitions": num_state_transitions,
+        "row_count": row_count,
+        "col_count": col_count,
+        "init_transition_code": init_transition_code
+    })
 
-    LOG.debug(cpp_template)
+    LOG.debug(result)
     with open(cpp_file, "w") as f:
-        f.write(cpp_template)
+        f.write(result)
 
 
-def get_max_num_rules(table: List[List[List[str]]]):
+def get_max_num_rules(table: List[List[List[StateTransition]]]):
     max_num_rules = 0
     for row in table:
         for col in row:
             for transition in col:
-                if transition[0] != "r":
+                if transition.type != StateTransitionType.REDUCE:
                     continue
-                _, rule_list = extract_reduce(transition[1:])
-                if len(rule_list) > max_num_rules:
-                    max_num_rules = len(rule_list)
+                if len(transition.rule) > max_num_rules:
+                    max_num_rules = len(transition.rule)
     return max_num_rules
 
 
@@ -481,9 +536,9 @@ def main(grammar_file: str = "grammar.txt", header_file: str = "Grammar.h", cpp_
     with open(grammar_file) as f:
         lines = f.readlines()
 
-    rules = parse_rules(lines)
-    for rule in sorted(rules):
-        LOG.info("Found rule: " + rule + " -> " + str(rules[rule]))
+    rules = Rules()
+    rules.parse_lines(lines)
+    rules.print()
 
     # TODO create data structures for header and table, or one for both
     states = construct_dfa_states(rules)
@@ -493,21 +548,19 @@ def main(grammar_file: str = "grammar.txt", header_file: str = "Grammar.h", cpp_
     LOG.debug("")
 
     # TODO create data structures for header and table, or one for both
-    header, table = TableConstructor(rules, states).construct_table()
+    table = TableConstructor(rules, states).construct_table()
 
-    for row in [header, *table]:
-        LOG.debug(str(row))
-    LOG.debug("")
+    table.print()
 
-    row_count = len(table)
-    col_count = len(header)
-    grammar_symbols = create_grammar_symbols(header)
-    max_num_rules = get_max_num_rules(table)
+    row_count = table.row_count()
+    col_count = table.col_count()
+    grammar_symbols = create_grammar_symbols(table.header)
+    max_num_rules = get_max_num_rules(table.table)
     write_header_file(header_file, grammar_symbols, row_count, col_count, max_num_rules)
 
-    num_state_transitions, num_empty_slots = get_number_of_state_transitions(table)
-    init_state_transitions_code = create_init_state_transitions_code(table)
-    write_cpp_file(cpp_file, header, num_state_transitions, row_count, col_count, init_state_transitions_code)
+    num_state_transitions, num_empty_slots = get_number_of_state_transitions(table.table)
+    init_state_transitions_code = create_init_state_transitions_code(table.table)
+    write_cpp_file(cpp_file, table.header, num_state_transitions, row_count, col_count, init_state_transitions_code)
 
     LOG.info("Generated parser:")
     table_size = row_count * col_count
@@ -520,7 +573,7 @@ def main(grammar_file: str = "grammar.txt", header_file: str = "Grammar.h", cpp_
     LOG.info("  Number of state transitions: %d (%d KB)", num_state_transitions, state_transitions_size)
 
 
-def create_init_state_transitions_code(table):
+def create_init_state_transitions_code(table: List[List[List[StateTransition]]]):
     init_state_transitions_code = ""
     for row_idx, row in enumerate(table):
         for col_idx, col in enumerate(row):
@@ -533,7 +586,7 @@ def create_init_state_transitions_code(table):
     return init_state_transitions_code
 
 
-def get_number_of_state_transitions(table):
+def get_number_of_state_transitions(table: List[List[List[Any]]]):
     num_state_transitions = 0
     num_empty_slots = 0
     for row_idx, row in enumerate(table):
