@@ -10,4 +10,7 @@ link:
 link-reverse:
 	clang++ -O0 -c link-reverse.cpp -o link-reverse.o
 
+time:
+	./time.sh
+
 .PHONY: compile llvm link

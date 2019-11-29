@@ -5,9 +5,12 @@ cmake:
 	mkdir -p build; cd build; cmake -G"Ninja" -DRUN_CLANG_TIDY=OFF -DCMAKE_BUILD_TYPE=Debug ..;
 
 build:
-	cd build; ninja
+	cd build; ninja Neon
 
-test: build
+build-test:
+	cd build; ninja LexerTests ParserTests AstGeneratorTests
+
+test: build-test
 	cd build; ninja test
 
 run: build
