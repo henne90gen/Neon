@@ -20,11 +20,5 @@ struct Program {
     AstNode *astRoot = nullptr;
     std::vector<Token> tokens = {};
 
-    [[nodiscard]] std::string toString() const {
-        std::string programStr;
-        for (const auto &t : tokens) {
-            programStr += t.content + " ";
-        }
-        return trim(programStr);
-    }
+    [[nodiscard]] std::string toString() const;
 };
