@@ -586,6 +586,10 @@ def main(grammar_file: str = "grammar.txt", header_file: str = "Grammar.h", cpp_
     write_cpp_file(cpp_file, grammar_symbol_switch_cases, num_state_transitions, row_count, col_count,
                    init_state_transitions_code)
 
+    print_statistics(row_count, col_count, num_empty_slots, num_state_transitions)
+
+
+def print_statistics(row_count: int, col_count: int, num_empty_slots: int, num_state_transitions: int):
     LOG.info("Generated parser:")
     table_size = row_count * col_count
     size_of_pointer = 4
