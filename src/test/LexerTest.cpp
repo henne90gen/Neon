@@ -7,7 +7,7 @@
 
 TEST_CASE("Lexer can handle lots of spaces") {
     std::vector<std::string> lines = {"     1    "};
-    CodeProvider *codeProvider = new StringCodeProvider(lines);
+    CodeProvider *codeProvider = new StringCodeProvider(lines, false);
     Program program = {};
     auto lexer = Lexer(codeProvider, program);
     auto token = lexer.getToken();
@@ -17,7 +17,7 @@ TEST_CASE("Lexer can handle lots of spaces") {
 
 TEST_CASE("Lexer can handle spaces between tokens") {
     std::vector<std::string> lines = {"1 - 5"};
-    CodeProvider *codeProvider = new StringCodeProvider(lines);
+    CodeProvider *codeProvider = new StringCodeProvider(lines, false);
     Program program = {};
     auto lexer = Lexer(codeProvider, program, false);
     auto token = lexer.getToken();
@@ -35,7 +35,7 @@ TEST_CASE("Lexer can handle spaces between tokens") {
 
 TEST_CASE("Lexer can handle tabs") {
     std::vector<std::string> lines = {"\t1"};
-    CodeProvider *codeProvider = new StringCodeProvider(lines);
+    CodeProvider *codeProvider = new StringCodeProvider(lines, false);
     Program program = {};
     auto lexer = Lexer(codeProvider, program);
     auto token = lexer.getToken();
@@ -45,7 +45,7 @@ TEST_CASE("Lexer can handle tabs") {
 
 TEST_CASE("Lexer can handle no spaces between tokens") {
     std::vector<std::string> lines = {"1-5"};
-    CodeProvider *codeProvider = new StringCodeProvider(lines);
+    CodeProvider *codeProvider = new StringCodeProvider(lines, false);
     Program program = {};
     auto lexer = Lexer(codeProvider, program, false);
     auto token = lexer.getToken();
@@ -63,7 +63,8 @@ TEST_CASE("Lexer can handle no spaces between tokens") {
 
 TEST_CASE("Lexer can handle all tokens") {
     std::unordered_map<std::string, Token::TokenType> tokens = {
-          {"1", Token::INTEGER}, //
+          {"\n", Token::NEW_LINE},
+          {"1", Token::INTEGER},
           {"1.5", Token::FLOAT},
           {"<", Token::LESS_THAN},
           {">", Token::GREATER_THAN},
@@ -106,14 +107,14 @@ TEST_CASE("Lexer can handle all tokens") {
         lines.push_back(kv.first);
     }
 
-    CodeProvider *codeProvider = new StringCodeProvider(lines);
+    CodeProvider *codeProvider = new StringCodeProvider(lines, false);
     Program program = {};
     auto lexer = Lexer(codeProvider, program, false);
     for (auto &expectedToken : tokens) {
         auto actualToken = lexer.getToken();
         INFO(to_string(actualToken.type) + " != " + to_string(expectedToken.second));
-        REQUIRE(actualToken.content == expectedToken.first);
-        INFO(actualToken.content + " != " + expectedToken.first);
         REQUIRE(actualToken.type == expectedToken.second);
+        INFO(actualToken.content + " != " + expectedToken.first);
+        REQUIRE(actualToken.content == expectedToken.first);
     }
 }

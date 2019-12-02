@@ -9,45 +9,47 @@
 #include "Token.h"
 
 class CodeProvider {
-public:
+  public:
     virtual std::optional<std::string> getMoreCode() = 0;
 };
 
 class StdInCodeProvider : public CodeProvider {
-public:
+  public:
     std::optional<std::string> getMoreCode() override;
 };
 
 class FileCodeProvider : public CodeProvider {
-public:
+  public:
     explicit FileCodeProvider(const Program &program) : fileName(program.fileName) {}
 
     std::optional<std::string> getMoreCode() override;
 
-private:
+  private:
     const std::string fileName;
     bool fileHasBeenRead = false;
     std::vector<std::string> lines = {};
 };
 
 class StringCodeProvider : public CodeProvider {
-public:
-    explicit StringCodeProvider(std::vector<std::string> lines) : lines(std::move(lines)) {}
+  public:
+    explicit StringCodeProvider(std::vector<std::string> lines, bool addLineBreaks)
+        : lines(std::move(lines)), addLineBreaks(addLineBreaks) {}
 
     std::optional<std::string> getMoreCode() override;
 
-private:
+  private:
     std::vector<std::string> lines = {};
+    bool addLineBreaks = false;
 };
 
 class Lexer {
-public:
+  public:
     explicit Lexer(CodeProvider *codeProvider, Program &program, bool verbose = false)
-            : codeProvider(codeProvider), program(program), verbose(verbose) {};
+        : codeProvider(codeProvider), program(program), verbose(verbose){};
 
     Token getToken();
 
-private:
+  private:
     std::string currentWord;
     CodeProvider *codeProvider;
     Program &program;

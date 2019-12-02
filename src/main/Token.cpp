@@ -70,6 +70,8 @@ std::string to_string(Token::TokenType type) {
         return "IF";
     case Token::ELSE:
         return "ELSE";
+    case Token::NEW_LINE:
+        return "NEW_LINE";
     default:
         return "NOT IMPLEMENTED YET (" + std::to_string(static_cast<int>(type)) + ")";
     }

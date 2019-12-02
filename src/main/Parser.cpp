@@ -18,6 +18,16 @@ void printParseTree(ParseTreeNode *node, int indentation) {
     }
 }
 
+std::string &replace(std::string &str, const std::string &from, const std::string &to) {
+    size_t pos = 0;
+    const size_t increment = to.size();
+    while ((pos = str.find(from, pos)) != std::string::npos) {
+        str.replace(pos, from.length(), to);
+        pos += increment;
+    }
+    return str;
+}
+
 void printParseTreeTestCase(const ParseTreeNode *node, const Program &program, int indentation) {
     if (node == nullptr) {
         return;
@@ -36,6 +46,7 @@ void printParseTreeTestCase(const ParseTreeNode *node, const Program &program, i
     }
 
     if (indentation == 0) {
+        programStr = replace(programStr, " \\n ", "\", \"");
         std::cout << "    };" << std::endl;
         std::cout << "    std::vector<std::string> program = {\"" << programStr << "\"};" << std::endl;
         std::cout << "    assertProgramCreatesParseTree(program, parseTree);" << std::endl;
@@ -129,6 +140,8 @@ GrammarSymbol convertToGrammarSymbol(const Token &token) {
         return GrammarSymbol::ELSE;
     case Token::FOR:
         return GrammarSymbol::FOR;
+    case Token::NEW_LINE:
+        return GrammarSymbol::NEW_LINE;
     default:
         std::cout << "Could not convert token " << to_string(token.type) << " to grammar symbol." << std::endl;
         exit(1);

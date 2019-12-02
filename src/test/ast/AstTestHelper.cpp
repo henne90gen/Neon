@@ -171,7 +171,7 @@ SimpleTree *createSimpleFromAst(AstNode *node) {
 void assertProgramCreatesAst(const std::vector<std::string> &program, std::vector<AstNodeSpec> &spec) {
     int index = 0;
     auto expected = createSimpleFromSpecification(spec, index);
-    CodeProvider *cp = new StringCodeProvider(program);
+    CodeProvider *cp = new StringCodeProvider(program, true);
     Program prog = {};
     Lexer lexer(cp, prog, false);
     Parser parser(lexer, prog, false);

@@ -25,7 +25,7 @@ std::optional<std::string> FileCodeProvider::getMoreCode() {
         }
         std::string line;
         while (std::getline(infile, line)) {
-            lines.push_back(line);
+            lines.push_back(line + "\n");
         }
     }
 
@@ -43,6 +43,9 @@ std::optional<std::string> StringCodeProvider::getMoreCode() {
         return {};
     }
     std::string result = lines.front();
+    if (addLineBreaks) {
+        result += "\n";
+    }
     lines.erase(lines.begin());
     return std::optional(result);
 }
@@ -207,6 +210,9 @@ std::optional<Token> Lexer::matchTwoCharToken() {
 
 std::optional<Token> Lexer::matchOneCharacterToken() {
     char firstChar = currentWord[0];
+    if (firstChar == '\n') {
+        return TOKEN(Token::NEW_LINE, "\n");
+    }
     if (firstChar == '(') {
         return TOKEN(Token::LEFT_PARAN, "(");
     }

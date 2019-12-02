@@ -39,6 +39,7 @@ struct Token {
         IF,
         ELSE,
         FOR,
+        NEW_LINE,
         END_OF_FILE,
     };
 

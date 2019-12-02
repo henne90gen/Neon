@@ -6,12 +6,13 @@ statements
     statements statement
 
 statement
-    call ;
-    external_function ;
+    new_line
+    call new_line
+    external_function new_line
     function
-    assignment ;
-    return expression ;
-    definition ;
+    assignment new_line
+    return expression new_line
+    definition new_line
     if_statement
     for_statement
 
