@@ -13,7 +13,7 @@ else ()
     message(STATUS "Looking for clang-tidy - found")
     set(
             DO_CLANG_TIDY
-            "${CLANG_TIDY_EXE}" "-fix"
+            "${CLANG_TIDY_EXE}"
             "-checks=*,-fuchsia-*,-cppcoreguidelines-pro-type-union-access,-hicpp-vararg,-cppcoreguidelines-pro-type-vararg,-cppcoreguidelines-owning-memory,-readability-magic-numbers,-google-runtime-int,-readability-braces-around-statements,-cppcoreguidelines-pro-bounds-constant-array-index,-modernize-use-trailing-return-type"
     )
 endif ()
