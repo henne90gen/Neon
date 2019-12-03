@@ -6,7 +6,7 @@ from enum import Enum
 from typing import List, Tuple, Set, Dict, Union, Any
 
 LOG = logging.getLogger()
-LOG.setLevel(logging.INFO)
+LOG.setLevel(logging.WARN)
 handler = logging.StreamHandler(sys.stdout)
 handler.setLevel(logging.DEBUG)
 formatter = logging.Formatter('%(asctime)s [%(levelname)s] %(message)s')
