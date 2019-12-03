@@ -15,6 +15,10 @@ statement
     definition new_line
     if_statement
     for_statement
+    import_statement
+
+import_statement
+    import string
 
 for_statement
     for assignment ; expression ; assignment { for_statement_body

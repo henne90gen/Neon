@@ -4,6 +4,25 @@
 
 #include <unordered_map>
 
+void assertTokensCanBeLexed(const std::unordered_map<std::string, Token::TokenType> &tokens) {
+    std::vector<std::string> lines;
+    lines.reserve(tokens.size());
+    for (auto &kv : tokens) {
+        lines.push_back(kv.first);
+    }
+
+    CodeProvider *codeProvider = new StringCodeProvider(lines, false);
+    Program program = {};
+    auto lexer = Lexer(codeProvider, program, false);
+    for (auto &expectedToken : tokens) {
+        auto actualToken = lexer.getToken();
+        INFO(to_string(actualToken.type) + " != " + to_string(expectedToken.second));
+        REQUIRE(actualToken.type == expectedToken.second);
+        INFO(actualToken.content + " != " + expectedToken.first);
+        REQUIRE(actualToken.content == expectedToken.first);
+    }
+}
+
 TEST_CASE("Lexer") {
     SECTION("can handle lots of spaces") {
         std::vector<std::string> lines = {"     1    "};
@@ -88,10 +107,6 @@ TEST_CASE("Lexer") {
               {"]", Token::RIGHT_BRACKET},
               {";", Token::SEMICOLON},
               {",", Token::COMMA},
-              {"helloWorld", Token::VARIABLE_NAME},
-              {"hello123World", Token::VARIABLE_NAME},
-              {"_helloWorld", Token::VARIABLE_NAME},
-              {"hello_World", Token::VARIABLE_NAME},
               {"int", Token::SIMPLE_DATA_TYPE},
               {"float", Token::SIMPLE_DATA_TYPE},
               {"bool", Token::SIMPLE_DATA_TYPE},
@@ -100,22 +115,26 @@ TEST_CASE("Lexer") {
               {"if", Token::IF},
               {"else", Token::ELSE},
               {"for", Token::FOR},
+              {"import", Token::IMPORT}
         };
-        std::vector<std::string> lines;
-        lines.reserve(tokens.size());
-        for (auto &kv : tokens) {
-            lines.push_back(kv.first);
-        }
+        assertTokensCanBeLexed(tokens);
+    }
 
-        CodeProvider *codeProvider = new StringCodeProvider(lines, false);
-        Program program = {};
-        auto lexer = Lexer(codeProvider, program, false);
-        for (auto &expectedToken : tokens) {
-            auto actualToken = lexer.getToken();
-            INFO(to_string(actualToken.type) + " != " + to_string(expectedToken.second));
-            REQUIRE(actualToken.type == expectedToken.second);
-            INFO(actualToken.content + " != " + expectedToken.first);
-            REQUIRE(actualToken.content == expectedToken.first);
-        }
+    SECTION("can handle variable names") {
+        std::unordered_map<std::string, Token::TokenType> tokens = {
+              {"helloWorld", Token::VARIABLE_NAME},
+              {"hello123World", Token::VARIABLE_NAME},
+              {"_helloWorld", Token::VARIABLE_NAME},
+              {"hello_World", Token::VARIABLE_NAME},
+        };
+        assertTokensCanBeLexed(tokens);
+    }
+
+    SECTION("can handle strings") {
+        std::unordered_map<std::string, Token::TokenType> tokens = {
+              {"\"myString\"", Token::STRING},
+              {"\"myString/anotherString\"", Token::STRING},
+        };
+        assertTokensCanBeLexed(tokens);
     }
 }

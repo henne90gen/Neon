@@ -25,6 +25,7 @@ class AstTestCasePrinter : public AstVisitor {
     int indentation = 0;
 
     void printNode(AstNode *node);
+    void visitImportNode(ImportNode *node);
 };
 
 struct Program;

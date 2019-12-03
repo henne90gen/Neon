@@ -199,4 +199,14 @@ TEST_CASE("AstGenerator") {
         std::vector<std::string> program = {"int[5] a", "a[0] = 5", "a[1] = a[0]"};
         assertProgramCreatesAst(program, spec);
     }
+
+    SECTION("can handle __'") {
+        std::vector<AstNodeSpec> spec = {
+              {0, ast::NodeType::SEQUENCE},
+              {1, ast::NodeType::STATEMENT},
+              {2, ast::NodeType::IMPORT},
+        };
+        std::vector<std::string> program = {"import \"examples/functions\""};
+        assertProgramCreatesAst(program, spec);
+    }
 }

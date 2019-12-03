@@ -111,6 +111,10 @@ void AstTestCasePrinter::visitForStatementNode(ForStatementNode *node) {
     indentation--;
 }
 
+void AstTestCasePrinter::visitImportNode(ImportNode *node) {
+    printNode(node);
+}
+
 void printAstTestCase(const Program &program, AstNode *root) {
     if (root == nullptr) {
         std::cerr << "Could not print AST test case (nullptr)." << std::endl;
@@ -118,14 +122,15 @@ void printAstTestCase(const Program &program, AstNode *root) {
     }
 
     std::cout << std::endl;
-    std::cout << "TEST_CASE(\"ASTGenerator can handle '" << program.toString() << "'\") {" << std::endl;
+    const auto &programStr = program.toEscapedString();
+    std::cout << "SECTION(\"can handle __'\") {" << std::endl;
     std::cout << "    std::vector<AstNodeSpec> spec = {" << std::endl;
 
     auto testCasePrinter = new AstTestCasePrinter();
     root->accept(testCasePrinter);
 
     std::cout << "    };" << std::endl;
-    std::cout << "    std::vector<std::string> program = {\"" << program.toString() << "\"};" << std::endl;
+    std::cout << "    std::vector<std::string> program = {\"" << programStr << "\"};" << std::endl;
     std::cout << "    assertProgramCreatesAst(program, spec);" << std::endl;
     std::cout << "}" << std::endl;
     std::cout << std::endl;

@@ -9,9 +9,7 @@
 #include "ast/visitors/AstTypeAnalyser.h"
 #include "ir/IrGenerator.h"
 
-int main() {
-    bool verbose = true;
-    Program program = {"main.ne"};
+void compileProgram(Program &program, const bool verbose) {
     CodeProvider *codeProvider = new FileCodeProvider(program);
     Lexer lexer(codeProvider, program, verbose);
     Parser parser(lexer, program, verbose);
@@ -34,8 +32,15 @@ int main() {
     generator->run(astRoot);
 
     writeModuleToObjectFile(program, generator);
+}
 
-    auto linker = new Linker(program);
+int main() {
+    bool verbose = true;
+    Program program = {"main.ne"};
+
+    compileProgram(program, verbose);
+
+    auto linker = new Linker("main.ne.exe", program);
     linker->link();
 
     return 0;

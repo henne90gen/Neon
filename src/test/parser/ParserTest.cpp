@@ -69,4 +69,9 @@ TEST_CASE("Parser Basics") {
         std::vector<std::string> program = {"int[5] a", "a[0] = 5", "a[1] = a[0]"};
         assertParserAccepts(program);
     }
+
+    SECTION("can handle import") {
+        std::vector<std::string> program = {"import \"example/functions\""};
+        assertParserAccepts(program);
+    }
 }

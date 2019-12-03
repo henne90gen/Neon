@@ -77,20 +77,22 @@ Token Lexer::_getToken() {
             std::cout << "Current word: '" << currentWord << "'" << std::endl;
         }
 
-        std::regex floatRegex("^[0-9]+\\.[0-9]+");
-        auto itr = std::sregex_iterator(currentWord.begin(), currentWord.end(), floatRegex);
-        if (itr != std::sregex_iterator()) {
-            auto content = static_cast<std::string>((*itr).str());
-            currentWord = currentWord.substr(content.length(), currentWord.length() - 1);
-            return {Token::FLOAT, content};
+        auto floatToken = matchRegex("^[0-9]+\\.[0-9]+", Token::FLOAT);
+        if (floatToken.has_value()) {
+            currentWord = currentWord.substr(floatToken.value().content.length(), currentWord.length() - 1);
+            return floatToken.value();
         }
 
-        std::regex intRegex("^[0-9]+");
-        itr = std::sregex_iterator(currentWord.begin(), currentWord.end(), intRegex);
-        if (itr != std::sregex_iterator()) {
-            auto content = static_cast<std::string>((*itr).str());
-            currentWord = currentWord.substr(content.length(), currentWord.length() - 1);
-            return {Token::INTEGER, content};
+        auto intToken = matchRegex("^[0-9]+", Token::INTEGER);
+        if (intToken.has_value()) {
+            currentWord = currentWord.substr(intToken.value().content.length(), currentWord.length() - 1);
+            return intToken.value();
+        }
+
+        auto stringToken = matchRegex("^\".*\"", Token::STRING);
+        if (stringToken.has_value()) {
+            currentWord = currentWord.substr(stringToken.value().content.length(), currentWord.length() - 1);
+            return stringToken.value();
         }
 
         auto wordToken = matchWordToken();
@@ -111,12 +113,10 @@ Token Lexer::_getToken() {
             return oneCharToken.value();
         }
 
-        std::regex varNameRegex("^[a-zA-Z_][_a-zA-Z0-9]*");
-        itr = std::sregex_iterator(currentWord.begin(), currentWord.end(), varNameRegex);
-        if (itr != std::sregex_iterator()) {
-            auto content = static_cast<std::string>((*itr).str());
-            currentWord = currentWord.substr(content.length(), currentWord.length() - 1);
-            return {Token::VARIABLE_NAME, content};
+        auto variableNameToken = matchRegex("^[a-zA-Z_][_a-zA-Z0-9]*", Token::VARIABLE_NAME);
+        if (variableNameToken.has_value()) {
+            currentWord = currentWord.substr(variableNameToken.value().content.length(), currentWord.length() - 1);
+            return variableNameToken.value();
         }
 
         if (currentWord == previousWord) {
@@ -145,6 +145,17 @@ Token Lexer::getToken() {
     auto token = _getToken();
     program.tokens.push_back(token);
     return token;
+}
+
+std::optional<Token> Lexer::matchRegex(const std::string &regex, Token::TokenType tokenType) {
+    std::regex re(regex);
+    auto itr = std::sregex_iterator(currentWord.begin(), currentWord.end(), re);
+    if (itr != std::sregex_iterator()) {
+        auto content = static_cast<std::string>((*itr).str());
+        Token token = {tokenType, content};
+        return std::optional<Token>(token);
+    }
+    return {};
 }
 
 std::optional<Token> Lexer::matchWordToken() {
@@ -189,6 +200,9 @@ std::optional<Token> Lexer::matchWordToken() {
     }
     if (STARTS_WITH(currentWord, "for")) {
         return TOKEN(Token::FOR, "for");
+    }
+    if (STARTS_WITH(currentWord, "import")) {
+        return TOKEN(Token::IMPORT, "import");
     }
 
     return {};

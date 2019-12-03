@@ -47,12 +47,10 @@ This makes it possible to call functions that are contained in the externally li
 
 ## TODO / Ideas
 
--   refactor parser generator to use more well defined data structures
-    -   stop passing around `List[List[str]]` for example
-    -   replace with real data structures and attach appropriate methods to them
--   split variable read and variable write into two different AstNodes?
+-   standard library
+    -   provide interface to important c functions
 -   complex types
-    -   arrays
+    -   arrays (multidimensional)
     -   compound types (structs)
 -   think about interface definitions
     -   how to create them

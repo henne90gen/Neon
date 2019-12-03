@@ -18,42 +18,19 @@ void printParseTree(ParseTreeNode *node, int indentation) {
     }
 }
 
-std::string replace(const std::string &str, const std::string &from, const std::string &to) {
-    std::string result = str;
-    size_t pos = 0;
-    const size_t increment = to.size();
-    while ((pos = result.find(from, pos)) != std::string::npos) {
-        result.replace(pos, from.length(), to);
-        pos += increment;
-    }
-    return result;
-}
-
-void printParseTreeTestCase(const ParseTreeNode *node, const Program &program, int indentation) {
+void printParseTreeTestCase(const ParseTreeNode *node, const Program &program) {
     if (node == nullptr) {
         return;
     }
 
-    std::string programStr = program.toString();
-    if (indentation == 0) {
-        std::cout << std::endl;
-        std::cout << "TEST_CASE(\"Parser can handle '" << programStr << "'\") {" << std::endl;
-        std::cout << "    std::vector<std::pair<int, GrammarSymbol>> parseTree = {" << std::endl;
-    }
+    std::string programArrayStr = program.toArrayString();
+    std::cout << std::endl;
+    std::cout << "SECTION(\"can handle _\") {" << std::endl;
 
-    std::cout << "        {" << indentation << ",  GrammarSymbol::" << to_string(node->symbol) << "}," << std::endl;
-    for (auto child : node->children) {
-        printParseTreeTestCase(child, program, indentation + 1);
-    }
-
-    if (indentation == 0) {
-        programStr = replace(programStr, " \\n ", "\", \"");
-        std::cout << "    };" << std::endl;
-        std::cout << "    std::vector<std::string> program = {\"" << programStr << "\"};" << std::endl;
-        std::cout << "    assertProgramCreatesParseTree(program, parseTree);" << std::endl;
-        std::cout << "}" << std::endl;
-        std::cout << std::endl;
-    }
+    std::cout << "    std::vector<std::string> program = {\"" << programArrayStr << "\"};" << std::endl;
+    std::cout << "    assertProgramCreatesParseTree(program, parseTree);" << std::endl;
+    std::cout << "}" << std::endl;
+    std::cout << std::endl;
 }
 
 void printCurrentParseState(const StateTransition &action, const std::vector<int> &states,
@@ -143,6 +120,10 @@ GrammarSymbol convertToGrammarSymbol(const Token &token) {
         return GrammarSymbol::FOR;
     case Token::NEW_LINE:
         return GrammarSymbol::NEW_LINE;
+    case Token::STRING:
+        return GrammarSymbol::STRING;
+    case Token::IMPORT:
+        return GrammarSymbol::IMPORT;
     default:
         std::cout << "Could not convert token " << to_string(token.type) << " to grammar symbol." << std::endl;
         exit(1);

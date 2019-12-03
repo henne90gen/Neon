@@ -6,6 +6,7 @@
 #include "ForStatementNode.h"
 #include "FunctionNode.h"
 #include "IfStatementNode.h"
+#include "ImportNode.h"
 #include "LiteralNodes.h"
 #include "SequenceNode.h"
 #include "StatementNode.h"

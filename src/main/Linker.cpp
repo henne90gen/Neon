@@ -1,6 +1,9 @@
 #include "Linker.h"
 
-Linker::Linker(Program &program) : program(program) {}
+#include <iostream>
+#include <utility>
+
+Linker::Linker(std::string programName, Program &program) : programName(std::move(programName)), program(program) {}
 
 void Linker::link() {
     std::string s = "ld";
@@ -10,9 +13,12 @@ void Linker::link() {
     s += " /lib64/crtn.o";
     s += " -L/usr/lib/gcc/x86_64-pc-linux-gnu/9.2.0/";
     s += " -lc -lgcc -lgcc_s";
-    s += " scripts/link-reverse.o";
-    s += " -o " + program.fileName + ".exe";
+
     s += " " + program.fileName + ".o";
+    s += " -o " + programName;
+
+    std::cout << std::endl << "Calling linker with the following command:" << std::endl << s << std::endl;
+
     const char *command = s.c_str();
     system(command);
 }

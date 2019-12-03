@@ -27,4 +27,4 @@ class Parser {
 
 void printParseTree(ParseTreeNode *node, int indentation = 0);
 
-void printParseTreeTestCase(const ParseTreeNode *node, const Program &program, int indentation = 0);
+void printParseTreeTestCase(const ParseTreeNode *node, const Program &program);

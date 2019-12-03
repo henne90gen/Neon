@@ -39,6 +39,8 @@ struct Token {
         IF,
         ELSE,
         FOR,
+        STRING,
+        IMPORT,
         NEW_LINE,
         END_OF_FILE,
     };

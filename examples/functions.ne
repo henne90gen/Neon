@@ -5,7 +5,7 @@ fun test(int arg) int {
 
 fun hello() int {
     int world = 6
-    return return test(world - 1)
+    return test(world - 1)
 }
 
 fun main() int {

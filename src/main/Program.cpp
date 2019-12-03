@@ -1,16 +1,6 @@
 #include "Program.h"
 
-std::string trim(const std::string &s) { return rtrim(ltrim(s)); }
-
-std::string rtrim(const std::string &s) {
-    size_t end = s.find_last_not_of(WHITESPACE);
-    return (end == std::string::npos) ? "" : s.substr(0, end + 1);
-}
-
-std::string ltrim(const std::string &s) {
-    size_t start = s.find_first_not_of(WHITESPACE);
-    return (start == std::string::npos) ? "" : s.substr(start);
-}
+#include "Utils.h"
 
 bool tokenHasSpaceBeforeIt(const Token *prev, const Token &t, const Token * /*next*/) {
     bool prevExists = prev != nullptr;
@@ -25,6 +15,9 @@ bool tokenHasSpaceBeforeIt(const Token *prev, const Token &t, const Token * /*ne
     bool isNumberAndAfterEquals = isNumber && prevTokenIsEquals;
     bool isNumberAndAfterOperation = isNumber && prevTokenIsOperation;
     bool isNumberAndNotAfterBracket = isNumber && !prevTokenIsBracket && !prevTokenIsParenthesis;
+
+    bool isString = t.type == Token::STRING;
+    bool isStringAndNotAfterParenthesisAndNotAfterBracket = isString && !prevTokenIsParenthesis && !prevTokenIsBracket;
 
     bool isVariable = t.type == Token::VARIABLE_NAME;
     bool isVariableAndNotAfterParenthesis = isVariable && !prevTokenIsParenthesis;
@@ -42,9 +35,10 @@ bool tokenHasSpaceBeforeIt(const Token *prev, const Token &t, const Token * /*ne
 
     return isNumberAndAfterEquals || isNumberAndAfterOperation || isNumberAndNotAfterBracket ||
            isVariableAndNotAfterParenthesis || isCurlyBrace || isBinaryOperation ||
-           isParenthesisAndAfterUnaryOperator || isSimpleDataTypeAndNotAfterParenthesis || t.type == Token::NEW_LINE ||
-           t.type == Token::TRUE || t.type == Token::FALSE || t.type == Token::SINGLE_EQUALS ||
-           t.type == Token::DOUBLE_EQUALS || t.type == Token::ELSE || t.type == Token::NOT || t.type == Token::FUN;
+           isParenthesisAndAfterUnaryOperator || isSimpleDataTypeAndNotAfterParenthesis ||
+           isStringAndNotAfterParenthesisAndNotAfterBracket || t.type == Token::NEW_LINE || t.type == Token::TRUE ||
+           t.type == Token::FALSE || t.type == Token::SINGLE_EQUALS || t.type == Token::DOUBLE_EQUALS ||
+           t.type == Token::ELSE || t.type == Token::NOT || t.type == Token::FUN;
 }
 
 std::string Program::toString() const {
@@ -72,4 +66,16 @@ std::string Program::toString() const {
         isFirstToken = false;
     }
     return trim(programStr);
+}
+
+std::string Program::toEscapedString() const {
+    std::string result = toString();
+    result = replace(result, "\"", "\\\"");
+    return result;
+}
+
+std::string Program::toArrayString() const {
+    std::string result = toEscapedString();
+    result = replace(result, " \\n ", "\", \"");
+    return result;
 }

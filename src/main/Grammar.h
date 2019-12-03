@@ -56,23 +56,26 @@ enum GrammarSymbol {
     IF_STATEMENT_BODY = 49,
     IF_STATEMENT_ELSE = 50,
     IF_STATEMENT_ELSE_BODY = 51,
-    INTEGER = 52,
-    NEGATION = 53,
-    NEW_LINE = 54,
-    NOT = 55,
-    OR = 56,
-    PROGRAM = 57,
-    RELATION = 58,
-    RETURN = 59,
-    STATEMENT = 60,
-    STATEMENTS = 61,
-    SUM = 62,
-    TERM = 63,
-    TRUE = 64,
-    VARIABLE_DEFINITION = 65,
-    VARIABLE_NAME = 66,
-    LEFT_CURLY_BRACE = 67,
-    RIGHT_CURLY_BRACE = 68
+    IMPORT = 52,
+    IMPORT_STATEMENT = 53,
+    INTEGER = 54,
+    NEGATION = 55,
+    NEW_LINE = 56,
+    NOT = 57,
+    OR = 58,
+    PROGRAM = 59,
+    RELATION = 60,
+    RETURN = 61,
+    STATEMENT = 62,
+    STATEMENTS = 63,
+    STRING = 64,
+    SUM = 65,
+    TERM = 66,
+    TRUE = 67,
+    VARIABLE_DEFINITION = 68,
+    VARIABLE_NAME = 69,
+    LEFT_CURLY_BRACE = 70,
+    RIGHT_CURLY_BRACE = 71
 };
 
 std::string to_string(GrammarSymbol symbol);
@@ -102,4 +105,4 @@ std::string to_string(const StateTransition &action);
 
 void initializeStateTransitionTable();
 
-extern const StateTransition *stateTransitionTable[149][69];
+extern const StateTransition *stateTransitionTable[152][72];

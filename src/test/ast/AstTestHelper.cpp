@@ -136,6 +136,12 @@ SimpleTree *createSimpleFromFor(ForStatementNode *node) {
     return result;
 }
 
+SimpleTree *createSimpleFromImport(ImportNode *node) {
+    auto result = new SimpleTree();
+    result->type = node->getAstNodeType();
+    return result;
+}
+
 SimpleTree *createSimpleFromAst(AstNode *node) {
     if (node == nullptr) {
         return nullptr;
@@ -165,6 +171,8 @@ SimpleTree *createSimpleFromAst(AstNode *node) {
         return createSimpleFromIf((IfStatementNode *)node);
     case ast::NodeType::FOR_STATEMENT:
         return createSimpleFromFor((ForStatementNode *)node);
+    case ast::NodeType::IMPORT:
+        return createSimpleFromImport((ImportNode *)node);
     default:
         std::cerr << "Could not create simple helper tree node for " << to_string(node->getAstNodeType()) << std::endl;
         exit(1);

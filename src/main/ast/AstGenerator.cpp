@@ -41,6 +41,8 @@ bool isAssignment(ParseTreeNode *node) { return node->symbol == GrammarSymbol::A
 
 bool isForStatement(ParseTreeNode *node) { return node->symbol == GrammarSymbol::FOR_STATEMENT; }
 
+bool isImportStatement(ParseTreeNode *node) { return node->symbol == GrammarSymbol::IMPORT_STATEMENT; }
+
 bool isIgnored(ParseTreeNode *node) {
     return node->symbol == GrammarSymbol::SEMICOLON || node->symbol == GrammarSymbol::NEW_LINE ||
            node->symbol == GrammarSymbol::ENDOFFILE;
@@ -436,6 +438,13 @@ ForStatementNode *createForStatement(ParseTreeNode *node) {
     return result;
 }
 
+AstNode *createImportStatement(ParseTreeNode *node) {
+    auto result = new ImportNode();
+    std::string fileName = node->children[1]->token.content;
+    result->setFileName(fileName);
+    return result;
+}
+
 AstNode *createAstFromParseTree(ParseTreeNode *node) {
     if (node == nullptr) {
         return nullptr;
@@ -491,6 +500,10 @@ AstNode *createAstFromParseTree(ParseTreeNode *node) {
 
     if (isForStatement(node)) {
         return createForStatement(node);
+    }
+
+    if (isImportStatement(node)) {
+        return createImportStatement(node);
     }
 
     if (node->children.size() == 1 || node->symbol == GrammarSymbol::PROGRAM) {

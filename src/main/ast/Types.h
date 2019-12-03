@@ -18,6 +18,7 @@ enum NodeType {
     ASSIGNMENT,
     IF_STATEMENT,
     FOR_STATEMENT,
+    IMPORT,
 };
 
 enum BinaryOperationType {

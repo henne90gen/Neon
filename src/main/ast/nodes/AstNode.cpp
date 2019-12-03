@@ -28,6 +28,8 @@ std::string to_string(ast::NodeType type) {
         return "ast::NodeType::IF_STATEMENT";
     case ast::NodeType::FOR_STATEMENT:
         return "ast::NodeType::FOR_STATEMENT";
+    case ast::NodeType::IMPORT:
+        return "ast::NodeType::IMPORT";
     default:
         std::cout << "Not implemented (AstNode.cpp:to_string)" << std::endl;
         exit(1);

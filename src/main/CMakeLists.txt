@@ -21,6 +21,7 @@ set(SOURCES_COMPILER
         ast/nodes/ForStatementNode.cpp
         ast/nodes/FunctionNode.cpp
         ast/nodes/IfStatementNode.cpp
+        ast/nodes/ImportNode.cpp
         ast/nodes/LiteralNodes.cpp
         ast/nodes/SequenceNode.cpp
         ast/nodes/StatementNode.cpp
@@ -38,7 +39,7 @@ set(SOURCES_COMPILER
         ir/Types.cpp
         ir/Variables.cpp
         Linker.cpp
-        ObjectFileWriter.cpp)
+        ObjectFileWriter.cpp Utils.cpp)
 
 add_library(NeonGrammar ${SOURCES_GRAMMAR})
 add_library(NeonCompiler ${SOURCES_COMPILER})
