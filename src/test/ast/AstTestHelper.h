@@ -6,7 +6,7 @@
 #include "ast/nodes/AstNode.h"
 
 struct AstNodeSpec {
-    int indentation;
+    int indent;
     ast::NodeType type;
 };
 

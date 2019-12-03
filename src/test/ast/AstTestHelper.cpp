@@ -6,6 +6,7 @@
 #include <iostream>
 
 void assertAstsAreEqual(SimpleTree *expected, SimpleTree *actual) {
+    REQUIRE(actual != nullptr);
     INFO(to_string(expected->type) + " | " + to_string(actual->type));
     REQUIRE(expected->type == actual->type);
     REQUIRE(expected->children.size() == actual->children.size());
@@ -18,7 +19,7 @@ SimpleTree *createSimpleFromSpecification(const std::vector<AstNodeSpec> &spec, 
     auto firstLine = spec[index];
     auto node = new SimpleTree();
     node->type = firstLine.type;
-    while (index + 1 < spec.size() && spec[index + 1].indentation > indentation) {
+    while (index + 1 < spec.size() && spec[index + 1].indent > indentation) {
         index++;
         auto child = createSimpleFromSpecification(spec, index, indentation + 1);
         node->children.push_back(child);
@@ -136,6 +137,9 @@ SimpleTree *createSimpleFromFor(ForStatementNode *node) {
 }
 
 SimpleTree *createSimpleFromAst(AstNode *node) {
+    if (node == nullptr) {
+        return nullptr;
+    }
     switch (node->getAstNodeType()) {
     case ast::NodeType::SEQUENCE:
         return createSimpleFromSequence((SequenceNode *)node);

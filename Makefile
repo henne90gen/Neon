@@ -8,7 +8,7 @@ build:
 	cd build; ninja Neon
 
 build-test:
-	cd build; ninja LexerTests ParserTests AstGeneratorTests
+	cd build; ninja Tests
 
 test: build-test
 	cd build; ninja test

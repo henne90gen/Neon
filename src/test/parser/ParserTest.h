@@ -2,5 +2,4 @@
 
 #include "Parser.h"
 
-void assertProgramCreatesParseTree(const std::vector<std::string> &program,
-                                   const std::vector<std::pair<int, GrammarSymbol>> &tree);
+void assertParserAccepts(const std::vector<std::string> &program);

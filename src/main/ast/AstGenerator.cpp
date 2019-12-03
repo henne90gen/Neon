@@ -42,7 +42,8 @@ bool isAssignment(ParseTreeNode *node) { return node->symbol == GrammarSymbol::A
 bool isForStatement(ParseTreeNode *node) { return node->symbol == GrammarSymbol::FOR_STATEMENT; }
 
 bool isIgnored(ParseTreeNode *node) {
-    return node->symbol == GrammarSymbol::SEMICOLON || node->symbol == GrammarSymbol::ENDOFFILE;
+    return node->symbol == GrammarSymbol::SEMICOLON || node->symbol == GrammarSymbol::NEW_LINE ||
+           node->symbol == GrammarSymbol::ENDOFFILE;
 }
 
 ast::BinaryOperationType getBinaryOperationType(GrammarSymbol symbol) {
@@ -217,6 +218,9 @@ StatementNode *createStatement(ParseTreeNode *node) {
     }
 
     auto child = createAstFromParseTree(node->children[isReturnStatement ? 1 : 0]);
+    if (child == nullptr) {
+        return nullptr;
+    }
     statementNode->setChild(child);
 
     return statementNode;
