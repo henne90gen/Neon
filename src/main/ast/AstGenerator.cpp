@@ -339,7 +339,8 @@ AssignmentNode *createAssignment(ParseTreeNode *node) {
     } else if (node->children.size() == 6) {
         left = new VariableNode(node->children[0]->token.content);
         auto arrayIndex = createAstFromParseTree(node->children[2]);
-        ((VariableNode *)left)->setArrayIndex(arrayIndex);
+        auto leftVariableNode = dynamic_cast<VariableNode *>(left);
+        leftVariableNode->setArrayIndex(arrayIndex);
         right = createAstFromParseTree(node->children[5]);
     } else {
         std::cout << "Invalid assignment node" << std::endl;

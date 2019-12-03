@@ -48,11 +48,11 @@ llvm::AllocaInst *IrGenerator::createEntryBlockAlloca(llvm::Type *type, const st
 }
 
 llvm::Constant *IrGenerator::getInitializer(const ast::DataType &dt, bool isArray, unsigned int arraySize) {
-    // TODO refactor this method once we have a solid type system
+    // TODO(henne): refactor this method once we have a solid type system
     if (isArray) {
         llvm::ArrayType *ty = llvm::ArrayType::get(getType(dt), arraySize);
         return llvm::ConstantAggregateZero::get(ty);
-    } else {
+    } 
         llvm::Type *ty = getType(dt);
         switch (dt) {
         case ast::DataType::FLOAT:
@@ -64,7 +64,7 @@ llvm::Constant *IrGenerator::getInitializer(const ast::DataType &dt, bool isArra
         default:
             return nullptr;
         }
-    }
+    
 }
 
 void IrGenerator::setupGlobalInitialization(llvm::Function *func) {
@@ -198,7 +198,7 @@ void IrGenerator::withScope(const std::function<void(void)> &func) {
 }
 
 void IrGenerator::printMetrics() {
-    for (auto metric : metrics) {
+    for (const auto& metric : metrics) {
         std::cout << metric.first << ": " << metric.second << std::endl;
     }
 }
@@ -206,7 +206,7 @@ void IrGenerator::printMetrics() {
 void IrGenerator::printErrors() {
     std::cerr << std::endl;
     std::cerr << "The following errors occured:" << std::endl;
-    for (auto msg : errors) {
+    for (const auto& msg : errors) {
         std::cerr << "\t" << msg << std::endl;
     }
     std::cerr << std::endl;

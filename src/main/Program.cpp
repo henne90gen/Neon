@@ -12,7 +12,7 @@ std::string ltrim(const std::string &s) {
     return (start == std::string::npos) ? "" : s.substr(start);
 }
 
-bool tokenHasSpaceBeforeIt(const Token *prev, const Token &t, const Token *next) {
+bool tokenHasSpaceBeforeIt(const Token *prev, const Token &t, const Token * /*next*/) {
     bool prevExists = prev != nullptr;
     bool prevTokenIsEquals = prevExists && (prev->type == Token::SINGLE_EQUALS || prev->type == Token::DOUBLE_EQUALS);
     bool prevTokenIsOperation = prevExists && (prev->type == Token::PLUS || prev->type == Token::STAR ||
