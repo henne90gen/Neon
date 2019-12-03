@@ -50,10 +50,12 @@ std::optional<std::string> StringCodeProvider::getMoreCode() {
     return std::optional(result);
 }
 
-void removeLeadingWhitespace(std::string &str) {
-    while (!str.empty() && (str[0] == ' ' || str[0] == '\t')) {
-        str = str.substr(1, str.length());
+std::string removeLeadingWhitespace(const std::string &str) {
+    std::string result = str;
+    while (!result.empty() && (result[0] == ' ' || result[0] == '\t')) {
+        result = result.substr(1, result.length());
     }
+    return result;
 }
 
 Token Lexer::_getToken() {
@@ -70,7 +72,7 @@ Token Lexer::_getToken() {
             }
         }
 
-        removeLeadingWhitespace(currentWord);
+        currentWord = removeLeadingWhitespace(currentWord);
         if (verbose) {
             std::cout << "Current word: '" << currentWord << "'" << std::endl;
         }

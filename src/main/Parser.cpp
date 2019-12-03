@@ -18,14 +18,15 @@ void printParseTree(ParseTreeNode *node, int indentation) {
     }
 }
 
-std::string &replace(std::string &str, const std::string &from, const std::string &to) {
+std::string replace(const std::string &str, const std::string &from, const std::string &to) {
+    std::string result = str;
     size_t pos = 0;
     const size_t increment = to.size();
-    while ((pos = str.find(from, pos)) != std::string::npos) {
-        str.replace(pos, from.length(), to);
+    while ((pos = result.find(from, pos)) != std::string::npos) {
+        result.replace(pos, from.length(), to);
         pos += increment;
     }
-    return str;
+    return result;
 }
 
 void printParseTreeTestCase(const ParseTreeNode *node, const Program &program, int indentation) {

@@ -164,6 +164,10 @@ ast::DataType getDataType(ParseTreeNode *node) {
 }
 
 VariableDefinitionNode *createVariableDefinition(ParseTreeNode *node) {
+    if (node == nullptr) {
+        std::cerr << "This was predicted by clang-analyzer, but had not been verified yet." << std::endl;
+        return nullptr;
+    }
     if (node->children.size() == 1) {
         return createVariableDefinition(node->children[0]);
     }

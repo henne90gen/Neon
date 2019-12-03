@@ -1,0 +1,22 @@
+FLOAT_LIT
+    regex
+
+INT_LIT
+    regex
+
+TRUE
+    regex
+
+FALSE
+    regex
+
+NOT
+    regex
+
+PLUS
+
+MINUS
+
+STAR
+
+DIV
