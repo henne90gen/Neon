@@ -19,17 +19,30 @@
 #include <llvm/Transforms/Utils/Cloning.h>
 
 void Compiler::run() {
-    while (!program->uncompiledModules.empty()) {
-        std::string moduleFileName = program->uncompiledModules.back();
-        program->uncompiledModules.pop_back();
-        auto module = compileModule(moduleFileName);
+    std::vector<std::string> uncompiledModules = {program->entryPoint};
+    while (!uncompiledModules.empty()) {
+        std::string moduleFileName = uncompiledModules.back();
+        uncompiledModules.pop_back();
+
+        auto module = ingestModule(moduleFileName);
         program->modules[moduleFileName] = module;
+
+        for (auto &importedModule : module->importedModules) {
+            // TODO prevent modules from being added twice
+            // TODO find a way to uniquely identify modules
+            uncompiledModules.push_back(importedModule);
+        }
     }
+
+    // TODO fix type analysis
+    //    analyseTypes();
+
+    generateIR();
 
     writeModuleToObjectFile();
 }
 
-Module *Compiler::compileModule(const std::string &moduleFileName) {
+Module *Compiler::ingestModule(const std::string &moduleFileName) {
     auto result = new Module(moduleFileName, program->llvmContext);
 
     CodeProvider *codeProvider = new FileCodeProvider(result);
@@ -44,9 +57,6 @@ Module *Compiler::compileModule(const std::string &moduleFileName) {
 
     auto astGenerator = AstGenerator(result);
     astGenerator.run(parseTreeRoot);
-    for (auto &importedModule : astGenerator.importedModules) {
-        program->uncompiledModules.push_back(importedModule);
-    }
 
     if (verbose) {
         auto astPrinter = AstPrinter(result);
@@ -56,13 +66,14 @@ Module *Compiler::compileModule(const std::string &moduleFileName) {
         astTestCasePrinter.run();
     }
 
-    // TODO fix type analysis
-    //    analyseTypes();
-
-    auto generator = IrGenerator(result, verbose);
-    generator.run();
-
     return result;
+}
+
+void Compiler::generateIR() {
+    for (const auto &module : program->modules) {
+        auto generator = IrGenerator(module.second, verbose);
+        generator.run();
+    }
 }
 
 // void IrGenerator::generateDummyMain() {

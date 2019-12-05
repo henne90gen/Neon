@@ -9,13 +9,12 @@
 
 class Program {
   public:
-    explicit Program(std::string name, std::vector<std::string> uncompiledModules)
-        : name(std::move(name)), uncompiledModules(std::move(uncompiledModules)), objectFileName(this->name + ".o") {}
+    explicit Program(std::string entryPoint);
 
+    std::string entryPoint;
     std::string name;
     std::string objectFileName;
 
-    std::vector<std::string> uncompiledModules = {};
     std::unordered_map<std::string, Module *> modules = {};
     llvm::LLVMContext llvmContext = {};
 };

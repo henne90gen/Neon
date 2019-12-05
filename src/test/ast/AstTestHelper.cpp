@@ -1,6 +1,6 @@
 #include "AstTestHelper.h"
 
-#include "ast/nodes/AllNodes.h"
+#include "compiler/ast/nodes/AllNodes.h"
 
 #include <catch2/catch.hpp>
 #include <iostream>
@@ -183,11 +183,14 @@ SimpleTree *createSimpleFromAst(AstNode *node) {
 void assertProgramCreatesAst(const std::vector<std::string> &program, std::vector<AstNodeSpec> &spec) {
     int index = 0;
     auto expected = createSimpleFromSpecification(spec, index);
-    CodeProvider *cp = new StringCodeProvider(program, true);
-    Module prog = {};
-    Lexer lexer(cp, prog, false);
+    CodeProvider *codeProvider = new StringCodeProvider(program, false);
+    auto context = new llvm::LLVMContext();
+    auto prog = new Module("test.ne", *context);
+    auto lexer = Lexer(codeProvider, prog);
     Parser parser(lexer, prog, false);
     ParseTreeNode *parseTree = parser.createParseTree();
-    auto actual = createAstFromParseTree(parseTree);
+    auto astGenerator = AstGenerator(prog);
+    astGenerator.run(parseTree);
+    auto actual = prog->root;
     assertAstsAreEqual(expected, createSimpleFromAst(actual));
 }

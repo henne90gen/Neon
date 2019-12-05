@@ -9,7 +9,6 @@ class AstGenerator {
 
     void run(ParseTreeNode *root);
 
-    std::vector<std::string> importedModules;
   private:
     Module *module;
 

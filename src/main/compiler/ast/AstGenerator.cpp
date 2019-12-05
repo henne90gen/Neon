@@ -442,7 +442,7 @@ AstNode *AstGenerator::createImportStatement(ParseTreeNode *node) {
     std::string fileName = node->children[1]->token.content;
     fileName = fileName.substr(1, fileName.size() - 2);
     result->setFileName(fileName);
-    importedModules.push_back(fileName);
+    module->importedModules.push_back(fileName);
     return result;
 }
 

@@ -11,7 +11,8 @@ class Compiler {
     Program *program;
     bool verbose;
 
-    Module *compileModule(const std::string &moduleFileName);
+    Module *ingestModule(const std::string &moduleFileName);
     void writeModuleToObjectFile();
     void mergeModules(llvm::Module &module, const llvm::DataLayout &dataLayout, const std::string &targetTriple);
+    void generateIR();
 };
