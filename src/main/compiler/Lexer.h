@@ -6,7 +6,7 @@
 #include <utility>
 #include <vector>
 
-#include "Module.h"
+#include "../Module.h"
 #include "Token.h"
 
 class CodeProvider {

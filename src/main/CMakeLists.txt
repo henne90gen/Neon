@@ -10,36 +10,38 @@ add_custom_command(
 set(SOURCES_GRAMMAR Grammar.cpp)
 
 set(SOURCES_COMPILER
-        Lexer.cpp
-        Parser.cpp
-        Token.cpp
-        Module.cpp
-        ast/AstGenerator.cpp
-        ast/nodes/AssignmentNode.cpp
-        ast/nodes/AstNode.cpp
-        ast/nodes/BinaryOperationNode.cpp
-        ast/nodes/ForStatementNode.cpp
-        ast/nodes/FunctionNode.cpp
-        ast/nodes/IfStatementNode.cpp
-        ast/nodes/ImportNode.cpp
-        ast/nodes/LiteralNodes.cpp
-        ast/nodes/SequenceNode.cpp
-        ast/nodes/StatementNode.cpp
-        ast/nodes/UnaryOperationNode.cpp
-        ast/nodes/VariableDefinitionNode.cpp
-        ast/nodes/VariableNode.cpp
-        ast/visitors/AstInterpreter.cpp
-        ast/visitors/AstPrinter.cpp
-        ast/visitors/AstTestCasePrinter.cpp
-        ast/visitors/AstTypeAnalyser.cpp
-        ir/Functions.cpp
-        ir/IrGenerator.cpp
-        ir/Operations.cpp
-        ir/Statements.cpp
-        ir/Types.cpp
-        ir/Variables.cpp
+        compiler/ast/AstGenerator.cpp
+        compiler/ast/nodes/AssignmentNode.cpp
+        compiler/ast/nodes/AstNode.cpp
+        compiler/ast/nodes/BinaryOperationNode.cpp
+        compiler/ast/nodes/ForStatementNode.cpp
+        compiler/ast/nodes/FunctionNode.cpp
+        compiler/ast/nodes/IfStatementNode.cpp
+        compiler/ast/nodes/ImportNode.cpp
+        compiler/ast/nodes/LiteralNodes.cpp
+        compiler/ast/nodes/SequenceNode.cpp
+        compiler/ast/nodes/StatementNode.cpp
+        compiler/ast/nodes/UnaryOperationNode.cpp
+        compiler/ast/nodes/VariableDefinitionNode.cpp
+        compiler/ast/nodes/VariableNode.cpp
+        compiler/ast/visitors/AstInterpreter.cpp
+        compiler/ast/visitors/AstPrinter.cpp
+        compiler/ast/visitors/AstTestCasePrinter.cpp
+        compiler/ast/visitors/AstTypeAnalyser.cpp
+        compiler/ir/Functions.cpp
+        compiler/ir/IrGenerator.cpp
+        compiler/ir/Operations.cpp
+        compiler/ir/Statements.cpp
+        compiler/ir/Types.cpp
+        compiler/ir/Variables.cpp
+        compiler/Compiler.cpp
+        compiler/Lexer.cpp
+        compiler/Parser.cpp
+        compiler/Token.cpp
         Linker.cpp
-        ObjectFileWriter.cpp Utils.cpp)
+        Module.cpp
+        Program.cpp
+        Utils.cpp)
 
 add_library(NeonGrammar ${SOURCES_GRAMMAR})
 add_library(NeonCompiler ${SOURCES_COMPILER})

@@ -1,7 +1,6 @@
 #include "Linker.h"
 
 #include <iostream>
-#include <utility>
 
 void Linker::link() {
     std::string s = "ld";

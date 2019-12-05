@@ -2,8 +2,8 @@
 
 #include <iostream>
 
-#include "../../Module.h"
-#include "../../Utils.h"
+#include "../../../Module.h"
+#include "../../../Utils.h"
 #include "../nodes/AllNodes.h"
 
 void AstTestCasePrinter::printNode(AstNode *node) {

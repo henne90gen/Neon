@@ -1,12 +1,12 @@
 #pragma once
 
-#include "../../Module.h"
+#include "../../../Module.h"
 #include "../AstVisitor.h"
 #include "../nodes/AstNode.h"
 
-class AstTestCasePrinter : public AstVisitor {
+class AstPrinter : public AstVisitor {
   public:
-    explicit AstTestCasePrinter(const Module *module) : module(module) {}
+    explicit AstPrinter(const Module *module) : module(module) {}
 
     void visitAssignmentNode(AssignmentNode *node) override;
     void visitBinaryOperationNode(BinaryOperationNode *node) override;
@@ -16,7 +16,6 @@ class AstTestCasePrinter : public AstVisitor {
     void visitForStatementNode(ForStatementNode *node) override;
     void visitFunctionNode(FunctionNode *node) override;
     void visitIfStatementNode(IfStatementNode *node) override;
-    void visitImportNode(ImportNode *node) override;
     void visitIntegerNode(IntegerNode *node) override;
     void visitSequenceNode(SequenceNode *node) override;
     void visitStatementNode(StatementNode *node) override;
@@ -29,6 +28,4 @@ class AstTestCasePrinter : public AstVisitor {
   private:
     const Module *module;
     int indentation = 0;
-
-    void printNode(AstNode *node);
 };

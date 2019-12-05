@@ -1,6 +1,6 @@
 #pragma once
 
-#include "Grammar.h"
+#include "../Grammar.h"
 #include "Lexer.h"
 #include "ParseTreeNode.h"
 

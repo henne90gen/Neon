@@ -1,6 +1,6 @@
 #pragma once
 
-#include "../Module.h"
+#include "../../Module.h"
 #include "../ast/AstVisitor.h"
 #include "../ast/nodes/AllNodes.h"
 

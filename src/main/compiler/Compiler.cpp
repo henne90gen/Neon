@@ -1,5 +1,11 @@
-#include "ObjectFileWriter.h"
+#include "Compiler.h"
 
+#include "ast/AstGenerator.h"
+#include "ast/visitors/AstPrinter.h"
+#include "ast/visitors/AstTestCasePrinter.h"
+#include "ir/IrGenerator.h"
+
+#include <iostream>
 #include <string>
 
 #include <llvm/IR/LegacyPassManager.h>
@@ -12,7 +18,54 @@
 #include <llvm/Target/TargetOptions.h>
 #include <llvm/Transforms/Utils/Cloning.h>
 
-//void IrGenerator::generateDummyMain() {
+void Compiler::run() {
+    while (!program->uncompiledModules.empty()) {
+        std::string moduleFileName = program->uncompiledModules.back();
+        program->uncompiledModules.pop_back();
+        auto module = compileModule(moduleFileName);
+        program->modules[moduleFileName] = module;
+    }
+
+    writeModuleToObjectFile();
+}
+
+Module *Compiler::compileModule(const std::string &moduleFileName) {
+    auto result = new Module(moduleFileName, program->llvmContext);
+
+    CodeProvider *codeProvider = new FileCodeProvider(result);
+    Lexer lexer(codeProvider, result, verbose);
+    Parser parser(lexer, result, verbose);
+
+    auto parseTreeRoot = parser.createParseTree();
+    if (verbose) {
+        printParseTree(parseTreeRoot);
+        printParseTreeTestCase(parseTreeRoot, result);
+    }
+
+    auto astGenerator = AstGenerator(result);
+    astGenerator.run(parseTreeRoot);
+    for (auto &importedModule : astGenerator.importedModules) {
+        program->uncompiledModules.push_back(importedModule);
+    }
+
+    if (verbose) {
+        auto astPrinter = AstPrinter(result);
+        astPrinter.run();
+
+        auto astTestCasePrinter = AstTestCasePrinter(result);
+        astTestCasePrinter.run();
+    }
+
+    // TODO fix type analysis
+    //    analyseTypes();
+
+    auto generator = IrGenerator(result, verbose);
+    generator.run();
+
+    return result;
+}
+
+// void IrGenerator::generateDummyMain() {
 //    if (llvmModule.getFunction("main") != nullptr) {
 //        return;
 //    }
@@ -29,8 +82,7 @@
 //    visitFunctionNode(function);
 //}
 
-void mergeModules(Program *program, llvm::Module &module, const llvm::DataLayout &dataLayout,
-                  const std::string &targetTriple) {
+void Compiler::mergeModules(llvm::Module &module, const llvm::DataLayout &dataLayout, const std::string &targetTriple) {
     // To be able to link modules, they have to be in the same context.
     // To create modules in parallel, they can't share a context.
     // One can work around this issue, by writing all the modules into a buffer first and then reading them in again
@@ -49,7 +101,7 @@ void mergeModules(Program *program, llvm::Module &module, const llvm::DataLayout
     }
 }
 
-void writeModuleToObjectFile(Program *program) {
+void Compiler::writeModuleToObjectFile() {
     llvm::InitializeNativeTarget();
     llvm::InitializeNativeTargetAsmParser();
     llvm::InitializeNativeTargetAsmPrinter();
@@ -74,7 +126,7 @@ void writeModuleToObjectFile(Program *program) {
     module.setDataLayout(dataLayout);
     module.setTargetTriple(targetTriple);
 
-    mergeModules(program, module, dataLayout, targetTriple);
+    mergeModules(module, dataLayout, targetTriple);
 
     // TODO generate dummy main function, to enable users to write "scripts"
 

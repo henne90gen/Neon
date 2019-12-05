@@ -1,8 +1,6 @@
 #pragma once
 
-#include "Module.h"
-
-#include <vector>
+#include "Program.h"
 
 class Linker {
   public:

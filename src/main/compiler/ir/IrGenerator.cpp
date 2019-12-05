@@ -14,7 +14,7 @@
 
 #include <iostream>
 
-#include "../Utils.h"
+#include "../../Utils.h"
 
 IrGenerator::IrGenerator(Module *module, const bool verbose)
     : module(module), verbose(verbose), context(module->llvmModule.getContext()), llvmModule(module->llvmModule),

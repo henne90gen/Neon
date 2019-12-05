@@ -1,6 +1,6 @@
 #pragma once
 
-#include "Grammar.h"
+#include "../Grammar.h"
 #include "Token.h"
 
 struct ParseTreeNode {

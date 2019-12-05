@@ -1,7 +1,7 @@
 #pragma once
 
-#include "Token.h"
-#include "ast/nodes/AstNode.h"
+#include "compiler/Token.h"
+#include "compiler/ast/nodes/AstNode.h"
 
 #include <algorithm>
 #include <llvm/IR/LLVMContext.h>
@@ -25,17 +25,4 @@ class Module {
     [[nodiscard]] std::string toString() const;
     [[nodiscard]] std::string toEscapedString() const;
     [[nodiscard]] std::string toArrayString() const;
-};
-
-class Program {
-  public:
-    explicit Program(std::string name, std::vector<std::string> uncompiledModules)
-        : name(std::move(name)), uncompiledModules(std::move(uncompiledModules)), objectFileName(this->name + ".o") {}
-
-    std::string name;
-    std::string objectFileName;
-
-    std::vector<std::string> uncompiledModules = {};
-    std::unordered_map<std::string, Module*> modules = {};
-    llvm::LLVMContext llvmContext = {};
 };

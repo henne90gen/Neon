@@ -1,6 +1,6 @@
 #include "IrGenerator.h"
 
-#include "../Utils.h"
+#include "../../Utils.h"
 
 void IrGenerator::visitVariableNode(VariableNode *node) {
     LOG("Enter Variable")
