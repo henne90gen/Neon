@@ -2,8 +2,6 @@
 
 #include <iostream>
 
-#include "nodes/AllNodes.h"
-
 bool isBinaryOperation(ParseTreeNode *node) {
     return (node->symbol == GrammarSymbol::SUM || node->symbol == GrammarSymbol::TERM ||
             node->symbol == GrammarSymbol::RELATION) &&
@@ -88,7 +86,7 @@ UnaryOperationNode::UnaryOperationType getUnaryOperationType(GrammarSymbol symbo
     }
 }
 
-AstNode *createBinaryOperation(ParseTreeNode *node) {
+AstNode *AstGenerator::createBinaryOperation(ParseTreeNode *node) {
     auto nodeType = getBinaryOperationType(node->children[1]->symbol);
     auto astNode = new BinaryOperationNode(nodeType);
 
@@ -100,7 +98,7 @@ AstNode *createBinaryOperation(ParseTreeNode *node) {
     return astNode;
 }
 
-AstNode *createUnaryOperation(ParseTreeNode *node) {
+AstNode *AstGenerator::createUnaryOperation(ParseTreeNode *node) {
     auto nodeType = getUnaryOperationType(node->children[0]->symbol);
     auto unaryOperationNode = new UnaryOperationNode(nodeType);
 
@@ -138,7 +136,7 @@ AstNode *createLiteral(ParseTreeNode *node) {
     }
 }
 
-VariableNode *createVariable(ParseTreeNode *node) {
+VariableNode *AstGenerator::createVariable(ParseTreeNode *node) {
     if (node->children.empty()) {
         return new VariableNode(node->token.content);
     }
@@ -165,7 +163,7 @@ ast::DataType getDataType(ParseTreeNode *node) {
     return ast::DataType::VOID;
 }
 
-VariableDefinitionNode *createVariableDefinition(ParseTreeNode *node) {
+VariableDefinitionNode *AstGenerator::createVariableDefinition(ParseTreeNode *node) {
     if (node == nullptr) {
         std::cerr << "This was predicted by clang-analyzer, but had not been verified yet." << std::endl;
         return nullptr;
@@ -190,7 +188,7 @@ VariableDefinitionNode *createVariableDefinition(ParseTreeNode *node) {
     return new VariableDefinitionNode(nameNode->token.content, dataType, arraySize);
 }
 
-AstNode *createSequence(ParseTreeNode *node, SequenceNode *seqRoot) {
+AstNode *AstGenerator::createSequence(ParseTreeNode *node, SequenceNode *seqRoot) {
     if (seqRoot == nullptr) {
         seqRoot = new SequenceNode();
     }
@@ -209,7 +207,7 @@ AstNode *createSequence(ParseTreeNode *node, SequenceNode *seqRoot) {
     return seqRoot;
 }
 
-StatementNode *createStatement(ParseTreeNode *node) {
+StatementNode *AstGenerator::createStatement(ParseTreeNode *node) {
     auto statementNode = new StatementNode();
     if (node->children.empty()) {
         std::cout << "Statement did not contain anything." << std::endl;
@@ -232,7 +230,7 @@ StatementNode *createStatement(ParseTreeNode *node) {
     return statementNode;
 }
 
-void addArguments(FunctionNode *function, ParseTreeNode *root) {
+void AstGenerator::addArguments(FunctionNode *function, ParseTreeNode *root) {
     auto currentNode = root;
     while (currentNode != nullptr) {
         ParseTreeNode *argNode = nullptr;
@@ -253,7 +251,7 @@ void addArguments(FunctionNode *function, ParseTreeNode *root) {
     }
 }
 
-FunctionNode *createExternalFunction(ParseTreeNode *node) {
+FunctionNode *AstGenerator::createExternalFunction(ParseTreeNode *node) {
     auto variableNameNode = node->children[2];
     auto header = node->children[4];
     ParseTreeNode *argumentsNode = nullptr;
@@ -287,7 +285,7 @@ FunctionNode *createExternalFunction(ParseTreeNode *node) {
     return function;
 }
 
-FunctionNode *createFunction(ParseTreeNode *node) {
+FunctionNode *AstGenerator::createFunction(ParseTreeNode *node) {
     auto variableNameNode = node->children[1];
     auto header = node->children[3];
     ParseTreeNode *argumentsNode = nullptr;
@@ -332,7 +330,7 @@ FunctionNode *createFunction(ParseTreeNode *node) {
     return function;
 }
 
-AssignmentNode *createAssignment(ParseTreeNode *node) {
+AssignmentNode *AstGenerator::createAssignment(ParseTreeNode *node) {
     AstNode *left = nullptr;
     AstNode *right = nullptr;
     if (node->children.size() == 3) {
@@ -358,7 +356,7 @@ AssignmentNode *createAssignment(ParseTreeNode *node) {
     return assignment;
 }
 
-void addArguments(CallNode *call, ParseTreeNode *root) {
+void AstGenerator::addArguments(CallNode *call, ParseTreeNode *root) {
     auto currentNode = root;
     while (currentNode != nullptr) {
         ParseTreeNode *argNode = nullptr;
@@ -379,7 +377,7 @@ void addArguments(CallNode *call, ParseTreeNode *root) {
     }
 }
 
-CallNode *createCall(ParseTreeNode *node) {
+CallNode *AstGenerator::createCall(ParseTreeNode *node) {
     std::string name = node->children[0]->token.content;
     auto call = new CallNode(name);
     auto call_header = node->children[2];
@@ -389,7 +387,7 @@ CallNode *createCall(ParseTreeNode *node) {
     return call;
 }
 
-IfStatementNode *createIfStatement(ParseTreeNode *node) {
+IfStatementNode *AstGenerator::createIfStatement(ParseTreeNode *node) {
     auto ifNode = new IfStatementNode();
     AstNode *condition = createAstFromParseTree(node->children[1]);
     ifNode->setCondition(condition);
@@ -408,7 +406,7 @@ IfStatementNode *createIfStatement(ParseTreeNode *node) {
     return ifNode;
 }
 
-ForStatementNode *createForStatement(ParseTreeNode *node) {
+ForStatementNode *AstGenerator::createForStatement(ParseTreeNode *node) {
     // FOR
     // ASSIGNMENT
     // SEMICOLON
@@ -438,14 +436,17 @@ ForStatementNode *createForStatement(ParseTreeNode *node) {
     return result;
 }
 
-AstNode *createImportStatement(ParseTreeNode *node) {
+AstNode *AstGenerator::createImportStatement(ParseTreeNode *node) {
     auto result = new ImportNode();
+    // TODO at what point should we remove '"' from the string?
     std::string fileName = node->children[1]->token.content;
+    fileName = fileName.substr(1, fileName.size() - 2);
     result->setFileName(fileName);
+    importedModules.push_back(fileName);
     return result;
 }
 
-AstNode *createAstFromParseTree(ParseTreeNode *node) {
+AstNode *AstGenerator::createAstFromParseTree(ParseTreeNode *node) {
     if (node == nullptr) {
         return nullptr;
     }
@@ -526,3 +527,5 @@ AstNode *createAstFromParseTree(ParseTreeNode *node) {
 
     return nullptr;
 }
+
+void AstGenerator::run(ParseTreeNode *root) { module->root = createAstFromParseTree(root); }

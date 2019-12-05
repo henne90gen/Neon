@@ -2,10 +2,11 @@
 
 #include "../AstVisitor.h"
 #include "../nodes/AstNode.h"
+#include "../../Module.h"
 
 class AstPrinter : public AstVisitor {
   public:
-    explicit AstPrinter() = default;
+    explicit AstPrinter(const Module *module) : module(module) {}
 
     void visitAssignmentNode(AssignmentNode *node) override;
     void visitBinaryOperationNode(BinaryOperationNode *node) override;
@@ -22,8 +23,9 @@ class AstPrinter : public AstVisitor {
     void visitVariableNode(VariableNode *node) override;
     void visitVariableDefinitionNode(VariableDefinitionNode *node) override;
 
+    void run();
+
   private:
+    const Module *module;
     int indentation = 0;
 };
-
-void printAst(AstNode *root);

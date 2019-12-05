@@ -14,7 +14,7 @@ test: build-test
 	cd build; ninja test
 
 run: build
-	./build/src/main/Neon
+	./build/src/main/Neon; ./main; echo $$?
 
 generate-parser:
 	cd src/main && python ../../scripts/parser_generator.py

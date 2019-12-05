@@ -2,7 +2,7 @@
 
 #include <iostream>
 
-#include "../../Program.h"
+#include "../../Module.h"
 #include "../../Utils.h"
 #include "../nodes/AllNodes.h"
 
@@ -111,23 +111,20 @@ void AstTestCasePrinter::visitForStatementNode(ForStatementNode *node) {
     indentation--;
 }
 
-void AstTestCasePrinter::visitImportNode(ImportNode *node) {
-    printNode(node);
-}
+void AstTestCasePrinter::visitImportNode(ImportNode *node) { printNode(node); }
 
-void printAstTestCase(const Program &program, AstNode *root) {
-    if (root == nullptr) {
+void AstTestCasePrinter::run() {
+    if (module->root == nullptr) {
         std::cerr << "Could not print AST test case (nullptr)." << std::endl;
         return;
     }
 
     std::cout << std::endl;
-    const auto &programStr = program.toEscapedString();
+    const auto &programStr = module->toArrayString();
     std::cout << "SECTION(\"can handle __'\") {" << std::endl;
     std::cout << "    std::vector<AstNodeSpec> spec = {" << std::endl;
 
-    auto testCasePrinter = new AstTestCasePrinter();
-    root->accept(testCasePrinter);
+    module->root->accept(this);
 
     std::cout << "    };" << std::endl;
     std::cout << "    std::vector<std::string> program = {\"" << programStr << "\"};" << std::endl;

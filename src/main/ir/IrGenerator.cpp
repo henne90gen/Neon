@@ -10,13 +10,15 @@
 #include <llvm/Support/raw_ostream.h>
 #include <llvm/Target/TargetOptions.h>
 #include <llvm/Transforms/Scalar/SimplifyCFG.h>
+#include <llvm/Transforms/Utils/Cloning.h>
 
 #include <iostream>
 
 #include "../Utils.h"
 
-IrGenerator::IrGenerator(const Program &program, const bool verbose)
-    : program(program), verbose(verbose), builder(context), module(program.fileName, context) {
+IrGenerator::IrGenerator(Module *module, const bool verbose)
+    : module(module), verbose(verbose), context(module->llvmModule.getContext()), llvmModule(module->llvmModule),
+      builder(context) {
     pushScope();
 }
 
@@ -52,27 +54,26 @@ llvm::Constant *IrGenerator::getInitializer(const ast::DataType &dt, bool isArra
     if (isArray) {
         llvm::ArrayType *ty = llvm::ArrayType::get(getType(dt), arraySize);
         return llvm::ConstantAggregateZero::get(ty);
-    } 
-        llvm::Type *ty = getType(dt);
-        switch (dt) {
-        case ast::DataType::FLOAT:
-            return llvm::ConstantFP::get(ty, 0);
-        case ast::DataType::INT:
-        case ast::DataType::BOOL:
-            return llvm::ConstantInt::get(ty, 0);
-        case ast::DataType::VOID:
-        default:
-            return nullptr;
-        }
-    
+    }
+    llvm::Type *ty = getType(dt);
+    switch (dt) {
+    case ast::DataType::FLOAT:
+        return llvm::ConstantFP::get(ty, 0);
+    case ast::DataType::INT:
+    case ast::DataType::BOOL:
+        return llvm::ConstantInt::get(ty, 0);
+    case ast::DataType::VOID:
+    default:
+        return nullptr;
+    }
 }
 
 void IrGenerator::setupGlobalInitialization(llvm::Function *func) {
     std::vector<llvm::Type *> types = {llvm::Type::getInt32Ty(context), func->getType(),
                                        llvm::PointerType::getInt8PtrTy(context)};
     auto structType = llvm::StructType::get(context, types);
-    module.getOrInsertGlobal("llvm.global_ctors", llvm::ArrayType::get(structType, 1));
-    llvm::GlobalVariable *ctorsVar = module.getGlobalVariable("llvm.global_ctors");
+    llvmModule.getOrInsertGlobal("llvm.global_ctors", llvm::ArrayType::get(structType, 1));
+    llvm::GlobalVariable *ctorsVar = llvmModule.getGlobalVariable("llvm.global_ctors");
     ctorsVar->setLinkage(llvm::GlobalValue::LinkageTypes::AppendingLinkage);
 
     const int globalInitializerNumber = 65535;
@@ -90,7 +91,7 @@ void IrGenerator::visitSequenceNode(SequenceNode *node) {
     llvm::Function *initFunc = nullptr;
     if (currentFunction == nullptr) {
         // TODO(henne): make sure this function name does not collide with any user defined functions
-        initFunc = getOrCreateFunctionDefinition("__ctor", ast::DataType::VOID, {});
+        initFunc = getOrCreateFunctionDefinition("global-ctor-" + module->fileName, ast::DataType::VOID, {});
 
         llvm::BasicBlock *BB = llvm::BasicBlock::Create(context, "entry-ctor", initFunc);
         builder.SetInsertPoint(BB);
@@ -118,40 +119,23 @@ void IrGenerator::visitSequenceNode(SequenceNode *node) {
 }
 
 void IrGenerator::print(const bool writeToFile) {
-    std::string fileName = program.fileName + ".llvm";
+    std::string fileName = module->fileName + ".llvm";
     std::error_code EC;
-    llvm::raw_fd_ostream dest(fileName, EC, llvm::sys::fs::OF_None);
-    module.print(llvm::outs(), nullptr);
+    llvmModule.print(llvm::outs(), nullptr);
     if (writeToFile) {
-        module.print(dest, nullptr);
+        llvm::raw_fd_ostream dest(fileName, EC, llvm::sys::fs::OF_None);
+        llvmModule.print(dest, nullptr);
+        dest.flush();
+        dest.close();
     }
 }
 
-void IrGenerator::generateDummyMain() {
-    if (module.getFunction("main") != nullptr) {
+void IrGenerator::run() {
+    if (module->root == nullptr) {
         return;
     }
 
-    auto zero = new IntegerNode(0);
-
-    auto returnStatement = new StatementNode();
-    returnStatement->setIsReturnStatement(true);
-    returnStatement->setChild(zero);
-
-    auto function = new FunctionNode("main", ast::DataType::INT);
-    function->setBody(returnStatement);
-
-    visitFunctionNode(function);
-}
-
-void IrGenerator::run(AstNode *root) {
-    if (root == nullptr) {
-        return;
-    }
-
-    root->accept(this);
-
-    generateDummyMain();
+    module->root->accept(this);
 
     this->printMetrics();
     if (!errors.empty()) {
@@ -198,7 +182,7 @@ void IrGenerator::withScope(const std::function<void(void)> &func) {
 }
 
 void IrGenerator::printMetrics() {
-    for (const auto& metric : metrics) {
+    for (const auto &metric : metrics) {
         std::cout << metric.first << ": " << metric.second << std::endl;
     }
 }
@@ -206,7 +190,7 @@ void IrGenerator::printMetrics() {
 void IrGenerator::printErrors() {
     std::cerr << std::endl;
     std::cerr << "The following errors occured:" << std::endl;
-    for (const auto& msg : errors) {
+    for (const auto &msg : errors) {
         std::cerr << "\t" << msg << std::endl;
     }
     std::cerr << std::endl;

@@ -18,14 +18,14 @@ void printParseTree(ParseTreeNode *node, int indentation) {
     }
 }
 
-void printParseTreeTestCase(const ParseTreeNode *node, const Program &program) {
+void printParseTreeTestCase(const ParseTreeNode *node, const Module *program) {
     if (node == nullptr) {
         return;
     }
 
-    std::string programArrayStr = program.toArrayString();
+    std::string programArrayStr = program->toArrayString();
     std::cout << std::endl;
-    std::cout << "SECTION(\"can handle _\") {" << std::endl;
+    std::cout << "SECTION(\"can handle __\") {" << std::endl;
 
     std::cout << "    std::vector<std::string> program = {\"" << programArrayStr << "\"};" << std::endl;
     std::cout << "    assertProgramCreatesParseTree(program, parseTree);" << std::endl;
@@ -277,7 +277,7 @@ ParseTreeNode *Parser::createParseTree() {
     std::cout << "Could not accept program!" << std::endl;
     if (verbose) {
         std::cout << std::endl << "Program:" << std::endl;
-        for (auto &t : program.tokens) {
+        for (auto &t : program->tokens) {
             std::cout << to_string(t.type) << ": " << t.content << std::endl;
         }
     }

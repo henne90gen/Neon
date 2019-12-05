@@ -143,7 +143,7 @@ Token Lexer::_getToken() {
 
 Token Lexer::getToken() {
     auto token = _getToken();
-    program.tokens.push_back(token);
+    program->tokens.push_back(token);
     return token;
 }
 

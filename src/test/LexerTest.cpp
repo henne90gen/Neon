@@ -12,7 +12,7 @@ void assertTokensCanBeLexed(const std::unordered_map<std::string, Token::TokenTy
     }
 
     CodeProvider *codeProvider = new StringCodeProvider(lines, false);
-    Program program = {};
+    Module program = {};
     auto lexer = Lexer(codeProvider, program, false);
     for (auto &expectedToken : tokens) {
         auto actualToken = lexer.getToken();
@@ -27,7 +27,7 @@ TEST_CASE("Lexer") {
     SECTION("can handle lots of spaces") {
         std::vector<std::string> lines = {"     1    "};
         CodeProvider *codeProvider = new StringCodeProvider(lines, false);
-        Program program = {};
+        Module program = {};
         auto lexer = Lexer(codeProvider, program);
         auto token = lexer.getToken();
         REQUIRE(token.content == "1");
@@ -37,7 +37,7 @@ TEST_CASE("Lexer") {
     SECTION("can handle spaces between tokens") {
         std::vector<std::string> lines = {"1 - 5"};
         CodeProvider *codeProvider = new StringCodeProvider(lines, false);
-        Program program = {};
+        Module program = {};
         auto lexer = Lexer(codeProvider, program, false);
         auto token = lexer.getToken();
         REQUIRE(token.type == Token::INTEGER);
@@ -55,7 +55,7 @@ TEST_CASE("Lexer") {
     SECTION("can handle tabs") {
         std::vector<std::string> lines = {"\t1"};
         CodeProvider *codeProvider = new StringCodeProvider(lines, false);
-        Program program = {};
+        Module program = {};
         auto lexer = Lexer(codeProvider, program);
         auto token = lexer.getToken();
         REQUIRE(token.content == "1");
@@ -65,7 +65,7 @@ TEST_CASE("Lexer") {
     SECTION("can handle no spaces between tokens") {
         std::vector<std::string> lines = {"1-5"};
         CodeProvider *codeProvider = new StringCodeProvider(lines, false);
-        Program program = {};
+        Module program = {};
         auto lexer = Lexer(codeProvider, program, false);
         auto token = lexer.getToken();
         REQUIRE(token.type == Token::INTEGER);

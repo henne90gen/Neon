@@ -1,6 +1,6 @@
 #pragma once
 
-#include "../Program.h"
+#include "../Module.h"
 #include "../ast/AstVisitor.h"
 #include "../ast/nodes/AllNodes.h"
 
@@ -18,7 +18,7 @@
 
 class IrGenerator : public AstVisitor {
   public:
-    explicit IrGenerator(const Program &program, bool verbose);
+    explicit IrGenerator(Module *module, bool verbose);
 
     void visitAssignmentNode(AssignmentNode *node) override;
     void visitBinaryOperationNode(BinaryOperationNode *node) override;
@@ -35,18 +35,17 @@ class IrGenerator : public AstVisitor {
     void visitVariableNode(VariableNode *node) override;
     void visitVariableDefinitionNode(VariableDefinitionNode *node) override;
 
-    void run(AstNode *root);
+    void run();
 
     void print(bool writeToFile = true);
 
-    llvm::Module &getModule() { return module; }
-
   private:
-    const Program &program;
+    Module *module;
     const bool verbose = false;
-    llvm::LLVMContext context = {};
+
+    llvm::LLVMContext &context;
+    llvm::Module &llvmModule;
     llvm::IRBuilder<> builder;
-    llvm::Module module;
 
     std::unordered_map<std::string, int> metrics = {};
     std::vector<std::string> errors = {};
@@ -73,5 +72,4 @@ class IrGenerator : public AstVisitor {
     void finalizeFunction(llvm::Function *function, ast::DataType returnType, bool isExternalFunction);
     llvm::Constant *getInitializer(const ast::DataType &dt, bool isArray, unsigned int arraySize);
     void setupGlobalInitialization(llvm::Function *func);
-    void generateDummyMain();
 };

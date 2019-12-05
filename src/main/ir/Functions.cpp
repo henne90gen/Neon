@@ -45,7 +45,7 @@ void IrGenerator::visitFunctionNode(FunctionNode *node) {
 
 llvm::Function *IrGenerator::getOrCreateFunctionDefinition(const std::string &name, const ast::DataType returnType,
                                                            const std::vector<VariableDefinitionNode *> &arguments) {
-    llvm::Function *function = module.getFunction(name);
+    llvm::Function *function = llvmModule.getFunction(name);
     if (function == nullptr) {
         auto retType = getType(returnType);
 
@@ -57,7 +57,7 @@ llvm::Function *IrGenerator::getOrCreateFunctionDefinition(const std::string &na
 
         llvm::FunctionType *functionType = llvm::FunctionType::get(retType, argumentTypes, false);
 
-        function = llvm::Function::Create(functionType, llvm::Function::ExternalLinkage, name, module);
+        function = llvm::Function::Create(functionType, llvm::Function::ExternalLinkage, name, llvmModule);
         if (function == nullptr) {
             logError("Could not create function");
             return nullptr;
@@ -108,7 +108,7 @@ void IrGenerator::finalizeFunction(llvm::Function *function, const ast::DataType
 }
 
 void IrGenerator::visitCallNode(CallNode *node) {
-    llvm::Function *calleeFunc = module.getFunction(node->getName());
+    llvm::Function *calleeFunc = llvmModule.getFunction(node->getName());
     if (calleeFunc == nullptr) {
         return logError("Undefined function '" + node->getName() + "'");
     }

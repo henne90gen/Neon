@@ -1,47 +1,65 @@
 #include "Lexer.h"
 #include "Linker.h"
+#include "Module.h"
 #include "ObjectFileWriter.h"
 #include "Parser.h"
-#include "Program.h"
 #include "ast/AstGenerator.h"
 #include "ast/visitors/AstPrinter.h"
 #include "ast/visitors/AstTestCasePrinter.h"
 #include "ast/visitors/AstTypeAnalyser.h"
 #include "ir/IrGenerator.h"
 
-void compileProgram(Program &program, const bool verbose) {
-    CodeProvider *codeProvider = new FileCodeProvider(program);
-    Lexer lexer(codeProvider, program, verbose);
-    Parser parser(lexer, program, verbose);
+Module *compileModule(Program *program, const std::string &moduleFileName, const bool verbose) {
+    auto result = new Module(moduleFileName, program->llvmContext);
+
+    CodeProvider *codeProvider = new FileCodeProvider(result);
+    Lexer lexer(codeProvider, result, verbose);
+    Parser parser(lexer, result, verbose);
 
     auto parseTreeRoot = parser.createParseTree();
     if (verbose) {
         printParseTree(parseTreeRoot);
-        printParseTreeTestCase(parseTreeRoot, program);
+        printParseTreeTestCase(parseTreeRoot, result);
     }
 
-    auto astRoot = createAstFromParseTree(parseTreeRoot);
+    auto astGenerator = AstGenerator(result);
+    astGenerator.run(parseTreeRoot);
+    for (auto &importedModule : astGenerator.importedModules) {
+        program->uncompiledModules.push_back(importedModule);
+    }
+
     if (verbose) {
-        printAst(astRoot);
-        printAstTestCase(program, astRoot);
+        auto astPrinter = AstPrinter(result);
+        astPrinter.run();
+
+        auto astTestCasePrinter = AstTestCasePrinter(result);
+        astTestCasePrinter.run();
     }
 
-    analyseTypes(astRoot);
+    // TODO fix type analysis
+    //    analyseTypes();
 
-    auto generator = new IrGenerator(program, verbose);
-    generator->run(astRoot);
+    auto generator = IrGenerator(result, verbose);
+    generator.run();
 
-    writeModuleToObjectFile(program, generator);
+    return result;
 }
 
 int main() {
     bool verbose = true;
-    Program program = {"main.ne"};
+    auto program = new Program("main", {"main.ne"});
 
-    compileProgram(program, verbose);
+    while (!program->uncompiledModules.empty()) {
+        std::string moduleFileName = program->uncompiledModules.back();
+        program->uncompiledModules.pop_back();
+        auto module = compileModule(program, moduleFileName, verbose);
+        program->modules[moduleFileName] = module;
+    }
 
-    auto linker = new Linker("main.ne.exe", program);
-    linker->link();
+    writeModuleToObjectFile(program);
+
+    auto linker = Linker(program);
+    linker.link();
 
     return 0;
 }

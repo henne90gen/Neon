@@ -184,7 +184,7 @@ void assertProgramCreatesAst(const std::vector<std::string> &program, std::vecto
     int index = 0;
     auto expected = createSimpleFromSpecification(spec, index);
     CodeProvider *cp = new StringCodeProvider(program, true);
-    Program prog = {};
+    Module prog = {};
     Lexer lexer(cp, prog, false);
     Parser parser(lexer, prog, false);
     ParseTreeNode *parseTree = parser.createParseTree();

@@ -200,7 +200,7 @@ TEST_CASE("AstGenerator") {
         assertProgramCreatesAst(program, spec);
     }
 
-    SECTION("can handle __'") {
+    SECTION("can handle import statement'") {
         std::vector<AstNodeSpec> spec = {
               {0, ast::NodeType::SEQUENCE},
               {1, ast::NodeType::STATEMENT},

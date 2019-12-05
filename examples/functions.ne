@@ -7,7 +7,3 @@ fun hello() int {
     int world = 6
     return test(world - 1)
 }
-
-fun main() int {
-    return hello()
-}

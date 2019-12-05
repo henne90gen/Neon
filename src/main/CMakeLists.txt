@@ -13,7 +13,7 @@ set(SOURCES_COMPILER
         Lexer.cpp
         Parser.cpp
         Token.cpp
-        Program.cpp
+        Module.cpp
         ast/AstGenerator.cpp
         ast/nodes/AssignmentNode.cpp
         ast/nodes/AstNode.cpp

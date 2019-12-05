@@ -6,7 +6,7 @@
 #include <utility>
 #include <vector>
 
-#include "Program.h"
+#include "Module.h"
 #include "Token.h"
 
 class CodeProvider {
@@ -21,7 +21,7 @@ class StdInCodeProvider : public CodeProvider {
 
 class FileCodeProvider : public CodeProvider {
   public:
-    explicit FileCodeProvider(const Program &program) : fileName(program.fileName) {}
+    explicit FileCodeProvider(const Module *program) : fileName(program->fileName) {}
 
     std::optional<std::string> getMoreCode() override;
 
@@ -45,7 +45,7 @@ class StringCodeProvider : public CodeProvider {
 
 class Lexer {
   public:
-    explicit Lexer(CodeProvider *codeProvider, Program &program, bool verbose = false)
+    explicit Lexer(CodeProvider *codeProvider, Module *program, bool verbose = false)
         : codeProvider(codeProvider), program(program), verbose(verbose){};
 
     Token getToken();
@@ -53,7 +53,7 @@ class Lexer {
   private:
     std::string currentWord;
     CodeProvider *codeProvider;
-    Program &program;
+    Module *program;
     bool verbose;
 
     Token _getToken();

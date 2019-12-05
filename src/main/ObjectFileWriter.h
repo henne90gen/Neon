@@ -1,6 +1,6 @@
 #pragma once
 
-#include "Program.h"
+#include "Module.h"
 #include "ir/IrGenerator.h"
 
-void writeModuleToObjectFile(const Program &program, IrGenerator *irGenerator);
+void writeModuleToObjectFile(Program *program);

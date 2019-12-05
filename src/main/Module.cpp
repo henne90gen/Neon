@@ -1,4 +1,4 @@
-#include "Program.h"
+#include "Module.h"
 
 #include "Utils.h"
 
@@ -38,10 +38,10 @@ bool tokenHasSpaceBeforeIt(const Token *prev, const Token &t, const Token * /*ne
            isParenthesisAndAfterUnaryOperator || isSimpleDataTypeAndNotAfterParenthesis ||
            isStringAndNotAfterParenthesisAndNotAfterBracket || t.type == Token::NEW_LINE || t.type == Token::TRUE ||
            t.type == Token::FALSE || t.type == Token::SINGLE_EQUALS || t.type == Token::DOUBLE_EQUALS ||
-           t.type == Token::ELSE || t.type == Token::NOT || t.type == Token::FUN;
+           t.type == Token::ELSE || t.type == Token::NOT || t.type == Token::FUN || t.type == Token::RETURN;
 }
 
-std::string Program::toString() const {
+std::string Module::toString() const {
     std::string programStr;
     bool isFirstToken = true;
     unsigned long tokenCount = tokens.size();
@@ -68,14 +68,14 @@ std::string Program::toString() const {
     return trim(programStr);
 }
 
-std::string Program::toEscapedString() const {
+std::string Module::toEscapedString() const {
     std::string result = toString();
     result = replace(result, "\"", "\\\"");
     return result;
 }
 
-std::string Program::toArrayString() const {
+std::string Module::toArrayString() const {
     std::string result = toEscapedString();
-    result = replace(result, " \\n ", "\", \"");
+    result = replace(result, " \n ", "\", \"");
     return result;
 }

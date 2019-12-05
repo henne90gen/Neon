@@ -3,8 +3,6 @@
 #include <iostream>
 #include <utility>
 
-Linker::Linker(std::string programName, Program &program) : programName(std::move(programName)), program(program) {}
-
 void Linker::link() {
     std::string s = "ld";
     s += " -dynamic-linker /lib64/ld-linux-x86-64.so.2";
@@ -14,8 +12,8 @@ void Linker::link() {
     s += " -L/usr/lib/gcc/x86_64-pc-linux-gnu/9.2.0/";
     s += " -lc -lgcc -lgcc_s";
 
-    s += " " + program.fileName + ".o";
-    s += " -o " + programName;
+    s += " " + program->objectFileName;
+    s += " -o " + program->name;
 
     std::cout << std::endl << "Calling linker with the following command:" << std::endl << s << std::endl;
 

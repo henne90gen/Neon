@@ -173,12 +173,11 @@ void AstPrinter::visitForStatementNode(ForStatementNode *node) {
     indentation--;
 }
 
-void printAst(AstNode *root) {
-    if (root == nullptr) {
+void AstPrinter::run() {
+    if (module->root == nullptr) {
         std::cerr << "Could not print AST (nullptr)." << std::endl;
         return;
     }
 
-    auto printer = new AstPrinter();
-    root->accept(printer);
+    module->root->accept(this);
 }

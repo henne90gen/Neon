@@ -37,9 +37,9 @@ void IrGenerator::visitVariableDefinitionNode(VariableDefinitionNode *node) {
 
     llvm::Value *value = nullptr;
     if (isGlobalScope) {
-        value = module.getOrInsertGlobal(name, type);
-        module.getNamedGlobal(name)->setDSOLocal(true);
-        module.getNamedGlobal(name)->setInitializer(
+        value = llvmModule.getOrInsertGlobal(name, type);
+        llvmModule.getNamedGlobal(name)->setDSOLocal(true);
+        llvmModule.getNamedGlobal(name)->setInitializer(
               getInitializer(node->getType(), node->isArray(), node->getArraySize()));
     } else {
         value = createEntryBlockAlloca(type, name);

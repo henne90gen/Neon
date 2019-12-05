@@ -1,16 +1,15 @@
 #pragma once
 
-#include "Program.h"
+#include "Module.h"
 
 #include <vector>
 
 class Linker {
   public:
-    explicit Linker(std::string programName, Program &program);
+    explicit Linker(const Program *program) : program(program) {}
 
     void link();
 
   private:
-    std::string programName;
-    Program &program;
+    const Program *program;
 };

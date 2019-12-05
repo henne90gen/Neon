@@ -6,13 +6,14 @@
 
 class Parser {
   public:
-    explicit Parser(Lexer &lexer, Program &program, bool verbose = false) : lexer(lexer), program(program), verbose(verbose) {}
+    explicit Parser(Lexer &lexer, Module *program, bool verbose = false)
+        : lexer(lexer), program(program), verbose(verbose) {}
 
     ParseTreeNode *createParseTree();
 
   private:
     Lexer &lexer;
-    Program &program;
+    Module *program;
     bool verbose;
 
     void executeShift(Token &token, std::vector<int> &states, StateTransition &action,
@@ -27,4 +28,4 @@ class Parser {
 
 void printParseTree(ParseTreeNode *node, int indentation = 0);
 
-void printParseTreeTestCase(const ParseTreeNode *node, const Program &program);
+void printParseTreeTestCase(const ParseTreeNode *node, const Module *program);
