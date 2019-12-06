@@ -43,30 +43,30 @@ void Compiler::run() {
 }
 
 Module *Compiler::ingestModule(const std::string &moduleFileName) {
-    auto result = new Module(moduleFileName, program->llvmContext);
+    auto module = new Module(moduleFileName, program->llvmContext);
 
-    CodeProvider *codeProvider = new FileCodeProvider(result);
-    Lexer lexer(codeProvider, result, verbose);
-    Parser parser(lexer, result, verbose);
+    CodeProvider *codeProvider = new FileCodeProvider(module);
+    Lexer lexer(codeProvider, module, verbose);
+    Parser parser(lexer, module, verbose);
 
     auto parseTreeRoot = parser.createParseTree();
     if (verbose) {
         printParseTree(parseTreeRoot);
-        printParseTreeTestCase(parseTreeRoot, result);
+        printParseTreeTestCase(parseTreeRoot, module);
     }
 
-    auto astGenerator = AstGenerator(result);
+    auto astGenerator = AstGenerator(module);
     astGenerator.run(parseTreeRoot);
 
     if (verbose) {
-        auto astPrinter = AstPrinter(result);
+        auto astPrinter = AstPrinter(module);
         astPrinter.run();
 
-        auto astTestCasePrinter = AstTestCasePrinter(result);
+        auto astTestCasePrinter = AstTestCasePrinter(module);
         astTestCasePrinter.run();
     }
 
-    return result;
+    return module;
 }
 
 void Compiler::generateIR() {

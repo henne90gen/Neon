@@ -183,7 +183,7 @@ SimpleTree *createSimpleFromAst(AstNode *node) {
 void assertProgramCreatesAst(const std::vector<std::string> &program, std::vector<AstNodeSpec> &spec) {
     int index = 0;
     auto expected = createSimpleFromSpecification(spec, index);
-    CodeProvider *codeProvider = new StringCodeProvider(program, false);
+    CodeProvider *codeProvider = new StringCodeProvider(program, true);
     auto context = new llvm::LLVMContext();
     auto prog = new Module("test.ne", *context);
     auto lexer = Lexer(codeProvider, prog);
