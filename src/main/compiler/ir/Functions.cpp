@@ -29,7 +29,6 @@ void IrGenerator::visitFunctionNode(FunctionNode *node) {
 
             node->getBody()->accept(this);
         });
-
     }
 
     finalizeFunction(currentFunction, node->getReturnType(), node->isExternal());
@@ -110,7 +109,17 @@ void IrGenerator::finalizeFunction(llvm::Function *function, const ast::DataType
 void IrGenerator::visitCallNode(CallNode *node) {
     llvm::Function *calleeFunc = llvmModule.getFunction(node->getName());
     if (calleeFunc == nullptr) {
-        return logError("Undefined function '" + node->getName() + "'");
+        const FunctionResolveResult resolveResult = functionResolver.resolveFunction(module, node->getName());
+        if (!resolveResult.functionExists) {
+            return logError("Undefined function '" + node->getName() + "'");
+        }
+
+        FunctionNode externalFunc = FunctionNode(node->getName(), resolveResult.dataType);
+        this->visitFunctionNode(&externalFunc);
+        calleeFunc = llvmModule.getFunction(node->getName());
+        if (calleeFunc == nullptr) {
+            return logError("Could not generate external definition for function '" + node->getName() + "'");
+        }
     }
 
     if (calleeFunc->arg_size() != node->getArguments().size()) {

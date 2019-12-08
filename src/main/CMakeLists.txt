@@ -28,6 +28,8 @@ set(SOURCES_COMPILER
         compiler/ast/visitors/AstPrinter.cpp
         compiler/ast/visitors/AstTestCasePrinter.cpp
         compiler/ast/visitors/AstTypeAnalyser.cpp
+        compiler/ast/visitors/FunctionFinder.cpp
+        compiler/ast/visitors/ImportFinder.cpp
         compiler/ir/Functions.cpp
         compiler/ir/IrGenerator.cpp
         compiler/ir/Operations.cpp
@@ -35,6 +37,7 @@ set(SOURCES_COMPILER
         compiler/ir/Types.cpp
         compiler/ir/Variables.cpp
         compiler/Compiler.cpp
+        compiler/FunctionResolver.cpp
         compiler/Lexer.cpp
         compiler/Parser.cpp
         compiler/Token.cpp

@@ -1,6 +1,7 @@
 #pragma once
 
 #include "../Program.h"
+#include "ast/nodes/FunctionNode.h"
 
 class Compiler {
   public:
@@ -10,8 +11,10 @@ class Compiler {
   private:
     Program *program;
     bool verbose;
+    std::unordered_map<Module*, std::vector<std::string>> moduleImportsMap;
+    std::unordered_map<Module*, std::vector<std::pair<std::string, ast::DataType>>> moduleFunctionsMap;
 
-    Module *ingestModule(const std::string &moduleFileName);
+    Module *loadModule(const std::string &moduleFileName);
     void writeModuleToObjectFile();
     void mergeModules(llvm::Module &module, const llvm::DataLayout &dataLayout, const std::string &targetTriple);
     void generateIR();

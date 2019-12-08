@@ -27,5 +27,5 @@ class AstGenerator {
     CallNode *createCall(ParseTreeNode *node);
     ForStatementNode *createForStatement(ParseTreeNode *node);
     IfStatementNode *createIfStatement(ParseTreeNode *node);
-    AstNode *createImportStatement(ParseTreeNode *node);
+    static AstNode *createImportStatement(ParseTreeNode *node);
 };

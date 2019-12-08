@@ -1,15 +1,16 @@
 #pragma once
 
 #include "../../Module.h"
+#include "../FunctionResolver.h"
 #include "../ast/AstVisitor.h"
 #include "../ast/nodes/AllNodes.h"
 
 #include <iostream>
 #include <unordered_map>
 
-#include "llvm/IR/IRBuilder.h"
-#include "llvm/IR/LLVMContext.h"
-#include "llvm/IR/Module.h"
+#include <llvm/IR/IRBuilder.h>
+#include <llvm/IR/LLVMContext.h>
+#include <llvm/IR/Module.h>
 
 #define LOG(msg)                                                                                                       \
     if (verbose) {                                                                                                     \
@@ -18,7 +19,7 @@
 
 class IrGenerator : public AstVisitor {
   public:
-    explicit IrGenerator(Module *module, bool verbose);
+    explicit IrGenerator(Module *module, FunctionResolver &functionResolver, bool verbose);
 
     void visitAssignmentNode(AssignmentNode *node) override;
     void visitBinaryOperationNode(BinaryOperationNode *node) override;
@@ -41,6 +42,7 @@ class IrGenerator : public AstVisitor {
 
   private:
     Module *module;
+    FunctionResolver &functionResolver;
     const bool verbose = false;
 
     llvm::LLVMContext &context;

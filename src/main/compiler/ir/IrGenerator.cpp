@@ -16,9 +16,9 @@
 
 #include "../../Utils.h"
 
-IrGenerator::IrGenerator(Module *module, const bool verbose)
-    : module(module), verbose(verbose), context(module->llvmModule.getContext()), llvmModule(module->llvmModule),
-      builder(context) {
+IrGenerator::IrGenerator(Module *module, FunctionResolver &functionResolver, const bool verbose)
+    : module(module), functionResolver(functionResolver), verbose(verbose), context(module->llvmModule.getContext()),
+      llvmModule(module->llvmModule), builder(context) {
     pushScope();
 }
 

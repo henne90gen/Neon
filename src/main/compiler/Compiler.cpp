@@ -1,8 +1,11 @@
 #include "Compiler.h"
 
+#include "FunctionResolver.h"
 #include "ast/AstGenerator.h"
 #include "ast/visitors/AstPrinter.h"
 #include "ast/visitors/AstTestCasePrinter.h"
+#include "ast/visitors/FunctionFinder.h"
+#include "ast/visitors/ImportFinder.h"
 #include "ir/IrGenerator.h"
 
 #include <iostream>
@@ -24,10 +27,10 @@ void Compiler::run() {
         std::string moduleFileName = uncompiledModules.back();
         uncompiledModules.pop_back();
 
-        auto module = ingestModule(moduleFileName);
+        auto module = loadModule(moduleFileName);
         program->modules[moduleFileName] = module;
 
-        for (auto &importedModule : module->importedModules) {
+        for (auto &importedModule : moduleImportsMap[module]) {
             // TODO prevent modules from being added twice
             // TODO find a way to uniquely identify modules
             uncompiledModules.push_back(importedModule);
@@ -42,7 +45,7 @@ void Compiler::run() {
     writeModuleToObjectFile();
 }
 
-Module *Compiler::ingestModule(const std::string &moduleFileName) {
+Module *Compiler::loadModule(const std::string &moduleFileName) {
     auto module = new Module(moduleFileName, program->llvmContext);
 
     CodeProvider *codeProvider = new FileCodeProvider(module);
@@ -66,12 +69,16 @@ Module *Compiler::ingestModule(const std::string &moduleFileName) {
         astTestCasePrinter.run();
     }
 
+    moduleImportsMap[module] = ImportFinder().run(module);
+    moduleFunctionsMap[module] = FunctionFinder().run(module);
+
     return module;
 }
 
 void Compiler::generateIR() {
+    auto functionResolver = FunctionResolver(program, moduleImportsMap, moduleFunctionsMap);
     for (const auto &module : program->modules) {
-        auto generator = IrGenerator(module.second, verbose);
+        auto generator = IrGenerator(module.second, functionResolver, verbose);
         generator.run();
     }
 }

@@ -1,6 +1,6 @@
 
 fun test(int arg) int {
-    return arg + 1
+    return arg + 10
 }
 
 fun hello() int {
