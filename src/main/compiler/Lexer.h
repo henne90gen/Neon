@@ -21,7 +21,7 @@ class StdInCodeProvider : public CodeProvider {
 
 class FileCodeProvider : public CodeProvider {
   public:
-    explicit FileCodeProvider(const Module *program) : fileName(program->fileName) {}
+    explicit FileCodeProvider(std::string absoluteFilePath) : fileName(std::move(absoluteFilePath)) {}
 
     std::optional<std::string> getMoreCode() override;
 

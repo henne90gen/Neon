@@ -8,15 +8,15 @@ void ImportFinder::visitSequenceNode(SequenceNode *node) {
     }
 }
 
-void ImportFinder::visitStatementNode(StatementNode *node) {
-    node->getChild()->accept(this);
-}
+void ImportFinder::visitStatementNode(StatementNode *node) { node->getChild()->accept(this); }
 
 void ImportFinder::visitImportNode(ImportNode *node) {
-    importedModules.push_back(node->getFileName());
+    auto path = directoryPath / std::filesystem::path(node->getFileName());
+    std::string absolutePath = std::filesystem::absolute(path).string();
+    importedModules.push_back(absolutePath);
 }
 
-std::vector<std::string> ImportFinder::run(Module *module) {
-    module->root->accept(this);
+std::vector<std::string> ImportFinder::run(AstNode *rootNode) {
+    rootNode->accept(this);
     return importedModules;
 }

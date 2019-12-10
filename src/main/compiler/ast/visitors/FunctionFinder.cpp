@@ -14,7 +14,7 @@ void FunctionFinder::visitFunctionNode(FunctionNode *node) {
     functions.emplace_back(node->getName(), node->getReturnType());
 }
 
-std::vector<std::pair<std::string, ast::DataType>> FunctionFinder::run(Module *module) {
-    module->root->accept(this);
+std::vector<std::pair<std::string, ast::DataType>> FunctionFinder::run(AstNode *rootNode) {
+    rootNode->accept(this);
     return functions;
 }

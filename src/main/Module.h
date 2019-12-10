@@ -2,10 +2,11 @@
 
 #include "compiler/Token.h"
 #include "compiler/ast/nodes/AstNode.h"
-#include "compiler/ast/nodes/ImportNode.h"
 #include "compiler/ast/nodes/FunctionNode.h"
+#include "compiler/ast/nodes/ImportNode.h"
 
 #include <algorithm>
+#include <filesystem>
 #include <llvm/IR/LLVMContext.h>
 #include <llvm/IR/Module.h>
 #include <string>
@@ -15,16 +16,22 @@
 
 class Module {
   public:
-    explicit Module(const std::string &fileName, llvm::LLVMContext &context)
-        : fileName(fileName), llvmModule(fileName, context) {}
+    explicit Module(std::filesystem::path _filePath, llvm::LLVMContext &context)
+        : filePath(std::move(_filePath)), llvmModule(_filePath.string(), context) {}
 
-    std::string fileName;
+    [[nodiscard]] std::string toString() const;
+    [[nodiscard]] std::string toEscapedString() const;
+    [[nodiscard]] std::string toArrayString() const;
+
+    std::string getDirectoryPath() const { return filePath.parent_path(); }
+    std::filesystem::path getFilePath() const { return filePath; }
+
+  public:
     AstNode *root = nullptr;
     std::vector<Token> tokens = {};
 
     llvm::Module llvmModule;
 
-    [[nodiscard]] std::string toString() const;
-    [[nodiscard]] std::string toEscapedString() const;
-    [[nodiscard]] std::string toArrayString() const;
+  private:
+    std::filesystem::path filePath;
 };

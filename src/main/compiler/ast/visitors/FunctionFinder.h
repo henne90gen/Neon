@@ -12,7 +12,7 @@ class FunctionFinder : public AstVisitor {
     void visitSequenceNode(SequenceNode *node) override;
     void visitStatementNode(StatementNode *node) override;
 
-    std::vector<std::pair<std::string, ast::DataType>> run(Module *module);
+    std::vector<std::pair<std::string, ast::DataType>> run(AstNode *rootNode);
 
     std::vector<std::pair<std::string, ast::DataType>> functions = {};
 };

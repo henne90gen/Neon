@@ -91,7 +91,8 @@ void IrGenerator::visitSequenceNode(SequenceNode *node) {
     llvm::Function *initFunc = nullptr;
     if (currentFunction == nullptr) {
         // TODO(henne): make sure this function name does not collide with any user defined functions
-        initFunc = getOrCreateFunctionDefinition("global-ctor-" + module->fileName, ast::DataType::VOID, {});
+        // TODO(henne): maybe don't use the full filepath...
+        initFunc = getOrCreateFunctionDefinition("global-ctor-" + module->getFilePath().string(), ast::DataType::VOID, {});
 
         llvm::BasicBlock *BB = llvm::BasicBlock::Create(context, "entry-ctor", initFunc);
         builder.SetInsertPoint(BB);
@@ -119,11 +120,11 @@ void IrGenerator::visitSequenceNode(SequenceNode *node) {
 }
 
 void IrGenerator::print(const bool writeToFile) {
-    std::string fileName = module->fileName + ".llvm";
+    std::string filePath = module->getFilePath().string() + ".llvm";
     std::error_code EC;
     llvmModule.print(llvm::outs(), nullptr);
     if (writeToFile) {
-        llvm::raw_fd_ostream dest(fileName, EC, llvm::sys::fs::OF_None);
+        llvm::raw_fd_ostream dest(filePath, EC, llvm::sys::fs::OF_None);
         llvmModule.print(dest, nullptr);
         dest.flush();
         dest.close();

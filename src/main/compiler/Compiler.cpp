@@ -22,17 +22,23 @@
 #include <llvm/Transforms/Utils/Cloning.h>
 
 void Compiler::run() {
-    std::vector<std::string> uncompiledModules = {program->entryPoint};
+    std::string entryPoint = std::filesystem::absolute(std::filesystem::path(program->entryPoint)).string();
+    std::vector<std::string> uncompiledModules = {entryPoint};
     while (!uncompiledModules.empty()) {
         std::string moduleFileName = uncompiledModules.back();
         uncompiledModules.pop_back();
+
+        auto itr = program->modules.find(moduleFileName);
+        bool moduleAlreadyExists = itr != program->modules.end();
+        if (moduleAlreadyExists) {
+            std::cout << "Skipping " << moduleFileName << std::endl;
+            continue;
+        }
 
         auto module = loadModule(moduleFileName);
         program->modules[moduleFileName] = module;
 
         for (auto &importedModule : moduleImportsMap[module]) {
-            // TODO prevent modules from being added twice
-            // TODO find a way to uniquely identify modules
             uncompiledModules.push_back(importedModule);
         }
     }
@@ -48,7 +54,7 @@ void Compiler::run() {
 Module *Compiler::loadModule(const std::string &moduleFileName) {
     auto module = new Module(moduleFileName, program->llvmContext);
 
-    CodeProvider *codeProvider = new FileCodeProvider(module);
+    CodeProvider *codeProvider = new FileCodeProvider(module->getFilePath());
     Lexer lexer(codeProvider, module, verbose);
     Parser parser(lexer, module, verbose);
 
@@ -61,6 +67,11 @@ Module *Compiler::loadModule(const std::string &moduleFileName) {
     auto astGenerator = AstGenerator(module);
     astGenerator.run(parseTreeRoot);
 
+    if (module->root == nullptr) {
+        std::cerr << "Could not create AST" << std::endl;
+        return module;
+    }
+
     if (verbose) {
         auto astPrinter = AstPrinter(module);
         astPrinter.run();
@@ -69,8 +80,8 @@ Module *Compiler::loadModule(const std::string &moduleFileName) {
         astTestCasePrinter.run();
     }
 
-    moduleImportsMap[module] = ImportFinder().run(module);
-    moduleFunctionsMap[module] = FunctionFinder().run(module);
+    moduleImportsMap[module] = ImportFinder(module->getDirectoryPath()).run(module->root);
+    moduleFunctionsMap[module] = FunctionFinder().run(module->root);
 
     return module;
 }
