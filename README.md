@@ -43,7 +43,13 @@ This makes it possible to call functions that are contained in the externally li
 #### For loops
 
 -   for loops work just like in C
--   e.g. for int i = 0; i < 5; i = i + 1 { … }
+-   e.g. `for int i = 0; i < 5; i = i + 1 { … }`
+
+### Imports
+
+-   other Neon-files can be imported with the `import` keyword
+-   the imported file is specified with a relative path to the current source file
+-   e.g. `import "examples/functions.ne"`
 
 ## TODO / Ideas
 
@@ -63,7 +69,6 @@ This makes it possible to call functions that are contained in the externally li
 -   importing files
     -   generate function in every module that contains all 'script' code
     -   generate function call to that function in place of the import statement
-    -   make code from other file available
 -   allow functions to be placed anywhere
     -   in global scope
     -   in function scope

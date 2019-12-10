@@ -2,7 +2,7 @@
 
 #include <string>
 
-#define NOT_IMPLEMENTED                                                                                                \
+#define NEON_NOT_IMPLEMENTED                                                                                                \
     std::cout << __FILE__ << ":" << __FUNCTION__ << ": Not implemented yet." << std::endl;                             \
     exit(1);
 

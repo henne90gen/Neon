@@ -114,7 +114,7 @@ void AstInterpreter::visitBinaryOperationNode(BinaryOperationNode *node) {
     auto leftResult = calculationResults[node->getLeft()];
     auto rightResult = calculationResults[node->getRight()];
     CalculationResult result = {};
-    NOT_IMPLEMENTED
+    NEON_NOT_IMPLEMENTED
     switch (node->getType()) {
     case ast::BinaryOperationType::ADDITION:
         result = add(leftResult, rightResult);
@@ -199,9 +199,9 @@ void AstInterpreter::visitAssignmentNode(AssignmentNode *node) {
     calculationResults[node] = calculationResults[node->getRight()];
 }
 
-void AstInterpreter::visitCallNode(CallNode * /*node*/) { NOT_IMPLEMENTED }
-void AstInterpreter::visitIfStatementNode(IfStatementNode * /*node*/) { NOT_IMPLEMENTED }
-void AstInterpreter::visitForStatementNode(ForStatementNode * /*node*/) { NOT_IMPLEMENTED }
+void AstInterpreter::visitCallNode(CallNode * /*node*/) { NEON_NOT_IMPLEMENTED }
+void AstInterpreter::visitIfStatementNode(IfStatementNode * /*node*/) { NEON_NOT_IMPLEMENTED }
+void AstInterpreter::visitForStatementNode(ForStatementNode * /*node*/) { NEON_NOT_IMPLEMENTED }
 
 void interpretAst(AstNode *node, bool verbose) {
     if (node == nullptr) {
