@@ -67,6 +67,7 @@ This makes it possible to call functions that are contained in the externally li
     -   single line
     -   multi line
 -   importing files
+    -   place imported functions in a different namespace (the generated function names), so that they don't collide with locally defined functions
     -   generate function in every module that contains all 'script' code
     -   generate function call to that function in place of the import statement
 -   allow functions to be placed anywhere
