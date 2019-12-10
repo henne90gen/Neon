@@ -8,7 +8,7 @@
 struct FunctionResolveResult {
     bool functionExists;
     ast::DataType dataType;
-    std::string module;
+    Module *module;
 };
 
 class FunctionResolver {
