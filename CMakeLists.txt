@@ -2,6 +2,10 @@ cmake_minimum_required(VERSION 3.14)
 
 project(Neon)
 
+set(CMAKE_CXX_STANDARD 17)
+set(CMAKE_EXPORT_COMPILE_COMMANDS TRUE)
+set(CMAKE_VERBOSE_MAKEFILE OFF)
+
 # Clang Tidy
 message(STATUS "Looking for clang-tidy")
 find_program(CLANG_TIDY_EXE
@@ -34,10 +38,6 @@ llvm_map_components_to_libnames(LLVM_LIBS
         support
         passes
         native)
-
-set(CMAKE_CXX_STANDARD 17)
-set(CMAKE_EXPORT_COMPILE_COMMANDS TRUE)
-set(CMAKE_VERBOSE_MAKEFILE OFF)
 
 enable_testing()
 add_subdirectory(src)
