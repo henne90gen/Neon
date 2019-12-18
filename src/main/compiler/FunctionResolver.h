@@ -1,26 +1,27 @@
 #pragma once
 
 #include "../Program.h"
+#include "MetaTypes.h"
 
 #include <string>
 #include <unordered_map>
 
 struct FunctionResolveResult {
-    bool functionExists;
-    ast::DataType dataType;
-    Module *module;
+    bool functionExists = false;
+    FunctionSignature signature;
+    Module *module = nullptr;
 };
 
 class FunctionResolver {
   public:
     FunctionResolver(
           Program *program, std::unordered_map<Module *, std::vector<std::string>> &moduleImportsMap,
-          std::unordered_map<Module *, std::vector<std::pair<std::string, ast::DataType>>> &moduleFunctionsMap)
+          std::unordered_map<Module *, std::vector<FunctionSignature>> &moduleFunctionsMap)
         : program(program), moduleImportsMap(moduleImportsMap), moduleFunctionsMap(moduleFunctionsMap) {}
 
-    FunctionResolveResult resolveFunction(Module *module, const std::string &functionName);
+    FunctionResolveResult resolveFunction(Module *module, const std::string &functionName) const;
 
     Program *program;
     std::unordered_map<Module *, std::vector<std::string>> &moduleImportsMap;
-    std::unordered_map<Module *, std::vector<std::pair<std::string, ast::DataType>>> &moduleFunctionsMap;
+    std::unordered_map<Module *, std::vector<FunctionSignature>> &moduleFunctionsMap;
 };

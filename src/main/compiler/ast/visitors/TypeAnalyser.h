@@ -1,13 +1,16 @@
 #pragma once
 
+#include "../../FunctionResolver.h"
 #include "../AstVisitor.h"
 #include "../Types.h"
 #include <unordered_map>
 
 class AstNode;
 
-class AstTypeAnalyser : public AstVisitor {
+class TypeAnalyser : public AstVisitor {
   public:
+    explicit TypeAnalyser(Module *module, const FunctionResolver &functionResolver)
+        : module(module), functionResolver(functionResolver) {}
 
     void visitAssignmentNode(AssignmentNode *node) override;
     void visitBinaryOperationNode(BinaryOperationNode *node) override;
@@ -24,11 +27,12 @@ class AstTypeAnalyser : public AstVisitor {
     void visitVariableNode(VariableNode *node) override;
     void visitVariableDefinitionNode(VariableDefinitionNode *node) override;
 
+    std::unordered_map<AstNode *, ast::DataType> run(AstNode *root);
 
   private:
+    Module *module;
+    const FunctionResolver &functionResolver;
+
     std::unordered_map<AstNode *, ast::DataType> typeMap = {};
     std::unordered_map<std::string, ast::DataType> variableMap = {};
-    std::unordered_map<std::string, ast::DataType> functionMap = {};
 };
-
-void analyseTypes(AstNode *root);

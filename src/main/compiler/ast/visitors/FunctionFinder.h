@@ -1,6 +1,7 @@
 #pragma once
 
 #include "../../../Module.h"
+#include "../../MetaTypes.h"
 #include "../AstVisitor.h"
 
 #include <string>
@@ -12,7 +13,7 @@ class FunctionFinder : public AstVisitor {
     void visitSequenceNode(SequenceNode *node) override;
     void visitStatementNode(StatementNode *node) override;
 
-    std::vector<std::pair<std::string, ast::DataType>> run(AstNode *rootNode);
+    std::vector<FunctionSignature> run(AstNode *rootNode);
 
-    std::vector<std::pair<std::string, ast::DataType>> functions = {};
+    std::vector<FunctionSignature> functions = {};
 };

@@ -27,7 +27,7 @@ set(SOURCES_COMPILER
         compiler/ast/visitors/AstInterpreter.cpp
         compiler/ast/visitors/AstPrinter.cpp
         compiler/ast/visitors/AstTestCasePrinter.cpp
-        compiler/ast/visitors/AstTypeAnalyser.cpp
+        compiler/ast/visitors/TypeAnalyser.cpp
         compiler/ast/visitors/FunctionFinder.cpp
         compiler/ast/visitors/ImportFinder.cpp
         compiler/ir/Functions.cpp
@@ -41,6 +41,7 @@ set(SOURCES_COMPILER
         compiler/Lexer.cpp
         compiler/Parser.cpp
         compiler/Token.cpp
+        compiler/TypeResolver.cpp
         Linker.cpp
         Module.cpp
         Program.cpp

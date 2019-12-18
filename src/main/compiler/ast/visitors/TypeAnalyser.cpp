@@ -1,43 +1,43 @@
-#include "AstTypeAnalyser.h"
+#include "TypeAnalyser.h"
 
 #include <iostream>
 
 #include "../../../Utils.h"
 #include "../nodes/AllNodes.h"
 
-void AstTypeAnalyser::visitFunctionNode(FunctionNode *node) {
+void TypeAnalyser::visitFunctionNode(FunctionNode *node) {
     for (auto &argument : node->getArguments()) {
         argument->accept(this);
     }
-    functionMap[node->getName()] = node->getReturnType();
     if (!node->isExternal()) {
         node->getBody()->accept(this);
     }
 }
 
-void AstTypeAnalyser::visitCallNode(CallNode *node) {
-    const auto &itr = functionMap.find(node->getName());
-    if (itr == functionMap.end()) {
-        std::cerr << "Undefined function " << node->getName() << std::endl;
+void TypeAnalyser::visitCallNode(CallNode *node) {
+    auto result = functionResolver.resolveFunction(module, node->getName());
+    if (!result.functionExists) {
+        std::cerr << "TypeAnalyser: Undefined function " << node->getName() << std::endl;
+        return;
     }
-    typeMap[node] = itr->second;
+    typeMap[node] = result.signature.returnType;
 }
 
-void AstTypeAnalyser::visitVariableNode(VariableNode *node) {
+void TypeAnalyser::visitVariableNode(VariableNode *node) {
     const auto &itr = variableMap.find(node->getName());
     if (itr == variableMap.end()) {
-        std::cerr << "Undefined variable " << node->getName() << std::endl;
+        std::cerr << "TypeAnalyser: Undefined variable " << node->getName() << std::endl;
         return;
     }
     typeMap[node] = itr->second;
 }
 
-void AstTypeAnalyser::visitVariableDefinitionNode(VariableDefinitionNode *node) {
+void TypeAnalyser::visitVariableDefinitionNode(VariableDefinitionNode *node) {
     typeMap[node] = node->getType();
     variableMap[node->getName()] = node->getType();
 }
 
-void AstTypeAnalyser::visitBinaryOperationNode(BinaryOperationNode *node) {
+void TypeAnalyser::visitBinaryOperationNode(BinaryOperationNode *node) {
     node->getLeft()->accept(this);
     node->getRight()->accept(this);
     auto leftType = typeMap[node->getLeft()];
@@ -58,10 +58,10 @@ void AstTypeAnalyser::visitBinaryOperationNode(BinaryOperationNode *node) {
         }
         return;
     }
-    std::cerr << "Binary operation type mismatch: " << to_string(node->getAstNodeType()) << std::endl;
+    std::cerr << "TypeAnalyser: Binary operation type mismatch: " << to_string(node->getAstNodeType()) << std::endl;
 }
 
-void AstTypeAnalyser::visitUnaryOperationNode(UnaryOperationNode *node) {
+void TypeAnalyser::visitUnaryOperationNode(UnaryOperationNode *node) {
     node->getChild()->accept(this);
     if (node->getType() == UnaryOperationNode::UnaryOperationType::NOT &&
         typeMap[node->getChild()] == ast::DataType::BOOL) {
@@ -69,29 +69,30 @@ void AstTypeAnalyser::visitUnaryOperationNode(UnaryOperationNode *node) {
         return;
     }
     // TODO(henne): unary operators can also be of other types than bool, we need to add support for that as well
-    std::cerr << "Unary operation type mismatch: " << to_string(node->getAstNodeType()) << std::endl;
+    std::cerr << "TypeAnalyser: Unary operation type mismatch: " << to_string(node->getAstNodeType()) << std::endl;
 }
 
-void AstTypeAnalyser::visitAssignmentNode(AssignmentNode *node) {
+void TypeAnalyser::visitAssignmentNode(AssignmentNode *node) {
     node->getRight()->accept(this);
     node->getLeft()->accept(this);
     ast::DataType leftType = typeMap[node->getLeft()];
     ast::DataType rightType = typeMap[node->getRight()];
     if (leftType != rightType) {
-        std::cerr << "Assignment type mismatch: " << to_string(node->getLeft()->getAstNodeType()) << " = "
+        std::cerr << "TypeAnalyser: Assignment type mismatch: " << to_string(node->getLeft()->getAstNodeType()) << " = "
                   << to_string(node->getRight()->getAstNodeType()) << std::endl;
-    } else {
-        typeMap[node] = leftType;
+        return;
     }
+
+    typeMap[node] = leftType;
 }
 
-void AstTypeAnalyser::visitSequenceNode(SequenceNode *node) {
+void TypeAnalyser::visitSequenceNode(SequenceNode *node) {
     for (auto child : node->getChildren()) {
         child->accept(this);
     }
 }
 
-void AstTypeAnalyser::visitStatementNode(StatementNode *node) {
+void TypeAnalyser::visitStatementNode(StatementNode *node) {
     if (node->getChild() == nullptr) {
         return;
     }
@@ -99,13 +100,13 @@ void AstTypeAnalyser::visitStatementNode(StatementNode *node) {
     typeMap[node] = typeMap[node->getChild()];
 }
 
-void AstTypeAnalyser::visitFloatNode(FloatNode *node) { typeMap[node] = ast::DataType::FLOAT; }
+void TypeAnalyser::visitFloatNode(FloatNode *node) { typeMap[node] = ast::DataType::FLOAT; }
 
-void AstTypeAnalyser::visitIntegerNode(IntegerNode *node) { typeMap[node] = ast::DataType::INT; }
+void TypeAnalyser::visitIntegerNode(IntegerNode *node) { typeMap[node] = ast::DataType::INT; }
 
-void AstTypeAnalyser::visitBoolNode(BoolNode *node) { typeMap[node] = ast::DataType::BOOL; }
+void TypeAnalyser::visitBoolNode(BoolNode *node) { typeMap[node] = ast::DataType::BOOL; }
 
-void AstTypeAnalyser::visitIfStatementNode(IfStatementNode *node) {
+void TypeAnalyser::visitIfStatementNode(IfStatementNode *node) {
     node->getCondition()->accept(this);
     if (typeMap[node->getCondition()] != ast::DataType::BOOL) {
         std::cerr << "If condition is not of type bool" << std::endl;
@@ -119,7 +120,7 @@ void AstTypeAnalyser::visitIfStatementNode(IfStatementNode *node) {
     }
 }
 
-void AstTypeAnalyser::visitForStatementNode(ForStatementNode *node) {
+void TypeAnalyser::visitForStatementNode(ForStatementNode *node) {
     if (node->getInit() != nullptr) {
         node->getInit()->accept(this);
     }
@@ -139,10 +140,10 @@ void AstTypeAnalyser::visitForStatementNode(ForStatementNode *node) {
     }
 }
 
-void analyseTypes(AstNode *root) {
+std::unordered_map<AstNode *, ast::DataType> TypeAnalyser::run(AstNode *root) {
     if (root == nullptr) {
-        return;
+        return {};
     }
-    auto analyser = new AstTypeAnalyser();
-    root->accept(analyser);
+    root->accept(this);
+    return typeMap;
 }

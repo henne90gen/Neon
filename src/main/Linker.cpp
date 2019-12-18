@@ -9,7 +9,7 @@ void Linker::link() {
     s += " /lib64/crti.o";
     s += " /lib64/crtn.o";
     s += " -L/usr/lib/gcc/x86_64-pc-linux-gnu/9.2.0/";
-    s += " -lc -lgcc -lgcc_s";
+    s += " -lc -lgcc -lgcc_s -lm";
 
     s += " " + program->objectFileName;
     s += " -o " + program->name;

@@ -1,13 +1,13 @@
 #include "FunctionResolver.h"
 
-FunctionResolveResult FunctionResolver::resolveFunction(Module *module, const std::string &functionName) {
+FunctionResolveResult FunctionResolver::resolveFunction(Module *module, const std::string &functionName) const {
     FunctionResolveResult result = {false};
 
     for (const auto &function : moduleFunctionsMap[module]) {
-        if (function.first == functionName) {
+        if (function.name == functionName) {
             result.functionExists = true;
-            result.dataType = function.second;
             result.module = module;
+            result.signature = function;
             return result;
         }
     }
@@ -16,10 +16,10 @@ FunctionResolveResult FunctionResolver::resolveFunction(Module *module, const st
     for (const auto &importedModuleId : moduleIds) {
         auto importedModule = program->modules[importedModuleId];
         for (const auto &function : moduleFunctionsMap[importedModule]) {
-            if (function.first == functionName) {
+            if (function.name == functionName) {
                 result.functionExists = true;
-                result.dataType = function.second;
                 result.module = importedModule;
+                result.signature = function;
                 return result;
             }
         }

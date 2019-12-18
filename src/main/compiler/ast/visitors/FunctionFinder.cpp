@@ -11,10 +11,19 @@ void FunctionFinder::visitSequenceNode(SequenceNode *node) {
 void FunctionFinder::visitStatementNode(StatementNode *node) { node->getChild()->accept(this); }
 
 void FunctionFinder::visitFunctionNode(FunctionNode *node) {
-    functions.emplace_back(node->getName(), node->getReturnType());
+    FunctionSignature funcSig = {};
+    funcSig.name = node->getName();
+    funcSig.returnType = node->getReturnType();
+    for (auto &argument : node->getArguments()) {
+        FunctionArgument funcArg = {};
+        funcArg.name = argument->getName();
+        funcArg.type = argument->getType();
+        funcSig.arguments.push_back(funcArg);
+    }
+    functions.push_back(funcSig);
 }
 
-std::vector<std::pair<std::string, ast::DataType>> FunctionFinder::run(AstNode *rootNode) {
+std::vector<FunctionSignature> FunctionFinder::run(AstNode *rootNode) {
     rootNode->accept(this);
     return functions;
 }

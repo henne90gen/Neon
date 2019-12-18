@@ -6,6 +6,7 @@
 #include "ast/visitors/AstTestCasePrinter.h"
 #include "ast/visitors/FunctionFinder.h"
 #include "ast/visitors/ImportFinder.h"
+#include "ast/visitors/TypeAnalyser.h"
 #include "ir/IrGenerator.h"
 
 #include <iostream>
@@ -43,8 +44,7 @@ void Compiler::run() {
         }
     }
 
-    // TODO fix type analysis
-    //    analyseTypes();
+    analyseTypes();
 
     generateIR();
 
@@ -89,7 +89,8 @@ Module *Compiler::loadModule(const std::string &moduleFileName) {
 void Compiler::generateIR() {
     auto functionResolver = FunctionResolver(program, moduleImportsMap, moduleFunctionsMap);
     for (const auto &module : program->modules) {
-        auto generator = IrGenerator(module.second, functionResolver, verbose);
+        auto typeResolver = TypeResolver(moduleTypesMap[module.second]);
+        auto generator = IrGenerator(module.second, functionResolver, typeResolver, verbose);
         generator.run();
     }
 }
@@ -183,4 +184,12 @@ void Compiler::writeModuleToObjectFile() {
     pass.run(module);
     dest.flush();
     dest.close();
+}
+
+void Compiler::analyseTypes() {
+    for (auto &entry : program->modules) {
+        auto &module = entry.second;
+        auto functionResolver = FunctionResolver(program, moduleImportsMap, moduleFunctionsMap);
+        moduleTypesMap[module] = TypeAnalyser(module, functionResolver).run(module->root);
+    }
 }

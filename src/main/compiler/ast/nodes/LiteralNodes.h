@@ -32,7 +32,7 @@ class FloatNode : public LiteralNode {
 
     void accept(AstVisitor *v) override;
 
-    float getValue() { return value; }
+    double getValue() { return value; }
 
   private:
     float value;

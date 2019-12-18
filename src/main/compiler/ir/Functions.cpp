@@ -114,8 +114,16 @@ void IrGenerator::visitCallNode(CallNode *node) {
             return logError("Undefined function '" + node->getName() + "'");
         }
 
-        FunctionNode externalFunc = FunctionNode(node->getName(), resolveResult.dataType);
+        auto signature = resolveResult.signature;
+        FunctionNode externalFunc = FunctionNode(signature.name, signature.returnType);
+        for (auto &argument : signature.arguments) {
+            auto argumentNode = new VariableDefinitionNode(argument.name, argument.type, 0);
+            externalFunc.getArguments().push_back(argumentNode);
+        }
         this->visitFunctionNode(&externalFunc);
+        for (auto argument : externalFunc.getArguments()) {
+            delete argument;
+        }
         calleeFunc = llvmModule.getFunction(node->getName());
         if (calleeFunc == nullptr) {
             return logError("Could not generate external definition for function '" + node->getName() + "'");

@@ -2,6 +2,7 @@
 
 #include "../../Module.h"
 #include "../FunctionResolver.h"
+#include "../TypeResolver.h"
 #include "../ast/AstVisitor.h"
 #include "../ast/nodes/AllNodes.h"
 
@@ -19,7 +20,7 @@
 
 class IrGenerator : public AstVisitor {
   public:
-    explicit IrGenerator(Module *module, FunctionResolver &functionResolver, bool verbose);
+    explicit IrGenerator(Module *module, FunctionResolver &functionResolver, TypeResolver &typeResolver, bool verbose);
 
     void visitAssignmentNode(AssignmentNode *node) override;
     void visitBinaryOperationNode(BinaryOperationNode *node) override;
@@ -43,6 +44,7 @@ class IrGenerator : public AstVisitor {
   private:
     Module *module;
     FunctionResolver &functionResolver;
+    TypeResolver &typeResolver;
     const bool verbose = false;
 
     llvm::LLVMContext &context;
@@ -74,4 +76,8 @@ class IrGenerator : public AstVisitor {
     void finalizeFunction(llvm::Function *function, ast::DataType returnType, bool isExternalFunction);
     llvm::Constant *getInitializer(const ast::DataType &dt, bool isArray, unsigned int arraySize);
     void setupGlobalInitialization(llvm::Function *func);
+    void emitIntegerDivision();
+    void emitIntegerDivision(BinaryOperationNode *node);
+    void emitIntegerOperation(BinaryOperationNode *node, llvm::Value *l, llvm::Value *r);
+    void emitFloatDivision(BinaryOperationNode *node, llvm::Value *l, llvm::Value *r);
 };
