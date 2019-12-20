@@ -6,9 +6,8 @@ extern fun asin(float x) float
 extern fun acos(float x) float
 extern fun atan(float x) float
 
-extern fun floor(float x) int
-extern fun ceil(float x) int
+extern fun floor(float x) float
+extern fun ceil(float x) float
 
-fun toInt(float x) int {
-    return floor(x)
-}
+extern fun toInt(float x) int
+extern fun toFloat(int x) float
