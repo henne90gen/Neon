@@ -7,9 +7,9 @@ add_custom_command(
         WORKING_DIRECTORY ${CMAKE_CURRENT_SOURCE_DIR}
         MAIN_DEPENDENCY ${CMAKE_CURRENT_SOURCE_DIR}/grammar.txt)
 
-set(SOURCES_GRAMMAR Grammar.cpp)
+add_library(NeonGrammar Grammar.cpp)
 
-set(SOURCES_COMPILER
+add_library(NeonCompiler
         compiler/ast/AstGenerator.cpp
         compiler/ast/nodes/AssignmentNode.cpp
         compiler/ast/nodes/AstNode.cpp
@@ -47,11 +47,10 @@ set(SOURCES_COMPILER
         Program.cpp
         Utils.cpp)
 
-add_library(NeonGrammar ${SOURCES_GRAMMAR})
-add_library(NeonCompiler ${SOURCES_COMPILER})
-add_executable(${EXECUTABLE_NAME} ${CMAKE_CURRENT_SOURCE_DIR}/main.cpp)
-
 add_dependencies(NeonCompiler NeonGrammar)
+add_dependencies(NeonCompiler NeonLib)
+
+add_executable(${EXECUTABLE_NAME} ${CMAKE_CURRENT_SOURCE_DIR}/main.cpp)
 
 target_link_libraries(NeonCompiler NeonGrammar ${LLVM_LIBS})
 target_link_libraries(${EXECUTABLE_NAME} NeonCompiler)
