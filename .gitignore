@@ -10,3 +10,7 @@ __pycache__/
 env/
 docs/
 main.ne
+
+*.llvm
+*.o
+*.so
