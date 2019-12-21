@@ -48,7 +48,7 @@ add_library(NeonCompiler
         Utils.cpp)
 
 add_dependencies(NeonCompiler NeonGrammar)
-add_dependencies(NeonCompiler NeonLib)
+add_dependencies(NeonCompiler NeonStd)
 
 add_executable(${EXECUTABLE_NAME} ${CMAKE_CURRENT_SOURCE_DIR}/main.cpp)
 

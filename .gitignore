@@ -13,4 +13,4 @@ main.ne
 
 *.llvm
 *.o
-*.so
+*.a
