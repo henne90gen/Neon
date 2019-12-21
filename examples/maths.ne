@@ -9,5 +9,5 @@ extern fun atan(float x) float
 extern fun floor(float x) float
 extern fun ceil(float x) float
 
-extern fun toInt(float x) int
-extern fun toFloat(int x) float
+extern fun ftoi(float x) int
+extern fun itof(int x) float

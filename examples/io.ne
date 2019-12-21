@@ -1,4 +1,4 @@
 
-extern fun print_f(float x)
-extern fun print_i(int x)
-extern fun print_b(bool x)
+extern fun pf(float x)
+extern fun pi(int x)
+extern fun pb(bool x)
