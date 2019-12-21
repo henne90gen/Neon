@@ -160,10 +160,10 @@ std::optional<Token> Lexer::matchRegex(const std::string &regex, Token::TokenTyp
 
 std::optional<Token> Lexer::matchWordToken() {
     if (STARTS_WITH(currentWord, "true")) {
-        return TOKEN(Token::TRUE, "true");
+        return TOKEN(Token::BOOLEAN, "true");
     }
     if (STARTS_WITH(currentWord, "false")) {
-        return TOKEN(Token::FALSE, "false");
+        return TOKEN(Token::BOOLEAN, "false");
     }
     if (STARTS_WITH(currentWord, "not")) {
         return TOKEN(Token::NOT, "not");
@@ -185,6 +185,9 @@ std::optional<Token> Lexer::matchWordToken() {
     }
     if (STARTS_WITH(currentWord, "bool")) {
         return TOKEN(Token::SIMPLE_DATA_TYPE, "bool");
+    }
+    if (STARTS_WITH(currentWord, "string")) {
+        return TOKEN(Token::SIMPLE_DATA_TYPE, "string");
     }
     if (STARTS_WITH(currentWord, "return")) {
         return TOKEN(Token::RETURN, "return");

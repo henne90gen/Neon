@@ -22,10 +22,8 @@ std::string to_string(Token::TokenType type) {
         return "STAR";
     case Token::END_OF_FILE:
         return "END_OF_FILE";
-    case Token::TRUE:
-        return "TRUE";
-    case Token::FALSE:
-        return "FALSE";
+    case Token::BOOLEAN:
+        return "BOOLEAN";
     case Token::NOT:
         return "NOT";
     case Token::AND:

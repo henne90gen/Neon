@@ -133,10 +133,10 @@ term
     term / factor
 
 factor
-    true
-    false
+    boolean
     integer
     float
+    string
     array_access
     call
     variable_name

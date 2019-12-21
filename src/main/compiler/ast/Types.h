@@ -1,8 +1,10 @@
 #pragma once
 
+#include <string>
+
 namespace ast {
 
-enum DataType { VOID, INT, FLOAT, BOOL };
+enum DataType { VOID, BOOL, INT, FLOAT, STRING };
 
 enum NodeType {
     SEQUENCE,
@@ -34,4 +36,6 @@ enum BinaryOperationType {
     GREATER_THAN,
 };
 
-}
+} // namespace ast
+
+std::string to_string(ast::DataType dataType);

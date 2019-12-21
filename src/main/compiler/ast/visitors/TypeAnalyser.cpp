@@ -78,8 +78,8 @@ void TypeAnalyser::visitAssignmentNode(AssignmentNode *node) {
     ast::DataType leftType = typeMap[node->getLeft()];
     ast::DataType rightType = typeMap[node->getRight()];
     if (leftType != rightType) {
-        std::cerr << "TypeAnalyser: Assignment type mismatch: " << to_string(node->getLeft()->getAstNodeType()) << " = "
-                  << to_string(node->getRight()->getAstNodeType()) << std::endl;
+        std::cerr << "TypeAnalyser: Assignment type mismatch: " << to_string(leftType) << " = " << to_string(rightType)
+                  << std::endl;
         return;
     }
 
@@ -100,11 +100,13 @@ void TypeAnalyser::visitStatementNode(StatementNode *node) {
     typeMap[node] = typeMap[node->getChild()];
 }
 
+void TypeAnalyser::visitBoolNode(BoolNode *node) { typeMap[node] = ast::DataType::BOOL; }
+
 void TypeAnalyser::visitFloatNode(FloatNode *node) { typeMap[node] = ast::DataType::FLOAT; }
 
 void TypeAnalyser::visitIntegerNode(IntegerNode *node) { typeMap[node] = ast::DataType::INT; }
 
-void TypeAnalyser::visitBoolNode(BoolNode *node) { typeMap[node] = ast::DataType::BOOL; }
+void TypeAnalyser::visitStringNode(StringNode *node) { typeMap[node] = ast::DataType::STRING; }
 
 void TypeAnalyser::visitIfStatementNode(IfStatementNode *node) {
     node->getCondition()->accept(this);

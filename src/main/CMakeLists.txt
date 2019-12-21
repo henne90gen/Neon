@@ -11,6 +11,7 @@ add_library(NeonGrammar Grammar.cpp)
 
 add_library(NeonCompiler
         compiler/ast/AstGenerator.cpp
+        compiler/ast/Types.cpp
         compiler/ast/nodes/AssignmentNode.cpp
         compiler/ast/nodes/AstNode.cpp
         compiler/ast/nodes/BinaryOperationNode.cpp

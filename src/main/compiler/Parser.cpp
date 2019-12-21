@@ -48,10 +48,14 @@ void printCurrentParseState(const StateTransition &action, const std::vector<int
 
 GrammarSymbol convertToGrammarSymbol(const Token &token) {
     switch (token.type) {
+    case Token::BOOLEAN:
+        return GrammarSymbol::BOOLEAN;
     case Token::INTEGER:
         return GrammarSymbol::INTEGER;
     case Token::FLOAT:
         return GrammarSymbol::FLOAT;
+    case Token::STRING:
+        return GrammarSymbol::STRING;
     case Token::PLUS:
         return GrammarSymbol::PLUS;
     case Token::MINUS:
@@ -70,10 +74,6 @@ GrammarSymbol convertToGrammarSymbol(const Token &token) {
         return GrammarSymbol::COMMA;
     case Token::SEMICOLON:
         return GrammarSymbol::SEMICOLON;
-    case Token::TRUE:
-        return GrammarSymbol::TRUE;
-    case Token::FALSE:
-        return GrammarSymbol::FALSE;
     case Token::NOT:
         return GrammarSymbol::NOT;
     case Token::SINGLE_EQUALS:
@@ -120,8 +120,6 @@ GrammarSymbol convertToGrammarSymbol(const Token &token) {
         return GrammarSymbol::FOR;
     case Token::NEW_LINE:
         return GrammarSymbol::NEW_LINE;
-    case Token::STRING:
-        return GrammarSymbol::STRING;
     case Token::IMPORT:
         return GrammarSymbol::IMPORT;
     default:

@@ -16,9 +16,10 @@
 
 #include "../../Utils.h"
 
-IrGenerator::IrGenerator(Module *module, FunctionResolver &functionResolver, TypeResolver &typeResolver, const bool verbose)
-    : module(module), functionResolver(functionResolver), typeResolver(typeResolver), verbose(verbose), context(module->llvmModule.getContext()),
-      llvmModule(module->llvmModule), builder(context) {
+IrGenerator::IrGenerator(Module *module, FunctionResolver &functionResolver, TypeResolver &typeResolver,
+                         const bool verbose)
+    : module(module), functionResolver(functionResolver), typeResolver(typeResolver), verbose(verbose),
+      context(module->llvmModule.getContext()), llvmModule(module->llvmModule), builder(context) {
     pushScope();
 }
 
@@ -34,6 +35,8 @@ llvm::Type *IrGenerator::getType(ast::DataType type) {
         return llvm::Type::getDoubleTy(context);
     case ast::DataType::BOOL:
         return llvm::Type::getInt1Ty(context);
+    case ast::DataType::STRING:
+        return llvm::Type::getInt8PtrTy(context);
     default:
         return nullptr;
     }
@@ -92,7 +95,8 @@ void IrGenerator::visitSequenceNode(SequenceNode *node) {
     if (currentFunction == nullptr) {
         // TODO(henne): make sure this function name does not collide with any user defined functions
         // TODO(henne): maybe don't use the full filepath...
-        initFunc = getOrCreateFunctionDefinition("global-ctor-" + module->getFilePath().string(), ast::DataType::VOID, {});
+        initFunc =
+              getOrCreateFunctionDefinition("global-ctor-" + module->getFilePath().string(), ast::DataType::VOID, {});
 
         llvm::BasicBlock *BB = llvm::BasicBlock::Create(context, "entry-ctor", initFunc);
         builder.SetInsertPoint(BB);

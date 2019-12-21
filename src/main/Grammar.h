@@ -25,22 +25,22 @@ enum GrammarSymbol {
     ARRAY_ACCESS = 18,
     ARRAY_DEFINITION = 19,
     ASSIGNMENT = 20,
-    CALL = 21,
-    CALL_ARGS = 22,
-    CALL_HEADER = 23,
-    CONJUNCTION = 24,
-    DATA_TYPE = 25,
-    DEFINITION = 26,
-    DISJUNCTION = 27,
-    ELSE = 28,
-    ENDOFFILE = 29,
-    EXPRESSION = 30,
-    EXTERN = 31,
-    EXTERNAL_FUNCTION = 32,
-    EXTERNAL_FUNCTION_HEADER = 33,
-    EXTERNAL_FUNCTION_RETURN = 34,
-    FACTOR = 35,
-    FALSE = 36,
+    BOOLEAN = 21,
+    CALL = 22,
+    CALL_ARGS = 23,
+    CALL_HEADER = 24,
+    CONJUNCTION = 25,
+    DATA_TYPE = 26,
+    DEFINITION = 27,
+    DISJUNCTION = 28,
+    ELSE = 29,
+    ENDOFFILE = 30,
+    EXPRESSION = 31,
+    EXTERN = 32,
+    EXTERNAL_FUNCTION = 33,
+    EXTERNAL_FUNCTION_HEADER = 34,
+    EXTERNAL_FUNCTION_RETURN = 35,
+    FACTOR = 36,
     FLOAT = 37,
     FOR = 38,
     FOR_STATEMENT = 39,
@@ -71,11 +71,10 @@ enum GrammarSymbol {
     STRING = 64,
     SUM = 65,
     TERM = 66,
-    TRUE = 67,
-    VARIABLE_DEFINITION = 68,
-    VARIABLE_NAME = 69,
-    LEFT_CURLY_BRACE = 70,
-    RIGHT_CURLY_BRACE = 71
+    VARIABLE_DEFINITION = 67,
+    VARIABLE_NAME = 68,
+    LEFT_CURLY_BRACE = 69,
+    RIGHT_CURLY_BRACE = 70
 };
 
 std::string to_string(GrammarSymbol symbol);
@@ -105,4 +104,4 @@ std::string to_string(const StateTransition &action);
 
 void initializeStateTransitionTable();
 
-extern const StateTransition *stateTransitionTable[152][72];
+extern const StateTransition *stateTransitionTable[152][71];

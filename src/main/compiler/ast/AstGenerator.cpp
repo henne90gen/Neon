@@ -13,8 +13,8 @@ bool isUnaryOperation(ParseTreeNode *node) {
 }
 
 bool isLiteral(ParseTreeNode *node) {
-    return node->symbol == GrammarSymbol::INTEGER || node->symbol == GrammarSymbol::FLOAT ||
-           node->symbol == GrammarSymbol::TRUE || node->symbol == GrammarSymbol::FALSE;
+    return node->symbol == GrammarSymbol::BOOLEAN || node->symbol == GrammarSymbol::INTEGER ||
+           node->symbol == GrammarSymbol::FLOAT || node->symbol == GrammarSymbol::STRING;
 }
 
 bool isVariable(ParseTreeNode *node) {
@@ -122,13 +122,16 @@ AstNode *createLiteral(ParseTreeNode *node) {
         float value = std::stof(node->token.content);
         return new FloatNode(value);
     }
-    case GrammarSymbol::TRUE:
-    case GrammarSymbol::FALSE: {
+    case GrammarSymbol::BOOLEAN: {
         bool value = false;
         if (node->token.content == "true") {
             value = true;
         }
         return new BoolNode(value);
+    }
+    case GrammarSymbol::STRING: {
+        std::string value = node->token.content;
+        return new StringNode(value);
     }
     default:
         std::cout << "Data type not supported yet!" << std::endl;
@@ -151,14 +154,17 @@ ast::DataType getDataType(ParseTreeNode *node) {
         return ast::DataType::VOID;
     }
 
+    if (node->token.content == "bool") {
+        return ast::DataType::BOOL;
+    }
     if (node->token.content == "int") {
         return ast::DataType::INT;
     }
     if (node->token.content == "float") {
         return ast::DataType::FLOAT;
     }
-    if (node->token.content == "bool") {
-        return ast::DataType::BOOL;
+    if (node->token.content == "string") {
+        return ast::DataType::STRING;
     }
     return ast::DataType::VOID;
 }

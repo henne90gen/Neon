@@ -71,8 +71,13 @@ TEST_CASE("Parser Basics") {
         assertParserAccepts(program);
     }
 
-    SECTION("can handle import") {
-        std::vector<std::string> program = {"import \"example/functions\""};
+    SECTION("can handle 'import \"test\"") {
+        std::vector<std::string> program = {"import \"test\""};
+        assertParserAccepts(program);
+    }
+
+    SECTION("can handle 'string s = \"Hello World!\"'") {
+        std::vector<std::string> program = {"string s = \"Hello World!\""};
         assertParserAccepts(program);
     }
 }

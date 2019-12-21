@@ -34,7 +34,7 @@ TEST_CASE("AstGenerator") {
         assertProgramCreatesAst(program, spec);
     }
 
-    SECTION("function call") {
+    SECTION("can handle function call") {
         std::vector<AstNodeSpec> spec = {
               {0, ast::NodeType::SEQUENCE},
               {1, ast::NodeType::STATEMENT},
@@ -44,7 +44,7 @@ TEST_CASE("AstGenerator") {
         assertProgramCreatesAst(program, spec);
     }
 
-    SECTION("function call with argument") {
+    SECTION("can handle function call with argument") {
         std::vector<AstNodeSpec> spec = {
               {0, ast::NodeType::SEQUENCE},
               {1, ast::NodeType::STATEMENT},
@@ -55,7 +55,7 @@ TEST_CASE("AstGenerator") {
         assertProgramCreatesAst(program, spec);
     }
 
-    SECTION("external function") {
+    SECTION("can handle external function") {
         std::vector<AstNodeSpec> spec = {
               {0, ast::NodeType::SEQUENCE},
               {1, ast::NodeType::STATEMENT},
@@ -65,7 +65,7 @@ TEST_CASE("AstGenerator") {
         assertProgramCreatesAst(program, spec);
     }
 
-    SECTION("external function with return type") {
+    SECTION("can handle external function with return type") {
         std::vector<AstNodeSpec> spec = {
               {0, ast::NodeType::SEQUENCE},
               {1, ast::NodeType::STATEMENT},
@@ -75,7 +75,7 @@ TEST_CASE("AstGenerator") {
         assertProgramCreatesAst(program, spec);
     }
 
-    SECTION("external function with argument") {
+    SECTION("can handle external function with argument") {
         std::vector<AstNodeSpec> spec = {
               {0, ast::NodeType::SEQUENCE},
               {1, ast::NodeType::STATEMENT},
@@ -184,17 +184,10 @@ TEST_CASE("AstGenerator") {
 
     SECTION("can handle array example") {
         std::vector<AstNodeSpec> spec = {
-              {0, ast::NodeType::SEQUENCE},
-              {1, ast::NodeType::STATEMENT},
-              {2, ast::NodeType::VARIABLE_DEFINITION},
-              {1, ast::NodeType::STATEMENT},
-              {2, ast::NodeType::ASSIGNMENT},
-              {3, ast::NodeType::VARIABLE},
-              {3, ast::NodeType::LITERAL},
-              {1, ast::NodeType::STATEMENT},
-              {2, ast::NodeType::ASSIGNMENT},
-              {3, ast::NodeType::VARIABLE},
-              {3, ast::NodeType::VARIABLE},
+              {0, ast::NodeType::SEQUENCE},  {1, ast::NodeType::STATEMENT},  {2, ast::NodeType::VARIABLE_DEFINITION},
+              {1, ast::NodeType::STATEMENT}, {2, ast::NodeType::ASSIGNMENT}, {3, ast::NodeType::VARIABLE},
+              {3, ast::NodeType::LITERAL},   {1, ast::NodeType::STATEMENT},  {2, ast::NodeType::ASSIGNMENT},
+              {3, ast::NodeType::VARIABLE},  {3, ast::NodeType::VARIABLE},
         };
         std::vector<std::string> program = {"int[5] a", "a[0] = 5", "a[1] = a[0]"};
         assertProgramCreatesAst(program, spec);
@@ -207,6 +200,17 @@ TEST_CASE("AstGenerator") {
               {2, ast::NodeType::IMPORT},
         };
         std::vector<std::string> program = {"import \"examples/functions\""};
+        assertProgramCreatesAst(program, spec);
+    }
+
+    SECTION("can handle string definition'") {
+        std::vector<AstNodeSpec> spec = {
+              {0, ast::NodeType::SEQUENCE},
+              {1, ast::NodeType::STATEMENT},
+              {2, ast::NodeType::ASSIGNMENT},
+              {3, ast::NodeType::VARIABLE_DEFINITION},
+        };
+        std::vector<std::string> program = {"string s = \"Hello World!\""};
         assertProgramCreatesAst(program, spec);
     }
 }

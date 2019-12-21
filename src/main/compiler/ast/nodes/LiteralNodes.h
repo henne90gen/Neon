@@ -1,10 +1,12 @@
 #pragma once
 
+#include <utility>
+
 #include "AstNode.h"
 
 class LiteralNode : public AstNode {
   public:
-    enum LiteralType { INTEGER, FLOAT, BOOL };
+    enum LiteralType { BOOL, INTEGER, FLOAT, STRING };
 
     explicit LiteralNode(LiteralType type) : AstNode(ast::NodeType::LITERAL), type(type) {}
 
@@ -12,6 +14,18 @@ class LiteralNode : public AstNode {
 
   private:
     LiteralType type;
+};
+
+class BoolNode : public LiteralNode {
+  public:
+    explicit BoolNode(bool value) : LiteralNode(LiteralNode::BOOL), value(value) {}
+
+    void accept(AstVisitor *v) override;
+
+    bool getValue() { return value; }
+
+  private:
+    bool value;
 };
 
 class IntegerNode : public LiteralNode {
@@ -38,14 +52,14 @@ class FloatNode : public LiteralNode {
     float value;
 };
 
-class BoolNode : public LiteralNode {
+class StringNode : public LiteralNode {
   public:
-    explicit BoolNode(bool value) : LiteralNode(LiteralNode::BOOL), value(value) {}
+    explicit StringNode(std::string value) : LiteralNode(LiteralNode::STRING), value(std::move(value)) {}
 
     void accept(AstVisitor *v) override;
 
-    bool getValue() { return value; }
+    std::string getValue() { return value; }
 
   private:
-    bool value;
+    std::string value;
 };

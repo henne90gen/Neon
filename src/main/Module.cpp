@@ -36,9 +36,9 @@ bool tokenHasSpaceBeforeIt(const Token *prev, const Token &t, const Token * /*ne
     return isNumberAndAfterEquals || isNumberAndAfterOperation || isNumberAndNotAfterBracket ||
            isVariableAndNotAfterParenthesis || isCurlyBrace || isBinaryOperation ||
            isParenthesisAndAfterUnaryOperator || isSimpleDataTypeAndNotAfterParenthesis ||
-           isStringAndNotAfterParenthesisAndNotAfterBracket || t.type == Token::NEW_LINE || t.type == Token::TRUE ||
-           t.type == Token::FALSE || t.type == Token::SINGLE_EQUALS || t.type == Token::DOUBLE_EQUALS ||
-           t.type == Token::ELSE || t.type == Token::NOT || t.type == Token::FUN || t.type == Token::RETURN;
+           isStringAndNotAfterParenthesisAndNotAfterBracket || t.type == Token::NEW_LINE || t.type == Token::BOOLEAN ||
+           t.type == Token::SINGLE_EQUALS || t.type == Token::DOUBLE_EQUALS || t.type == Token::ELSE ||
+           t.type == Token::NOT || t.type == Token::FUN || t.type == Token::RETURN;
 }
 
 std::string Module::toString() const {
