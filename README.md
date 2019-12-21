@@ -51,10 +51,19 @@ This makes it possible to call functions that are contained in the externally li
 -   the imported file is specified with a relative path to the current source file
 -   e.g. `import "examples/functions.ne"`
 
+### Standard Library
+
+- consists of two parts:
+    - functions written in Neon
+        - provides definitions to interface with existing c functions
+        - for example maths functions
+        - still WIP
+    - functions written in C
+        - provides functions that do not exist in available C libraries
+        - for example conversion functions between the different data types
+
 ## TODO / Ideas
 
--   standard library
-    -   provide interface to important c functions
 -   complex types
     -   arrays (multidimensional)
     -   compound types (structs)
