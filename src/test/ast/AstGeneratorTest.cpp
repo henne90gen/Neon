@@ -193,7 +193,7 @@ TEST_CASE("AstGenerator") {
         assertProgramCreatesAst(program, spec);
     }
 
-    SECTION("can handle import statement'") {
+    SECTION("can handle import statement") {
         std::vector<AstNodeSpec> spec = {
               {0, ast::NodeType::SEQUENCE},
               {1, ast::NodeType::STATEMENT},
@@ -203,12 +203,11 @@ TEST_CASE("AstGenerator") {
         assertProgramCreatesAst(program, spec);
     }
 
-    SECTION("can handle string definition'") {
+    SECTION("can handle string definition") {
         std::vector<AstNodeSpec> spec = {
-              {0, ast::NodeType::SEQUENCE},
-              {1, ast::NodeType::STATEMENT},
-              {2, ast::NodeType::ASSIGNMENT},
-              {3, ast::NodeType::VARIABLE_DEFINITION},
+              {0, ast::NodeType::SEQUENCE},   {1, ast::NodeType::STATEMENT},
+              {2, ast::NodeType::ASSIGNMENT}, {3, ast::NodeType::VARIABLE_DEFINITION},
+              {3, ast::NodeType::LITERAL},
         };
         std::vector<std::string> program = {"string s = \"Hello World!\""};
         assertProgramCreatesAst(program, spec);
