@@ -2,11 +2,11 @@
 
 #include <llvm/IR/BasicBlock.h>
 #include <llvm/IR/Constants.h>
+#include <llvm/IR/DerivedTypes.h>
 #include <llvm/IR/GlobalVariable.h>
 #include <llvm/IR/PassManager.h>
 #include <llvm/Passes/PassBuilder.h>
 #include <llvm/Support/FileSystem.h>
-#include <llvm/Support/TargetRegistry.h>
 #include <llvm/Support/raw_ostream.h>
 #include <llvm/Target/TargetOptions.h>
 #include <llvm/Transforms/Scalar/SimplifyCFG.h>
@@ -16,6 +16,7 @@
 
 #include "../../Utils.h"
 
+void generateStringType();
 IrGenerator::IrGenerator(Module *module, FunctionResolver &functionResolver, TypeResolver &typeResolver,
                          const bool verbose)
     : module(module), functionResolver(functionResolver), typeResolver(typeResolver), verbose(verbose),
@@ -24,23 +25,6 @@ IrGenerator::IrGenerator(Module *module, FunctionResolver &functionResolver, Typ
 }
 
 void IrGenerator::logError(const std::string &msg) { errors.push_back(msg); }
-
-llvm::Type *IrGenerator::getType(ast::DataType type) {
-    switch (type) {
-    case ast::DataType::VOID:
-        return llvm::Type::getVoidTy(context);
-    case ast::DataType::INT:
-        return llvm::Type::getInt64Ty(context);
-    case ast::DataType::FLOAT:
-        return llvm::Type::getDoubleTy(context);
-    case ast::DataType::BOOL:
-        return llvm::Type::getInt1Ty(context);
-    case ast::DataType::STRING:
-        return llvm::Type::getInt8PtrTy(context);
-    default:
-        return nullptr;
-    }
-}
 
 llvm::AllocaInst *IrGenerator::createEntryBlockAlloca(llvm::Type *type, const std::string &name) {
     llvm::BasicBlock *block = builder.GetInsertBlock();
@@ -115,7 +99,7 @@ void IrGenerator::visitSequenceNode(SequenceNode *node) {
 
     if (initFunc != nullptr) {
         finalizeFunction(initFunc, ast::DataType::VOID, false);
-        // TODO(henne): henne: don't generate global init function, if there are no globals
+        // TODO(henne): don't generate global init function, if there are no globals
         setupGlobalInitialization(initFunc);
         isGlobalScope = false;
     }

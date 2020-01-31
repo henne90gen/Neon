@@ -13,4 +13,7 @@ link-reverse:
 time:
 	./time.sh
 
+struct_pointer:
+	clang++ -O0 -S struct_pointer.cpp -emit-llvm && cat struct_pointer.ll
+
 .PHONY: compile llvm link

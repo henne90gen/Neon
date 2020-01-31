@@ -131,6 +131,7 @@ AstNode *createLiteral(ParseTreeNode *node) {
     }
     case GrammarSymbol::STRING: {
         std::string value = node->token.content;
+        value = value.substr(1, value.size() - 2);
         return new StringNode(value);
     }
     default:

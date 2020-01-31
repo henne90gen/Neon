@@ -20,6 +20,9 @@ void TypeAnalyser::visitCallNode(CallNode *node) {
         std::cerr << "TypeAnalyser: Undefined function " << node->getName() << std::endl;
         return;
     }
+    for (const auto arg : node->getArguments()) {
+        arg->accept(this);
+    }
     typeMap[node] = result.signature.returnType;
 }
 

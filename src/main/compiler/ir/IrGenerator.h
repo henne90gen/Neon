@@ -33,6 +33,7 @@ class IrGenerator : public AstVisitor {
     void visitIntegerNode(IntegerNode *node) override;
     void visitSequenceNode(SequenceNode *node) override;
     void visitStatementNode(StatementNode *node) override;
+    void visitStringNode(StringNode *node) override;
     void visitUnaryOperationNode(UnaryOperationNode *node) override;
     void visitVariableNode(VariableNode *node) override;
     void visitVariableDefinitionNode(VariableDefinitionNode *node) override;
@@ -70,14 +71,17 @@ class IrGenerator : public AstVisitor {
 
     void logError(const std::string &msg);
     llvm::Type *getType(ast::DataType type);
-    llvm::Function *getOrCreateFunctionDefinition(const std::string &name, ast::DataType returnType,
-                                                  const std::vector<VariableDefinitionNode *> &arguments);
+    llvm::Function *getOrCreateFunctionDefinition(const std::string &name, const ast::DataType returnType,
+                                                  const std::vector<FunctionArgument> &arguments);
+    llvm::Function *getOrCreateFunctionDefinition(const FunctionSignature &signature);
     llvm::AllocaInst *createEntryBlockAlloca(llvm::Type *type, const std::string &name);
     void finalizeFunction(llvm::Function *function, ast::DataType returnType, bool isExternalFunction);
     llvm::Constant *getInitializer(const ast::DataType &dt, bool isArray, unsigned int arraySize);
     void setupGlobalInitialization(llvm::Function *func);
-    void emitIntegerDivision();
+
     void emitIntegerDivision(BinaryOperationNode *node);
     void emitIntegerOperation(BinaryOperationNode *node, llvm::Value *l, llvm::Value *r);
     void emitFloatDivision(BinaryOperationNode *node, llvm::Value *l, llvm::Value *r);
+
+    llvm::StructType *getStringType();
 };

@@ -11,7 +11,12 @@ void IrGenerator::visitFunctionNode(FunctionNode *node) {
     llvm::Function *previousFunction = currentFunction;
     bool previousGlobalScopeState = isGlobalScope;
     isGlobalScope = false;
-    currentFunction = getOrCreateFunctionDefinition(node->getName(), node->getReturnType(), node->getArguments());
+    std::vector<FunctionArgument> arguments = {};
+    for (const auto &arg : node->getArguments()) {
+        FunctionArgument newArg = {arg->getName(), arg->getType()};
+        arguments.push_back(newArg);
+    }
+    currentFunction = getOrCreateFunctionDefinition(node->getName(), node->getReturnType(), arguments);
 
     if (!node->isExternal()) {
         llvm::BasicBlock *BB = llvm::BasicBlock::Create(context, "entry-" + node->getName(), currentFunction);
@@ -43,7 +48,7 @@ void IrGenerator::visitFunctionNode(FunctionNode *node) {
 }
 
 llvm::Function *IrGenerator::getOrCreateFunctionDefinition(const std::string &name, const ast::DataType returnType,
-                                                           const std::vector<VariableDefinitionNode *> &arguments) {
+                                                           const std::vector<FunctionArgument> &arguments) {
     llvm::Function *function = llvmModule.getFunction(name);
     if (function == nullptr) {
         auto retType = getType(returnType);
@@ -51,24 +56,35 @@ llvm::Function *IrGenerator::getOrCreateFunctionDefinition(const std::string &na
         std::vector<llvm::Type *> argumentTypes = {};
         argumentTypes.reserve(arguments.size());
         for (auto &arg : arguments) {
-            argumentTypes.push_back(getType(arg->getType()));
+            llvm::Type *type = getType(arg.type);
+            if (arg.type == ast::STRING) {
+                // TODO this is a hack to get strings working.
+                //      ín the future we want only primitive types to be passed by value
+                //      everything else is going to be passed by pointer
+                type = type->getPointerTo();
+            }
+            argumentTypes.push_back(type);
         }
 
         llvm::FunctionType *functionType = llvm::FunctionType::get(retType, argumentTypes, false);
 
         function = llvm::Function::Create(functionType, llvm::Function::ExternalLinkage, name, llvmModule);
         if (function == nullptr) {
-            logError("Could not create function");
+            logError("Could not create function " + name);
             return nullptr;
         }
 
         unsigned int i = 0;
         for (auto &arg : function->args()) {
-            arg.setName(arguments[i++]->getName());
+            arg.setName(arguments[i++].name);
         }
     }
 
     return function;
+}
+
+llvm::Function *IrGenerator::getOrCreateFunctionDefinition(const FunctionSignature &signature) {
+    return getOrCreateFunctionDefinition(signature.name, signature.returnType, signature.arguments);
 }
 
 void IrGenerator::finalizeFunction(llvm::Function *function, const ast::DataType returnType,
@@ -114,17 +130,7 @@ void IrGenerator::visitCallNode(CallNode *node) {
             return logError("Undefined function '" + node->getName() + "'");
         }
 
-        auto signature = resolveResult.signature;
-        FunctionNode externalFunc = FunctionNode(signature.name, signature.returnType);
-        for (auto &argument : signature.arguments) {
-            auto argumentNode = new VariableDefinitionNode(argument.name, argument.type, 0);
-            externalFunc.getArguments().push_back(argumentNode);
-        }
-        this->visitFunctionNode(&externalFunc);
-        for (auto argument : externalFunc.getArguments()) {
-            delete argument;
-        }
-        calleeFunc = llvmModule.getFunction(node->getName());
+        calleeFunc = getOrCreateFunctionDefinition(resolveResult.signature);
         if (calleeFunc == nullptr) {
             return logError("Could not generate external definition for function '" + node->getName() + "'");
         }
@@ -141,7 +147,14 @@ void IrGenerator::visitCallNode(CallNode *node) {
         if (itr == nodesToValues.end()) {
             return logError("Could not generate code for argument.");
         }
-        arguments.push_back(itr->second);
+        auto arg = itr->second;
+        if (typeResolver.getTypeOf(argument) == ast::STRING) {
+            // TODO this is a hack to get strings working.
+            //      ín the future we want only primitive types to be passed by value
+            //      everything else is going to be passed by pointer
+            arg = ((llvm::LoadInst *)itr->second)->getPointerOperand();
+        }
+        arguments.push_back(arg);
     }
 
     llvm::Value *call = nullptr;
