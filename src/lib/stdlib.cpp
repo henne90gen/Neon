@@ -2,6 +2,7 @@
 #include <cstdlib>
 #include <cstring>
 
+#define DEBUG
 #ifdef DEBUG
 #define LOG(x) x
 #else

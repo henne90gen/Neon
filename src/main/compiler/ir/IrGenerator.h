@@ -40,7 +40,7 @@ class IrGenerator : public AstVisitor {
 
     void run();
 
-    void print(bool writeToFile = true);
+    void writeToFile();
 
   private:
     Module *module;

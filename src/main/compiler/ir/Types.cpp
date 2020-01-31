@@ -93,18 +93,18 @@ void IrGenerator::visitBoolNode(BoolNode *node) {
 }
 
 void IrGenerator::visitStringNode(StringNode *node) {
-    unsigned int numCharacters = node->getValue().size();
+    const std::string stringValue = node->getValue();
+    unsigned int numCharacters = stringValue.size();
     std::vector<llvm::Constant *> constants = {
           llvm::ConstantPointerNull::get(llvm::IntegerType::getInt8PtrTy(context)),      // content
           llvm::ConstantInt::get(llvm::IntegerType::getInt64Ty(context), numCharacters), // length
           llvm::ConstantInt::get(llvm::IntegerType::getInt64Ty(context), numCharacters), // max length
-          llvm::ConstantInt::get(llvm::IntegerType::getInt64Ty(context), 16),            // growth factor
     };
     auto stringType = getStringType();
     auto value = llvm::ConstantStruct::get(stringType, constants);
 
     // two options:
-    //      paste code that inits string
+    //      generate code that inits string
     //      call function that inits string
     // going with second option for now
 
@@ -118,7 +118,7 @@ void IrGenerator::visitStringNode(StringNode *node) {
     auto alloc = createEntryBlockAlloca(stringType, "tmpS");
     builder.CreateStore(value, alloc);
 
-    auto data = builder.CreateGlobalStringPtr(node->getValue(), "str");
+    auto data = builder.CreateGlobalStringPtr(stringValue, "str");
     std::vector<llvm::Value *> args = {};
     args.push_back(alloc);
     args.push_back(data);

@@ -107,16 +107,13 @@ void IrGenerator::visitSequenceNode(SequenceNode *node) {
     LOG("Exit Sequence")
 }
 
-void IrGenerator::print(const bool writeToFile) {
+void IrGenerator::writeToFile() {
     std::string filePath = module->getFilePath().string() + ".llvm";
     std::error_code EC;
-    llvmModule.print(llvm::outs(), nullptr);
-    if (writeToFile) {
-        llvm::raw_fd_ostream dest(filePath, EC, llvm::sys::fs::OF_None);
-        llvmModule.print(dest, nullptr);
-        dest.flush();
-        dest.close();
-    }
+    llvm::raw_fd_ostream dest(filePath, EC, llvm::sys::fs::OF_None);
+    llvmModule.print(dest, nullptr);
+    dest.flush();
+    dest.close();
 }
 
 void IrGenerator::run() {
@@ -131,7 +128,7 @@ void IrGenerator::run() {
         printErrors();
         exit(1);
     } else {
-        this->print();
+        this->writeToFile();
     }
 }
 

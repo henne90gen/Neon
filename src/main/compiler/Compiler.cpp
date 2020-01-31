@@ -164,8 +164,10 @@ void Compiler::writeModuleToObjectFile() {
         exit(1);
     }
 
+    // print llvm ir to console
     module.print(llvm::outs(), nullptr);
 
+    // write object file
     std::error_code EC;
     llvm::raw_fd_ostream dest(program->objectFileName, EC, llvm::sys::fs::OF_None);
 
