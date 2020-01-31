@@ -147,14 +147,7 @@ void IrGenerator::visitCallNode(CallNode *node) {
         if (itr == nodesToValues.end()) {
             return logError("Could not generate code for argument.");
         }
-        auto arg = itr->second;
-        if (typeResolver.getTypeOf(argument) == ast::STRING) {
-            // TODO this is a hack to get strings working.
-            //      ín the future we want only primitive types to be passed by value
-            //      everything else is going to be passed by pointer
-            arg = ((llvm::LoadInst *)itr->second)->getPointerOperand();
-        }
-        arguments.push_back(arg);
+        arguments.push_back(itr->second);
     }
 
     llvm::Value *call = nullptr;
