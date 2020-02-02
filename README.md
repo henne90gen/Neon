@@ -7,9 +7,9 @@ It has C-like syntax and is easily interoperable with C/C++.
 
 ### Variables
 
--   declaring new variables: `int i = 0;`
--   writing variables: `i = 5;`
--   reading variables: `i = i + 5;`
+-   declaring new variables: `int i = 0`
+-   writing variables: `i = 5`
+-   reading variables: `i = i + 5`
 -   variable scoping
     -   variables that are defined inside of a scope are not accessible from outside that scope
     -   variables that are overriden in a scope are available again after that scope
@@ -17,15 +17,20 @@ It has C-like syntax and is easily interoperable with C/C++.
 ### Functions
 
 -   declaring functions: `fun hello(float f) int { … }`
--   calling functions: `hello(3.14);`
+-   calling functions: `hello(3.14)`
 
 ### Data Types
 
--   Integer (64 bit): `int i = 0;`
--   Float (64 bit): `float f = 0.0;`
--   Booleans (1 bit): `bool b = true;`
--   Arrays
-    -   one dimensional arrays of all the basic data types are fully supported: `int[5] a;`
+-   Integer (64 bit): `int i = 0`
+-   Float (64 bit): `float f = 0.0`
+-   Boolean (1 bit): `bool b = true`
+-   Array
+    -   one dimensional arrays of all the primitive data types are fully supported
+        -   `int[5] a`
+        -   `float[5] a`
+        -   `bool[5] a`
+-   String `string s = "Hello World!"`
+    - the string type is managed, which means that the length of the string is saved along the data
 
 ### Link external object files
 
@@ -60,13 +65,15 @@ This makes it possible to call functions that are contained in the externally li
         - still WIP
     - functions written in C
         - provides functions that do not exist in available C libraries
-        - for example conversion functions between the different data types
+        - for example conversion functions between the primitive data types
 
 ## TODO / Ideas
 
 -   complex types
     -   arrays (multidimensional)
     -   compound types (structs)
+-   strings
+    -   concatenating strings
 -   think about interface definitions
     -   how to create them
     -   how to implement them
