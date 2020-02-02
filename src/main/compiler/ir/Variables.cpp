@@ -18,16 +18,12 @@ void IrGenerator::visitVariableNode(VariableNode *node) {
         auto elementPtr = builder.CreateInBoundsGEP(value, indices);
         nodesToValues[node] = builder.CreateLoad(elementPtr);
     } else {
-        if (typeResolver.getTypeOf(node) == ast::STRING) {
-            // TODO this is a hack to get strings working.
-            //      ín the future we want only primitive types to be passed by value
-            //      everything else is going to be passed by pointer
-
-            // this directly passes the pointer, instead of loading the value first
-            nodesToValues[node] = value;
-        } else {
+        if (isPrimitiveType(typeResolver.getTypeOf(node))) {
             llvm::Value *loadedValue = builder.CreateLoad(value, node->getName());
             nodesToValues[node] = loadedValue;
+        } else {
+            // this directly passes the pointer, instead of loading the value first
+            nodesToValues[node] = value;
         }
     }
 

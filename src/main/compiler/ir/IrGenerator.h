@@ -60,6 +60,8 @@ class IrGenerator : public AstVisitor {
     bool isGlobalScope = false;
     std::unordered_map<AstNode *, llvm::Value *> nodesToValues = {};
     std::vector<Scope> scopeStack = {};
+
+    // This is used to save a pointer to write to (for structs)
     llvm::Value* currentDestination = nullptr;
 
     llvm::Value *findVariable(const std::string &name);
@@ -86,4 +88,5 @@ class IrGenerator : public AstVisitor {
     void emitFloatDivision(BinaryOperationNode *node, llvm::Value *l, llvm::Value *r);
 
     llvm::StructType *getStringType();
+    static bool isPrimitiveType(ast::DataType type);
 };

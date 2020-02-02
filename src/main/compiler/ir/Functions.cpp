@@ -57,10 +57,8 @@ llvm::Function *IrGenerator::getOrCreateFunctionDefinition(const std::string &na
         argumentTypes.reserve(arguments.size());
         for (auto &arg : arguments) {
             llvm::Type *type = getType(arg.type);
-            if (arg.type == ast::STRING) {
-                // TODO this is a hack to get strings working.
-                //      ín the future we want only primitive types to be passed by value
-                //      everything else is going to be passed by pointer
+            if (!isPrimitiveType(arg.type)) {
+                // pass the pointer to the variable, if it is not a primitive type
                 type = type->getPointerTo();
             }
             argumentTypes.push_back(type);
@@ -157,4 +155,8 @@ void IrGenerator::visitCallNode(CallNode *node) {
         call = builder.CreateCall(calleeFunc, arguments, "call");
     }
     nodesToValues[node] = call;
+}
+
+bool IrGenerator::isPrimitiveType(ast::DataType type) {
+    return type == ast::BOOL || type == ast::INT || type == ast::FLOAT;
 }
