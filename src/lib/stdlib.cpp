@@ -17,6 +17,18 @@ struct string {
     long maxSize;
 };
 
+void logString(string *s) {
+    long size = 0;
+    long maxSize = 0;
+    char *buf = nullptr;
+    if (s != nullptr) {
+        size = s->size;
+        maxSize = s->maxSize;
+        buf = s->buf;
+    }
+    printf("%p {size=%ld, maxSize=%ld, buf=%p} - ", s, size, maxSize, buf);
+}
+
 void pi(long x) { printf("%ld\n", x); }
 
 void pf(double x) { printf("%f\n", x); }
@@ -25,20 +37,22 @@ void pb(bool x) { printf("%s\n", x ? "true" : "false"); }
 
 void ps(string *s) {
     if (s == nullptr) {
-        printf("received null string\n");
+        LOG(logString(s); printf("Did not receive a string to print.\n"));
         return;
     }
 
     if (s->size == 0 || s->buf == nullptr) {
-        printf("empty string!\n");
+        LOG(logString(s); printf("Cannot print empty string.\n"));
         return;
     }
 
     char *buf = (char *)malloc(s->size + 1);
     memcpy(buf, s->buf, s->size);
     buf[s->size] = '\0';
-    LOG(printf("Printing string at    %p {size=%ld, maxSize=%ld, buf=%s}\n", s, s->size, s->maxSize, buf));
     printf("%s\n", buf);
+    free(buf);
+
+    LOG(logString(s); printf("Printed string.\n"));
 }
 
 long ftoi(double x) { return (long)x; }
@@ -46,8 +60,22 @@ long ftoi(double x) { return (long)x; }
 double itof(long x) { return (double)x; }
 
 void initString(string *s, char *data) {
+    if (s->buf != nullptr) {
+        LOG(logString(s); printf("Found existing buffer.\n"));
+    }
     s->buf = (char *)malloc(s->maxSize);
     memcpy(s->buf, data, s->size);
-    LOG(printf("Initialized string at %p {size=%ld, maxSize=%ld, buf=%s}\n", s, s->size, s->maxSize, s->buf));
+    LOG(logString(s); printf("Initialized string.\n"));
+}
+
+void deleteString(string *s) {
+    char *buf = s->buf;
+    if (buf == nullptr) {
+        LOG(logString(s); printf("Nothing to delete, string has no data.\n"));
+        return;
+    }
+    free(buf);
+    LOG(logString(s); printf("Freed string.\n"));
+    s->buf = nullptr;
 }
 }

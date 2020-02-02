@@ -16,4 +16,7 @@ time:
 struct_pointer:
 	clang++ -O0 -S struct_pointer.cpp -emit-llvm && cat struct_pointer.ll
 
-.PHONY: compile llvm link
+memory_test:
+	clang++ -O0 memory_test.cpp -o memory_test && ./memory_test
+
+.PHONY: compile llvm link memory_test struct_pointer time

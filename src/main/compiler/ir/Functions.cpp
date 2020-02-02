@@ -29,7 +29,7 @@ void IrGenerator::visitFunctionNode(FunctionNode *node) {
                 // store initial value
                 builder.CreateStore(&arg, value);
 
-                definedVariables[definedVariables.size() - 1][arg.getName()] = value;
+                currentScope().definedVariables[arg.getName()] = value;
             }
 
             node->getBody()->accept(this);

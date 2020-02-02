@@ -88,11 +88,12 @@ void IrGenerator::visitIfStatementNode(IfStatementNode *node) {
 void IrGenerator::visitForStatementNode(ForStatementNode *node) {
     LOG("Enter ForStatement");
     pushScope();
+
     node->getInit()->accept(this);
 
     llvm::Function *function = builder.GetInsertBlock()->getParent();
     llvm::BasicBlock *loopHeaderBB = llvm::BasicBlock::Create(context, "loop-header", function);
-    llvm::BasicBlock *loopBB = llvm::BasicBlock::Create(context, "loop-body", function);
+    llvm::BasicBlock *loopBodyBB = llvm::BasicBlock::Create(context, "loop-body", function);
     llvm::BasicBlock *loopExitBB = llvm::BasicBlock::Create(context, "loop-exit", function);
     builder.CreateBr(loopHeaderBB);
     builder.SetInsertPoint(loopHeaderBB);
@@ -100,9 +101,9 @@ void IrGenerator::visitForStatementNode(ForStatementNode *node) {
     node->getCondition()->accept(this);
     auto condition = nodesToValues[node->getCondition()];
 
-    builder.CreateCondBr(condition, loopBB, loopExitBB);
+    builder.CreateCondBr(condition, loopBodyBB, loopExitBB);
 
-    builder.SetInsertPoint(loopBB);
+    builder.SetInsertPoint(loopBodyBB);
 
     if (node->getBody() != nullptr) {
         node->getBody()->accept(this);
@@ -110,8 +111,11 @@ void IrGenerator::visitForStatementNode(ForStatementNode *node) {
 
     node->getUpdate()->accept(this);
 
+    popScope();
+
     builder.CreateBr(loopHeaderBB);
 
-    popScope();
+    builder.SetInsertPoint(loopExitBB);
+
     LOG("Exit ForStatement");
 }

@@ -115,16 +115,31 @@ void IrGenerator::visitStringNode(StringNode *node) {
         llvm::FunctionType *funcType = llvm::FunctionType::get(llvm::Type::getVoidTy(context), arguments, false);
         initStringFunc = llvm::Function::Create(funcType, llvm::Function::ExternalLinkage, funcName, llvmModule);
     }
-    auto alloc = createEntryBlockAlloca(stringType, "tmpS");
-    builder.CreateStore(value, alloc);
+    //    auto alloc = createEntryBlockAlloca(stringType, "tmpS");
+    builder.CreateStore(value, currentDestination);
 
     auto data = builder.CreateGlobalStringPtr(stringValue, "str");
     std::vector<llvm::Value *> args = {};
-    args.push_back(alloc);
+    args.push_back(currentDestination);
     args.push_back(data);
     builder.CreateCall(initStringFunc, args);
 
-    nodesToValues[node] = builder.CreateLoad(alloc, "loadS");
+    //    nodesToValues[node] = builder.CreateLoad(alloc, "loadS");
+    nodesToValues[node] = currentDestination;
+
+    currentScope().cleanUpFunctions.emplace_back([this, stringType]() {
+        const std::string funcName = "deleteString";
+        auto deleteStringFunc = llvmModule.getFunction(funcName);
+        if (deleteStringFunc == nullptr) {
+            std::vector<llvm::Type *> arguments = {stringType->getPointerTo()};
+            llvm::FunctionType *funcType = llvm::FunctionType::get(llvm::Type::getVoidTy(context), arguments, false);
+            deleteStringFunc = llvm::Function::Create(funcType, llvm::Function::ExternalLinkage, funcName, llvmModule);
+        }
+
+        std::vector<llvm::Value *> args = {};
+        args.push_back(currentDestination);
+        builder.CreateCall(deleteStringFunc, args);
+    });
 
     LOG("Created String");
 }

@@ -129,22 +129,23 @@ void IrGenerator::run() {
         exit(1);
     } else {
         this->writeToFile();
+        llvmModule.print(llvm::outs(), nullptr);
     }
 }
 
 llvm::Value *IrGenerator::findVariable(const std::string &name) {
     metrics["variableLookups"]++;
 
-    unsigned long currentScope = definedVariables.size() - 1;
+    unsigned long currentScope = scopeStack.size() - 1;
     while (currentScope >= 0) {
-        auto &scope = definedVariables[currentScope];
-        auto result = scope.find(name);
-        if (result != scope.end()) {
+        auto &scope = scopeStack[currentScope];
+        auto result = scope.definedVariables.find(name);
 
+        if (result != scope.definedVariables.end()) {
             metrics["variableLookupsSuccessful"]++;
-
             return result->second;
         }
+
         currentScope--;
     }
 
@@ -153,13 +154,17 @@ llvm::Value *IrGenerator::findVariable(const std::string &name) {
     return nullptr;
 }
 
-std::unordered_map<std::string, llvm::Value *> &IrGenerator::currentScope() {
-    return definedVariables[definedVariables.size() - 1];
+Scope &IrGenerator::currentScope() { return scopeStack[scopeStack.size() - 1]; }
+
+void IrGenerator::pushScope() { scopeStack.emplace_back(); }
+
+void IrGenerator::popScope() {
+    auto currentScope = scopeStack.back();
+    for (auto &func : currentScope.cleanUpFunctions) {
+        func();
+    }
+    scopeStack.pop_back();
 }
-
-void IrGenerator::pushScope() { definedVariables.emplace_back(); }
-
-void IrGenerator::popScope() { definedVariables.pop_back(); }
 
 void IrGenerator::withScope(const std::function<void(void)> &func) {
     pushScope();

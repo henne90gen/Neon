@@ -5,6 +5,7 @@
 #include "../TypeResolver.h"
 #include "../ast/AstVisitor.h"
 #include "../ast/nodes/AllNodes.h"
+#include "Scope.h"
 
 #include <iostream>
 #include <unordered_map>
@@ -58,10 +59,11 @@ class IrGenerator : public AstVisitor {
     llvm::Function *currentFunction = nullptr;
     bool isGlobalScope = false;
     std::unordered_map<AstNode *, llvm::Value *> nodesToValues = {};
-    std::vector<std::unordered_map<std::string, llvm::Value *>> definedVariables = {};
+    std::vector<Scope> scopeStack = {};
+    llvm::Value* currentDestination = nullptr;
 
     llvm::Value *findVariable(const std::string &name);
-    std::unordered_map<std::string, llvm::Value *> &currentScope();
+    Scope &currentScope();
     void pushScope();
     void popScope();
     void withScope(const std::function<void(void)> &func);

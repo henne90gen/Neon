@@ -53,7 +53,8 @@ void IrGenerator::visitVariableDefinitionNode(VariableDefinitionNode *node) {
     } else {
         value = createEntryBlockAlloca(type, name);
     }
-    currentScope()[name] = value;
+
+    currentScope().definedVariables[name] = value;
     nodesToValues[node] = value;
 
     LOG("Exit VariableDefinition")
@@ -67,6 +68,7 @@ void IrGenerator::visitAssignmentNode(AssignmentNode *node) {
         // only generate variable definitions
         node->getLeft()->accept(this);
         dest = nodesToValues[node->getLeft()];
+        currentDestination = dest;
     } else {
         auto variable = dynamic_cast<VariableNode *>(node->getLeft());
         dest = findVariable(variable->getName());
@@ -85,10 +87,18 @@ void IrGenerator::visitAssignmentNode(AssignmentNode *node) {
 
     node->getRight()->accept(this);
     llvm::Value *src = nodesToValues[node->getRight()];
-    if (src == nullptr || dest == nullptr) {
-        return logError("Could not create assignment.");
+
+    if (typeResolver.getTypeOf(node->getRight()) == ast::STRING) {
+        if (src == nullptr) {
+            return logError("Could not create assignment.");
+        }
+        nodesToValues[node] = src;
+    } else {
+        if (src == nullptr || dest == nullptr) {
+            return logError("Could not create assignment.");
+        }
+        nodesToValues[node] = builder.CreateStore(src, dest);
     }
-    nodesToValues[node] = builder.CreateStore(src, dest);
 
     LOG("Exit Assignment")
 }
