@@ -18,7 +18,7 @@ target_link_libraries(Tests NeonGrammar NeonCompiler)
 catch_discover_tests(Tests)
 
 
-add_executable(FuzzTests fuzz/FuzzTester.cpp)
+add_executable(FuzzTests fuzz/LexerFuzzTester.cpp)
 target_include_directories(FuzzTests PRIVATE ${PROJECT_SOURCE_DIR}/src/main)
 target_compile_options(FuzzTests PRIVATE $<$<C_COMPILER_ID:Clang>:-g -O1 -fsanitize=fuzzer>)
 target_link_libraries(FuzzTests PRIVATE $<$<C_COMPILER_ID:Clang>:-fsanitize=fuzzer> NeonGrammar NeonCompiler)
