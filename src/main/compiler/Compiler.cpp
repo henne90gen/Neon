@@ -55,7 +55,7 @@ Module *Compiler::loadModule(const std::string &moduleFileName) {
     auto module = new Module(moduleFileName, program->llvmContext);
 
     CodeProvider *codeProvider = new FileCodeProvider(module->getFilePath());
-    Lexer lexer(codeProvider, module, verbose);
+    Lexer lexer(codeProvider, verbose);
     Parser parser(lexer, module, verbose);
 
     auto parseTreeRoot = parser.createParseTree();

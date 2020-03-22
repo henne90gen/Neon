@@ -78,4 +78,21 @@ void deleteString(string *s) {
     LOG(logString(s); printf("Freed string.\n"));
     s->buf = nullptr;
 }
+
+void resizeString(string *s1, long newMaxSize) {
+    char *newBuf = (char *)malloc(newMaxSize);
+    memcpy(newBuf, s1->buf, s1->size);
+    free(s1->buf);
+    s1->buf = newBuf;
+    s1->maxSize = newMaxSize;
+}
+
+void appendString(string *s1, string *s2) {
+    long newMaxSize = s1->size + s2->size;
+    if (s1->maxSize < newMaxSize) {
+        resizeString(s1, newMaxSize);
+    }
+    memcpy(s1->buf + s1->size, s2->buf, s2->size);
+}
+
 }

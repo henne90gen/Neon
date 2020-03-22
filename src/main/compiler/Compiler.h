@@ -1,8 +1,8 @@
 #pragma once
 
 #include "../Program.h"
-#include "ast/nodes/FunctionNode.h"
 #include "MetaTypes.h"
+#include "ast/nodes/FunctionNode.h"
 
 class Compiler {
   public:
@@ -14,7 +14,7 @@ class Compiler {
     bool verbose;
     std::unordered_map<Module *, std::vector<std::string>> moduleImportsMap = {};
     std::unordered_map<Module *, std::vector<FunctionSignature>> moduleFunctionsMap = {};
-    std::unordered_map<Module*, std::unordered_map<AstNode*, ast::DataType>> moduleTypesMap;
+    std::unordered_map<Module *, std::unordered_map<AstNode *, ast::DataType>> moduleTypesMap;
 
     Module *loadModule(const std::string &moduleFileName);
     void writeModuleToObjectFile();

@@ -14,11 +14,6 @@ class CodeProvider {
     virtual std::optional<std::string> getMoreCode() = 0;
 };
 
-class StdInCodeProvider : public CodeProvider {
-  public:
-    std::optional<std::string> getMoreCode() override;
-};
-
 class FileCodeProvider : public CodeProvider {
   public:
     explicit FileCodeProvider(std::string absoluteFilePath) : fileName(std::move(absoluteFilePath)) {}
@@ -43,20 +38,27 @@ class StringCodeProvider : public CodeProvider {
     bool addLineBreaks = false;
 };
 
+class ByteCodeProvider : public CodeProvider {
+  public:
+    explicit ByteCodeProvider(const char *data, const long size) : data(data), size(size) {}
+
+    std::optional<std::string> getMoreCode() override;
+
+  private:
+    const char *data;
+    long size;
+};
+
 class Lexer {
   public:
-    explicit Lexer(CodeProvider *codeProvider, Module *program, bool verbose = false)
-        : codeProvider(codeProvider), program(program), verbose(verbose){};
+    explicit Lexer(CodeProvider *codeProvider, bool verbose = false) : codeProvider(codeProvider), verbose(verbose){};
 
     Token getToken();
 
   private:
     std::string currentWord;
     CodeProvider *codeProvider;
-    Module *program;
     bool verbose;
-
-    Token _getToken();
 
     std::optional<Token> matchRegex(const std::string &regex, Token::TokenType tokenType);
     std::optional<Token> matchOneCharacterToken();

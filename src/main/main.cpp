@@ -11,5 +11,6 @@ int main() {
     auto linker = Linker(program);
     linker.link();
 
+    delete program;
     return 0;
 }

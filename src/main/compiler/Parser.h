@@ -16,6 +16,8 @@ class Parser {
     Module *program;
     bool verbose;
 
+    Token getNextToken();
+
     void executeShift(Token &token, std::vector<int> &states, StateTransition &action,
                       std::vector<ParseTreeNode *> &nodes);
 

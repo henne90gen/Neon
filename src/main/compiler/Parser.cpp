@@ -122,10 +122,11 @@ GrammarSymbol convertToGrammarSymbol(const Token &token) {
         return GrammarSymbol::NEW_LINE;
     case Token::IMPORT:
         return GrammarSymbol::IMPORT;
-    default:
-        std::cout << "Could not convert token " << to_string(token.type) << " to grammar symbol." << std::endl;
-        exit(1);
+    case Token::INVALID:
+        return GrammarSymbol::ENDOFFILE;
     }
+    std::cout << "Could not convert token " << to_string(token.type) << " to grammar symbol." << std::endl;
+    exit(1);
     return GrammarSymbol::ENDOFFILE;
 }
 
@@ -169,7 +170,7 @@ std::optional<StateTransition> Parser::getNextAction(int rowIndex, int columnInd
 
 void Parser::executeShift(Token &token, std::vector<int> &states, StateTransition &action,
                           std::vector<ParseTreeNode *> &nodes) {
-    token = lexer.getToken();
+    token = getNextToken();
 
     states.push_back(action.nextStateIndex);
     auto newNode = new ParseTreeNode();
@@ -225,7 +226,7 @@ ParseTreeNode *Parser::createParseTree() {
     std::vector<ParseTreeNode *> nodes = {};
     std::vector<int> states = {};
     states.push_back(0);
-    auto token = lexer.getToken();
+    auto token = getNextToken();
     auto node = new ParseTreeNode();
     node->symbol = convertToGrammarSymbol(token);
     node->token = token;
@@ -281,4 +282,10 @@ ParseTreeNode *Parser::createParseTree() {
     }
 
     return nullptr;
+}
+
+Token Parser::getNextToken() {
+    const Token token = lexer.getToken();
+    program->tokens.push_back(token);
+    return token;
 }

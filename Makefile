@@ -8,7 +8,7 @@ build:
 	cd build; ninja Neon
 
 build-test:
-	cd build; ninja Tests
+	cd build; ninja Tests FuzzTests
 
 test: build-test
 	cd build; ninja test

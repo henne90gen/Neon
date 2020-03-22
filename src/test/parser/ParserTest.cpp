@@ -28,7 +28,7 @@ void assertParserAccepts(const std::vector<std::string> &program) {
     CodeProvider *cp = new StringCodeProvider(program, true);
     auto context = new llvm::LLVMContext();
     auto prog = new Module("test.ne", *context);
-    Lexer lexer(cp, prog, false);
+    Lexer lexer(cp, false);
     Parser parser(lexer, prog, false);
 
     ParseTreeNode *actual = parser.createParseTree();

@@ -7,13 +7,22 @@
 
 #include "../Utils.h"
 
-std::optional<std::string> StdInCodeProvider::getMoreCode() {
-    std::string result;
-    std::cin >> result;
-    if (result.empty()) {
+std::optional<std::string> ByteCodeProvider::getMoreCode() {
+    if (size == 0) {
         return {};
     }
-    return std::optional(result);
+
+    std::string s;
+    while (*data != '\n' && size > 0) {
+        s += *data;
+        data++;
+        size--;
+    }
+    if (*data == '\n' && size > 0) {
+        data++;
+        size--;
+    }
+    return std::optional<std::string>(s);
 }
 
 std::optional<std::string> FileCodeProvider::getMoreCode() {
@@ -58,7 +67,7 @@ std::string removeLeadingWhitespace(const std::string &str) {
     return result;
 }
 
-Token Lexer::_getToken() {
+Token Lexer::getToken() {
     std::string previousWord = currentWord;
     while (true) {
         if (currentWord.empty()) {
@@ -138,13 +147,7 @@ Token Lexer::_getToken() {
     if (!invalidToken.empty() && verbose) {
         std::cout << "Found an invalid token: '" << invalidToken << "'" << std::endl;
     }
-    return {Token::END_OF_FILE, invalidToken};
-}
-
-Token Lexer::getToken() {
-    auto token = _getToken();
-    program->tokens.push_back(token);
-    return token;
+    return {Token::INVALID, invalidToken};
 }
 
 std::optional<Token> Lexer::matchRegex(const std::string &regex, Token::TokenType tokenType) {
