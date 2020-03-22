@@ -1,19 +1,21 @@
 #pragma once
 
+#include <vector>
+
 #include "../Grammar.h"
 #include "Lexer.h"
 #include "ParseTreeNode.h"
 
 class Parser {
   public:
-    explicit Parser(Lexer &lexer, Module *program, bool verbose = false)
-        : lexer(lexer), program(program), verbose(verbose) {}
+    explicit Parser(Lexer &lexer, std::vector<Token> &tokens, bool verbose = false)
+        : lexer(lexer), tokens(tokens), verbose(verbose) {}
 
     ParseTreeNode *createParseTree();
 
   private:
     Lexer &lexer;
-    Module *program;
+    std::vector<Token> &tokens;
     bool verbose;
 
     Token getNextToken();
@@ -30,4 +32,4 @@ class Parser {
 
 void printParseTree(ParseTreeNode *node, int indentation = 0);
 
-void printParseTreeTestCase(const ParseTreeNode *node, const Module *program);
+void printParseTreeTestCase(const ParseTreeNode *node, const std::string &programAsArrayString);

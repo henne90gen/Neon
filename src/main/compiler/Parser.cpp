@@ -18,16 +18,15 @@ void printParseTree(ParseTreeNode *node, int indentation) {
     }
 }
 
-void printParseTreeTestCase(const ParseTreeNode *node, const Module *program) {
+void printParseTreeTestCase(const ParseTreeNode *node, const std::string &programAsArrayString) {
     if (node == nullptr) {
         return;
     }
 
-    std::string programArrayStr = program->toArrayString();
     std::cout << std::endl;
     std::cout << "SECTION(\"can handle __\") {" << std::endl;
 
-    std::cout << "    std::vector<std::string> program = {\"" << programArrayStr << "\"};" << std::endl;
+    std::cout << "    std::vector<std::string> program = {\"" << programAsArrayString << "\"};" << std::endl;
     std::cout << "    assertProgramCreatesParseTree(program, parseTree);" << std::endl;
     std::cout << "}" << std::endl;
     std::cout << std::endl;
@@ -276,7 +275,7 @@ ParseTreeNode *Parser::createParseTree() {
     std::cout << "Could not accept program!" << std::endl;
     if (verbose) {
         std::cout << std::endl << "Program:" << std::endl;
-        for (auto &t : program->tokens) {
+        for (auto &t : tokens) {
             std::cout << to_string(t.type) << ": " << t.content << std::endl;
         }
     }
@@ -286,6 +285,6 @@ ParseTreeNode *Parser::createParseTree() {
 
 Token Parser::getNextToken() {
     const Token token = lexer.getToken();
-    program->tokens.push_back(token);
+    tokens.push_back(token);
     return token;
 }

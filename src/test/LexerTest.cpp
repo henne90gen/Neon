@@ -6,9 +6,7 @@
 
 Lexer getLexer(const std::vector<std::string> &lines) {
     CodeProvider *codeProvider = new StringCodeProvider(lines, false);
-    auto context = new llvm::LLVMContext();
-    auto program = new Module("test.ne", *context);
-    auto lexer = Lexer(codeProvider, program);
+    auto lexer = Lexer(codeProvider);
     return lexer;
 }
 

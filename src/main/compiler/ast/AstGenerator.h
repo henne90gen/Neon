@@ -1,6 +1,7 @@
 #pragma once
 
 #include "../Parser.h"
+#include "../../Module.h"
 #include "nodes/AllNodes.h"
 
 class AstGenerator {

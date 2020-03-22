@@ -54,14 +54,13 @@ void Compiler::run() {
 Module *Compiler::loadModule(const std::string &moduleFileName) {
     auto module = new Module(moduleFileName, program->llvmContext);
 
-    CodeProvider *codeProvider = new FileCodeProvider(module->getFilePath());
-    Lexer lexer(codeProvider, verbose);
-    Parser parser(lexer, module, verbose);
+    Lexer lexer(module->getCodeProvider(), verbose);
+    Parser parser(lexer, module->tokens, verbose);
 
     auto parseTreeRoot = parser.createParseTree();
     if (verbose) {
         printParseTree(parseTreeRoot);
-        printParseTreeTestCase(parseTreeRoot, module);
+        printParseTreeTestCase(parseTreeRoot, module->toArrayString());
     }
 
     auto astGenerator = AstGenerator(module);

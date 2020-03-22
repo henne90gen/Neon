@@ -1,6 +1,7 @@
 #include "Module.h"
 
 #include "Utils.h"
+#include "compiler/Lexer.h"
 
 bool tokenHasSpaceBeforeIt(const Token *prev, const Token &t, const Token * /*next*/) {
     bool prevExists = prev != nullptr;
@@ -78,4 +79,8 @@ std::string Module::toArrayString() const {
     std::string result = toEscapedString();
     result = replace(result, " \n ", "\", \"");
     return result;
+}
+
+CodeProvider *Module::getCodeProvider() {
+    return codeProvider;
 }

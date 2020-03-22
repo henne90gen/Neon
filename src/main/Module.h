@@ -1,5 +1,6 @@
 #pragma once
 
+#include "compiler/Lexer.h"
 #include "compiler/Token.h"
 #include "compiler/ast/nodes/AstNode.h"
 #include "compiler/ast/nodes/FunctionNode.h"
@@ -17,7 +18,8 @@
 class Module {
   public:
     explicit Module(std::filesystem::path _filePath, llvm::LLVMContext &context)
-        : filePath(std::move(_filePath)), llvmModule(_filePath.string(), context) {}
+        : filePath(std::move(_filePath)), codeProvider(new FileCodeProvider(_filePath)),
+          llvmModule(_filePath.string(), context) {}
 
     [[nodiscard]] std::string toString() const;
     [[nodiscard]] std::string toEscapedString() const;
@@ -26,7 +28,10 @@ class Module {
     std::string getDirectoryPath() const { return filePath.parent_path(); }
     std::filesystem::path getFilePath() const { return filePath; }
 
+    CodeProvider *getCodeProvider();
+
   public:
+    CodeProvider *codeProvider;
     AstNode *root = nullptr;
     std::vector<Token> tokens = {};
 

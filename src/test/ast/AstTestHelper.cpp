@@ -187,7 +187,7 @@ void assertProgramCreatesAst(const std::vector<std::string> &program, std::vecto
     auto context = new llvm::LLVMContext();
     auto prog = new Module("test.ne", *context);
     auto lexer = Lexer(codeProvider, prog);
-    Parser parser(lexer, prog, false);
+    Parser parser(lexer, prog->tokens, false);
     ParseTreeNode *parseTree = parser.createParseTree();
     auto astGenerator = AstGenerator(prog);
     astGenerator.run(parseTree);

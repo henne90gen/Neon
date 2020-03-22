@@ -6,11 +6,12 @@
 #include <utility>
 #include <vector>
 
-#include "../Module.h"
 #include "Token.h"
 
 class CodeProvider {
   public:
+    virtual ~CodeProvider() = default;
+
     virtual std::optional<std::string> getMoreCode() = 0;
 };
 
@@ -52,6 +53,8 @@ class ByteCodeProvider : public CodeProvider {
 class Lexer {
   public:
     explicit Lexer(CodeProvider *codeProvider, bool verbose = false) : codeProvider(codeProvider), verbose(verbose){};
+
+    ~Lexer() { delete codeProvider; }
 
     Token getToken();
 

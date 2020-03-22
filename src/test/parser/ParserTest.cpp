@@ -26,10 +26,9 @@ void assertParseTreesAreEqual(ParseTreeNode *node1, ParseTreeNode *node2) {
 
 void assertParserAccepts(const std::vector<std::string> &program) {
     CodeProvider *cp = new StringCodeProvider(program, true);
-    auto context = new llvm::LLVMContext();
-    auto prog = new Module("test.ne", *context);
+    auto tokens = std::vector<Token>();
     Lexer lexer(cp, false);
-    Parser parser(lexer, prog, false);
+    Parser parser(lexer, tokens, false);
 
     ParseTreeNode *actual = parser.createParseTree();
     REQUIRE(actual != nullptr);
