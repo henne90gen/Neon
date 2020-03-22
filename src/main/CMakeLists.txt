@@ -2,12 +2,12 @@ set(EXECUTABLE_NAME ${PROJECT_NAME})
 
 # run parser generator, when grammar.txt has changed
 add_custom_command(
-        OUTPUT ${CMAKE_CURRENT_SOURCE_DIR}/Grammar.h ${CMAKE_CURRENT_SOURCE_DIR}/Grammar.cpp
+        OUTPUT ${CMAKE_CURRENT_SOURCE_DIR}/compiler/parser/Grammar.h ${CMAKE_CURRENT_SOURCE_DIR}/compiler/parser/Grammar.cpp
         COMMAND python ${PROJECT_SOURCE_DIR}/scripts/parser_generator.py
-        WORKING_DIRECTORY ${CMAKE_CURRENT_SOURCE_DIR}
-        MAIN_DEPENDENCY ${CMAKE_CURRENT_SOURCE_DIR}/grammar.txt)
+        WORKING_DIRECTORY ${CMAKE_CURRENT_SOURCE_DIR}/compiler/parser
+        MAIN_DEPENDENCY ${CMAKE_CURRENT_SOURCE_DIR}/compiler/parser/grammar.txt)
 
-add_library(NeonGrammar Grammar.cpp)
+add_library(NeonGrammar compiler/parser/Grammar.cpp)
 
 add_library(NeonCompiler
         compiler/ast/AstGenerator.cpp
@@ -39,9 +39,9 @@ add_library(NeonCompiler
         compiler/ir/Variables.cpp
         compiler/Compiler.cpp
         compiler/FunctionResolver.cpp
-        compiler/Lexer.cpp
-        compiler/Parser.cpp
-        compiler/Token.cpp
+        compiler/lexer/Lexer.cpp
+        compiler/parser/Parser.cpp
+        compiler/lexer/Token.cpp
         compiler/TypeResolver.cpp
         Linker.cpp
         Module.cpp

@@ -1,6 +1,6 @@
 #include <catch2/catch.hpp>
 
-#include "compiler/Lexer.h"
+#include "compiler/lexer/Lexer.h"
 
 #include <unordered_map>
 

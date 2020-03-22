@@ -1,6 +1,6 @@
 #pragma once
 
-#include "compiler/Parser.h"
+#include "compiler/parser/Parser.h"
 
 #include "compiler/ast/AstGenerator.h"
 #include "compiler/ast/nodes/AstNode.h"

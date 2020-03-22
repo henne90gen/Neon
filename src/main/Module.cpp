@@ -1,7 +1,7 @@
 #include "Module.h"
 
 #include "Utils.h"
-#include "compiler/Lexer.h"
+#include "compiler/lexer/Lexer.h"
 
 bool tokenHasSpaceBeforeIt(const Token *prev, const Token &t, const Token * /*next*/) {
     bool prevExists = prev != nullptr;

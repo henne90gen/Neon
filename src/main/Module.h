@@ -1,10 +1,10 @@
 #pragma once
 
-#include "compiler/Lexer.h"
-#include "compiler/Token.h"
 #include "compiler/ast/nodes/AstNode.h"
 #include "compiler/ast/nodes/FunctionNode.h"
 #include "compiler/ast/nodes/ImportNode.h"
+#include "compiler/lexer/Lexer.h"
+#include "compiler/lexer/Token.h"
 
 #include <algorithm>
 #include <filesystem>

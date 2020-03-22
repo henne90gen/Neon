@@ -1,7 +1,7 @@
 #pragma once
 
-#include "../Grammar.h"
-#include "Token.h"
+#include "../lexer/Token.h"
+#include "Grammar.h"
 
 struct ParseTreeNode {
     GrammarSymbol symbol;

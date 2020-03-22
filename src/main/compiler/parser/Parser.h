@@ -2,8 +2,8 @@
 
 #include <vector>
 
-#include "../Grammar.h"
-#include "Lexer.h"
+#include "../lexer/Lexer.h"
+#include "Grammar.h"
 #include "ParseTreeNode.h"
 
 class Parser {
