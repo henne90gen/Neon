@@ -39,3 +39,5 @@ enum BinaryOperationType {
 } // namespace ast
 
 std::string to_string(ast::DataType dataType);
+
+std::string to_string(ast::BinaryOperationType operationType);

@@ -62,7 +62,7 @@ class IrGenerator : public AstVisitor {
     std::vector<Scope> scopeStack = {};
 
     // This is used to save a pointer to write to (for structs)
-    llvm::Value* currentDestination = nullptr;
+    llvm::Value *currentDestination = nullptr;
 
     llvm::Value *findVariable(const std::string &name);
     Scope &currentScope();
@@ -75,7 +75,7 @@ class IrGenerator : public AstVisitor {
 
     void logError(const std::string &msg);
     llvm::Type *getType(ast::DataType type);
-    llvm::Function *getOrCreateFunctionDefinition(const std::string &name, const ast::DataType returnType,
+    llvm::Function *getOrCreateFunctionDefinition(const std::string &name, ast::DataType returnType,
                                                   const std::vector<FunctionArgument> &arguments);
     llvm::Function *getOrCreateFunctionDefinition(const FunctionSignature &signature);
     llvm::AllocaInst *createEntryBlockAlloca(llvm::Type *type, const std::string &name);
@@ -83,10 +83,13 @@ class IrGenerator : public AstVisitor {
     llvm::Constant *getInitializer(const ast::DataType &dt, bool isArray, unsigned int arraySize);
     void setupGlobalInitialization(llvm::Function *func);
 
-    void emitIntegerDivision(BinaryOperationNode *node);
     void emitIntegerOperation(BinaryOperationNode *node, llvm::Value *l, llvm::Value *r);
-    void emitFloatDivision(BinaryOperationNode *node, llvm::Value *l, llvm::Value *r);
+    void emitFloatOperation(BinaryOperationNode *node, llvm::Value *l, llvm::Value *r);
+    void emitStringOperation(BinaryOperationNode *node, llvm::Value *l, llvm::Value *r);
 
     llvm::StructType *getStringType();
     static bool isPrimitiveType(ast::DataType type);
+
+    llvm::Function *getOrCreateStdLibFunction(const std::string &functionName);
+    llvm::Value *createStdLibCall(const std::string &functionName, const std::vector<llvm::Value *> &args);
 };

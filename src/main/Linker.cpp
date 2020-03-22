@@ -15,7 +15,7 @@ void Linker::link() {
     s += " -L/usr/lib/gcc/x86_64-pc-linux-gnu/9.2.0/";
     s += " -L.";
     s += " " + program->objectFileName;
-    s += " -lc -lgcc -lgcc_s -lm";
+    s += " -lc -lm"; // TODO there used to be "-lgcc -lgcc_s" linked as well, but that doesn't work any more
     s += " -lNeonStd";
 
     std::cout << std::endl << "Calling linker with the following command:" << std::endl << s << std::endl;

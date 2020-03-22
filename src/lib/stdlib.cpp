@@ -59,7 +59,7 @@ long ftoi(double x) { return (long)x; }
 
 double itof(long x) { return (double)x; }
 
-void initString(string *s, char *data) {
+void createString(string *s, char *data) {
     if (s->buf != nullptr) {
         LOG(logString(s); printf("Found existing buffer.\n"));
     }
@@ -79,20 +79,21 @@ void deleteString(string *s) {
     s->buf = nullptr;
 }
 
-void resizeString(string *s1, long newMaxSize) {
+void resizeString(string *s, long newMaxSize) {
     char *newBuf = (char *)malloc(newMaxSize);
-    memcpy(newBuf, s1->buf, s1->size);
-    free(s1->buf);
-    s1->buf = newBuf;
-    s1->maxSize = newMaxSize;
+    memcpy(newBuf, s->buf, s->size);
+    free(s->buf);
+    s->buf = newBuf;
+    s->maxSize = newMaxSize;
 }
 
-void appendString(string *s1, string *s2) {
+void appendString(string *s0, string *s1, string *s2) {
     long newMaxSize = s1->size + s2->size;
-    if (s1->maxSize < newMaxSize) {
-        resizeString(s1, newMaxSize);
+    if (s0->maxSize < newMaxSize) {
+        resizeString(s0, newMaxSize);
     }
-    memcpy(s1->buf + s1->size, s2->buf, s2->size);
+    memcpy(s0->buf, s1->buf, s1->size);
+    memcpy(s0->buf + s1->size, s2->buf, s2->size);
+    s0->size = newMaxSize;
 }
-
 }

@@ -33,50 +33,6 @@ llvm::StructType *IrGenerator::getStringType() {
     return llvm::StructType::create(context, elements, "string");
 }
 
-// llvm::Value *IrGenerator::getFuncMalloc() {
-//    const std::string name = "malloc";
-//    auto result = llvmModule.getFunction(name);
-//    if (result != nullptr) {
-//        return result;
-//    }
-//
-//    std::vector<llvm::Type *> arguments = {llvm::IntegerType::getInt64Ty(context)};
-//    llvm::FunctionType *functionType =
-//          llvm::FunctionType::get(llvm::PointerType::getInt8PtrTy(context), arguments, false);
-//    result = llvm::Function::Create(functionType, llvm::Function::ExternalLinkage, name, llvmModule);
-//
-//    if (result == nullptr) {
-//        logError("Could not create function " + name);
-//        return nullptr;
-//    }
-//
-//    return result;
-//}
-//
-// llvm::Value *IrGenerator::getFuncMemcpy() {
-//    const std::string name = "memcpy";
-//    auto result = llvmModule.getFunction(name);
-//    if (result != nullptr) {
-//        return result;
-//    }
-//
-//    std::vector<llvm::Type *> arguments = {
-//          llvm::PointerType::getInt8PtrTy(context), // src
-//          llvm::PointerType::getInt8PtrTy(context), // dest
-//          llvm::IntegerType::getInt64Ty(context),   // size
-//    };
-//    llvm::FunctionType *functionType =
-//          llvm::FunctionType::get(llvm::PointerType::getInt8PtrTy(context), arguments, false);
-//    result = llvm::Function::Create(functionType, llvm::Function::ExternalLinkage, name, llvmModule);
-//
-//    if (result == nullptr) {
-//        logError("Could not create function " + name);
-//        return nullptr;
-//    }
-//
-//    return result;
-//}
-
 void IrGenerator::visitIntegerNode(IntegerNode *node) {
     nodesToValues[node] = llvm::ConstantInt::get(context, llvm::APInt(NUM_BITS_OF_INT, node->getValue()));
     LOG("Created Integer")
@@ -108,36 +64,21 @@ void IrGenerator::visitStringNode(StringNode *node) {
     //      call function that inits string
     // going with second option for now
 
-    const std::string funcName = "initString";
-    auto initStringFunc = llvmModule.getFunction(funcName);
-    if (initStringFunc == nullptr) {
-        std::vector<llvm::Type *> arguments = {stringType->getPointerTo(), llvm::PointerType::getInt8PtrTy(context)};
-        llvm::FunctionType *funcType = llvm::FunctionType::get(llvm::Type::getVoidTy(context), arguments, false);
-        initStringFunc = llvm::Function::Create(funcType, llvm::Function::ExternalLinkage, funcName, llvmModule);
-    }
     builder.CreateStore(value, currentDestination);
 
     auto data = builder.CreateGlobalStringPtr(stringValue, "str");
     std::vector<llvm::Value *> args = {};
     args.push_back(currentDestination);
     args.push_back(data);
-    builder.CreateCall(initStringFunc, args);
+    createStdLibCall("createString", args);
 
     nodesToValues[node] = currentDestination;
     currentDestination = nullptr;
 
     currentScope().cleanUpFunctions.emplace_back([this, stringType, node]() {
-        const std::string funcName = "deleteString";
-        auto deleteStringFunc = llvmModule.getFunction(funcName);
-        if (deleteStringFunc == nullptr) {
-            std::vector<llvm::Type *> arguments = {stringType->getPointerTo()};
-            llvm::FunctionType *funcType = llvm::FunctionType::get(llvm::Type::getVoidTy(context), arguments, false);
-            deleteStringFunc = llvm::Function::Create(funcType, llvm::Function::ExternalLinkage, funcName, llvmModule);
-        }
-
         std::vector<llvm::Value *> args = {};
         args.push_back(nodesToValues[node]);
-        builder.CreateCall(deleteStringFunc, args);
+        createStdLibCall("deleteString", args);
     });
 
     LOG("Created String");

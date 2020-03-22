@@ -5,6 +5,43 @@
 
 #define ENABLE_OPTIMIZATIONS 0
 
+llvm::Function *IrGenerator::getOrCreateStdLibFunction(const std::string &functionName) {
+    auto func = llvmModule.getFunction(functionName);
+    if (func != nullptr) {
+        return func;
+    }
+    if (functionName == "deleteString") {
+        auto stringType = getStringType();
+        std::vector<llvm::Type *> arguments = {stringType->getPointerTo()};
+        llvm::FunctionType *funcType = llvm::FunctionType::get(llvm::Type::getVoidTy(context), arguments, false);
+        return llvm::Function::Create(funcType, llvm::Function::ExternalLinkage, functionName, llvmModule);
+    }
+    if (functionName == "createString") {
+        auto stringType = getStringType();
+        std::vector<llvm::Type *> arguments = {stringType->getPointerTo(), llvm::PointerType::getInt8PtrTy(context)};
+        llvm::FunctionType *funcType = llvm::FunctionType::get(llvm::Type::getVoidTy(context), arguments, false);
+        return llvm::Function::Create(funcType, llvm::Function::ExternalLinkage, functionName, llvmModule);
+    }
+    if (functionName == "appendString") {
+        auto stringType = getStringType();
+        std::vector<llvm::Type *> arguments = {stringType->getPointerTo(), stringType->getPointerTo(),
+                                               stringType->getPointerTo()};
+        llvm::FunctionType *funcType = llvm::FunctionType::get(llvm::Type::getVoidTy(context), arguments, false);
+        return llvm::Function::Create(funcType, llvm::Function::ExternalLinkage, functionName, llvmModule);
+    }
+    return nullptr;
+}
+
+llvm::Value *IrGenerator::createStdLibCall(const std::string &functionName, const std::vector<llvm::Value *> &args) {
+    auto func = getOrCreateStdLibFunction(functionName);
+    if (func == nullptr) {
+        logError("Could not create standard library call to function " + functionName);
+        return nullptr;
+    }
+
+    return builder.CreateCall(func, args);
+}
+
 void IrGenerator::visitFunctionNode(FunctionNode *node) {
     LOG("Enter Function")
 
