@@ -61,25 +61,26 @@ double itof(long x) { return (double)x; }
 
 void createString(string *s, char *data) {
     if (s->buf != nullptr) {
+        // TODO what should we do?
+        //  1. just free it
+        //  2. ignore it
         LOG(logString(s); printf("Found existing buffer.\n"));
     }
     s->buf = (char *)malloc(s->maxSize);
     memcpy(s->buf, data, s->size);
-    LOG(logString(s); printf("Initialized string.\n"));
 }
 
 void deleteString(string *s) {
     char *buf = s->buf;
     if (buf == nullptr) {
-        LOG(logString(s); printf("Nothing to delete, string has no data.\n"));
         return;
     }
     free(buf);
-    LOG(logString(s); printf("Freed string.\n"));
     s->buf = nullptr;
 }
 
 void resizeString(string *s, long newMaxSize) {
+    // TODO implement exponential growth here?
     char *newBuf = (char *)malloc(newMaxSize);
     memcpy(newBuf, s->buf, s->size);
     free(s->buf);
@@ -95,5 +96,13 @@ void appendString(string *s0, string *s1, string *s2) {
     memcpy(s0->buf, s1->buf, s1->size);
     memcpy(s0->buf + s1->size, s2->buf, s2->size);
     s0->size = newMaxSize;
+}
+
+void assignString(string *dest, string *src) {
+    if (dest->maxSize < src->size) {
+        resizeString(dest, src->size);
+    }
+    memcpy(dest->buf, src->buf, src->size);
+    dest->size = src->size;
 }
 }

@@ -22,4 +22,6 @@ void Linker::link() {
 
     const char *command = s.c_str();
     system(command);
+
+    std::cout << "Finished linking." << std::endl;
 }

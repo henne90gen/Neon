@@ -49,6 +49,8 @@ void Compiler::run() {
     generateIR();
 
     writeModuleToObjectFile();
+
+    std::cout << "Finished compilation." << std::endl;
 }
 
 Module *Compiler::loadModule(const std::string &moduleFileName) {
@@ -111,7 +113,8 @@ void Compiler::generateIR() {
 //    visitFunctionNode(function);
 //}
 
-void Compiler::mergeModules(llvm::Module &module, const llvm::DataLayout &dataLayout, const std::string &targetTriple) {
+void Compiler::mergeModules(llvm::Module &destinationModule, const llvm::DataLayout &dataLayout,
+                            const std::string &targetTriple) {
     // To be able to link modules, they have to be in the same context.
     // To create modules in parallel, they can't share a context.
     // One can work around this issue, by writing all the modules into a buffer first and then reading them in again
@@ -122,7 +125,7 @@ void Compiler::mergeModules(llvm::Module &module, const llvm::DataLayout &dataLa
         llvmModule.setDataLayout(dataLayout);
         llvmModule.setTargetTriple(targetTriple);
 
-        auto error = llvm::Linker::linkModules(module, llvm::CloneModule(llvmModule));
+        auto error = llvm::Linker::linkModules(destinationModule, llvm::CloneModule(llvmModule));
         if (error) {
             std::cerr << "Could not link modules" << std::endl;
             exit(1);

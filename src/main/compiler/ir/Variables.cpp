@@ -83,16 +83,15 @@ void IrGenerator::visitAssignmentNode(AssignmentNode *node) {
 
     node->getRight()->accept(this);
     llvm::Value *src = nodesToValues[node->getRight()];
+    if (src == nullptr || dest == nullptr) {
+        return logError("Could not create assignment.");
+    }
 
     if (typeResolver.getTypeOf(node->getRight()) == ast::STRING) {
-        if (src == nullptr) {
-            return logError("Could not create assignment.");
-        }
-        nodesToValues[node] = src;
+        std::vector<llvm::Value *> args = {dest, src};
+        createStdLibCall("assignString", args);
+        nodesToValues[node] = dest;
     } else {
-        if (src == nullptr || dest == nullptr) {
-            return logError("Could not create assignment.");
-        }
         nodesToValues[node] = builder.CreateStore(src, dest);
     }
 

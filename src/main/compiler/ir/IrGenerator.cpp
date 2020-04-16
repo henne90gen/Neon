@@ -16,7 +16,6 @@
 
 #include "../../Utils.h"
 
-void generateStringType();
 IrGenerator::IrGenerator(Module *module, FunctionResolver &functionResolver, TypeResolver &typeResolver,
                          const bool verbose)
     : module(module), functionResolver(functionResolver), typeResolver(typeResolver), verbose(verbose),

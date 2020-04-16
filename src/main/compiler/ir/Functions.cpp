@@ -29,6 +29,12 @@ llvm::Function *IrGenerator::getOrCreateStdLibFunction(const std::string &functi
         llvm::FunctionType *funcType = llvm::FunctionType::get(llvm::Type::getVoidTy(context), arguments, false);
         return llvm::Function::Create(funcType, llvm::Function::ExternalLinkage, functionName, llvmModule);
     }
+    if (functionName == "assignString") {
+        auto stringType = getStringType();
+        std::vector<llvm::Type *> arguments = {stringType->getPointerTo(), stringType->getPointerTo()};
+        llvm::FunctionType *funcType = llvm::FunctionType::get(llvm::Type::getVoidTy(context), arguments, false);
+        return llvm::Function::Create(funcType, llvm::Function::ExternalLinkage, functionName, llvmModule);
+    }
     return nullptr;
 }
 
@@ -70,6 +76,14 @@ void IrGenerator::visitFunctionNode(FunctionNode *node) {
             }
 
             node->getBody()->accept(this);
+
+            if (node->getReturnType() != ast::DataType::VOID) {
+                // set insertion point to be before the return statement
+                llvm::BasicBlock &lastBB = currentFunction->getBasicBlockList().back();
+                llvm::BasicBlock::InstListType &instructionList = lastBB.getInstList();
+                llvm::Instruction &returnInstruction = instructionList.back();
+                builder.SetInsertPoint(&returnInstruction);
+            }
         });
     }
 

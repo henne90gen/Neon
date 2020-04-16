@@ -18,7 +18,7 @@ class Compiler {
 
     Module *loadModule(const std::string &moduleFileName);
     void writeModuleToObjectFile();
-    void mergeModules(llvm::Module &module, const llvm::DataLayout &dataLayout, const std::string &targetTriple);
+    void mergeModules(llvm::Module &destinationModule, const llvm::DataLayout &dataLayout, const std::string &targetTriple);
     void generateIR();
     void analyseTypes();
 };
