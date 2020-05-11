@@ -33,6 +33,7 @@ struct Token {
         FUN,
         VARIABLE_NAME,
         SIMPLE_DATA_TYPE,
+        TYPE,
         RETURN,
         EXTERN,
         IF,

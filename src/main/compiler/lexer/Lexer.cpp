@@ -116,7 +116,7 @@ Token Lexer::getToken() {
             return twoCharToken.value();
         }
 
-        auto oneCharToken = matchOneCharacterToken();
+        auto oneCharToken = matchOneCharToken();
         if (oneCharToken.has_value()) {
             currentWord = currentWord.substr(1, currentWord.length() - 1);
             return oneCharToken.value();
@@ -180,6 +180,9 @@ std::optional<Token> Lexer::matchWordToken() {
     if (STARTS_WITH(currentWord, "fun")) {
         return TOKEN(Token::FUN, "fun");
     }
+    if (STARTS_WITH(currentWord, "type")) {
+        return TOKEN(Token::TYPE, "type");
+    }
     if (STARTS_WITH(currentWord, "int")) {
         return TOKEN(Token::SIMPLE_DATA_TYPE, "int");
     }
@@ -230,7 +233,7 @@ std::optional<Token> Lexer::matchTwoCharToken() {
     return {};
 }
 
-std::optional<Token> Lexer::matchOneCharacterToken() {
+std::optional<Token> Lexer::matchOneCharToken() {
     char firstChar = currentWord[0];
     if (firstChar == '\n') {
         return TOKEN(Token::NEW_LINE, "\n");

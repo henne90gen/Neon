@@ -10,6 +10,7 @@ statement
     call new_line
     external_function new_line
     function
+    type_declaration
     assignment new_line
     return expression new_line
     definition new_line
@@ -43,7 +44,7 @@ if_statement_else_body
     statements }
 
 external_function
-    extern fun variable_name ( external_function_header
+    extern fun identifier ( external_function_header
 
 external_function_header
     external_function_return
@@ -54,7 +55,7 @@ external_function_return
     ) data_type
 
 function
-    fun variable_name ( function_header
+    fun identifier ( function_header
 
 function_header
     ) function_return
@@ -72,18 +73,34 @@ function_args
     definition
     function_args , definition
 
+type_declaration
+    type identifier { type_body
+    type identifier { new_line type_body
+
+type_body
+    }
+    type_member_declarations }
+
+type_member_declarations
+    type_member_declaration
+    type_member_declarations type_member_declaration
+
+type_member_declaration
+    definition new_line
+
 definition
     array_definition
     variable_definition
 
 array_definition
-    data_type [ integer ] variable_name
+    data_type [ integer ] identifier
 
 variable_definition
-    data_type variable_name
+    data_type identifier
+    identifier identifier
 
 call
-    variable_name ( call_header
+    identifier ( call_header
 
 call_header
     )
@@ -95,8 +112,8 @@ call_args
 
 assignment
     definition = expression
-    variable_name = expression
-    variable_name [ expression ] = expression
+    identifier = expression
+    identifier [ expression ] = expression
 
 expression
     disjunction
@@ -139,8 +156,8 @@ factor
     string
     array_access
     call
-    variable_name
+    identifier
     ( expression )
 
 array_access
-    variable_name [ expression ]
+    identifier [ expression ]

@@ -96,9 +96,11 @@ GrammarSymbol convertToGrammarSymbol(const Token &token) {
     case Token::FUN:
         return GrammarSymbol::FUN;
     case Token::VARIABLE_NAME:
-        return GrammarSymbol::VARIABLE_NAME;
+        return GrammarSymbol::IDENTIFIER;
     case Token::SIMPLE_DATA_TYPE:
         return GrammarSymbol::DATA_TYPE;
+    case Token::TYPE:
+        return GrammarSymbol::TYPE;
     case Token::LEFT_CURLY_BRACE:
         return GrammarSymbol::LEFT_CURLY_BRACE;
     case Token::RIGHT_CURLY_BRACE:

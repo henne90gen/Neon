@@ -25,14 +25,14 @@ It has C-like syntax and is easily interoperable with C/C++.
 -   Float (64 bit): `float f = 0.0`
 -   Boolean (1 bit): `bool b = true`
 -   Array
-    -   one dimensional arrays of all the primitive data types are fully supported
+    -   one dimensional arrays of the following primitive data types are supported:
         -   `int[5] a`
         -   `float[5] a`
         -   `bool[5] a`
 -   String `string s = "Hello World!"`
-    - the string type is managed, which means that the length of the string is saved along the data
+    -   the string type is managed, which means that the length of the string is saved along the data
 
-### Link external object files
+### Linking external object files
 
 It is possible to link an object file with a program written in Neon.
 This makes it possible to call functions that are contained in the externally linked object file.
@@ -72,8 +72,6 @@ This makes it possible to call functions that are contained in the externally li
 -   complex types
     -   arrays (multidimensional)
     -   compound types (structs)
--   strings
-    -   concatenating strings
 -   think about interface definitions
     -   how to create them
     -   how to implement them

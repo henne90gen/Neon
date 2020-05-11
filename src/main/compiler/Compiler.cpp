@@ -178,7 +178,7 @@ void Compiler::writeModuleToObjectFile() {
         exit(1);
     }
 
-    auto fileType = llvm::TargetMachine::CGFT_ObjectFile;
+    auto fileType = llvm::CGFT_ObjectFile;
     llvm::legacy::PassManager pass;
     if (targetMachine->addPassesToEmitFile(pass, dest, nullptr, fileType)) {
         llvm::errs() << "TargetMachine can't emit a file of this type";

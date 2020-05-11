@@ -64,7 +64,7 @@ class Lexer {
     bool verbose;
 
     std::optional<Token> matchRegex(const std::string &regex, Token::TokenType tokenType);
-    std::optional<Token> matchOneCharacterToken();
+    std::optional<Token> matchOneCharToken();
     std::optional<Token> matchTwoCharToken();
     std::optional<Token> matchWordToken();
 };

@@ -72,6 +72,8 @@ std::string to_string(Token::TokenType type) {
         return "NEW_LINE";
     case Token::STRING:
         return "STRING";
+    case Token::TYPE:
+        return "TYPE";
     default:
         return "NOT IMPLEMENTED YET (" + std::to_string(static_cast<int>(type)) + ")";
     }

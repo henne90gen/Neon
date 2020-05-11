@@ -18,7 +18,7 @@ bool isLiteral(ParseTreeNode *node) {
 }
 
 bool isVariable(ParseTreeNode *node) {
-    return node->symbol == GrammarSymbol::VARIABLE_NAME || node->symbol == GrammarSymbol::ARRAY_ACCESS;
+    return node->symbol == GrammarSymbol::IDENTIFIER || node->symbol == GrammarSymbol::ARRAY_ACCESS;
 }
 
 bool isVariableDefinition(ParseTreeNode *node) { return node->symbol == GrammarSymbol::DEFINITION; }
