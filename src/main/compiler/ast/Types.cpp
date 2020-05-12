@@ -2,8 +2,10 @@
 
 #include <iostream>
 
-std::string to_string(ast::DataType dataType) {
-    switch (dataType) {
+std::string to_string(const ast::DataType &dataType) { return dataType.typeName; }
+
+std::string to_string(ast::SimpleDataType type) {
+    switch (type) {
     case ast::VOID:
         return "VOID";
     case ast::BOOL:
@@ -15,7 +17,7 @@ std::string to_string(ast::DataType dataType) {
     case ast::STRING:
         return "STRING";
     }
-    std::cerr << "Could not convert " << dataType << " to string." << std::endl;
+    std::cerr << "Could not convert " << type << " to string." << std::endl;
 }
 
 std::string to_string(ast::BinaryOperationType operationType) {
@@ -42,4 +44,24 @@ std::string to_string(ast::BinaryOperationType operationType) {
         return "GREATER_THAN";
     }
     std::cerr << "Could not convert " << operationType << " to string." << std::endl;
+}
+
+bool ast::isSimpleDataType(const ast::DataType &type) {
+    return type.typeName == "VOID" || type.typeName == "BOOL" || type.typeName == "INT" || type.typeName == "FLOAT" ||
+           type.typeName == "STRING";
+}
+
+ast::SimpleDataType ast::toSimpleDataType(const ast::DataType &type) {
+    if (type.typeName == "VOID") {
+        return ast::SimpleDataType::VOID;
+    } else if (type.typeName == "BOOL") {
+        return ast::SimpleDataType::BOOL;
+    } else if (type.typeName == "INT") {
+        return ast::SimpleDataType::INT;
+    } else if (type.typeName == "FLOAT") {
+        return ast::SimpleDataType::FLOAT;
+    } else if (type.typeName == "STRING") {
+        return ast::SimpleDataType::STRING;
+    }
+    return ast::SimpleDataType::VOID;
 }

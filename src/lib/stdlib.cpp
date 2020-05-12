@@ -59,15 +59,13 @@ long ftoi(double x) { return (long)x; }
 
 double itof(long x) { return (double)x; }
 
-void createString(string *s, char *data) {
-    if (s->buf != nullptr) {
-        // TODO what should we do?
-        //  1. just free it
-        //  2. ignore it
-        LOG(logString(s); printf("Found existing buffer.\n"));
-    }
+string *createString(char *data, long size, long maxSize) {
+    auto s = (string *)malloc(sizeof(string));
+    s->size = size;
+    s->maxSize = maxSize;
     s->buf = (char *)malloc(s->maxSize);
     memcpy(s->buf, data, s->size);
+    return s;
 }
 
 void deleteString(string *s) {

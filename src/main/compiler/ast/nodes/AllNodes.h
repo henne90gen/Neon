@@ -10,6 +10,8 @@
 #include "LiteralNodes.h"
 #include "SequenceNode.h"
 #include "StatementNode.h"
+#include "TypeDeclarationNode.h"
+#include "TypeMemberNode.h"
 #include "UnaryOperationNode.h"
 #include "VariableDefinitionNode.h"
 #include "VariableNode.h"

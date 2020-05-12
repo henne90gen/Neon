@@ -11,15 +11,17 @@ void FunctionFinder::visitSequenceNode(SequenceNode *node) {
 void FunctionFinder::visitStatementNode(StatementNode *node) { node->getChild()->accept(this); }
 
 void FunctionFinder::visitFunctionNode(FunctionNode *node) {
-    FunctionSignature funcSig = {};
-    funcSig.name = node->getName();
-    funcSig.returnType = node->getReturnType();
+    FunctionSignature funcSig = {.name = node->getName(), .returnType = node->getReturnType()};
     for (auto &argument : node->getArguments()) {
-        FunctionArgument funcArg = {};
-        funcArg.name = argument->getName();
-        funcArg.type = argument->getType();
+        FunctionArgument funcArg = {.name = argument->getName(), .type = argument->getType()};
         funcSig.arguments.push_back(funcArg);
     }
+    functions.push_back(funcSig);
+}
+
+void FunctionFinder::visitTypeDeclarationNode(TypeDeclarationNode *node) {
+    FunctionSignature funcSig = {.name = node->getName(), .returnType = node->getType()};
+    // TODO add constructor arguments, maybe...
     functions.push_back(funcSig);
 }
 

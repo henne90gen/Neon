@@ -40,7 +40,7 @@ void IrGenerator::visitVariableDefinitionNode(VariableDefinitionNode *node) {
         type = llvm::ArrayType::get(type, node->getArraySize());
     }
 
-    llvm::Value *value = nullptr;
+    llvm::Value *value;
     if (isGlobalScope) {
         value = llvmModule.getOrInsertGlobal(name, type);
         llvmModule.getNamedGlobal(name)->setDSOLocal(true);
@@ -59,13 +59,13 @@ void IrGenerator::visitVariableDefinitionNode(VariableDefinitionNode *node) {
 void IrGenerator::visitAssignmentNode(AssignmentNode *node) {
     LOG("Enter Assignment")
 
-    llvm::Value *dest = nullptr;
+    llvm::Value *dest;
     if (node->getLeft()->getAstNodeType() == ast::NodeType::VARIABLE_DEFINITION) {
-        // only generate variable definitions
+        // generate variable definition
         node->getLeft()->accept(this);
         dest = nodesToValues[node->getLeft()];
-        currentDestination = dest;
     } else {
+        // lookup the variable to save into
         auto variable = dynamic_cast<VariableNode *>(node->getLeft());
         dest = findVariable(variable->getName());
         if (variable->isArrayAccess()) {
@@ -80,6 +80,7 @@ void IrGenerator::visitAssignmentNode(AssignmentNode *node) {
             dest = builder.CreateInBoundsGEP(dest, indices);
         }
     }
+    currentDestination = dest;
 
     node->getRight()->accept(this);
     llvm::Value *src = nodesToValues[node->getRight()];
@@ -87,9 +88,13 @@ void IrGenerator::visitAssignmentNode(AssignmentNode *node) {
         return logError("Could not create assignment.");
     }
 
-    if (typeResolver.getTypeOf(node->getRight()) == ast::STRING) {
-        std::vector<llvm::Value *> args = {dest, src};
-        createStdLibCall("assignString", args);
+    if (typeResolver.getTypeOf(node->getRight()) == ast::DataType(ast::SimpleDataType::STRING)) {
+        if (node->getLeft()->getAstNodeType() != ast::NodeType::VARIABLE_DEFINITION) {
+            llvm::Value *loadedDest = builder.CreateLoad(dest);
+            llvm::Value *loadedSrc = builder.CreateLoad(src);
+            std::vector<llvm::Value *> args = {loadedDest, loadedSrc};
+            createStdLibCall("assignString", args);
+        }
         nodesToValues[node] = dest;
     } else {
         nodesToValues[node] = builder.CreateStore(src, dest);

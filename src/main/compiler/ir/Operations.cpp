@@ -77,28 +77,36 @@ void IrGenerator::emitStringOperation(BinaryOperationNode *node, llvm::Value *l,
     case ast::ADDITION: {
         auto stringType = getStringType();
         std::string name = "tmpStr";
-        auto result = createEntryBlockAlloca(stringType, name);
+        auto result = createEntryBlockAlloca(stringType->getPointerTo(), name);
 
         unsigned int numCharacters = 0; // default number of characters, forces a resize to the correct size
-        std::vector<llvm::Constant *> constants = {
-              llvm::ConstantPointerNull::get(llvm::IntegerType::getInt8PtrTy(context)),      // content
-              llvm::ConstantInt::get(llvm::IntegerType::getInt64Ty(context), numCharacters), // length
-              llvm::ConstantInt::get(llvm::IntegerType::getInt64Ty(context), numCharacters), // max length
-        };
-        auto initializer = llvm::ConstantStruct::get(stringType, constants);
-        builder.CreateStore(initializer, result);
+        auto data = builder.CreateGlobalStringPtr("", "str");
+        auto size = llvm::ConstantInt::get(llvm::IntegerType::getInt64Ty(context), numCharacters);
+        auto maxSize = llvm::ConstantInt::get(llvm::IntegerType::getInt64Ty(context), numCharacters);
 
         std::vector<llvm::Value *> args = {};
-        args.push_back(result);
-        args.push_back(l);
-        args.push_back(r);
+        args.push_back(data);
+        args.push_back(size);
+        args.push_back(maxSize);
+        auto value = createStdLibCall("createString", args);
+
+        builder.CreateStore(value, result);
+
+        auto dest = builder.CreateLoad(result);
+        auto loadedLeft = builder.CreateLoad(l);
+        auto loadedRight = builder.CreateLoad(r);
+        args.clear();
+        args.push_back(dest);
+        args.push_back(loadedLeft);
+        args.push_back(loadedRight);
         createStdLibCall("appendString", args);
         nodesToValues[node] = result;
 
         currentScope().cleanUpFunctions.emplace_back([this, stringType, node]() {
-          std::vector<llvm::Value *> args = {};
-          args.push_back(nodesToValues[node]);
-          createStdLibCall("deleteString", args);
+            auto loadedValue = builder.CreateLoad(nodesToValues[node]);
+            std::vector<llvm::Value *> args = {};
+            args.push_back(loadedValue);
+            createStdLibCall("deleteString", args);
         });
         return;
     }
@@ -143,11 +151,11 @@ void IrGenerator::visitBinaryOperationNode(BinaryOperationNode *node) {
                         " are not compatible for binary operation");
     }
 
-    if (typeOfLeft == ast::DataType::INT) {
+    if (typeOfLeft == ast::DataType(ast::SimpleDataType::INT)) {
         emitIntegerOperation(node, l, r);
-    } else if (typeOfLeft == ast::DataType::FLOAT) {
+    } else if (typeOfLeft == ast::DataType(ast::SimpleDataType::FLOAT)) {
         emitFloatOperation(node, l, r);
-    } else if (typeOfLeft == ast::DataType::STRING) {
+    } else if (typeOfLeft == ast::DataType(ast::SimpleDataType::STRING)) {
         emitStringOperation(node, l, r);
     } else {
         return logError("Binary operations are not supported for types " + to_string(typeOfLeft) + " and " +

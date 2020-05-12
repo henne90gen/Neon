@@ -5,9 +5,9 @@
 #include "../Types.h"
 #include <unordered_map>
 
-class TypeAnalyser : public AstVisitor {
+class TypeAnalyzer : public AstVisitor {
   public:
-    explicit TypeAnalyser(Module *module, const FunctionResolver &functionResolver)
+    explicit TypeAnalyzer(Module *module, const FunctionResolver &functionResolver)
         : module(module), functionResolver(functionResolver) {}
 
     void visitAssignmentNode(AssignmentNode *node) override;
@@ -22,6 +22,7 @@ class TypeAnalyser : public AstVisitor {
     void visitSequenceNode(SequenceNode *node) override;
     void visitStatementNode(StatementNode *node) override;
     void visitStringNode(StringNode *node) override;
+    void visitTypeDeclarationNode(TypeDeclarationNode *node) override;
     void visitUnaryOperationNode(UnaryOperationNode *node) override;
     void visitVariableNode(VariableNode *node) override;
     void visitVariableDefinitionNode(VariableDefinitionNode *node) override;

@@ -13,6 +13,8 @@ class IntegerNode;
 class SequenceNode;
 class StatementNode;
 class StringNode;
+class TypeDeclarationNode;
+class TypeMemberNode;
 class UnaryOperationNode;
 class VariableDefinitionNode;
 class VariableNode;
@@ -32,6 +34,8 @@ class AstVisitor {
     virtual void visitSequenceNode(SequenceNode *node){};
     virtual void visitStatementNode(StatementNode *node){};
     virtual void visitStringNode(StringNode *node){};
+    virtual void visitTypeDeclarationNode(TypeDeclarationNode *node){};
+    virtual void visitTypeMemberNode(TypeMemberNode *node){};
     virtual void visitUnaryOperationNode(UnaryOperationNode *node){};
     virtual void visitVariableDefinitionNode(VariableDefinitionNode *node){};
     virtual void visitVariableNode(VariableNode *node){};

@@ -18,8 +18,10 @@ llvm::Function *IrGenerator::getOrCreateStdLibFunction(const std::string &functi
     }
     if (functionName == "createString") {
         auto stringType = getStringType();
-        std::vector<llvm::Type *> arguments = {stringType->getPointerTo(), llvm::PointerType::getInt8PtrTy(context)};
-        llvm::FunctionType *funcType = llvm::FunctionType::get(llvm::Type::getVoidTy(context), arguments, false);
+        std::vector<llvm::Type *> arguments = {llvm::PointerType::getInt8PtrTy(context),
+                                               llvm::IntegerType::getInt64Ty(context),
+                                               llvm::IntegerType::getInt64Ty(context)};
+        llvm::FunctionType *funcType = llvm::FunctionType::get(stringType->getPointerTo(), arguments, false);
         return llvm::Function::Create(funcType, llvm::Function::ExternalLinkage, functionName, llvmModule);
     }
     if (functionName == "appendString") {
@@ -77,7 +79,7 @@ void IrGenerator::visitFunctionNode(FunctionNode *node) {
 
             node->getBody()->accept(this);
 
-            if (node->getReturnType() != ast::DataType::VOID) {
+            if (node->getReturnType() != ast::DataType(ast::SimpleDataType::VOID)) {
                 // set insertion point to be before the return statement
                 llvm::BasicBlock &lastBB = currentFunction->getBasicBlockList().back();
                 llvm::BasicBlock::InstListType &instructionList = lastBB.getInstList();
@@ -98,35 +100,33 @@ void IrGenerator::visitFunctionNode(FunctionNode *node) {
     LOG("Exit Function")
 }
 
-llvm::Function *IrGenerator::getOrCreateFunctionDefinition(const std::string &name, const ast::DataType returnType,
+llvm::Function *IrGenerator::getOrCreateFunctionDefinition(const std::string &name, const ast::DataType &returnType,
                                                            const std::vector<FunctionArgument> &arguments) {
     llvm::Function *function = llvmModule.getFunction(name);
+    if (function != nullptr) {
+        return function;
+    }
+
+    auto retType = getType(returnType);
+
+    std::vector<llvm::Type *> argumentTypes = {};
+    argumentTypes.reserve(arguments.size());
+    for (auto &arg : arguments) {
+        llvm::Type *type = getType(arg.type);
+        argumentTypes.push_back(type);
+    }
+
+    llvm::FunctionType *functionType = llvm::FunctionType::get(retType, argumentTypes, false);
+
+    function = llvm::Function::Create(functionType, llvm::Function::ExternalLinkage, name, llvmModule);
     if (function == nullptr) {
-        auto retType = getType(returnType);
+        logError("Could not create function " + name);
+        return nullptr;
+    }
 
-        std::vector<llvm::Type *> argumentTypes = {};
-        argumentTypes.reserve(arguments.size());
-        for (auto &arg : arguments) {
-            llvm::Type *type = getType(arg.type);
-            if (!isPrimitiveType(arg.type)) {
-                // pass the pointer to the variable, if it is not a primitive type
-                type = type->getPointerTo();
-            }
-            argumentTypes.push_back(type);
-        }
-
-        llvm::FunctionType *functionType = llvm::FunctionType::get(retType, argumentTypes, false);
-
-        function = llvm::Function::Create(functionType, llvm::Function::ExternalLinkage, name, llvmModule);
-        if (function == nullptr) {
-            logError("Could not create function " + name);
-            return nullptr;
-        }
-
-        unsigned int i = 0;
-        for (auto &arg : function->args()) {
-            arg.setName(arguments[i++].name);
-        }
+    unsigned int i = 0;
+    for (auto &arg : function->args()) {
+        arg.setName(arguments[i++].name);
     }
 
     return function;
@@ -136,9 +136,9 @@ llvm::Function *IrGenerator::getOrCreateFunctionDefinition(const FunctionSignatu
     return getOrCreateFunctionDefinition(signature.name, signature.returnType, signature.arguments);
 }
 
-void IrGenerator::finalizeFunction(llvm::Function *function, const ast::DataType returnType,
+void IrGenerator::finalizeFunction(llvm::Function *function, const ast::DataType &returnType,
                                    const bool isExternalFunction) {
-    if (!isExternalFunction && returnType == ast::DataType::VOID) {
+    if (!isExternalFunction && returnType == ast::DataType(ast::SimpleDataType::VOID)) {
         builder.SetInsertPoint(&function->getBasicBlockList().back());
         builder.CreateRetVoid();
     }
@@ -196,10 +196,14 @@ void IrGenerator::visitCallNode(CallNode *node) {
         if (itr == nodesToValues.end()) {
             return logError("Could not generate code for argument.");
         }
-        arguments.push_back(itr->second);
+        if (typeResolver.getTypeOf(argument) == ast::DataType(ast::SimpleDataType::STRING)) {
+            arguments.push_back(builder.CreateLoad(itr->second));
+        } else {
+            arguments.push_back(itr->second);
+        }
     }
 
-    llvm::Value *call = nullptr;
+    llvm::Value *call;
     if (calleeFunc->getReturnType()->getTypeID() == llvm::Type::TypeID::VoidTyID) {
         call = builder.CreateCall(calleeFunc, arguments);
     } else {
@@ -208,6 +212,7 @@ void IrGenerator::visitCallNode(CallNode *node) {
     nodesToValues[node] = call;
 }
 
-bool IrGenerator::isPrimitiveType(ast::DataType type) {
-    return type == ast::BOOL || type == ast::INT || type == ast::FLOAT;
+bool IrGenerator::isPrimitiveType(const ast::DataType &type) {
+    return type == ast::DataType(ast::SimpleDataType::BOOL) || type == ast::DataType(ast::SimpleDataType::INT) ||
+           type == ast::DataType(ast::SimpleDataType::FLOAT);
 }

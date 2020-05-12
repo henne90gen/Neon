@@ -1,10 +1,25 @@
 #pragma once
 
 #include <string>
+#include <utility>
+
+namespace ast {
+enum SimpleDataType { VOID, BOOL, INT, FLOAT, STRING };
+}
+
+std::string to_string(ast::SimpleDataType type);
 
 namespace ast {
 
-enum DataType { VOID, BOOL, INT, FLOAT, STRING };
+struct DataType {
+    std::string typeName = "";
+    explicit DataType() : typeName(to_string(SimpleDataType::VOID)) {}
+    explicit DataType(SimpleDataType simple) : typeName(to_string(simple)) {}
+    explicit DataType(std::string typeName) : typeName(std::move(typeName)) {}
+};
+
+inline bool operator==(const DataType &lhs, const DataType &rhs) { return lhs.typeName == rhs.typeName; }
+inline bool operator!=(const DataType &lhs, const DataType &rhs) { return lhs.typeName != rhs.typeName; }
 
 enum NodeType {
     SEQUENCE,
@@ -21,6 +36,8 @@ enum NodeType {
     IF_STATEMENT,
     FOR_STATEMENT,
     IMPORT,
+    TYPE_DECLARATION,
+    TYPE_MEMBER,
 };
 
 enum BinaryOperationType {
@@ -36,8 +53,12 @@ enum BinaryOperationType {
     GREATER_THAN,
 };
 
+bool isSimpleDataType(const ast::DataType &type);
+
+SimpleDataType toSimpleDataType(const ast::DataType &type);
+
 } // namespace ast
 
-std::string to_string(ast::DataType dataType);
+std::string to_string(const ast::DataType &dataType);
 
 std::string to_string(ast::BinaryOperationType operationType);

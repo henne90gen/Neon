@@ -19,4 +19,7 @@ struct_pointer:
 memory_test:
 	clang++ -O0 memory_test.cpp -o memory_test && ./memory_test
 
+custom_types:
+	clang++ -O0 -S custom_types.cpp -emit-llvm
+
 .PHONY: compile llvm link memory_test struct_pointer time

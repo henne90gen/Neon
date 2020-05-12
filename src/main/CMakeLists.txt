@@ -22,13 +22,16 @@ add_library(NeonCompiler
         compiler/ast/nodes/LiteralNodes.cpp
         compiler/ast/nodes/SequenceNode.cpp
         compiler/ast/nodes/StatementNode.cpp
+        compiler/ast/nodes/TypeDeclarationNode.cpp
+        compiler/ast/nodes/TypeMemberNode.cpp
         compiler/ast/nodes/UnaryOperationNode.cpp
         compiler/ast/nodes/VariableDefinitionNode.cpp
         compiler/ast/nodes/VariableNode.cpp
         compiler/ast/visitors/AstInterpreter.cpp
         compiler/ast/visitors/AstPrinter.cpp
         compiler/ast/visitors/AstTestCasePrinter.cpp
-        compiler/ast/visitors/TypeAnalyser.cpp
+        compiler/ast/visitors/TypeAnalyzer.cpp
+        compiler/ast/visitors/TypeFinder.cpp
         compiler/ast/visitors/FunctionFinder.cpp
         compiler/ast/visitors/ImportFinder.cpp
         compiler/ir/Functions.cpp

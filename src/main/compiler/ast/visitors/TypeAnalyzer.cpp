@@ -1,11 +1,11 @@
-#include "TypeAnalyser.h"
+#include "TypeAnalyzer.h"
 
 #include <iostream>
 
 #include "../../../Utils.h"
 #include "../nodes/AllNodes.h"
 
-void TypeAnalyser::visitFunctionNode(FunctionNode *node) {
+void TypeAnalyzer::visitFunctionNode(FunctionNode *node) {
     for (auto &argument : node->getArguments()) {
         argument->accept(this);
     }
@@ -14,10 +14,10 @@ void TypeAnalyser::visitFunctionNode(FunctionNode *node) {
     }
 }
 
-void TypeAnalyser::visitCallNode(CallNode *node) {
+void TypeAnalyzer::visitCallNode(CallNode *node) {
     auto result = functionResolver.resolveFunction(module, node->getName());
     if (!result.functionExists) {
-        std::cerr << "TypeAnalyser: Undefined function " << node->getName() << std::endl;
+        std::cerr << "TypeAnalyzer: Undefined function " << node->getName() << std::endl;
         return;
     }
     for (const auto arg : node->getArguments()) {
@@ -26,21 +26,21 @@ void TypeAnalyser::visitCallNode(CallNode *node) {
     typeMap[node] = result.signature.returnType;
 }
 
-void TypeAnalyser::visitVariableNode(VariableNode *node) {
+void TypeAnalyzer::visitVariableNode(VariableNode *node) {
     const auto &itr = variableMap.find(node->getName());
     if (itr == variableMap.end()) {
-        std::cerr << "TypeAnalyser: Undefined variable " << node->getName() << std::endl;
+        std::cerr << "TypeAnalyzer: Undefined variable " << node->getName() << std::endl;
         return;
     }
     typeMap[node] = itr->second;
 }
 
-void TypeAnalyser::visitVariableDefinitionNode(VariableDefinitionNode *node) {
+void TypeAnalyzer::visitVariableDefinitionNode(VariableDefinitionNode *node) {
     typeMap[node] = node->getType();
     variableMap[node->getName()] = node->getType();
 }
 
-void TypeAnalyser::visitBinaryOperationNode(BinaryOperationNode *node) {
+void TypeAnalyzer::visitBinaryOperationNode(BinaryOperationNode *node) {
     node->getLeft()->accept(this);
     node->getRight()->accept(this);
     auto leftType = typeMap[node->getLeft()];
@@ -57,31 +57,31 @@ void TypeAnalyser::visitBinaryOperationNode(BinaryOperationNode *node) {
                    node->getType() == ast::BinaryOperationType::GREATER_THAN ||
                    node->getType() == ast::BinaryOperationType::EQUALS ||
                    node->getType() == ast::BinaryOperationType::NOT_EQUALS) {
-            typeMap[node] = ast::DataType::BOOL;
+            typeMap[node] = ast::DataType(ast::SimpleDataType::BOOL);
         }
         return;
     }
-    std::cerr << "TypeAnalyser: Binary operation type mismatch: " << to_string(node->getAstNodeType()) << std::endl;
+    std::cerr << "TypeAnalyzer: Binary operation type mismatch: " << to_string(node->getAstNodeType()) << std::endl;
 }
 
-void TypeAnalyser::visitUnaryOperationNode(UnaryOperationNode *node) {
+void TypeAnalyzer::visitUnaryOperationNode(UnaryOperationNode *node) {
     node->getChild()->accept(this);
     if (node->getType() == UnaryOperationNode::UnaryOperationType::NOT &&
-        typeMap[node->getChild()] == ast::DataType::BOOL) {
-        typeMap[node] = ast::DataType::BOOL;
+        typeMap[node->getChild()] == ast::DataType(ast::SimpleDataType::BOOL)) {
+        typeMap[node] = ast::DataType(ast::SimpleDataType::BOOL);
         return;
     }
     // TODO(henne): unary operators can also be of other types than bool, we need to add support for that as well
-    std::cerr << "TypeAnalyser: Unary operation type mismatch: " << to_string(node->getAstNodeType()) << std::endl;
+    std::cerr << "TypeAnalyzer: Unary operation type mismatch: " << to_string(node->getAstNodeType()) << std::endl;
 }
 
-void TypeAnalyser::visitAssignmentNode(AssignmentNode *node) {
+void TypeAnalyzer::visitAssignmentNode(AssignmentNode *node) {
     node->getRight()->accept(this);
     node->getLeft()->accept(this);
     ast::DataType leftType = typeMap[node->getLeft()];
     ast::DataType rightType = typeMap[node->getRight()];
     if (leftType != rightType) {
-        std::cerr << "TypeAnalyser: Assignment type mismatch: " << to_string(leftType) << " = " << to_string(rightType)
+        std::cerr << "TypeAnalyzer: Assignment type mismatch: " << to_string(leftType) << " = " << to_string(rightType)
                   << std::endl;
         return;
     }
@@ -89,13 +89,13 @@ void TypeAnalyser::visitAssignmentNode(AssignmentNode *node) {
     typeMap[node] = leftType;
 }
 
-void TypeAnalyser::visitSequenceNode(SequenceNode *node) {
+void TypeAnalyzer::visitSequenceNode(SequenceNode *node) {
     for (auto child : node->getChildren()) {
         child->accept(this);
     }
 }
 
-void TypeAnalyser::visitStatementNode(StatementNode *node) {
+void TypeAnalyzer::visitStatementNode(StatementNode *node) {
     if (node->getChild() == nullptr) {
         return;
     }
@@ -103,17 +103,17 @@ void TypeAnalyser::visitStatementNode(StatementNode *node) {
     typeMap[node] = typeMap[node->getChild()];
 }
 
-void TypeAnalyser::visitBoolNode(BoolNode *node) { typeMap[node] = ast::DataType::BOOL; }
+void TypeAnalyzer::visitBoolNode(BoolNode *node) { typeMap[node] = ast::DataType(ast::SimpleDataType::BOOL); }
 
-void TypeAnalyser::visitFloatNode(FloatNode *node) { typeMap[node] = ast::DataType::FLOAT; }
+void TypeAnalyzer::visitFloatNode(FloatNode *node) { typeMap[node] = ast::DataType(ast::SimpleDataType::FLOAT); }
 
-void TypeAnalyser::visitIntegerNode(IntegerNode *node) { typeMap[node] = ast::DataType::INT; }
+void TypeAnalyzer::visitIntegerNode(IntegerNode *node) { typeMap[node] = ast::DataType(ast::SimpleDataType::INT); }
 
-void TypeAnalyser::visitStringNode(StringNode *node) { typeMap[node] = ast::DataType::STRING; }
+void TypeAnalyzer::visitStringNode(StringNode *node) { typeMap[node] = ast::DataType(ast::SimpleDataType::STRING); }
 
-void TypeAnalyser::visitIfStatementNode(IfStatementNode *node) {
+void TypeAnalyzer::visitIfStatementNode(IfStatementNode *node) {
     node->getCondition()->accept(this);
-    if (typeMap[node->getCondition()] != ast::DataType::BOOL) {
+    if (typeMap[node->getCondition()] != ast::DataType(ast::SimpleDataType::BOOL)) {
         std::cerr << "If condition is not of type bool" << std::endl;
         return;
     }
@@ -125,13 +125,13 @@ void TypeAnalyser::visitIfStatementNode(IfStatementNode *node) {
     }
 }
 
-void TypeAnalyser::visitForStatementNode(ForStatementNode *node) {
+void TypeAnalyzer::visitForStatementNode(ForStatementNode *node) {
     if (node->getInit() != nullptr) {
         node->getInit()->accept(this);
     }
 
     node->getCondition()->accept(this);
-    if (typeMap[node->getCondition()] != ast::DataType::BOOL) {
+    if (typeMap[node->getCondition()] != ast::DataType(ast::SimpleDataType::BOOL)) {
         std::cerr << "For condition is not of type bool" << std::endl;
         return;
     }
@@ -145,7 +145,10 @@ void TypeAnalyser::visitForStatementNode(ForStatementNode *node) {
     }
 }
 
-std::unordered_map<AstNode *, ast::DataType> TypeAnalyser::run(AstNode *root) {
+void TypeAnalyzer::visitTypeDeclarationNode(TypeDeclarationNode *node) {
+}
+
+std::unordered_map<AstNode *, ast::DataType> TypeAnalyzer::run(AstNode *root) {
     if (root == nullptr) {
         return {};
     }

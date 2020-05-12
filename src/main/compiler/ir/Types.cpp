@@ -2,21 +2,50 @@
 
 const int NUM_BITS_OF_INT = 64;
 
-llvm::Type *IrGenerator::getType(ast::DataType type) {
-    switch (type) {
-    case ast::DataType::VOID:
-        return llvm::Type::getVoidTy(context);
-    case ast::DataType::INT:
-        return llvm::Type::getInt64Ty(context);
-    case ast::DataType::FLOAT:
-        return llvm::Type::getDoubleTy(context);
-    case ast::DataType::BOOL:
-        return llvm::Type::getInt1Ty(context);
-    case ast::DataType::STRING:
-        return getStringType();
-    default:
-        return nullptr;
+llvm::Type *IrGenerator::getType(const ast::DataType &type) {
+    bool isSimpleType = ast::isSimpleDataType(type);
+    if (isSimpleType) {
+        ast::SimpleDataType simpleDataType = toSimpleDataType(type);
+        switch (simpleDataType) {
+        case ast::SimpleDataType::VOID:
+            return llvm::Type::getVoidTy(context);
+        case ast::SimpleDataType::INT:
+            return llvm::Type::getInt64Ty(context);
+        case ast::SimpleDataType::FLOAT:
+            return llvm::Type::getDoubleTy(context);
+        case ast::SimpleDataType::BOOL:
+            return llvm::Type::getInt1Ty(context);
+        case ast::SimpleDataType::STRING:
+            return getStringType()->getPointerTo();
+        default:
+            return nullptr;
+        }
+    } else {
+        TypeResolveResult resolveResult = typeResolver.resolveType(module, type);
+        if (!resolveResult.typeExists) {
+            logError("Undefined type '" + to_string(type) + "'");
+            return llvm::Type::getVoidTy(context);
+        }
+
+        auto result = getOrCreateComplexType(resolveResult.complexType);
+        if (result == nullptr) {
+            logError("Could not generate type declaration for type '" + to_string(type) + "'");
+            return llvm::Type::getVoidTy(context);
+        }
+        return result->getPointerTo();
     }
+}
+
+llvm::StructType *IrGenerator::getOrCreateComplexType(const ComplexType &type) {
+    auto result = llvmModule.getTypeByName(type.type.typeName);
+    if (result != nullptr) {
+        return result;
+    }
+    std::vector<llvm::Type *> elements = {};
+    for (const auto &member : type.members) {
+        elements.push_back(getType(member.type));
+    }
+    return llvm::StructType::create(context, elements, type.type.typeName);
 }
 
 llvm::StructType *IrGenerator::getStringType() {
@@ -49,37 +78,49 @@ void IrGenerator::visitBoolNode(BoolNode *node) {
 }
 
 void IrGenerator::visitStringNode(StringNode *node) {
-    const std::string stringValue = node->getValue();
-    unsigned int numCharacters = stringValue.size();
-    std::vector<llvm::Constant *> constants = {
-          llvm::ConstantPointerNull::get(llvm::IntegerType::getInt8PtrTy(context)),      // content
-          llvm::ConstantInt::get(llvm::IntegerType::getInt64Ty(context), numCharacters), // length
-          llvm::ConstantInt::get(llvm::IntegerType::getInt64Ty(context), numCharacters), // max length
-    };
-    auto stringType = getStringType();
-    auto value = llvm::ConstantStruct::get(stringType, constants);
-
     // two options:
     //      generate code that inits string
     //      call function that inits string
     // going with second option for now
 
-    builder.CreateStore(value, currentDestination);
-
+    const std::string stringValue = node->getValue();
+    unsigned int numCharacters = stringValue.size();
     auto data = builder.CreateGlobalStringPtr(stringValue, "str");
+    auto size = llvm::ConstantInt::get(llvm::IntegerType::getInt64Ty(context), numCharacters);
+    auto maxSize = llvm::ConstantInt::get(llvm::IntegerType::getInt64Ty(context), numCharacters);
+
     std::vector<llvm::Value *> args = {};
-    args.push_back(currentDestination);
     args.push_back(data);
-    createStdLibCall("createString", args);
+    args.push_back(size);
+    args.push_back(maxSize);
+    auto value = createStdLibCall("createString", args);
+
+    builder.CreateStore(value, currentDestination);
 
     nodesToValues[node] = currentDestination;
     currentDestination = nullptr;
 
-    currentScope().cleanUpFunctions.emplace_back([this, stringType, node]() {
+    currentScope().cleanUpFunctions.emplace_back([this, node]() {
+        llvm::Value *loadedValue = builder.CreateLoad(nodesToValues[node]);
         std::vector<llvm::Value *> args = {};
-        args.push_back(nodesToValues[node]);
+        args.push_back(loadedValue);
         createStdLibCall("deleteString", args);
     });
 
     LOG("Created String");
+}
+
+void IrGenerator::visitTypeDeclarationNode(TypeDeclarationNode *node) {
+    auto functionDef = getOrCreateFunctionDefinition(node->getName(), node->getType(), {});
+    // TODO generate the constructor function body
+    llvm::BasicBlock *BB = llvm::BasicBlock::Create(context, "entry-" + node->getName(), functionDef);
+    builder.SetInsertPoint(BB);
+
+    //    for (auto &member : node->getMembers()) {
+    //        auto *memberType = getType(member->getType());
+    //        auto value = createEntryBlockAlloca(memberType, member->getName());
+    //
+    //        // store initial value
+    //        builder.CreateStore(&member, value);
+    //    }
 }

@@ -12,6 +12,7 @@ class FunctionFinder : public AstVisitor {
     void visitFunctionNode(FunctionNode *node) override;
     void visitSequenceNode(SequenceNode *node) override;
     void visitStatementNode(StatementNode *node) override;
+    void visitTypeDeclarationNode(TypeDeclarationNode *node) override;
 
     std::vector<FunctionSignature> run(AstNode *rootNode);
 

@@ -6,7 +6,8 @@
 #include "ast/visitors/AstTestCasePrinter.h"
 #include "ast/visitors/FunctionFinder.h"
 #include "ast/visitors/ImportFinder.h"
-#include "ast/visitors/TypeAnalyser.h"
+#include "ast/visitors/TypeAnalyzer.h"
+#include "ast/visitors/TypeFinder.h"
 #include "ir/IrGenerator.h"
 
 #include <iostream>
@@ -83,6 +84,7 @@ Module *Compiler::loadModule(const std::string &moduleFileName) {
 
     moduleImportsMap[module] = ImportFinder(module->getDirectoryPath()).run(module->root);
     moduleFunctionsMap[module] = FunctionFinder().run(module->root);
+    moduleComplexTypesMap[module] = TypeFinder().run(module->root);
 
     return module;
 }
@@ -90,7 +92,8 @@ Module *Compiler::loadModule(const std::string &moduleFileName) {
 void Compiler::generateIR() {
     auto functionResolver = FunctionResolver(program, moduleImportsMap, moduleFunctionsMap);
     for (const auto &module : program->modules) {
-        auto typeResolver = TypeResolver(moduleTypesMap[module.second]);
+        auto typeResolver =
+              TypeResolver(program, moduleNodeToTypeMap[module.second], moduleImportsMap, moduleComplexTypesMap);
         auto generator = IrGenerator(module.second, functionResolver, typeResolver, verbose);
         generator.run();
     }
@@ -194,6 +197,6 @@ void Compiler::analyseTypes() {
     for (auto &entry : program->modules) {
         auto &module = entry.second;
         auto functionResolver = FunctionResolver(program, moduleImportsMap, moduleFunctionsMap);
-        moduleTypesMap[module] = TypeAnalyser(module, functionResolver).run(module->root);
+        moduleNodeToTypeMap[module] = TypeAnalyzer(module, functionResolver).run(module->root);
     }
 }

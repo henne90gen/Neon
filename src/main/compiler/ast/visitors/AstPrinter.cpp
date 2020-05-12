@@ -55,8 +55,8 @@ void AstPrinter::visitVariableNode(VariableNode *node) {
 
 void AstPrinter::visitVariableDefinitionNode(VariableDefinitionNode *node) {
     indent(indentation);
-    std::cout << "VariableDefinitionNode(type='" << node->getType() << "', name='" << node->getName() << "', isArray='"
-              << node->isArray() << "', arraySize='" << node->getArraySize() << "')" << std::endl;
+    std::cout << "VariableDefinitionNode(type='" << to_string(node->getType()) << "', name='" << node->getName()
+              << "', isArray='" << node->isArray() << "', arraySize='" << node->getArraySize() << "')" << std::endl;
 }
 
 void AstPrinter::visitBinaryOperationNode(BinaryOperationNode *node) {
@@ -131,7 +131,7 @@ void AstPrinter::visitAssignmentNode(AssignmentNode *node) {
 
 void AstPrinter::visitCallNode(CallNode *node) {
     indent(indentation);
-    std::cout << "CallNode(name=" << node->getName() << ", numArguments=" << node->getArguments().size() << ")"
+    std::cout << "CallNode(name='" << node->getName() << "', numArguments=" << node->getArguments().size() << ")"
               << std::endl;
     indentation++;
     for (auto argument : node->getArguments()) {
@@ -171,6 +171,22 @@ void AstPrinter::visitForStatementNode(ForStatementNode *node) {
         node->getBody()->accept(this);
     }
     indentation--;
+}
+
+void AstPrinter::visitTypeDeclarationNode(TypeDeclarationNode *node) {
+    indent(indentation);
+    std::cout << "TypeDeclarationNode(name='" << node->getName() << "')" << std::endl;
+    indentation++;
+    for (const auto member : node->getMembers()) {
+        member->accept(this);
+    }
+    indentation--;
+}
+
+void AstPrinter::visitTypeMemberNode(TypeMemberNode *node) {
+    indent(indentation);
+    std::cout << "TypeMemberNode(name='" << node->getName() << "', type='" << to_string(node->getType()) << "')"
+              << std::endl;
 }
 
 void AstPrinter::run() {

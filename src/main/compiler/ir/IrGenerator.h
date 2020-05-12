@@ -34,6 +34,7 @@ class IrGenerator : public AstVisitor {
     void visitIntegerNode(IntegerNode *node) override;
     void visitSequenceNode(SequenceNode *node) override;
     void visitStatementNode(StatementNode *node) override;
+    void visitTypeDeclarationNode(TypeDeclarationNode *node) override;
     void visitStringNode(StringNode *node) override;
     void visitUnaryOperationNode(UnaryOperationNode *node) override;
     void visitVariableNode(VariableNode *node) override;
@@ -74,12 +75,13 @@ class IrGenerator : public AstVisitor {
     void printErrors();
 
     void logError(const std::string &msg);
-    llvm::Type *getType(ast::DataType type);
-    llvm::Function *getOrCreateFunctionDefinition(const std::string &name, ast::DataType returnType,
+    llvm::Type *getType(const ast::DataType &type);
+    llvm::Function *getOrCreateFunctionDefinition(const std::string &name, const ast::DataType& returnType,
                                                   const std::vector<FunctionArgument> &arguments);
     llvm::Function *getOrCreateFunctionDefinition(const FunctionSignature &signature);
+    llvm::StructType *getOrCreateComplexType(const ComplexType &type);
     llvm::AllocaInst *createEntryBlockAlloca(llvm::Type *type, const std::string &name);
-    void finalizeFunction(llvm::Function *function, ast::DataType returnType, bool isExternalFunction);
+    void finalizeFunction(llvm::Function *function, const ast::DataType &returnType, bool isExternalFunction);
     llvm::Constant *getInitializer(const ast::DataType &dt, bool isArray, unsigned int arraySize);
     void setupGlobalInitialization(llvm::Function *func);
 
@@ -88,7 +90,7 @@ class IrGenerator : public AstVisitor {
     void emitStringOperation(BinaryOperationNode *node, llvm::Value *l, llvm::Value *r);
 
     llvm::StructType *getStringType();
-    static bool isPrimitiveType(ast::DataType type);
+    static bool isPrimitiveType(const ast::DataType &type);
 
     llvm::Function *getOrCreateStdLibFunction(const std::string &functionName);
     llvm::Value *createStdLibCall(const std::string &functionName, const std::vector<llvm::Value *> &args);

@@ -3,12 +3,13 @@
 #include "AstNode.h"
 #include "VariableDefinitionNode.h"
 
+#include <utility>
 #include <vector>
 
 class FunctionNode : public AstNode {
   public:
     explicit FunctionNode(std::string name, ast::DataType returnType)
-          : AstNode(ast::NodeType::FUNCTION), name(std::move(name)), returnType(returnType) {}
+          : AstNode(ast::NodeType::FUNCTION), name(std::move(name)), returnType(std::move(returnType)) {}
 
     void accept(AstVisitor *v) override;
 

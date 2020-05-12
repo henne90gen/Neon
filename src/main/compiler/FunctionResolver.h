@@ -8,7 +8,8 @@
 
 struct FunctionResolveResult {
     bool functionExists = false;
-    FunctionSignature signature;
+    FunctionSignature signature = {.returnType=ast::DataType()};
+    // TODO do we really need this?
     Module *module = nullptr;
 };
 

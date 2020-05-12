@@ -15,3 +15,13 @@ struct FunctionSignature {
     ast::DataType returnType;
     std::vector<FunctionArgument> arguments = {};
 };
+
+struct ComplexTypeMember {
+    std::string name;
+    ast::DataType type;
+};
+
+struct ComplexType {
+    ast::DataType type;
+    std::vector<ComplexTypeMember> members = {};
+};

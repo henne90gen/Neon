@@ -36,20 +36,26 @@ llvm::AllocaInst *IrGenerator::createEntryBlockAlloca(llvm::Type *type, const st
 }
 
 llvm::Constant *IrGenerator::getInitializer(const ast::DataType &dt, bool isArray, unsigned int arraySize) {
-    // TODO(henne): refactor this method once we have a solid type system
+    // TODO(henne): refactor this method once we have a "solid" type system
     if (isArray) {
         llvm::ArrayType *ty = llvm::ArrayType::get(getType(dt), arraySize);
         return llvm::ConstantAggregateZero::get(ty);
     }
-    llvm::Type *ty = getType(dt);
-    switch (dt) {
-    case ast::DataType::FLOAT:
-        return llvm::ConstantFP::get(ty, 0);
-    case ast::DataType::INT:
-    case ast::DataType::BOOL:
-        return llvm::ConstantInt::get(ty, 0);
-    case ast::DataType::VOID:
-    default:
+    if (ast::isSimpleDataType(dt)) {
+        llvm::Type *ty = getType(dt);
+        auto simpleType = ast::toSimpleDataType(dt);
+        switch (simpleType) {
+        case ast::SimpleDataType::FLOAT:
+            return llvm::ConstantFP::get(ty, 0);
+        case ast::SimpleDataType::INT:
+        case ast::SimpleDataType::BOOL:
+            return llvm::ConstantInt::get(ty, 0);
+        case ast::SimpleDataType::VOID:
+        default:
+            return nullptr;
+        }
+    } else {
+        // TODO get or create the correct complex llvm type
         return nullptr;
     }
 }
@@ -78,8 +84,8 @@ void IrGenerator::visitSequenceNode(SequenceNode *node) {
     if (currentFunction == nullptr) {
         // TODO(henne): make sure this function name does not collide with any user defined functions
         // TODO(henne): maybe don't use the full filepath...
-        initFunc =
-              getOrCreateFunctionDefinition("global-ctor-" + module->getFilePath().string(), ast::DataType::VOID, {});
+        initFunc = getOrCreateFunctionDefinition("global-ctor-" + module->getFilePath().string(),
+                                                 ast::DataType(ast::SimpleDataType::VOID), {});
 
         llvm::BasicBlock *BB = llvm::BasicBlock::Create(context, "entry-ctor", initFunc);
         builder.SetInsertPoint(BB);
@@ -97,7 +103,7 @@ void IrGenerator::visitSequenceNode(SequenceNode *node) {
     }
 
     if (initFunc != nullptr) {
-        finalizeFunction(initFunc, ast::DataType::VOID, false);
+        finalizeFunction(initFunc, ast::DataType(ast::SimpleDataType::VOID), false);
         // TODO(henne): don't generate global init function, if there are no globals
         setupGlobalInitialization(initFunc);
         isGlobalScope = false;

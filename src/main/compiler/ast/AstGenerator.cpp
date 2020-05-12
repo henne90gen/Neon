@@ -41,6 +41,8 @@ bool isForStatement(ParseTreeNode *node) { return node->symbol == GrammarSymbol:
 
 bool isImportStatement(ParseTreeNode *node) { return node->symbol == GrammarSymbol::IMPORT_STATEMENT; }
 
+bool isTypeDeclaration(ParseTreeNode *node) { return node->symbol == GrammarSymbol::TYPE_DECLARATION; }
+
 bool isIgnored(ParseTreeNode *node) {
     return node->symbol == GrammarSymbol::SEMICOLON || node->symbol == GrammarSymbol::NEW_LINE ||
            node->symbol == GrammarSymbol::ENDOFFILE;
@@ -152,22 +154,22 @@ VariableNode *AstGenerator::createVariable(ParseTreeNode *node) {
 
 ast::DataType getDataType(ParseTreeNode *node) {
     if (node->token.type != Token::SIMPLE_DATA_TYPE) {
-        return ast::DataType::VOID;
+        return ast::DataType(node->token.content);
     }
 
     if (node->token.content == "bool") {
-        return ast::DataType::BOOL;
+        return ast::DataType(ast::SimpleDataType::BOOL);
     }
     if (node->token.content == "int") {
-        return ast::DataType::INT;
+        return ast::DataType(ast::SimpleDataType::INT);
     }
     if (node->token.content == "float") {
-        return ast::DataType::FLOAT;
+        return ast::DataType(ast::SimpleDataType::FLOAT);
     }
     if (node->token.content == "string") {
-        return ast::DataType::STRING;
+        return ast::DataType(ast::SimpleDataType::STRING);
     }
-    return ast::DataType::VOID;
+    return ast::DataType(ast::SimpleDataType::VOID);
 }
 
 VariableDefinitionNode *AstGenerator::createVariableDefinition(ParseTreeNode *node) {
@@ -280,7 +282,7 @@ FunctionNode *AstGenerator::createExternalFunction(ParseTreeNode *node) {
         // we don't have a return type (implicitly void)
     }
 
-    auto returnType = ast::DataType::VOID;
+    auto returnType = ast::DataType(ast::SimpleDataType::VOID);
     if (returnTypeNode != nullptr) {
         returnType = getDataType(returnTypeNode);
     }
@@ -317,7 +319,7 @@ FunctionNode *AstGenerator::createFunction(ParseTreeNode *node) {
         bodyNode = returnNode->children[1];
     }
 
-    auto returnType = ast::DataType::VOID;
+    auto returnType = ast::DataType(ast::SimpleDataType::VOID);
     if (returnTypeNode != nullptr) {
         returnType = getDataType(returnTypeNode);
     }
@@ -452,6 +454,45 @@ AstNode *AstGenerator::createImportStatement(ParseTreeNode *node) {
     return result;
 }
 
+TypeMemberNode *createTypeMember(ParseTreeNode *node) {
+    ParseTreeNode *definition = node->children[0];
+    ParseTreeNode *variableDefinition = definition->children[0];
+    ParseTreeNode *dataTypeNode = variableDefinition->children[0];
+    ast::DataType dataType = getDataType(dataTypeNode);
+    ParseTreeNode *identifier = variableDefinition->children[1];
+    std::string name = identifier->token.content;
+    return new TypeMemberNode(name, dataType);
+}
+
+AstNode *AstGenerator::createTypeDeclaration(ParseTreeNode *node) {
+    std::string name = node->children[1]->token.content;
+    auto result = new TypeDeclarationNode(name);
+
+    auto body = node->children[4];
+    if (body->children.size() < 2) {
+        return result;
+    }
+
+    auto members = std::vector<TypeMemberNode *>();
+    auto currentNode = body->children[0];
+    while (currentNode) {
+        unsigned long childrenSize = currentNode->children.size();
+        if (childrenSize == 1) {
+            auto member = createTypeMember(currentNode->children[0]);
+            members.push_back(member);
+            break;
+        } else if (childrenSize == 2) {
+            auto member = createTypeMember(currentNode->children[1]);
+            members.push_back(member);
+            currentNode = currentNode->children[0];
+        } else {
+            // FIXME log error
+        }
+    }
+    result->setMembers(members);
+    return result;
+}
+
 AstNode *AstGenerator::createAstFromParseTree(ParseTreeNode *node) {
     if (node == nullptr) {
         return nullptr;
@@ -511,6 +552,10 @@ AstNode *AstGenerator::createAstFromParseTree(ParseTreeNode *node) {
 
     if (isImportStatement(node)) {
         return createImportStatement(node);
+    }
+
+    if (isTypeDeclaration(node)) {
+        return createTypeDeclaration(node);
     }
 
     if (node->children.size() == 1 || node->symbol == GrammarSymbol::PROGRAM) {
