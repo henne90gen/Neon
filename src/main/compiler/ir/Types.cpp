@@ -112,15 +112,24 @@ void IrGenerator::visitStringNode(StringNode *node) {
 
 void IrGenerator::visitTypeDeclarationNode(TypeDeclarationNode *node) {
     auto functionDef = getOrCreateFunctionDefinition(node->getName(), node->getType(), {});
-    // TODO generate the constructor function body
     llvm::BasicBlock *BB = llvm::BasicBlock::Create(context, "entry-" + node->getName(), functionDef);
     builder.SetInsertPoint(BB);
 
+    auto complexType = getType(node->getType());
+    const auto dataLayout = llvmModule.getDataLayout();
+    auto typeSize = dataLayout.getTypeAllocSize(complexType);
+    auto fixedTypeSize = typeSize.getFixedSize();
+    std::vector<llvm::Value *> args = {llvm::ConstantInt::get(llvm::IntegerType::getInt64Ty(context), fixedTypeSize)};
+    auto result = createStdLibCall("malloc", args);
+    auto castedResult = builder.CreateBitOrPointerCast(result, complexType);
+
+    // TODO init members
     //    for (auto &member : node->getMembers()) {
     //        auto *memberType = getType(member->getType());
     //        auto value = createEntryBlockAlloca(memberType, member->getName());
-    //
     //        // store initial value
     //        builder.CreateStore(&member, value);
     //    }
+
+    builder.CreateRet(castedResult);
 }

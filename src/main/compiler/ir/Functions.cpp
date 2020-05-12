@@ -13,7 +13,7 @@ llvm::Function *IrGenerator::getOrCreateStdLibFunction(const std::string &functi
     if (functionName == "deleteString") {
         auto stringType = getStringType();
         std::vector<llvm::Type *> arguments = {stringType->getPointerTo()};
-        llvm::FunctionType *funcType = llvm::FunctionType::get(llvm::Type::getVoidTy(context), arguments, false);
+        auto funcType = llvm::FunctionType::get(llvm::Type::getVoidTy(context), arguments, false);
         return llvm::Function::Create(funcType, llvm::Function::ExternalLinkage, functionName, llvmModule);
     }
     if (functionName == "createString") {
@@ -21,20 +21,25 @@ llvm::Function *IrGenerator::getOrCreateStdLibFunction(const std::string &functi
         std::vector<llvm::Type *> arguments = {llvm::PointerType::getInt8PtrTy(context),
                                                llvm::IntegerType::getInt64Ty(context),
                                                llvm::IntegerType::getInt64Ty(context)};
-        llvm::FunctionType *funcType = llvm::FunctionType::get(stringType->getPointerTo(), arguments, false);
+        auto funcType = llvm::FunctionType::get(stringType->getPointerTo(), arguments, false);
         return llvm::Function::Create(funcType, llvm::Function::ExternalLinkage, functionName, llvmModule);
     }
     if (functionName == "appendString") {
         auto stringType = getStringType();
         std::vector<llvm::Type *> arguments = {stringType->getPointerTo(), stringType->getPointerTo(),
                                                stringType->getPointerTo()};
-        llvm::FunctionType *funcType = llvm::FunctionType::get(llvm::Type::getVoidTy(context), arguments, false);
+        auto funcType = llvm::FunctionType::get(llvm::Type::getVoidTy(context), arguments, false);
         return llvm::Function::Create(funcType, llvm::Function::ExternalLinkage, functionName, llvmModule);
     }
     if (functionName == "assignString") {
         auto stringType = getStringType();
         std::vector<llvm::Type *> arguments = {stringType->getPointerTo(), stringType->getPointerTo()};
-        llvm::FunctionType *funcType = llvm::FunctionType::get(llvm::Type::getVoidTy(context), arguments, false);
+        auto funcType = llvm::FunctionType::get(llvm::Type::getVoidTy(context), arguments, false);
+        return llvm::Function::Create(funcType, llvm::Function::ExternalLinkage, functionName, llvmModule);
+    }
+    if (functionName == "malloc") {
+        std::vector<llvm::Type *> arguments = {llvm::Type::getInt64Ty(context)};
+        auto funcType = llvm::FunctionType::get(llvm::Type::getInt8PtrTy(context), arguments, false);
         return llvm::Function::Create(funcType, llvm::Function::ExternalLinkage, functionName, llvmModule);
     }
     return nullptr;
