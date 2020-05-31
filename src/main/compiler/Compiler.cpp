@@ -92,8 +92,8 @@ Module *Compiler::loadModule(const std::string &moduleFileName) {
 void Compiler::generateIR() {
     auto functionResolver = FunctionResolver(program, moduleImportsMap, moduleFunctionsMap);
     for (const auto &module : program->modules) {
-        auto typeResolver =
-              TypeResolver(program, moduleNodeToTypeMap[module.second], moduleImportsMap, moduleComplexTypesMap);
+        auto typeResolver = TypeResolver(program, moduleNodeToTypeMap[module.second],
+                                         moduleNameToTypeMap[module.second], moduleImportsMap, moduleComplexTypesMap);
         auto generator = IrGenerator(module.second, functionResolver, typeResolver, verbose);
         generator.run();
     }
@@ -197,6 +197,8 @@ void Compiler::analyseTypes() {
     for (auto &entry : program->modules) {
         auto &module = entry.second;
         auto functionResolver = FunctionResolver(program, moduleImportsMap, moduleFunctionsMap);
-        moduleNodeToTypeMap[module] = TypeAnalyzer(module, functionResolver).run(module->root);
+        auto result = TypeAnalyzer(module, functionResolver).run(module->root);
+        moduleNodeToTypeMap[module] = result.first;
+        moduleNameToTypeMap[module] = result.second;
     }
 }

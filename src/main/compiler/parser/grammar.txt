@@ -111,9 +111,13 @@ call_args
     call_args , expression
 
 assignment
-    definition = expression
-    identifier = expression
-    identifier [ expression ] = expression
+    assignment_left = expression
+
+assignment_left
+    definition
+    identifier
+    array_access
+    member_access
 
 expression
     disjunction
@@ -157,6 +161,7 @@ factor
     array_access
     call
     identifier
+    member_access
     ( expression )
 
 array_access

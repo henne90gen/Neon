@@ -25,9 +25,8 @@ void printParseTreeTestCase(const ParseTreeNode *node, const std::string &progra
 
     std::cout << std::endl;
     std::cout << "SECTION(\"can handle __\") {" << std::endl;
-
     std::cout << "    std::vector<std::string> program = {\"" << programAsArrayString << "\"};" << std::endl;
-    std::cout << "    assertProgramCreatesParseTree(program, parseTree);" << std::endl;
+    std::cout << "    assertParserAccepts(program);" << std::endl;
     std::cout << "}" << std::endl;
     std::cout << std::endl;
 }
@@ -95,8 +94,10 @@ GrammarSymbol convertToGrammarSymbol(const Token &token) {
         return GrammarSymbol::OR;
     case Token::FUN:
         return GrammarSymbol::FUN;
-    case Token::VARIABLE_NAME:
+    case Token::IDENTIFIER:
         return GrammarSymbol::IDENTIFIER;
+    case Token::MEMBER_ACCESS:
+        return GrammarSymbol::MEMBER_ACCESS;
     case Token::SIMPLE_DATA_TYPE:
         return GrammarSymbol::DATA_TYPE;
     case Token::TYPE:
@@ -152,6 +153,15 @@ std::optional<StateTransition> Parser::getNextAction(int rowIndex, int columnInd
         currentAction = currentAction->next;
     }
 
+    if (verbose) {
+        currentAction = rootAction;
+        std::cout << "Available actions:" << std::endl;
+        while (currentAction != nullptr) {
+            std::cout << "    " << to_string(currentAction->type) << std::endl;
+            currentAction = currentAction->next;
+        }
+    }
+
     currentAction = rootAction;
     while (currentAction != nullptr) {
         if (currentAction->type == StateTransitionType::SHIFT) {
@@ -182,7 +192,7 @@ void Parser::executeShift(Token &token, std::vector<int> &states, StateTransitio
 
 void Parser::executeGoto(std::vector<int> &states, StateTransition &action) { states.push_back(action.nextStateIndex); }
 
-void Parser::executeReduce(std::vector<int> &states, StateTransition &action, std::vector<ParseTreeNode *> &nodes) {
+bool Parser::executeReduce(std::vector<int> &states, StateTransition &action, std::vector<ParseTreeNode *> &nodes) {
     auto newNode = new ParseTreeNode();
     newNode->symbol = action.symbol;
 
@@ -203,9 +213,10 @@ void Parser::executeReduce(std::vector<int> &states, StateTransition &action, st
     auto newActionOptional = getNextAction(rowIndex, columnIndex);
     if (!newActionOptional) {
         std::cout << "This should never happen " << rowIndex << "," << columnIndex << std::endl;
-        exit(1);
+        return true;
     }
     states.push_back(newActionOptional.value().nextStateIndex);
+    return false;
 }
 
 /**
@@ -247,6 +258,7 @@ ParseTreeNode *Parser::createParseTree() {
             printCurrentParseState(action, states, nodes);
         }
 
+        bool hasError = false;
         switch (action.type) {
         case SHIFT:
             executeShift(token, states, action, nodes);
@@ -255,7 +267,7 @@ ParseTreeNode *Parser::createParseTree() {
             executeGoto(states, action);
             break;
         case REDUCE: {
-            executeReduce(states, action, nodes);
+            hasError = executeReduce(states, action, nodes);
         } break;
         case ACCEPT: {
             auto root = new ParseTreeNode();
@@ -271,6 +283,9 @@ ParseTreeNode *Parser::createParseTree() {
         case ERROR:
             std::cout << "ERROR!" << std::endl;
             return nullptr;
+        }
+        if (hasError) {
+            break;
         }
     }
 

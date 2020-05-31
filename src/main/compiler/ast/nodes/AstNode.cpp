@@ -30,6 +30,12 @@ std::string to_string(ast::NodeType type) {
         return "ast::NodeType::FOR_STATEMENT";
     case ast::NodeType::IMPORT:
         return "ast::NodeType::IMPORT";
+    case ast::NodeType::TYPE_DECLARATION:
+        return "ast::NodeType::TYPE_DECLARATION";
+    case ast::NodeType::TYPE_MEMBER:
+        return "ast::NodeType::TYPE_MEMBER";
+    case ast::NodeType::MEMBER_ACCESS:
+        return "ast::NodeType::MEMBER_ACCESS";
     default:
         std::cout << "Not implemented (AstNode.cpp:to_string)" << std::endl;
         exit(1);

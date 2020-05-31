@@ -67,6 +67,17 @@ This makes it possible to call functions that are contained in the externally li
         - provides functions that do not exist in available C libraries
         - for example conversion functions between the primitive data types
 
+### Complex Types
+
+- complex types are types that are built up from other types
+- for now only primitive types (int, float, bool, string) are allowed inside complex types
+- can be declared like so:
+```
+type MyType {
+   int i
+}
+```
+
 ## TODO / Ideas
 
 -   complex types

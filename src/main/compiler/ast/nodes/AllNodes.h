@@ -8,6 +8,7 @@
 #include "IfStatementNode.h"
 #include "ImportNode.h"
 #include "LiteralNodes.h"
+#include "MemberAccessNode.h"
 #include "SequenceNode.h"
 #include "StatementNode.h"
 #include "TypeDeclarationNode.h"

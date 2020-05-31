@@ -113,16 +113,19 @@ TEST_CASE("Lexer") {
               {"else", Token::ELSE},
               {"for", Token::FOR},
               {"import", Token::IMPORT},
+              {"abc.abc", Token::MEMBER_ACCESS},
+              {"abc.abc.abc", Token::MEMBER_ACCESS},
+              {"abc.abc.abc.abc", Token::MEMBER_ACCESS},
         };
         assertTokensCanBeLexed(tokens);
     }
 
     SECTION("can handle variable names") {
         std::unordered_map<std::string, Token::TokenType> tokens = {
-              {"helloWorld", Token::VARIABLE_NAME},
-              {"hello123World", Token::VARIABLE_NAME},
-              {"_helloWorld", Token::VARIABLE_NAME},
-              {"hello_World", Token::VARIABLE_NAME},
+              {"helloWorld", Token::IDENTIFIER},
+              {"hello123World", Token::IDENTIFIER},
+              {"_helloWorld", Token::IDENTIFIER},
+              {"hello_World", Token::IDENTIFIER},
         };
         assertTokensCanBeLexed(tokens);
     }

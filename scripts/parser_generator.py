@@ -34,7 +34,7 @@ SYMBOL_TO_ENUM_MAPPING = {
     '<=': 'LESS_EQUALS',
     '>=': 'GREATER_EQUALS',
     '==': 'DOUBLE_EQUALS',
-    '!=': 'NOT_EQUALS',
+    '!=': 'NOT_EQUALS'
 }
 
 
@@ -502,8 +502,8 @@ std::string to_string(const StateTransition &action) {
     } else if (action.type == StateTransitionType::REDUCE) {
         info = "REDUCE";
         info += ":" + to_string(action.symbol) + "->";
-        for (auto rule : action.rule) {
-            info += to_string(rule) + " ";
+        for (int i = 0; i < action.numRules; i++) {
+            info += to_string(action.rule[i]) + " ";
         }
         if (info[info.length() - 1] == ' ') {
             info = info.substr(0, info.length() - 1);

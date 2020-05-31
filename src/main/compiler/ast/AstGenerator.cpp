@@ -43,6 +43,8 @@ bool isImportStatement(ParseTreeNode *node) { return node->symbol == GrammarSymb
 
 bool isTypeDeclaration(ParseTreeNode *node) { return node->symbol == GrammarSymbol::TYPE_DECLARATION; }
 
+bool isMemberAccess(ParseTreeNode *node) { return node->symbol == GrammarSymbol::MEMBER_ACCESS; }
+
 bool isIgnored(ParseTreeNode *node) {
     return node->symbol == GrammarSymbol::SEMICOLON || node->symbol == GrammarSymbol::NEW_LINE ||
            node->symbol == GrammarSymbol::ENDOFFILE;
@@ -342,19 +344,16 @@ FunctionNode *AstGenerator::createFunction(ParseTreeNode *node) {
 AssignmentNode *AstGenerator::createAssignment(ParseTreeNode *node) {
     AstNode *left = nullptr;
     AstNode *right = nullptr;
-    if (node->children.size() == 3) {
-        if (node->children[0]->symbol == GrammarSymbol::DEFINITION) {
-            left = createVariableDefinition(node->children[0]);
-        } else {
-            left = createVariable(node->children[0]);
-        }
+    auto assignmentLeft = node->children[0];
+    if (assignmentLeft->children.size() == 1) {
+        left = createAstFromParseTree(assignmentLeft->children[0]);
         right = createAstFromParseTree(node->children[2]);
-    } else if (node->children.size() == 6) {
-        left = new VariableNode(node->children[0]->token.content);
-        auto arrayIndex = createAstFromParseTree(node->children[2]);
+    } else if (assignmentLeft->children.size() == 4) {
+        left = new VariableNode(assignmentLeft->children[0]->token.content);
+        auto arrayIndex = createAstFromParseTree(assignmentLeft->children[2]);
         auto leftVariableNode = dynamic_cast<VariableNode *>(left);
         leftVariableNode->setArrayIndex(arrayIndex);
-        right = createAstFromParseTree(node->children[5]);
+        right = createAstFromParseTree(node->children[2]);
     } else {
         std::cout << "Invalid assignment node" << std::endl;
         return nullptr;
@@ -489,8 +488,27 @@ AstNode *AstGenerator::createTypeDeclaration(ParseTreeNode *node) {
             // FIXME log error
         }
     }
+
+    // we collected the members in reverse order
+    std::reverse(members.begin(), members.end());
     result->setMembers(members);
+
     return result;
+}
+
+AstNode *AstGenerator::createMemberAccess(ParseTreeNode *node) {
+    std::string currentStr;
+    std::vector<std::string> parts = {};
+    for (char c : node->token.content) {
+        if (c == '.') {
+            parts.push_back(currentStr);
+            currentStr = "";
+        } else {
+            currentStr += c;
+        }
+    }
+    parts.push_back(currentStr);
+    return new MemberAccessNode(parts);
 }
 
 AstNode *AstGenerator::createAstFromParseTree(ParseTreeNode *node) {
@@ -556,6 +574,10 @@ AstNode *AstGenerator::createAstFromParseTree(ParseTreeNode *node) {
 
     if (isTypeDeclaration(node)) {
         return createTypeDeclaration(node);
+    }
+
+    if (isMemberAccess(node)) {
+        return createMemberAccess(node);
     }
 
     if (node->children.size() == 1 || node->symbol == GrammarSymbol::PROGRAM) {

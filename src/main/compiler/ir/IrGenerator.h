@@ -32,6 +32,7 @@ class IrGenerator : public AstVisitor {
     void visitFunctionNode(FunctionNode *node) override;
     void visitIfStatementNode(IfStatementNode *node) override;
     void visitIntegerNode(IntegerNode *node) override;
+    void visitMemberAccessNode(MemberAccessNode *node) override;
     void visitSequenceNode(SequenceNode *node) override;
     void visitStatementNode(StatementNode *node) override;
     void visitTypeDeclarationNode(TypeDeclarationNode *node) override;
@@ -76,7 +77,7 @@ class IrGenerator : public AstVisitor {
 
     void logError(const std::string &msg);
     llvm::Type *getType(const ast::DataType &type);
-    llvm::Function *getOrCreateFunctionDefinition(const std::string &name, const ast::DataType& returnType,
+    llvm::Function *getOrCreateFunctionDefinition(const std::string &name, const ast::DataType &returnType,
                                                   const std::vector<FunctionArgument> &arguments);
     llvm::Function *getOrCreateFunctionDefinition(const FunctionSignature &signature);
     llvm::StructType *getOrCreateComplexType(const ComplexType &type);

@@ -122,7 +122,13 @@ Token Lexer::getToken() {
             return oneCharToken.value();
         }
 
-        auto variableNameToken = matchRegex("^[a-zA-Z_][_a-zA-Z0-9]*", Token::VARIABLE_NAME);
+        auto memberAccessToken = matchRegex("^[a-zA-Z_][_a-zA-Z0-9]*(\\.[a-zA-Z_][_a-zA-Z0-9]*)+", Token::MEMBER_ACCESS);
+        if (memberAccessToken.has_value()) {
+            currentWord = currentWord.substr(memberAccessToken.value().content.length(), currentWord.length() - 1);
+            return memberAccessToken.value();
+        }
+
+        auto variableNameToken = matchRegex("^[a-zA-Z_][_a-zA-Z0-9]*", Token::IDENTIFIER);
         if (variableNameToken.has_value()) {
             currentWord = currentWord.substr(variableNameToken.value().content.length(), currentWord.length() - 1);
             return variableNameToken.value();

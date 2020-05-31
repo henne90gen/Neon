@@ -2,7 +2,6 @@
 
 #include <iostream>
 
-#include "../../../Module.h"
 #include "../../../Utils.h"
 #include "../nodes/AllNodes.h"
 
@@ -113,6 +112,19 @@ void AstTestCasePrinter::visitForStatementNode(ForStatementNode *node) {
 
 void AstTestCasePrinter::visitImportNode(ImportNode *node) { printNode(node); }
 
+void AstTestCasePrinter::visitTypeDeclarationNode(TypeDeclarationNode *node) {
+    printNode(node);
+    indentation++;
+    for (const auto &member : node->getMembers()) {
+        member->accept(this);
+    }
+    indentation--;
+}
+
+void AstTestCasePrinter::visitTypeMemberNode(TypeMemberNode *node) { printNode(node); }
+
+void AstTestCasePrinter::visitMemberAccessNode(MemberAccessNode *node) { printNode(node); }
+
 void AstTestCasePrinter::run() {
     if (module->root == nullptr) {
         std::cerr << "Could not print AST test case (nullptr)." << std::endl;
@@ -121,7 +133,7 @@ void AstTestCasePrinter::run() {
 
     std::cout << std::endl;
     const auto &programStr = module->toArrayString();
-    std::cout << "SECTION(\"can handle __'\") {" << std::endl;
+    std::cout << "SECTION(\"can handle __\") {" << std::endl;
     std::cout << "    std::vector<AstNodeSpec> spec = {" << std::endl;
 
     module->root->accept(this);

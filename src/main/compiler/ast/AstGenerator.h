@@ -30,4 +30,5 @@ class AstGenerator {
     IfStatementNode *createIfStatement(ParseTreeNode *node);
     static AstNode *createImportStatement(ParseTreeNode *node);
     static AstNode *createTypeDeclaration(ParseTreeNode *node);
+    static AstNode *createMemberAccess(ParseTreeNode *node);
 };

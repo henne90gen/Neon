@@ -189,6 +189,13 @@ void AstPrinter::visitTypeMemberNode(TypeMemberNode *node) {
               << std::endl;
 }
 
+void AstPrinter::visitMemberAccessNode(MemberAccessNode *node) {
+    indent(indentation);
+    // TODO print all chained member accesses
+    std::cout << "MemberAccessNode(name='" << node->getVariableName() << "', members='"
+              << "')" << std::endl;
+}
+
 void AstPrinter::run() {
     if (module->root == nullptr) {
         std::cerr << "Could not print AST (nullptr)." << std::endl;

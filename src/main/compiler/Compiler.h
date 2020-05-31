@@ -15,6 +15,7 @@ class Compiler {
     std::unordered_map<Module *, std::vector<std::string>> moduleImportsMap = {};
     std::unordered_map<Module *, std::vector<FunctionSignature>> moduleFunctionsMap = {};
     std::unordered_map<Module *, std::unordered_map<AstNode *, ast::DataType>> moduleNodeToTypeMap;
+    std::unordered_map<Module *, std::unordered_map<std::string, ast::DataType>> moduleNameToTypeMap;
     std::unordered_map<Module *, std::vector<ComplexType>> moduleComplexTypesMap;
 
     Module *loadModule(const std::string &moduleFileName);

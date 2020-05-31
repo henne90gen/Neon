@@ -17,6 +17,7 @@ class AstPrinter : public AstVisitor {
     void visitFunctionNode(FunctionNode *node) override;
     void visitIfStatementNode(IfStatementNode *node) override;
     void visitIntegerNode(IntegerNode *node) override;
+    void visitMemberAccessNode(MemberAccessNode *node) override;
     void visitSequenceNode(SequenceNode *node) override;
     void visitStatementNode(StatementNode *node) override;
     void visitTypeDeclarationNode(TypeDeclarationNode *node) override;

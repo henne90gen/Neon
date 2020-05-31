@@ -64,7 +64,7 @@ void IrGenerator::visitAssignmentNode(AssignmentNode *node) {
         // generate variable definition
         node->getLeft()->accept(this);
         dest = nodesToValues[node->getLeft()];
-    } else {
+    } else if (node->getLeft()->getAstNodeType() == ast::NodeType::VARIABLE) {
         // lookup the variable to save into
         auto variable = dynamic_cast<VariableNode *>(node->getLeft());
         dest = findVariable(variable->getName());
@@ -72,17 +72,26 @@ void IrGenerator::visitAssignmentNode(AssignmentNode *node) {
             variable->getArrayIndex()->accept(this);
 
             // This first accesses the array
-            llvm::Value *indexOfArray = llvm::ConstantInt::get(llvm::Type::getInt64Ty(context), 0);
-            // and then indexes into the array
+            llvm::Value *indexOfArray = llvm::ConstantInt::get(llvm::Type::getInt32Ty(context), 0);
+            // and then indexes into the array, for multi dimensional array access
             llvm::Value *indexInsideArray = nodesToValues[variable->getArrayIndex()];
-            // for multi dimensional array access
             std::vector<llvm::Value *> indices = {indexOfArray, indexInsideArray};
             dest = builder.CreateInBoundsGEP(dest, indices);
         }
+    } else if (node->getLeft()->getAstNodeType() == ast::NodeType::MEMBER_ACCESS) {
+        // TODO this is a hack!
+        //  setting currentDestination to 1 is used as a flag to signal to visitMemberAccessNode that we are going to write to its result
+        currentDestination = reinterpret_cast<llvm::Value *>(1);
+        node->getLeft()->accept(this);
+        dest = nodesToValues[node->getLeft()];
+    } else {
+        return logError("Could not handle assignment to " + to_string(node->getLeft()->getAstNodeType()));
     }
-    currentDestination = dest;
 
+    currentDestination = dest;
     node->getRight()->accept(this);
+    currentDestination = nullptr;
+
     llvm::Value *src = nodesToValues[node->getRight()];
     if (src == nullptr || dest == nullptr) {
         return logError("Could not create assignment.");
@@ -101,4 +110,53 @@ void IrGenerator::visitAssignmentNode(AssignmentNode *node) {
     }
 
     LOG("Exit Assignment")
+}
+
+void IrGenerator::visitMemberAccessNode(MemberAccessNode *node) {
+    // TODO add nested member access
+
+    LOG("Enter MemberAccess")
+
+    auto memberAccesses = node->getMemberAccesses();
+    if (memberAccesses.empty()) {
+        return logError("Could not create member access, since there are no members.");
+    }
+
+    const ast::DataType baseType = typeResolver.getTypeOf(node->getVariableName());
+
+    auto resolveResult = typeResolver.resolveType(module, baseType);
+    if (!resolveResult.typeExists) {
+        return logError("Could not resolve type: " + to_string(baseType));
+    }
+
+    int memberIndex = -1;
+    for (int i = 0; i < resolveResult.complexType.members.size(); i++) {
+        if (resolveResult.complexType.members[i].name == memberAccesses[0]) {
+            memberIndex = i;
+            break;
+        }
+    }
+    if (memberIndex == -1) {
+        return logError("Could not find member: " + memberAccesses[0]);
+    }
+
+    auto llvmBaseType = getType(baseType);
+    auto elementType = llvmBaseType->getPointerElementType();
+
+    auto baseVariable = findVariable(node->getVariableName());
+    baseVariable = builder.CreateLoad(baseVariable);
+
+    llvm::Value *indexOfBaseVariable = llvm::ConstantInt::get(llvm::Type::getInt32Ty(context), 0);
+    llvm::Value *indexOfMember = llvm::ConstantInt::get(llvm::Type::getInt32Ty(context), memberIndex);
+    std::vector<llvm::Value *> indices = {indexOfBaseVariable, indexOfMember};
+
+    auto result = builder.CreateInBoundsGEP(elementType, baseVariable, indices, "memberAccess");
+
+    if (reinterpret_cast<long>(currentDestination) != 1) {
+        result = builder.CreateLoad(result, "memberAccessLoad");
+    }
+
+    nodesToValues[node] = result;
+
+    LOG("Exit MemberAccess")
 }

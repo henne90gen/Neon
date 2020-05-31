@@ -18,8 +18,11 @@ class AstTestCasePrinter : public AstVisitor {
     void visitIfStatementNode(IfStatementNode *node) override;
     void visitImportNode(ImportNode *node) override;
     void visitIntegerNode(IntegerNode *node) override;
+    void visitMemberAccessNode(MemberAccessNode *node) override;
     void visitSequenceNode(SequenceNode *node) override;
     void visitStatementNode(StatementNode *node) override;
+    void visitTypeDeclarationNode(TypeDeclarationNode *node) override;
+    void visitTypeMemberNode(TypeMemberNode *node) override;
     void visitUnaryOperationNode(UnaryOperationNode *node) override;
     void visitVariableNode(VariableNode *node) override;
     void visitVariableDefinitionNode(VariableDefinitionNode *node) override;

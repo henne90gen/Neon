@@ -10,6 +10,7 @@ class FunctionNode;
 class IfStatementNode;
 class ImportNode;
 class IntegerNode;
+class MemberAccessNode;
 class SequenceNode;
 class StatementNode;
 class StringNode;
@@ -31,6 +32,7 @@ class AstVisitor {
     virtual void visitIfStatementNode(IfStatementNode *node){};
     virtual void visitImportNode(ImportNode *node){};
     virtual void visitIntegerNode(IntegerNode *node){};
+    virtual void visitMemberAccessNode(MemberAccessNode *node){};
     virtual void visitSequenceNode(SequenceNode *node){};
     virtual void visitStatementNode(StatementNode *node){};
     virtual void visitStringNode(StringNode *node){};

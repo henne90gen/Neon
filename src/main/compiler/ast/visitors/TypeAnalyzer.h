@@ -19,6 +19,7 @@ class TypeAnalyzer : public AstVisitor {
     void visitFunctionNode(FunctionNode *node) override;
     void visitIfStatementNode(IfStatementNode *node) override;
     void visitIntegerNode(IntegerNode *node) override;
+    void visitMemberAccessNode(MemberAccessNode *node) override;
     void visitSequenceNode(SequenceNode *node) override;
     void visitStatementNode(StatementNode *node) override;
     void visitStringNode(StringNode *node) override;
@@ -27,12 +28,14 @@ class TypeAnalyzer : public AstVisitor {
     void visitVariableNode(VariableNode *node) override;
     void visitVariableDefinitionNode(VariableDefinitionNode *node) override;
 
-    std::unordered_map<AstNode *, ast::DataType> run(AstNode *root);
+    std::pair<std::unordered_map<AstNode *, ast::DataType>, std::unordered_map<std::string, ast::DataType>>
+    run(AstNode *root);
 
   private:
     Module *module;
     const FunctionResolver &functionResolver;
 
-    std::unordered_map<AstNode *, ast::DataType> typeMap = {};
-    std::unordered_map<std::string, ast::DataType> variableMap = {};
+    std::unordered_map<AstNode *, ast::DataType> nodeTypeMap = {};
+    std::unordered_map<std::string, ast::DataType> variableTypeMap = {};
+    std::unordered_map<ast::DataType, ComplexType> complexTypeMap = {};
 };

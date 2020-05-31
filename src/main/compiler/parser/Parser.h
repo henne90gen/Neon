@@ -25,7 +25,7 @@ class Parser {
 
     static void executeGoto(std::vector<int> &states, StateTransition &action);
 
-    void executeReduce(std::vector<int> &states, StateTransition &action, std::vector<ParseTreeNode *> &nodes);
+    bool executeReduce(std::vector<int> &states, StateTransition &action, std::vector<ParseTreeNode *> &nodes);
 
     std::optional<StateTransition> getNextAction(int rowIndex, int columnIndex);
 };

@@ -20,7 +20,7 @@ bool tokenHasSpaceBeforeIt(const Token *prev, const Token &t, const Token * /*ne
     bool isString = t.type == Token::STRING;
     bool isStringAndNotAfterParenthesisAndNotAfterBracket = isString && !prevTokenIsParenthesis && !prevTokenIsBracket;
 
-    bool isVariable = t.type == Token::VARIABLE_NAME;
+    bool isVariable = t.type == Token::IDENTIFIER;
     bool isVariableAndNotAfterParenthesis = isVariable && !prevTokenIsParenthesis;
 
     bool isCurlyBrace = t.type == Token::LEFT_CURLY_BRACE || t.type == Token::RIGHT_CURLY_BRACE;
@@ -39,7 +39,7 @@ bool tokenHasSpaceBeforeIt(const Token *prev, const Token &t, const Token * /*ne
            isParenthesisAndAfterUnaryOperator || isSimpleDataTypeAndNotAfterParenthesis ||
            isStringAndNotAfterParenthesisAndNotAfterBracket || t.type == Token::NEW_LINE || t.type == Token::BOOLEAN ||
            t.type == Token::SINGLE_EQUALS || t.type == Token::DOUBLE_EQUALS || t.type == Token::ELSE ||
-           t.type == Token::NOT || t.type == Token::FUN || t.type == Token::RETURN;
+           t.type == Token::NOT || t.type == Token::FUN || t.type == Token::RETURN || t.type == Token::MEMBER_ACCESS;
 }
 
 std::string Module::toString() const {
@@ -77,10 +77,10 @@ std::string Module::toEscapedString() const {
 
 std::string Module::toArrayString() const {
     std::string result = toEscapedString();
+    // TODO This can't handle two line breaks
     result = replace(result, " \n ", "\", \"");
+    result = replace(result, "\n ", "");
     return result;
 }
 
-CodeProvider *Module::getCodeProvider() {
-    return codeProvider;
-}
+CodeProvider *Module::getCodeProvider() { return codeProvider; }

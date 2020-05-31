@@ -79,4 +79,10 @@ TEST_CASE("Parser Basics") {
         std::vector<std::string> program = {"string s = \"Hello World!\""};
         assertParserAccepts(program);
     }
+
+    SECTION("can handle complex types") {
+        std::vector<std::string> program = {"type MyType {",       "int t",   "}",          "fun main() int {",
+                                            "MyType t = MyType()", "t.i = 5", "return t.i", "}"};
+        assertParserAccepts(program);
+    }
 }

@@ -38,6 +38,7 @@ enum NodeType {
     IMPORT,
     TYPE_DECLARATION,
     TYPE_MEMBER,
+    MEMBER_ACCESS,
 };
 
 enum BinaryOperationType {
@@ -62,3 +63,11 @@ SimpleDataType toSimpleDataType(const ast::DataType &type);
 std::string to_string(const ast::DataType &dataType);
 
 std::string to_string(ast::BinaryOperationType operationType);
+
+namespace std {
+
+template <> struct hash<ast::DataType> {
+    std::size_t operator()(const ast::DataType &k) const { return hash<string>()(k.typeName); }
+};
+
+} // namespace std

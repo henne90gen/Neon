@@ -8,6 +8,14 @@ ast::DataType TypeResolver::getTypeOf(AstNode *node) {
     return itr->second;
 }
 
+ast::DataType TypeResolver::getTypeOf(const std::string &variableName) {
+    auto itr = nameToTypeMap.find(variableName);
+    if (itr == nameToTypeMap.end()) {
+        return ast::DataType(ast::SimpleDataType::VOID);
+    }
+    return itr->second;
+}
+
 TypeResolveResult TypeResolver::resolveType(Module *module, const ast::DataType &type) const {
     TypeResolveResult result = {false};
 

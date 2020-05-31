@@ -5,5 +5,6 @@ type MyType {
 
 fun main() int {
     MyType t = MyType()
-    return 0
+    t.i = 5
+    return t.i
 }

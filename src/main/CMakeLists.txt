@@ -20,6 +20,7 @@ add_library(NeonCompiler
         compiler/ast/nodes/IfStatementNode.cpp
         compiler/ast/nodes/ImportNode.cpp
         compiler/ast/nodes/LiteralNodes.cpp
+        compiler/ast/nodes/MemberAccessNode.cpp
         compiler/ast/nodes/SequenceNode.cpp
         compiler/ast/nodes/StatementNode.cpp
         compiler/ast/nodes/TypeDeclarationNode.cpp

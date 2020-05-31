@@ -142,6 +142,27 @@ SimpleTree *createSimpleFromImport(ImportNode *node) {
     return result;
 }
 
+SimpleTree *createSimpleFromTypeDeclaration(TypeDeclarationNode *node) {
+    auto result = new SimpleTree();
+    result->type = node->getAstNodeType();
+    for (const auto &member : node->getMembers()) {
+        result->children.push_back(createSimpleFromAst(member));
+    }
+    return result;
+}
+
+SimpleTree *createSimpleFromTypeMember(TypeMemberNode *node) {
+    auto result = new SimpleTree();
+    result->type = node->getAstNodeType();
+    return result;
+}
+
+SimpleTree *createSimpleFromMemberAccess(MemberAccessNode *node) {
+    auto result = new SimpleTree();
+    result->type = node->getAstNodeType();
+    return result;
+}
+
 SimpleTree *createSimpleFromAst(AstNode *node) {
     if (node == nullptr) {
         return nullptr;
@@ -173,6 +194,12 @@ SimpleTree *createSimpleFromAst(AstNode *node) {
         return createSimpleFromFor((ForStatementNode *)node);
     case ast::NodeType::IMPORT:
         return createSimpleFromImport((ImportNode *)node);
+    case ast::NodeType::TYPE_DECLARATION:
+        return createSimpleFromTypeDeclaration((TypeDeclarationNode *)node);
+    case ast::NodeType::TYPE_MEMBER:
+        return createSimpleFromTypeMember((TypeMemberNode *)node);
+    case ast::NodeType::MEMBER_ACCESS:
+        return createSimpleFromMemberAccess((MemberAccessNode *)node);
     default:
         std::cerr << "Could not create simple helper tree node for " << to_string(node->getAstNodeType()) << std::endl;
         exit(1);
@@ -186,7 +213,7 @@ void assertProgramCreatesAst(const std::vector<std::string> &program, std::vecto
     CodeProvider *codeProvider = new StringCodeProvider(program, true);
     auto context = new llvm::LLVMContext();
     auto prog = new Module("test.ne", *context);
-    auto lexer = Lexer(codeProvider, prog);
+    auto lexer = Lexer(codeProvider);
     Parser parser(lexer, prog->tokens, false);
     ParseTreeNode *parseTree = parser.createParseTree();
     auto astGenerator = AstGenerator(prog);
