@@ -7,7 +7,7 @@
 class Compiler {
   public:
     Compiler(Program *program, bool verbose) : program(program), verbose(verbose) {}
-    void run();
+    bool run();
 
   private:
     Program *program;

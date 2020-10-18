@@ -18,3 +18,4 @@ struct SimpleTree {
 SimpleTree *createSimpleFromAst(AstNode *node);
 
 void assertProgramCreatesAst(const std::vector<std::string> &program, std::vector<AstNodeSpec> &spec);
+void assertProgramCreatesAstWithSimpleParser(const std::vector<std::string> &program, std::vector<AstNodeSpec> &spec);

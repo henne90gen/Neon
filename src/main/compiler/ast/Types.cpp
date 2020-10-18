@@ -44,6 +44,27 @@ std::string to_string(ast::BinaryOperationType operationType) {
         return "GREATER_THAN";
     }
     std::cerr << "Could not convert " << operationType << " to string." << std::endl;
+    exit(1);
+}
+
+ast::SimpleDataType from_string(const std::string &type) {
+    if (type == "int") {
+        return ast::SimpleDataType::INT;
+    }
+    if (type == "float") {
+        return ast::SimpleDataType::FLOAT;
+    }
+    if (type == "bool") {
+        return ast::SimpleDataType::BOOL;
+    }
+    if (type == "void") {
+        return ast::SimpleDataType::VOID;
+    }
+    if (type == "string") {
+        return ast::SimpleDataType::STRING;
+    }
+    std::cerr << "Could not convert " << type << " to a simple data type." << std::endl;
+    exit(1);
 }
 
 bool ast::isSimpleDataType(const ast::DataType &type) {

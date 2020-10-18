@@ -4,6 +4,7 @@
 
 class VariableDefinitionNode : public AstNode {
   public:
+    explicit VariableDefinitionNode(std::string name, ast::DataType type);
     explicit VariableDefinitionNode(std::string name, ast::DataType type, unsigned int arraySize);
 
     void accept(AstVisitor *v) override;

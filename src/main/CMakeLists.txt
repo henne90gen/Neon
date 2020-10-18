@@ -45,6 +45,7 @@ add_library(NeonCompiler
         compiler/FunctionResolver.cpp
         compiler/lexer/Lexer.cpp
         compiler/parser/Parser.cpp
+        compiler/simple-parser/SimpleParser.cpp
         compiler/lexer/Token.cpp
         compiler/TypeResolver.cpp
         Linker.cpp

@@ -1,17 +1,19 @@
 #include "AstTestHelper.h"
 
 #include "compiler/ast/nodes/AllNodes.h"
+#include "compiler/simple-parser/SimpleParser.h"
+#include "compiler/ast/visitors/AstPrinter.h"
 
 #include <catch2/catch.hpp>
 #include <iostream>
 
-void assertAstsAreEqual(SimpleTree *expected, SimpleTree *actual) {
+void assertAstsAreEqual(SimpleTree *expected, SimpleTree *actual, int level) {
     REQUIRE(actual != nullptr);
-    INFO(to_string(expected->type) + " | " + to_string(actual->type));
+    INFO(std::to_string(level) + ": " + to_string(expected->type) + " | " + to_string(actual->type));
     REQUIRE(expected->type == actual->type);
     REQUIRE(expected->children.size() == actual->children.size());
     for (unsigned long i = 0; i < expected->children.size(); i++) {
-        assertAstsAreEqual(expected->children[i], actual->children[i]);
+        assertAstsAreEqual(expected->children[i], actual->children[i], level + 1);
     }
 }
 
@@ -219,5 +221,24 @@ void assertProgramCreatesAst(const std::vector<std::string> &program, std::vecto
     auto astGenerator = AstGenerator(prog);
     astGenerator.run(parseTree);
     auto actual = prog->root;
-    assertAstsAreEqual(expected, createSimpleFromAst(actual));
+    assertAstsAreEqual(expected, createSimpleFromAst(actual), 0);
+}
+
+void assertProgramCreatesAstWithSimpleParser(const std::vector<std::string> &program, std::vector<AstNodeSpec> &spec) {
+    int index = 0;
+    auto expected = createSimpleFromSpecification(spec, index);
+    CodeProvider *codeProvider = new StringCodeProvider(program, true);
+    auto context = new llvm::LLVMContext();
+    auto prog = new Module("test.ne", *context);
+    auto lexer = Lexer(codeProvider);
+
+    SimpleParser parser(lexer, prog, false);
+    parser.run();
+
+    auto astPrinter = AstPrinter(prog);
+    astPrinter.run();
+
+    auto actual = prog->root;
+
+    assertAstsAreEqual(expected, createSimpleFromAst(actual), 0);
 }

@@ -2,6 +2,9 @@
 
 #include "../AstVisitor.h"
 
+VariableDefinitionNode::VariableDefinitionNode(std::string name, ast::DataType type)
+    : AstNode(ast::NodeType::VARIABLE_DEFINITION), name(std::move(name)), type(type), arraySize(0) {}
+
 VariableDefinitionNode::VariableDefinitionNode(std::string name, ast::DataType type, unsigned int arraySize)
     : AstNode(ast::NodeType::VARIABLE_DEFINITION), name(std::move(name)), type(type), arraySize(arraySize) {}
 

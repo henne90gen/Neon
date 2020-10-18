@@ -8,7 +8,7 @@ class Linker {
   public:
     explicit Linker(const Program *program) : program(program) {}
 
-    void link();
+    bool link();
 
   private:
     const Program *program;

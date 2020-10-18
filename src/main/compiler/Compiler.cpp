@@ -9,6 +9,7 @@
 #include "ast/visitors/TypeAnalyzer.h"
 #include "ast/visitors/TypeFinder.h"
 #include "ir/IrGenerator.h"
+#include "simple-parser/SimpleParser.h"
 
 #include <iostream>
 #include <string>
@@ -23,7 +24,7 @@
 #include <llvm/Target/TargetOptions.h>
 #include <llvm/Transforms/Utils/Cloning.h>
 
-void Compiler::run() {
+bool Compiler::run() {
     std::string entryPoint = std::filesystem::absolute(std::filesystem::path(program->entryPoint)).string();
     std::vector<std::string> uncompiledModules = {entryPoint};
     while (!uncompiledModules.empty()) {
@@ -38,6 +39,10 @@ void Compiler::run() {
         }
 
         auto module = loadModule(moduleFileName);
+        if (module->root == nullptr) {
+            std::cout << "Failed to compile module " << moduleFileName << std::endl;
+            return true;
+        }
         program->modules[moduleFileName] = module;
 
         for (auto &importedModule : moduleImportsMap[module]) {
@@ -52,14 +57,20 @@ void Compiler::run() {
     writeModuleToObjectFile();
 
     std::cout << "Finished compilation." << std::endl;
+    return false;
 }
 
 Module *Compiler::loadModule(const std::string &moduleFileName) {
     auto module = new Module(moduleFileName, program->llvmContext);
 
     Lexer lexer(module->getCodeProvider(), verbose);
-    Parser parser(lexer, module->tokens, verbose);
 
+#define USE_SIMPLE_PARSER 1
+#if USE_SIMPLE_PARSER
+    SimpleParser parser(lexer, module, verbose);
+    parser.run();
+#else
+    Parser parser(lexer, module->tokens, verbose);
     auto parseTreeRoot = parser.createParseTree();
     if (verbose) {
         printParseTree(parseTreeRoot);
@@ -68,6 +79,7 @@ Module *Compiler::loadModule(const std::string &moduleFileName) {
 
     auto astGenerator = AstGenerator(module);
     astGenerator.run(parseTreeRoot);
+#endif
 
     if (module->root == nullptr) {
         std::cerr << "Could not create AST" << std::endl;

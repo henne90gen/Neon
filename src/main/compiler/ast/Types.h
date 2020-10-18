@@ -8,6 +8,7 @@ enum SimpleDataType { VOID, BOOL, INT, FLOAT, STRING };
 }
 
 std::string to_string(ast::SimpleDataType type);
+ast::SimpleDataType from_string(const std::string &type);
 
 namespace ast {
 

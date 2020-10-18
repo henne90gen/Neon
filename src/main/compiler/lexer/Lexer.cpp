@@ -83,7 +83,7 @@ Token Lexer::getToken() {
 
         currentWord = removeLeadingWhitespace(currentWord);
         if (verbose) {
-            std::cout << "Current word: '" << currentWord << "'" << std::endl;
+            // std::cout << "Current word: '" << currentWord << "'" << std::endl;
         }
 
         auto floatToken = matchRegex("^[0-9]+\\.[0-9]+", Token::FLOAT);
@@ -122,7 +122,8 @@ Token Lexer::getToken() {
             return oneCharToken.value();
         }
 
-        auto memberAccessToken = matchRegex("^[a-zA-Z_][_a-zA-Z0-9]*(\\.[a-zA-Z_][_a-zA-Z0-9]*)+", Token::MEMBER_ACCESS);
+        auto memberAccessToken =
+              matchRegex("^[a-zA-Z_][_a-zA-Z0-9]*(\\.[a-zA-Z_][_a-zA-Z0-9]*)+", Token::MEMBER_ACCESS);
         if (memberAccessToken.has_value()) {
             currentWord = currentWord.substr(memberAccessToken.value().content.length(), currentWord.length() - 1);
             return memberAccessToken.value();

@@ -8,6 +8,7 @@ set(SOURCES_TEST
         parser/FunctionTest.cpp
         parser/OperationTest.cpp
         ast/AstGeneratorTest.cpp
+        ast/SimpleParserTest.cpp
         ast/AstTestHelper.cpp)
 
 add_executable(Tests ${SOURCES_TEST})

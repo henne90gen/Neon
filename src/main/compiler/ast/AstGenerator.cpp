@@ -446,7 +446,6 @@ ForStatementNode *AstGenerator::createForStatement(ParseTreeNode *node) {
 
 AstNode *AstGenerator::createImportStatement(ParseTreeNode *node) {
     auto result = new ImportNode();
-    // TODO at what point should we remove '"' from the string?
     std::string fileName = node->children[1]->token.content;
     fileName = fileName.substr(1, fileName.size() - 2);
     result->setFileName(fileName);

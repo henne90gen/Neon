@@ -2,7 +2,7 @@
 
 #include <iostream>
 
-void Linker::link() {
+bool Linker::link() {
     // TODO find out what these options do:
     //  -pie --eh-frame-hdr -m elf_x86_64
 
@@ -21,7 +21,8 @@ void Linker::link() {
     std::cout << std::endl << "Calling linker with the following command:" << std::endl << s << std::endl;
 
     const char *command = s.c_str();
-    system(command);
+    int statusCode = system(command);
 
     std::cout << "Finished linking." << std::endl;
+    return statusCode != 0;
 }
