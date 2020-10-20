@@ -3,6 +3,48 @@
 #include "AstTestHelper.h"
 
 TEST_CASE("SimpleParser") {
+    SECTION("can handle integers") {
+        std::vector<AstNodeSpec> spec = {
+              {0, ast::NodeType::SEQUENCE},   {1, ast::NodeType::STATEMENT},
+              {2, ast::NodeType::ASSIGNMENT}, {3, ast::NodeType::VARIABLE_DEFINITION},
+              {3, ast::NodeType::LITERAL},
+        };
+        std::vector<std::string> program = {"int a = 1"};
+        assertProgramCreatesAstWithSimpleParser(program, spec);
+    }
+
+    SECTION("can handle floats") {
+        std::vector<AstNodeSpec> spec = {
+              {0, ast::NodeType::SEQUENCE},   {1, ast::NodeType::STATEMENT},
+              {2, ast::NodeType::ASSIGNMENT}, {3, ast::NodeType::VARIABLE_DEFINITION},
+              {3, ast::NodeType::LITERAL},
+        };
+        std::vector<std::string> program = {"float a = 1.0"};
+        assertProgramCreatesAstWithSimpleParser(program, spec);
+    }
+
+    SECTION("can handle booleans") {
+        std::vector<AstNodeSpec> spec = {
+              {0, ast::NodeType::SEQUENCE},   {1, ast::NodeType::STATEMENT},
+              {2, ast::NodeType::ASSIGNMENT}, {3, ast::NodeType::VARIABLE_DEFINITION},
+              {3, ast::NodeType::LITERAL},    {1, ast::NodeType::STATEMENT},
+              {2, ast::NodeType::ASSIGNMENT}, {3, ast::NodeType::VARIABLE_DEFINITION},
+              {3, ast::NodeType::LITERAL},
+        };
+        std::vector<std::string> program = {"bool a = true", "bool b = false"};
+        assertProgramCreatesAstWithSimpleParser(program, spec);
+    }
+
+    SECTION("can handle strings") {
+        std::vector<AstNodeSpec> spec = {
+              {0, ast::NodeType::SEQUENCE},   {1, ast::NodeType::STATEMENT},
+              {2, ast::NodeType::ASSIGNMENT}, {3, ast::NodeType::VARIABLE_DEFINITION},
+              {3, ast::NodeType::LITERAL},
+        };
+        std::vector<std::string> program = {"string a = \"Hello World\""};
+        assertProgramCreatesAstWithSimpleParser(program, spec);
+    }
+
     SECTION("can handle addition") {
         std::vector<AstNodeSpec> spec = {
               {0, ast::NodeType::SEQUENCE},         {1, ast::NodeType::STATEMENT},
@@ -190,14 +232,36 @@ TEST_CASE("SimpleParser") {
         assertProgramCreatesAstWithSimpleParser(program, spec);
     }
 
-    SECTION("can handle 'if true { } else { }'") {
+    SECTION("can handle 'if true { int i = 0 }'") {
+        std::vector<AstNodeSpec> spec = {
+              {0, ast::NodeType::SEQUENCE},     {1, ast::NodeType::STATEMENT},
+              {2, ast::NodeType::IF_STATEMENT}, {3, ast::NodeType::LITERAL},
+              {3, ast::NodeType::SEQUENCE},     {4, ast::NodeType::STATEMENT},
+              {5, ast::NodeType::ASSIGNMENT},   {6, ast::NodeType::VARIABLE_DEFINITION},
+              {6, ast::NodeType::LITERAL},
+        };
+        std::vector<std::string> program = {"if true {", "int i = 0", "}"};
+        assertProgramCreatesAstWithSimpleParser(program, spec);
+    }
+
+    SECTION("can handle 'if true { int i = 0 } else { int j = 1 }'") {
         std::vector<AstNodeSpec> spec = {
               {0, ast::NodeType::SEQUENCE},
               {1, ast::NodeType::STATEMENT},
               {2, ast::NodeType::IF_STATEMENT},
               {3, ast::NodeType::LITERAL},
+              {3, ast::NodeType::SEQUENCE},
+              {4, ast::NodeType::STATEMENT},
+              {5, ast::NodeType::ASSIGNMENT},
+              {6, ast::NodeType::VARIABLE_DEFINITION},
+              {6, ast::NodeType::LITERAL},
+              {3, ast::NodeType::SEQUENCE},
+              {4, ast::NodeType::STATEMENT},
+              {5, ast::NodeType::ASSIGNMENT},
+              {6, ast::NodeType::VARIABLE_DEFINITION},
+              {6, ast::NodeType::LITERAL},
         };
-        std::vector<std::string> program = {"if true { } else { }"};
+        std::vector<std::string> program = {"if true {", "int i = 0", "} else {", "int j = 1", "}"};
         assertProgramCreatesAstWithSimpleParser(program, spec);
     }
 
@@ -249,7 +313,7 @@ TEST_CASE("SimpleParser") {
         assertProgramCreatesAstWithSimpleParser(program, spec);
     }
 
-    SECTION("can handle 'for int i = 0; i < 10; i = i + 1 { \n int a = 0 \n }'") {
+    SECTION("can handle 'for int i = 0; i < 10; i = i + 1 { int a = 0 }'") {
         std::vector<AstNodeSpec> spec = {
               {0, ast::NodeType::SEQUENCE},
               {1, ast::NodeType::STATEMENT},

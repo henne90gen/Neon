@@ -50,6 +50,20 @@ LiteralNode *parseLiteral(const std::vector<Token> &tokens, int &currentTokenIdx
         return new IntegerNode(value);
     }
 
+    if (tokens[currentTokenIdx].type == Token::FLOAT) {
+        std::cout << indent(level) << "parsed float node" << std::endl;
+        float value = std::stof(tokens[currentTokenIdx].content);
+        currentTokenIdx++;
+        return new FloatNode(value);
+    }
+
+    if (tokens[currentTokenIdx].type == Token::BOOLEAN) {
+        std::cout << indent(level) << "parsed boolean node" << std::endl;
+        bool value = tokens[currentTokenIdx].content == "true";
+        currentTokenIdx++;
+        return new BoolNode(value);
+    }
+
     if (tokens[currentTokenIdx].type == Token::STRING) {
         std::cout << indent(level) << "parsed string node" << std::endl;
         std::string value = tokens[currentTokenIdx].content;
@@ -275,6 +289,39 @@ VariableDefinitionNode *parseVariableDefinition(const std::vector<Token> &tokens
     return nullptr;
 }
 
+SequenceNode *parseScope(const std::vector<Token> &tokens, int &currentTokenIdx, int level) {
+    std::cout << indent(level) << "parsing scope" << std::endl;
+    if (!(currentTokenIdx < tokens.size() && tokens[currentTokenIdx].type == Token::LEFT_CURLY_BRACE)) {
+        return nullptr;
+    }
+    int beforeTokenIdx = currentTokenIdx;
+
+    currentTokenIdx++;
+
+    std::vector<AstNode *> children = {};
+    while (true) {
+        auto statement = parseStatement(tokens, currentTokenIdx, level + 1);
+        if (statement == nullptr) {
+            break;
+        }
+
+        children.push_back(statement);
+    }
+
+    if (!(currentTokenIdx < tokens.size() && tokens[currentTokenIdx].type == Token::RIGHT_CURLY_BRACE)) {
+        currentTokenIdx = beforeTokenIdx;
+        return nullptr;
+    }
+
+    currentTokenIdx++;
+
+    auto body = new SequenceNode();
+    for (auto child : children) {
+        body->getChildren().push_back(child);
+    }
+    return body;
+}
+
 FunctionNode *parseFunction(const std::vector<Token> &tokens, int &currentTokenIdx, int level) {
     bool isExternFunc = false;
     if (tokens[currentTokenIdx].type == Token::EXTERN) {
@@ -320,26 +367,7 @@ FunctionNode *parseFunction(const std::vector<Token> &tokens, int &currentTokenI
         currentTokenIdx += 1;
     }
 
-    SequenceNode *body = nullptr;
-    if (currentTokenIdx < tokens.size() && tokens[currentTokenIdx].type == Token::LEFT_CURLY_BRACE) {
-        std::cout << indent(level) << "parsing function body" << std::endl;
-        currentTokenIdx++;
-        body = new SequenceNode();
-        while (true) {
-            auto statement = parseStatement(tokens, currentTokenIdx, level + 1);
-            if (statement == nullptr) {
-                break;
-            }
-
-            body->getChildren().push_back(statement);
-        }
-
-        if (currentTokenIdx < tokens.size() && tokens[currentTokenIdx].type == Token::RIGHT_CURLY_BRACE) {
-            currentTokenIdx++;
-        } else {
-            body = nullptr;
-        }
-    }
+    auto body = parseScope(tokens, currentTokenIdx, level + 1);
 
     auto functionNode = new FunctionNode(functionName, returnType);
     functionNode->setBody(body);
@@ -364,7 +392,7 @@ AstNode *parseAssignmentLeft(const std::vector<Token> &tokens, int &currentToken
 }
 
 AssignmentNode *parseAssignment(const std::vector<Token> &tokens, int &currentTokenIdx, int level) {
-    std::cout << indent(level) << "parsing assignment node" << std::endl;
+    std::cout << indent(level) << "parsing assignment statement" << std::endl;
     auto left = parseAssignmentLeft(tokens, currentTokenIdx, level + 1);
     if (left == nullptr) {
         return nullptr;
@@ -389,8 +417,48 @@ AssignmentNode *parseAssignment(const std::vector<Token> &tokens, int &currentTo
     return assignmentNode;
 }
 
-StatementNode *parseIf(const std::vector<Token> &tokens, int &currentTokenIdx, int level) {
-    return nullptr;
+IfStatementNode *parseIf(const std::vector<Token> &tokens, int &currentTokenIdx, int level) {
+    if (!(currentTokenIdx < tokens.size() && tokens[currentTokenIdx].type == Token::IF)) {
+        return nullptr;
+    }
+    std::cout << indent(level) << "parsing if statement" << std::endl;
+    int beforeTokenIdx = currentTokenIdx;
+
+    currentTokenIdx++;
+
+    auto condition = parseExpression(tokens, currentTokenIdx, level + 1);
+    if (condition == nullptr) {
+        currentTokenIdx--;
+        return nullptr;
+    }
+
+    if (!(currentTokenIdx < tokens.size() && tokens[currentTokenIdx].type == Token::LEFT_CURLY_BRACE)) {
+        currentTokenIdx--;
+        return nullptr;
+    }
+
+    SequenceNode *ifBody = parseScope(tokens, currentTokenIdx, level + 1);
+    if (ifBody->getChildren().empty()) {
+        ifBody = nullptr;
+    }
+
+    SequenceNode *elseBody = nullptr;
+    if (currentTokenIdx < tokens.size() && tokens[currentTokenIdx].type == Token::ELSE) {
+        currentTokenIdx++;
+        elseBody = parseScope(tokens, currentTokenIdx, level + 1);
+        if (elseBody == nullptr) {
+            currentTokenIdx--;
+            return nullptr;
+        } else if (elseBody->getChildren().empty()) {
+            elseBody = nullptr;
+        }
+    }
+
+    auto ifNode = new IfStatementNode();
+    ifNode->setCondition(condition);
+    ifNode->setIfBody(ifBody);
+    ifNode->setElseBody(elseBody);
+    return ifNode;
 }
 
 StatementNode *createStatementNode(AstNode *ifNode) {
@@ -399,7 +467,7 @@ StatementNode *createStatementNode(AstNode *ifNode) {
     return statement;
 }
 
-StatementNode *parseStatementNode(const std::vector<Token> &tokens, int &currentTokenIdx, int level) {
+StatementNode *parseStatement(const std::vector<Token> &tokens, int &currentTokenIdx, int level) {
     std::cout << indent(level) << "parsing statement node" << std::endl;
 
     while (currentTokenIdx < tokens.size() && tokens[currentTokenIdx].type == Token::NEW_LINE) {
@@ -458,7 +526,7 @@ void SimpleParser::run() {
             continue;
         }
 
-        auto statementNode = parseStatementNode(module->tokens, currentTokenIdx, 0);
+        auto statementNode = parseStatement(module->tokens, currentTokenIdx, 0);
         if (statementNode != nullptr) {
             assert(nodeStack.back()->getAstNodeType() == ast::NodeType::SEQUENCE);
             reinterpret_cast<SequenceNode *>(nodeStack.back())->getChildren().push_back(statementNode);
