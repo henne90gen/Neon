@@ -104,6 +104,21 @@ TEST_CASE("SimpleParser") {
         assertProgramCreatesAstWithSimpleParser(program, spec);
     }
 
+    SECTION("can handle 'fun hello() { int a = 1 }'") {
+        std::vector<AstNodeSpec> spec = {
+              {0, ast::NodeType::SEQUENCE},
+              {1, ast::NodeType::STATEMENT},
+              {2, ast::NodeType::FUNCTION},
+              {3, ast::NodeType::SEQUENCE},
+              {4, ast::NodeType::STATEMENT},
+              {5, ast::NodeType::ASSIGNMENT},
+              {6, ast::NodeType::VARIABLE_DEFINITION},
+              {6, ast::NodeType::LITERAL},
+        };
+        std::vector<std::string> program = {"fun hello() {", "int a = 1", "}"};
+        assertProgramCreatesAstWithSimpleParser(program, spec);
+    }
+
     SECTION("can handle function call") {
         std::vector<AstNodeSpec> spec = {
               {0, ast::NodeType::SEQUENCE},
