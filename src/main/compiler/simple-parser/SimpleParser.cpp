@@ -77,8 +77,12 @@ LiteralNode *parseLiteral(const std::vector<Token> &tokens, int &currentTokenIdx
 }
 
 VariableNode *parseVariable(const std::vector<Token> &tokens, int &currentTokenIdx, int level) {
-    // TODO parse variable node
-    return nullptr;
+    if (!(currentTokenIdx < tokens.size() && tokens[currentTokenIdx].type == Token::IDENTIFIER)) {
+        return nullptr;
+    }
+    currentTokenIdx++;
+    std::string name = tokens[currentTokenIdx].content;
+    return new VariableNode(name);
 }
 
 AstNode *parseBinaryLeft(const std::vector<Token> &tokens, int &currentTokenIdx, int level) {

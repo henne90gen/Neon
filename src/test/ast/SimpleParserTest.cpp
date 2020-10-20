@@ -163,12 +163,8 @@ TEST_CASE("SimpleParser") {
 
     SECTION("can handle 'fun main() int { return 0 }'") {
         std::vector<AstNodeSpec> spec = {
-              {0, ast::NodeType::SEQUENCE},
-              {1, ast::NodeType::STATEMENT},
-              {2, ast::NodeType::FUNCTION},
-              {3, ast::NodeType::SEQUENCE},
-              {4, ast::NodeType::STATEMENT},
-              {5, ast::NodeType::LITERAL},
+              {0, ast::NodeType::SEQUENCE}, {1, ast::NodeType::STATEMENT}, {2, ast::NodeType::FUNCTION},
+              {3, ast::NodeType::SEQUENCE}, {4, ast::NodeType::STATEMENT}, {5, ast::NodeType::LITERAL},
         };
         std::vector<std::string> program = {"fun main() {", "return 0", "}"};
         assertProgramCreatesAstWithSimpleParser(program, spec);
@@ -391,6 +387,18 @@ TEST_CASE("SimpleParser") {
               {3, ast::NodeType::TYPE_MEMBER},
         };
         std::vector<std::string> program = {"type MyType {", "int t", "}"};
+        assertProgramCreatesAstWithSimpleParser(program, spec);
+    }
+
+    SECTION("can handle variables") {
+        std::vector<AstNodeSpec> spec = {
+              {0, ast::NodeType::SEQUENCE},   {1, ast::NodeType::STATEMENT},
+              {2, ast::NodeType::ASSIGNMENT}, {3, ast::NodeType::VARIABLE},
+              {3, ast::NodeType::LITERAL},    {1, ast::NodeType::STATEMENT},
+              {2, ast::NodeType::ASSIGNMENT}, {3, ast::NodeType::VARIABLE_DEFINITION},
+              {3, ast::NodeType::VARIABLE},
+        };
+        std::vector<std::string> program = {"a = 5", "int b = a"};
         assertProgramCreatesAstWithSimpleParser(program, spec);
     }
 
