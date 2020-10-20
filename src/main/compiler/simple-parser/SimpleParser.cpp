@@ -422,7 +422,6 @@ IfStatementNode *parseIf(const std::vector<Token> &tokens, int &currentTokenIdx,
         return nullptr;
     }
     std::cout << indent(level) << "parsing if statement" << std::endl;
-    int beforeTokenIdx = currentTokenIdx;
 
     currentTokenIdx++;
 
@@ -467,6 +466,25 @@ StatementNode *createStatementNode(AstNode *ifNode) {
     return statement;
 }
 
+StatementNode *parseReturnStatement(const std::vector<Token> &tokens, int &currentTokenIdx, int level) {
+    if (!(currentTokenIdx < tokens.size() && tokens[currentTokenIdx].type == Token::RETURN)) {
+        return nullptr;
+    }
+    std::cout << indent(level) << "parsing return statement" << std::endl;
+
+    currentTokenIdx++;
+
+    auto expression = parseExpression(tokens, currentTokenIdx, level + 1);
+    if (expression == nullptr) {
+        currentTokenIdx--;
+        return nullptr;
+    }
+
+    auto *statement = createStatementNode(expression);
+    statement->setIsReturnStatement(true);
+    return statement;
+}
+
 StatementNode *parseStatement(const std::vector<Token> &tokens, int &currentTokenIdx, int level) {
     std::cout << indent(level) << "parsing statement node" << std::endl;
 
@@ -497,6 +515,11 @@ StatementNode *parseStatement(const std::vector<Token> &tokens, int &currentToke
     auto assignmentNode = parseAssignment(tokens, currentTokenIdx, level + 1);
     if (assignmentNode != nullptr) {
         return createStatementNode(assignmentNode);
+    }
+
+    auto returnStatement = parseReturnStatement(tokens, currentTokenIdx, level + 1);
+    if (returnStatement != nullptr) {
+        return returnStatement;
     }
 
     return nullptr;
