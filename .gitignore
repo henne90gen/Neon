@@ -9,8 +9,10 @@ cmake-build-relwithdebinfo/
 __pycache__/
 env/
 docs/
+neon-build/
 main.ne
 
 *.llvm
 *.o
 *.a
+*.ll
