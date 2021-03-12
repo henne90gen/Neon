@@ -12,8 +12,7 @@ void ImportFinder::visitStatementNode(StatementNode *node) { node->getChild()->a
 
 void ImportFinder::visitImportNode(ImportNode *node) {
     auto path = directoryPath / std::filesystem::path(node->getFileName());
-    std::string absolutePath = std::filesystem::absolute(path).string();
-    importedModules.push_back(absolutePath);
+    importedModules.push_back(path);
 }
 
 std::vector<std::string> ImportFinder::run(AstNode *rootNode) {

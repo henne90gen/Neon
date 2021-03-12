@@ -18,6 +18,7 @@
 #include <llvm/IR/Verifier.h>
 #include <llvm/Linker/Linker.h>
 #include <llvm/Support/FileSystem.h>
+#include <llvm/Support/Host.h>
 #include <llvm/Support/TargetRegistry.h>
 #include <llvm/Support/TargetSelect.h>
 #include <llvm/Target/TargetMachine.h>
@@ -25,16 +26,15 @@
 #include <llvm/Transforms/Utils/Cloning.h>
 
 bool Compiler::run() {
-    std::string entryPoint = std::filesystem::absolute(std::filesystem::path(program->entryPoint)).string();
-    std::vector<std::string> uncompiledModules = {entryPoint};
-    while (!uncompiledModules.empty()) {
-        std::string moduleFileName = uncompiledModules.back();
-        uncompiledModules.pop_back();
+    std::vector<std::string> uncompiledModulePaths = {program->entryPoint};
+    while (!uncompiledModulePaths.empty()) {
+        std::string moduleFileName = uncompiledModulePaths.back();
+        uncompiledModulePaths.pop_back();
 
         auto itr = program->modules.find(moduleFileName);
         bool moduleAlreadyExists = itr != program->modules.end();
         if (moduleAlreadyExists) {
-            std::cout << "Skipping " << moduleFileName << std::endl;
+            std::cout << "Skipping " << moduleFileName << " because it has already been processed" << std::endl;
             continue;
         }
 
@@ -46,7 +46,7 @@ bool Compiler::run() {
         program->modules[moduleFileName] = module;
 
         for (auto &importedModule : moduleImportsMap[module]) {
-            uncompiledModules.push_back(importedModule);
+            uncompiledModulePaths.push_back(importedModule);
         }
     }
 
@@ -106,27 +106,10 @@ void Compiler::generateIR() {
     for (const auto &module : program->modules) {
         auto typeResolver = TypeResolver(program, moduleNodeToTypeMap[module.second],
                                          moduleNameToTypeMap[module.second], moduleImportsMap, moduleComplexTypesMap);
-        auto generator = IrGenerator(module.second, functionResolver, typeResolver, verbose);
+        auto generator = IrGenerator(buildEnv, module.second, functionResolver, typeResolver, verbose);
         generator.run();
     }
 }
-
-// void IrGenerator::generateDummyMain() {
-//    if (llvmModule.getFunction("main") != nullptr) {
-//        return;
-//    }
-//
-//    auto zero = new IntegerNode(0);
-//
-//    auto returnStatement = new StatementNode();
-//    returnStatement->setIsReturnStatement(true);
-//    returnStatement->setChild(zero);
-//
-//    auto function = new FunctionNode("main" + module->fileName, ast::DataType::INT);
-//    function->setBody(returnStatement);
-//
-//    visitFunctionNode(function);
-//}
 
 void Compiler::mergeModules(llvm::Module &destinationModule, const llvm::DataLayout &dataLayout,
                             const std::string &targetTriple) {
@@ -169,13 +152,11 @@ void Compiler::writeModuleToObjectFile() {
     auto targetMachine = target->createTargetMachine(targetTriple, cpu, features, targetOptions, RM);
     auto dataLayout = targetMachine->createDataLayout();
 
-    auto module = llvm::Module(program->objectFileName, program->llvmContext);
+    auto module = llvm::Module(buildEnv->buildDirectory + program->objectFileName, program->llvmContext);
     module.setDataLayout(dataLayout);
     module.setTargetTriple(targetTriple);
 
     mergeModules(module, dataLayout, targetTriple);
-
-    // TODO generate dummy main function, to enable users to write "scripts"
 
     if (llvm::verifyModule(module, &llvm::errs())) {
         exit(1);
@@ -184,25 +165,39 @@ void Compiler::writeModuleToObjectFile() {
     // print llvm ir to console
     module.print(llvm::outs(), nullptr);
 
+    // print llvm ir to file
+    {
+        std::error_code EC;
+        const std::string filePath = buildEnv->buildDirectory + program->name + ".llvm";
+        llvm::raw_fd_ostream destIR(filePath, EC, llvm::sys::fs::OF_None);
+        module.print(destIR, nullptr);
+        if (EC) {
+            llvm::errs() << "Failed to open file (" << filePath << "): " << EC.message() << "\n";
+            exit(1);
+        }
+    }
+
     // write object file
-    std::error_code EC;
-    llvm::raw_fd_ostream dest(program->objectFileName, EC, llvm::sys::fs::OF_None);
+    {
+        std::error_code EC;
+        llvm::raw_fd_ostream dest(buildEnv->buildDirectory + program->objectFileName, EC, llvm::sys::fs::OF_None);
 
-    if (EC) {
-        llvm::errs() << "Could not open file: " << EC.message();
-        exit(1);
+        if (EC) {
+            llvm::errs() << "Could not open file: " << EC.message() << "\n";
+            exit(1);
+        }
+
+        auto fileType = llvm::CGFT_ObjectFile;
+        llvm::legacy::PassManager pass;
+        if (targetMachine->addPassesToEmitFile(pass, dest, nullptr, fileType)) {
+            llvm::errs() << "TargetMachine can't emit a file of this type";
+            exit(1);
+        }
+
+        pass.run(module);
+        dest.flush();
+        dest.close();
     }
-
-    auto fileType = llvm::CGFT_ObjectFile;
-    llvm::legacy::PassManager pass;
-    if (targetMachine->addPassesToEmitFile(pass, dest, nullptr, fileType)) {
-        llvm::errs() << "TargetMachine can't emit a file of this type";
-        exit(1);
-    }
-
-    pass.run(module);
-    dest.flush();
-    dest.close();
 }
 
 void Compiler::analyseTypes() {

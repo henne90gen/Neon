@@ -1,8 +1,8 @@
 #include "AstTestHelper.h"
 
 #include "compiler/ast/nodes/AllNodes.h"
-#include "compiler/simple-parser/SimpleParser.h"
 #include "compiler/ast/visitors/AstPrinter.h"
+#include "compiler/simple-parser/SimpleParser.h"
 
 #include <catch2/catch.hpp>
 #include <iostream>
@@ -165,6 +165,13 @@ SimpleTree *createSimpleFromMemberAccess(MemberAccessNode *node) {
     return result;
 }
 
+SimpleTree *createSimpleFromAssert(AssertNode *node) {
+    auto result = new SimpleTree();
+    result->type = node->getAstNodeType();
+    result->children.push_back(createSimpleFromAst(node->getCondition()));
+    return result;
+}
+
 SimpleTree *createSimpleFromAst(AstNode *node) {
     if (node == nullptr) {
         return nullptr;
@@ -202,6 +209,8 @@ SimpleTree *createSimpleFromAst(AstNode *node) {
         return createSimpleFromTypeMember((TypeMemberNode *)node);
     case ast::NodeType::MEMBER_ACCESS:
         return createSimpleFromMemberAccess((MemberAccessNode *)node);
+    case ast::NodeType::ASSERT:
+        return createSimpleFromAssert((AssertNode *)node);
     default:
         std::cerr << "Could not create simple helper tree node for " << to_string(node->getAstNodeType()) << std::endl;
         exit(1);

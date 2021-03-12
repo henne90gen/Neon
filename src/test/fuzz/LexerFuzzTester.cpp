@@ -1,4 +1,3 @@
-#include "Module.h"
 #include "compiler/lexer/Lexer.h"
 #include <iterator>
 

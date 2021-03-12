@@ -10,7 +10,7 @@
 class Program {
   public:
     explicit Program(std::string entryPoint);
-    explicit Program();
+    explicit Program() = default;
 
     std::string entryPoint;
     std::string name;

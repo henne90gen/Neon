@@ -80,8 +80,8 @@ VariableNode *parseVariable(const std::vector<Token> &tokens, int &currentTokenI
     if (!(currentTokenIdx < tokens.size() && tokens[currentTokenIdx].type == Token::IDENTIFIER)) {
         return nullptr;
     }
-    currentTokenIdx++;
     std::string name = tokens[currentTokenIdx].content;
+    currentTokenIdx++;
     return new VariableNode(name);
 }
 
@@ -178,7 +178,7 @@ BinaryOperationNode *parseBinaryOperation(const std::vector<Token> &tokens, int 
 
     auto right = parseBinaryRight(tokens, currentTokenIdx, level + 1);
     if (right == nullptr) {
-        std::cout << indent(level) << "failed to parse binary operation right" << std::endl;
+        std::cout << indent(level) << "failed to parse right side of binary operation" << std::endl;
         currentTokenIdx--;
         return nullptr;
     }
@@ -464,9 +464,19 @@ IfStatementNode *parseIf(const std::vector<Token> &tokens, int &currentTokenIdx,
     return ifNode;
 }
 
-StatementNode *createStatementNode(AstNode *ifNode) {
+ForStatementNode *parseFor(const std::vector<Token> &tokens, int &currentTokenIdx, int level) {
+    if (!(currentTokenIdx < tokens.size() && tokens[currentTokenIdx].type == Token::FOR)) {
+        return nullptr;
+    }
+    std::cout << indent(level) << "parsing for statement" << std::endl;
+
+    auto forStatement = new ForStatementNode();
+    return forStatement;
+}
+
+StatementNode *createStatementNode(AstNode *child) {
     auto statement = new StatementNode();
-    statement->setChild(ifNode);
+    statement->setChild(child);
     return statement;
 }
 
@@ -489,6 +499,24 @@ StatementNode *parseReturnStatement(const std::vector<Token> &tokens, int &curre
     return statement;
 }
 
+AssertNode *parseAssert(const std::vector<Token> &tokens, int &currentTokenIdx, int level) {
+    if (!(currentTokenIdx < tokens.size() && tokens[currentTokenIdx].type == Token::ASSERT)) {
+        return nullptr;
+    }
+    std::cout << indent(level) << "parsing assert statement" << std::endl;
+
+    currentTokenIdx++;
+
+    auto expression = parseExpression(tokens, currentTokenIdx, level + 1);
+    if (expression == nullptr) {
+        currentTokenIdx--;
+        return nullptr;
+    }
+    auto *result = new AssertNode();
+    result->setCondition(expression);
+    return result;
+}
+
 StatementNode *parseStatement(const std::vector<Token> &tokens, int &currentTokenIdx, int level) {
     std::cout << indent(level) << "parsing statement node" << std::endl;
 
@@ -499,6 +527,11 @@ StatementNode *parseStatement(const std::vector<Token> &tokens, int &currentToke
     auto importNode = parseImport(tokens, currentTokenIdx);
     if (importNode != nullptr) {
         return createStatementNode(importNode);
+    }
+
+    auto assertNode = parseAssert(tokens, currentTokenIdx, level + 1);
+    if (assertNode != nullptr) {
+        return createStatementNode(assertNode);
     }
 
     auto callNode = parseCall(tokens, currentTokenIdx, level + 1);
@@ -514,6 +547,11 @@ StatementNode *parseStatement(const std::vector<Token> &tokens, int &currentToke
     auto ifNode = parseIf(tokens, currentTokenIdx, level + 1);
     if (ifNode != nullptr) {
         return createStatementNode(ifNode);
+    }
+
+    auto forNode = parseFor(tokens, currentTokenIdx, level + 1);
+    if (forNode != nullptr) {
+        return createStatementNode(forNode);
     }
 
     auto assignmentNode = parseAssignment(tokens, currentTokenIdx, level + 1);

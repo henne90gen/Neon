@@ -1,5 +1,6 @@
 #pragma once
 
+class AssertNode;
 class AssignmentNode;
 class BinaryOperationNode;
 class BoolNode;
@@ -22,6 +23,7 @@ class VariableNode;
 
 class AstVisitor {
   public:
+    virtual void visitAssertNode(AssertNode *node){};
     virtual void visitAssignmentNode(AssignmentNode *node){};
     virtual void visitBinaryOperationNode(BinaryOperationNode *node){};
     virtual void visitBoolNode(BoolNode *node){};

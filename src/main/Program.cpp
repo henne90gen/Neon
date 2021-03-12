@@ -12,5 +12,3 @@ Program::Program(std::string _entryPoint) : entryPoint(std::move(_entryPoint)) {
     name = entryPoint.substr(0, position);
     objectFileName = name + ".o";
 }
-
-Program::Program() : entryPoint(""), name(""), objectFileName("") {}

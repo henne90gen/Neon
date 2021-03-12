@@ -1,5 +1,6 @@
 #pragma once
 
+#include "../../BuildEnv.h"
 #include "../../Module.h"
 #include "../FunctionResolver.h"
 #include "../TypeResolver.h"
@@ -21,7 +22,8 @@
 
 class IrGenerator : public AstVisitor {
   public:
-    explicit IrGenerator(Module *module, FunctionResolver &functionResolver, TypeResolver &typeResolver, bool verbose);
+    explicit IrGenerator(const BuildEnv *buildEnv, Module *module, FunctionResolver &functionResolver,
+                         TypeResolver &typeResolver, bool verbose);
 
     void visitAssignmentNode(AssignmentNode *node) override;
     void visitBinaryOperationNode(BinaryOperationNode *node) override;
@@ -46,6 +48,7 @@ class IrGenerator : public AstVisitor {
     void writeToFile();
 
   private:
+    const BuildEnv *buildEnv;
     Module *module;
     FunctionResolver &functionResolver;
     TypeResolver &typeResolver;

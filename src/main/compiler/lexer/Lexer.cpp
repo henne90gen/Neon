@@ -220,6 +220,9 @@ std::optional<Token> Lexer::matchWordToken() {
     if (STARTS_WITH(currentWord, "import")) {
         return TOKEN(Token::IMPORT, "import");
     }
+    if (STARTS_WITH(currentWord, "assert")) {
+        return TOKEN(Token::ASSERT, "assert");
+    }
 
     return {};
 }

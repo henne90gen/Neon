@@ -1,5 +1,6 @@
 #pragma once
 
+#include "AssertNode.h"
 #include "AssignmentNode.h"
 #include "AstNode.h"
 #include "BinaryOperationNode.h"

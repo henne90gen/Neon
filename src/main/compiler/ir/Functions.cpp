@@ -74,12 +74,12 @@ void IrGenerator::visitFunctionNode(FunctionNode *node) {
 
         withScope([this, &node]() {
             for (auto &arg : currentFunction->args()) {
-                auto value = createEntryBlockAlloca(arg.getType(), arg.getName());
+                auto value = createEntryBlockAlloca(arg.getType(), arg.getName().str());
 
                 // store initial value
                 builder.CreateStore(&arg, value);
 
-                currentScope().definedVariables[arg.getName()] = value;
+                currentScope().definedVariables[arg.getName().str()] = value;
             }
 
             node->getBody()->accept(this);

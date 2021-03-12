@@ -1,15 +1,17 @@
 #pragma once
 
+#include "BuildEnv.h"
 #include "Program.h"
 
-#include <math.h>
+#include <cmath>
 
 class Linker {
   public:
-    explicit Linker(const Program *program) : program(program) {}
+    explicit Linker(const Program *program, const BuildEnv *buildEnv) : program(program), buildEnv(buildEnv) {}
 
     bool link();
 
   private:
     const Program *program;
+    const BuildEnv *buildEnv;
 };

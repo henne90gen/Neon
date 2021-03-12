@@ -40,6 +40,7 @@ enum NodeType {
     TYPE_DECLARATION,
     TYPE_MEMBER,
     MEMBER_ACCESS,
+    ASSERT,
 };
 
 enum BinaryOperationType {

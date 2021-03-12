@@ -1,3 +1,5 @@
+all: clean cmake build test
+
 clean:
 	rm build -rf
 
@@ -11,10 +13,10 @@ build-test:
 	cd build; ninja Tests FuzzTests
 
 test: build-test
-	cd build; ninja test
+	cd build/src/test; ./Tests
 
 run: build
-	./build/src/main/Neon && echo "" && ./main; echo $$?
+	./build/src/main/Neon && echo "" && ./neon-build/main; echo $$?
 
 generate-parser:
 	cd src/main && python ../../scripts/parser_generator.py

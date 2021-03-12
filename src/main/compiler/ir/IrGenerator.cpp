@@ -16,10 +16,10 @@
 
 #include "../../Utils.h"
 
-IrGenerator::IrGenerator(Module *module, FunctionResolver &functionResolver, TypeResolver &typeResolver,
-                         const bool verbose)
-    : module(module), functionResolver(functionResolver), typeResolver(typeResolver), verbose(verbose),
-      context(module->llvmModule.getContext()), llvmModule(module->llvmModule), builder(context) {
+IrGenerator::IrGenerator(const BuildEnv *buildEnv, Module *module, FunctionResolver &functionResolver,
+                         TypeResolver &typeResolver, const bool verbose)
+    : buildEnv(buildEnv), module(module), functionResolver(functionResolver), typeResolver(typeResolver),
+      verbose(verbose), context(module->llvmModule.getContext()), llvmModule(module->llvmModule), builder(context) {
     pushScope();
 }
 
@@ -113,9 +113,13 @@ void IrGenerator::visitSequenceNode(SequenceNode *node) {
 }
 
 void IrGenerator::writeToFile() {
-    std::string filePath = module->getFilePath().string() + ".llvm";
+    std::string filePath = buildEnv->buildDirectory + module->getFilePath().string() + ".llvm";
     std::error_code EC;
     llvm::raw_fd_ostream dest(filePath, EC, llvm::sys::fs::OF_None);
+    if (EC) {
+        llvm::errs() << "Failed to open file (" << filePath << "): " << EC.message() << "\n";
+        exit(1);
+    }
     llvmModule.print(dest, nullptr);
     dest.flush();
     dest.close();

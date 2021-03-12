@@ -319,7 +319,8 @@ TEST_CASE("SimpleParser") {
               {5, ast::NodeType::LITERAL},
         };
         std::vector<std::string> program = {"for int i = 0; i < 10; i = i + 1 { }"};
-        assertProgramCreatesAstWithSimpleParser(program, spec);
+        // FIXME       assertProgramCreatesAstWithSimpleParser(program, spec);
+        REQUIRE(false);
     }
 
     SECTION("can handle 'for int i = 0; i < 10; i = i + 1 { int a = 0 }'") {
@@ -345,7 +346,8 @@ TEST_CASE("SimpleParser") {
               {6, ast::NodeType::LITERAL},
         };
         std::vector<std::string> program = {"for int i = 0; i < 10; i = i + 1 {", "int a = 0", "}"};
-        assertProgramCreatesAstWithSimpleParser(program, spec);
+        // FIXME       assertProgramCreatesAstWithSimpleParser(program, spec);
+        REQUIRE(false);
     }
 
     SECTION("can handle array example") {
@@ -424,6 +426,17 @@ TEST_CASE("SimpleParser") {
         };
         std::vector<std::string> program = {"type MyType {",       "int i",   "}",          "fun main() int {",
                                             "MyType t = MyType()", "t.i = 5", "return t.i", "}"};
+        assertProgramCreatesAstWithSimpleParser(program, spec);
+    }
+
+    SECTION("can handle assert statement") {
+        std::vector<AstNodeSpec> spec = {
+              {0, ast::NodeType::SEQUENCE},
+              {1, ast::NodeType::STATEMENT},
+              {2, ast::NodeType::ASSERT},
+              {3, ast::NodeType::LITERAL},
+        };
+        std::vector<std::string> program = {"assert true"};
         assertProgramCreatesAstWithSimpleParser(program, spec);
     }
 }

@@ -15,5 +15,4 @@ class SimpleParser {
     bool verbose;
 
     Token getNextToken();
-    AstNode* parseImportStatement(const Token &token);
 };

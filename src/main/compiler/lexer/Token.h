@@ -42,6 +42,7 @@ struct Token {
         FOR,
         STRING,
         IMPORT,
+        ASSERT,
         NEW_LINE,
         END_OF_FILE,
     };

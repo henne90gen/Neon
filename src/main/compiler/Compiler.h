@@ -1,17 +1,22 @@
 #pragma once
 
+#include "../BuildEnv.h"
 #include "../Program.h"
 #include "MetaTypes.h"
 #include "ast/nodes/FunctionNode.h"
 
 class Compiler {
   public:
-    Compiler(Program *program, bool verbose) : program(program), verbose(verbose) {}
+    Compiler(Program *program, const BuildEnv *buildEnv, bool verbose)
+        : program(program), buildEnv(buildEnv), verbose(verbose) {}
+
     bool run();
 
   private:
     Program *program;
+    const BuildEnv *buildEnv;
     bool verbose;
+
     std::unordered_map<Module *, std::vector<std::string>> moduleImportsMap = {};
     std::unordered_map<Module *, std::vector<FunctionSignature>> moduleFunctionsMap = {};
     std::unordered_map<Module *, std::unordered_map<AstNode *, ast::DataType>> moduleNodeToTypeMap;
