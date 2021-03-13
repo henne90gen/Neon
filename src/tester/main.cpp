@@ -1,6 +1,7 @@
 #include <filesystem>
 #include <iostream>
 #include <string>
+#include <sys/wait.h>
 
 #include <BuildEnv.h>
 #include <Linker.h>
@@ -59,7 +60,7 @@ TestResult compileAndRun(const std::string &path, const bool verbose) {
 
     auto runTime = std::chrono::duration_cast<std::chrono::nanoseconds>(end - start);
     return {
-          .exitCode = exitCode,
+          .exitCode = WEXITSTATUS(exitCode),
           .compileTime = compileTimeNs,
           .runTime = runTime,
     };
@@ -71,6 +72,7 @@ int main() {
 
     std::cout << std::fixed;
     std::cout << std::setprecision(2);
+    bool success = true;
 
     for (const auto &path : std::filesystem::recursive_directory_iterator(testDirectory)) {
         if (path.is_directory()) {
@@ -83,6 +85,7 @@ int main() {
         const TestResult &result = compileAndRun(path.path().string(), verbose);
         if (!result.success()) {
             std::cout << "FAILURE ";
+            success = false;
         } else {
             std::cout << "SUCCESS ";
         }
@@ -91,5 +94,9 @@ int main() {
                   << "ms, run: " << result.runTimeMillis() << "ms): " << path << std::endl;
     }
 
-    return 0;
+    if (success) {
+        return 0;
+    } else {
+        return 1;
+    }
 }
