@@ -89,6 +89,11 @@ void TypeAnalyzer::visitAssignmentNode(AssignmentNode *node) {
     nodeTypeMap[node] = leftType;
 }
 
+void TypeAnalyzer::visitAssertNode(AssertNode *node) {
+    node->getCondition()->accept(this);
+    nodeTypeMap[node] = nodeTypeMap[node->getCondition()];
+}
+
 void TypeAnalyzer::visitSequenceNode(SequenceNode *node) {
     for (auto child : node->getChildren()) {
         child->accept(this);

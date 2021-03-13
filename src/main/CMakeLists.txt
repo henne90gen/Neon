@@ -1,4 +1,3 @@
-set(EXECUTABLE_NAME ${PROJECT_NAME})
 
 # run parser generator, when grammar.txt has changed
 add_custom_command(
@@ -33,7 +32,7 @@ add_library(NeonCompiler
         compiler/ast/visitors/AstPrinter.cpp
         compiler/ast/visitors/AstTestCasePrinter.cpp
         compiler/ast/visitors/TypeAnalyzer.cpp
-        compiler/ast/visitors/TypeFinder.cpp
+        compiler/ast/visitors/ComplexTypeFinder.cpp
         compiler/ast/visitors/FunctionFinder.cpp
         compiler/ast/visitors/ImportFinder.cpp
         compiler/ir/Functions.cpp
@@ -56,10 +55,12 @@ add_library(NeonCompiler
 
 add_dependencies(NeonCompiler NeonGrammar)
 add_dependencies(NeonCompiler NeonStd)
+target_link_libraries(NeonCompiler PUBLIC NeonGrammar ${LLVM_LIBS})
+target_include_directories(NeonCompiler PUBLIC ${CMAKE_CURRENT_SOURCE_DIR})
 
+set(EXECUTABLE_NAME ${PROJECT_NAME})
 add_executable(${EXECUTABLE_NAME} ${CMAKE_CURRENT_SOURCE_DIR}/main.cpp)
 
-target_link_libraries(NeonCompiler NeonGrammar ${LLVM_LIBS})
 target_link_libraries(${EXECUTABLE_NAME} NeonCompiler)
 
 if (${CMAKE_SYSTEM_NAME} STREQUAL "Windows")

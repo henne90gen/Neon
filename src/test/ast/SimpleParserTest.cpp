@@ -182,12 +182,47 @@ TEST_CASE("SimpleParser") {
 
     SECTION("can handle function call with argument") {
         std::vector<AstNodeSpec> spec = {
-              {0, ast::NodeType::SEQUENCE},
+              {0, ast::NodeType::SEQUENCE}, //
               {1, ast::NodeType::STATEMENT},
               {2, ast::NodeType::CALL},
               {3, ast::NodeType::LITERAL},
+              {1, ast::NodeType::STATEMENT},
+              {2, ast::NodeType::CALL},
+              {3, ast::NodeType::VARIABLE},
+              {1, ast::NodeType::STATEMENT},
+              {2, ast::NodeType::CALL},
+              {3, ast::NodeType::BINARY_OPERATION},
+              {4, ast::NodeType::VARIABLE},
+              {4, ast::NodeType::LITERAL},
+
+              // return tests
+              {1, ast::NodeType::STATEMENT},
+              {2, ast::NodeType::CALL},
+              {3, ast::NodeType::LITERAL},
+              {1, ast::NodeType::STATEMENT},
+              {2, ast::NodeType::CALL},
+              {3, ast::NodeType::VARIABLE},
+              {1, ast::NodeType::STATEMENT},
+              {2, ast::NodeType::CALL},
+              {3, ast::NodeType::BINARY_OPERATION},
+              {4, ast::NodeType::VARIABLE},
+              {4, ast::NodeType::LITERAL},
+              {1, ast::NodeType::STATEMENT},
+              {2, ast::NodeType::BINARY_OPERATION},
+              {3, ast::NodeType::CALL},
+              {4, ast::NodeType::LITERAL},
+              {3, ast::NodeType::CALL},
+              {4, ast::NodeType::VARIABLE},
         };
-        std::vector<std::string> program = {"hello(1)"};
+        std::vector<std::string> program = {
+              "hello(1)",
+              "hello(num)",
+              "hello(num - 1)",
+              "return hello(1)",
+              "return hello(num)",
+              "return hello(num - 1)",
+              "return hello(1) + hello(num)",
+        };
         assertProgramCreatesAstWithSimpleParser(program, spec);
     }
 
@@ -250,6 +285,15 @@ TEST_CASE("SimpleParser") {
               {6, ast::NodeType::LITERAL},
         };
         std::vector<std::string> program = {"if true {", "int i = 0", "}"};
+        assertProgramCreatesAstWithSimpleParser(program, spec);
+    }
+
+    SECTION("can handle 'if num == 1 { }'") {
+        std::vector<AstNodeSpec> spec = {
+              {0, ast::NodeType::SEQUENCE},         {1, ast::NodeType::STATEMENT}, {2, ast::NodeType::IF_STATEMENT},
+              {3, ast::NodeType::BINARY_OPERATION}, {4, ast::NodeType::VARIABLE},  {4, ast::NodeType::LITERAL},
+        };
+        std::vector<std::string> program = {"if num == 1 {", "}"};
         assertProgramCreatesAstWithSimpleParser(program, spec);
     }
 

@@ -6,7 +6,7 @@
 #include "../AstVisitor.h"
 #include "../nodes/AllNodes.h"
 
-class TypeFinder : public AstVisitor {
+class ComplexTypeFinder : public AstVisitor {
   public:
     void visitSequenceNode(SequenceNode *node) override;
     void visitStatementNode(StatementNode *node) override;

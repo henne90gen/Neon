@@ -8,6 +8,7 @@ class AstPrinter : public AstVisitor {
   public:
     explicit AstPrinter(const Module *module) : module(module) {}
 
+    void visitAssertNode(AssertNode *node) override;
     void visitAssignmentNode(AssignmentNode *node) override;
     void visitBinaryOperationNode(BinaryOperationNode *node) override;
     void visitBoolNode(BoolNode *node) override;

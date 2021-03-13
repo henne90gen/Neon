@@ -25,6 +25,7 @@ class IrGenerator : public AstVisitor {
     explicit IrGenerator(const BuildEnv *buildEnv, Module *module, FunctionResolver &functionResolver,
                          TypeResolver &typeResolver, bool verbose);
 
+    void visitAssertNode(AssertNode *node) override;
     void visitAssignmentNode(AssignmentNode *node) override;
     void visitBinaryOperationNode(BinaryOperationNode *node) override;
     void visitBoolNode(BoolNode *node) override;

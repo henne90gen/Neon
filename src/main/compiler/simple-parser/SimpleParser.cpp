@@ -40,39 +40,51 @@ ImportNode *parseImport(const std::vector<Token> &tokens, int &currentTokenIdx) 
     return importNode;
 }
 
-LiteralNode *parseLiteral(const std::vector<Token> &tokens, int &currentTokenIdx, int level) {
-    std::cout << indent(level) << "parsing literal node" << std::endl;
+LiteralNode *SimpleParser::parseLiteral(const std::vector<Token> &tokens, int &currentTokenIdx, int level) const {
+    if (verbose) {
+        std::cout << indent(level) << "parsing literal node" << std::endl;
+    }
 
     if (tokens[currentTokenIdx].type == Token::INTEGER) {
-        std::cout << indent(level) << "parsed integer node" << std::endl;
+        if (verbose) {
+            std::cout << indent(level) << "parsed integer node" << std::endl;
+        }
         int value = std::stoi(tokens[currentTokenIdx].content);
         currentTokenIdx++;
         return new IntegerNode(value);
     }
 
     if (tokens[currentTokenIdx].type == Token::FLOAT) {
-        std::cout << indent(level) << "parsed float node" << std::endl;
+        if (verbose) {
+            std::cout << indent(level) << "parsed float node" << std::endl;
+        }
         float value = std::stof(tokens[currentTokenIdx].content);
         currentTokenIdx++;
         return new FloatNode(value);
     }
 
     if (tokens[currentTokenIdx].type == Token::BOOLEAN) {
-        std::cout << indent(level) << "parsed boolean node" << std::endl;
+        if (verbose) {
+            std::cout << indent(level) << "parsed boolean node" << std::endl;
+        }
         bool value = tokens[currentTokenIdx].content == "true";
         currentTokenIdx++;
         return new BoolNode(value);
     }
 
     if (tokens[currentTokenIdx].type == Token::STRING) {
-        std::cout << indent(level) << "parsed string node" << std::endl;
+        if (verbose) {
+            std::cout << indent(level) << "parsed string node" << std::endl;
+        }
         std::string value = tokens[currentTokenIdx].content;
         value = value.substr(1, value.size() - 2);
         currentTokenIdx++;
         return new StringNode(value);
     }
 
-    std::cout << indent(level) << "failed to parse literal node" << std::endl;
+    if (verbose) {
+        std::cout << indent(level) << "failed to parse literal node" << std::endl;
+    }
     return nullptr;
 }
 
@@ -85,7 +97,7 @@ VariableNode *parseVariable(const std::vector<Token> &tokens, int &currentTokenI
     return new VariableNode(name);
 }
 
-AstNode *parseBinaryLeft(const std::vector<Token> &tokens, int &currentTokenIdx, int level) {
+AstNode *SimpleParser::parseBinaryLeft(const std::vector<Token> &tokens, int &currentTokenIdx, int level) const {
     if (tokens[currentTokenIdx].type == Token::LEFT_PARAN) {
         currentTokenIdx++;
         auto expression = parseExpression(tokens, currentTokenIdx, level + 1);
@@ -102,6 +114,11 @@ AstNode *parseBinaryLeft(const std::vector<Token> &tokens, int &currentTokenIdx,
         return literal;
     }
 
+    auto functionCall = parseFunctionCall(tokens, currentTokenIdx, level + 1);
+    if (functionCall != nullptr) {
+        return functionCall;
+    }
+
     auto variable = parseVariable(tokens, currentTokenIdx, level + 1);
     if (variable != nullptr) {
         return variable;
@@ -110,7 +127,7 @@ AstNode *parseBinaryLeft(const std::vector<Token> &tokens, int &currentTokenIdx,
     return nullptr;
 }
 
-AstNode *parseBinaryRight(const std::vector<Token> &tokens, int &currentTokenIdx, int level) {
+AstNode *SimpleParser::parseBinaryRight(const std::vector<Token> &tokens, int &currentTokenIdx, int level) const {
     if (tokens[currentTokenIdx].type == Token::LEFT_PARAN) {
         currentTokenIdx++;
         auto expression = parseExpression(tokens, currentTokenIdx, level + 1);
@@ -130,8 +147,11 @@ AstNode *parseBinaryRight(const std::vector<Token> &tokens, int &currentTokenIdx
     return nullptr;
 }
 
-BinaryOperationNode *parseBinaryOperation(const std::vector<Token> &tokens, int &currentTokenIdx, int level) {
-    std::cout << indent(level) << "parsing binary operation node" << std::endl;
+BinaryOperationNode *SimpleParser::parseBinaryOperation(const std::vector<Token> &tokens, int &currentTokenIdx,
+                                                        int level) const {
+    if (verbose) {
+        std::cout << indent(level) << "parsing binary operation node" << std::endl;
+    }
 
     int tokenIdxBeforeLeft = currentTokenIdx;
     auto left = parseBinaryLeft(tokens, currentTokenIdx, level + 1);
@@ -139,11 +159,15 @@ BinaryOperationNode *parseBinaryOperation(const std::vector<Token> &tokens, int 
         return nullptr;
     }
 
-    std::cout << indent(level) << "parsed binary operation left" << std::endl;
+    if (verbose) {
+        std::cout << indent(level) << "parsed binary operation left" << std::endl;
+    }
 
     if (currentTokenIdx >= tokens.size()) {
         currentTokenIdx = tokenIdxBeforeLeft;
-        std::cout << indent(level) << "failed to parse binary operation" << std::endl;
+        if (verbose) {
+            std::cout << indent(level) << "failed to parse binary operation" << std::endl;
+        }
         return nullptr;
     }
 
@@ -170,7 +194,9 @@ BinaryOperationNode *parseBinaryOperation(const std::vector<Token> &tokens, int 
         operationType = ast::BinaryOperationType::NOT_EQUALS;
     } else {
         currentTokenIdx = tokenIdxBeforeLeft;
-        std::cout << indent(level) << "failed to parse binary operation" << std::endl;
+        if (verbose) {
+            std::cout << indent(level) << "failed to parse binary operation" << std::endl;
+        }
         return nullptr;
     }
 
@@ -178,12 +204,16 @@ BinaryOperationNode *parseBinaryOperation(const std::vector<Token> &tokens, int 
 
     auto right = parseBinaryRight(tokens, currentTokenIdx, level + 1);
     if (right == nullptr) {
-        std::cout << indent(level) << "failed to parse right side of binary operation" << std::endl;
+        if (verbose) {
+            std::cout << indent(level) << "failed to parse right side of binary operation" << std::endl;
+        }
         currentTokenIdx--;
         return nullptr;
     }
 
-    std::cout << indent(level) << "parsed binary operation right" << std::endl;
+    if (verbose) {
+        std::cout << indent(level) << "parsed binary operation right" << std::endl;
+    }
 
     auto binaryOperation = new BinaryOperationNode(operationType);
     binaryOperation->setLeft(left);
@@ -191,7 +221,8 @@ BinaryOperationNode *parseBinaryOperation(const std::vector<Token> &tokens, int 
     return binaryOperation;
 }
 
-AstNode *parseExpressionInsideParens(const std::vector<Token> &tokens, int &currentTokenIdx, int level) {
+AstNode *SimpleParser::parseExpressionInsideParens(const std::vector<Token> &tokens, int &currentTokenIdx,
+                                                   int level) const {
     auto binaryOperation = parseBinaryOperation(tokens, currentTokenIdx, level + 1);
     if (binaryOperation != nullptr) {
         return binaryOperation;
@@ -202,6 +233,11 @@ AstNode *parseExpressionInsideParens(const std::vector<Token> &tokens, int &curr
         return literal;
     }
 
+    auto functionCall = parseFunctionCall(tokens, currentTokenIdx, level + 1);
+    if (functionCall != nullptr) {
+        return functionCall;
+    }
+
     auto variable = parseVariable(tokens, currentTokenIdx, level + 1);
     if (variable != nullptr) {
         return variable;
@@ -210,9 +246,12 @@ AstNode *parseExpressionInsideParens(const std::vector<Token> &tokens, int &curr
     return nullptr;
 }
 
-AstNode *parseExpression(const std::vector<Token> &tokens, int &currentTokenIdx, int level) {
-    std::cout << indent(level) << "parsing expression node" << std::endl;
+AstNode *SimpleParser::parseExpression(const std::vector<Token> &tokens, int &currentTokenIdx, int level) const {
+    if (verbose) {
+        std::cout << indent(level) << "parsing expression node" << std::endl;
+    }
 
+    // TODO why are we trying to parse a binary operation before checking for parenthesis
     auto binaryOperation = parseBinaryOperation(tokens, currentTokenIdx, level + 1);
     if (binaryOperation != nullptr) {
         return binaryOperation;
@@ -240,13 +279,17 @@ AstNode *parseExpression(const std::vector<Token> &tokens, int &currentTokenIdx,
     return nullptr;
 }
 
-CallNode *parseCall(const std::vector<Token> &tokens, int &currentTokenIdx, int level) {
+CallNode *SimpleParser::parseFunctionCall(const std::vector<Token> &tokens, int &currentTokenIdx, int level) const {
     if (tokens[currentTokenIdx].type != Token::IDENTIFIER) {
         return nullptr;
     }
 
     if (currentTokenIdx + 1 >= tokens.size() || tokens[currentTokenIdx + 1].type != Token::LEFT_PARAN) {
         return nullptr;
+    }
+
+    if (verbose) {
+        std::cout << indent(level) << "parsing call node" << std::endl;
     }
 
     std::vector<AstNode *> params = {};
@@ -274,8 +317,11 @@ CallNode *parseCall(const std::vector<Token> &tokens, int &currentTokenIdx, int 
     return callNode;
 }
 
-VariableDefinitionNode *parseVariableDefinition(const std::vector<Token> &tokens, int &currentTokenIdx, int level) {
-    std::cout << indent(level) << "parsing variable definition node" << std::endl;
+VariableDefinitionNode *SimpleParser::parseVariableDefinition(const std::vector<Token> &tokens, int &currentTokenIdx,
+                                                              int level) const {
+    if (verbose) {
+        std::cout << indent(level) << "parsing variable definition node" << std::endl;
+    }
 
     if (tokens[currentTokenIdx].type == Token::SIMPLE_DATA_TYPE &&
         (currentTokenIdx + 1 < tokens.size() && tokens[currentTokenIdx + 1].type == Token::IDENTIFIER)) {
@@ -283,21 +329,28 @@ VariableDefinitionNode *parseVariableDefinition(const std::vector<Token> &tokens
         auto dataType = ast::DataType(from_string(tokens[currentTokenIdx].content));
         auto variableDefinitionNode = new VariableDefinitionNode(variableName, dataType);
         currentTokenIdx += 2;
-        std::cout << indent(level) << "parsed variable definition with simple data type" << std::endl;
+        if (verbose) {
+            std::cout << indent(level) << "parsed variable definition with simple data type" << std::endl;
+        }
         return variableDefinitionNode;
     }
 
-    std::cout << indent(level) << "failed to parse variable definition" << std::endl;
+    if (verbose) {
+        std::cout << indent(level) << "failed to parse variable definition" << std::endl;
+    }
     // TODO parse custom types as well
 
     return nullptr;
 }
 
-SequenceNode *parseScope(const std::vector<Token> &tokens, int &currentTokenIdx, int level) {
-    std::cout << indent(level) << "parsing scope" << std::endl;
+SequenceNode *SimpleParser::parseScope(const std::vector<Token> &tokens, int &currentTokenIdx, int level) const {
     if (!(currentTokenIdx < tokens.size() && tokens[currentTokenIdx].type == Token::LEFT_CURLY_BRACE)) {
         return nullptr;
     }
+    if (verbose) {
+        std::cout << indent(level) << "parsing scope" << std::endl;
+    }
+
     int beforeTokenIdx = currentTokenIdx;
 
     currentTokenIdx++;
@@ -326,7 +379,7 @@ SequenceNode *parseScope(const std::vector<Token> &tokens, int &currentTokenIdx,
     return body;
 }
 
-FunctionNode *parseFunction(const std::vector<Token> &tokens, int &currentTokenIdx, int level) {
+FunctionNode *SimpleParser::parseFunction(const std::vector<Token> &tokens, int &currentTokenIdx, int level) const {
     bool isExternFunc = false;
     if (tokens[currentTokenIdx].type == Token::EXTERN) {
         isExternFunc = true;
@@ -341,7 +394,9 @@ FunctionNode *parseFunction(const std::vector<Token> &tokens, int &currentTokenI
         return nullptr;
     }
 
-    std::cout << indent(level) << "parsing function node" << std::endl;
+    if (verbose) {
+        std::cout << indent(level) << "parsing function node" << std::endl;
+    }
 
     std::vector<VariableDefinitionNode *> params = {};
     int paramsIdx = 2;
@@ -381,7 +436,7 @@ FunctionNode *parseFunction(const std::vector<Token> &tokens, int &currentTokenI
     return functionNode;
 }
 
-AstNode *parseAssignmentLeft(const std::vector<Token> &tokens, int &currentTokenIdx, int level) {
+AstNode *SimpleParser::parseAssignmentLeft(const std::vector<Token> &tokens, int &currentTokenIdx, int level) const {
     auto variableDefinitionNode = parseVariableDefinition(tokens, currentTokenIdx, level + 1);
     if (variableDefinitionNode != nullptr) {
         return variableDefinitionNode;
@@ -395,13 +450,17 @@ AstNode *parseAssignmentLeft(const std::vector<Token> &tokens, int &currentToken
     return nullptr;
 }
 
-AssignmentNode *parseAssignment(const std::vector<Token> &tokens, int &currentTokenIdx, int level) {
-    std::cout << indent(level) << "parsing assignment statement" << std::endl;
+AssignmentNode *SimpleParser::parseAssignment(const std::vector<Token> &tokens, int &currentTokenIdx, int level) const {
+    if (verbose) {
+        std::cout << indent(level) << "parsing assignment statement" << std::endl;
+    }
     auto left = parseAssignmentLeft(tokens, currentTokenIdx, level + 1);
     if (left == nullptr) {
         return nullptr;
     }
-    std::cout << indent(level) << "parsed assignment left" << std::endl;
+    if (verbose) {
+        std::cout << indent(level) << "parsed assignment left" << std::endl;
+    }
 
     if (!(currentTokenIdx < tokens.size() && tokens[currentTokenIdx].type == Token::SINGLE_EQUALS)) {
         return nullptr;
@@ -413,7 +472,9 @@ AssignmentNode *parseAssignment(const std::vector<Token> &tokens, int &currentTo
         return nullptr;
     }
 
-    std::cout << indent(level) << "parsed assignment right" << std::endl;
+    if (verbose) {
+        std::cout << indent(level) << "parsed assignment right" << std::endl;
+    }
 
     auto assignmentNode = new AssignmentNode();
     assignmentNode->setLeft(left);
@@ -421,11 +482,13 @@ AssignmentNode *parseAssignment(const std::vector<Token> &tokens, int &currentTo
     return assignmentNode;
 }
 
-IfStatementNode *parseIf(const std::vector<Token> &tokens, int &currentTokenIdx, int level) {
+IfStatementNode *SimpleParser::parseIf(const std::vector<Token> &tokens, int &currentTokenIdx, int level) const {
     if (!(currentTokenIdx < tokens.size() && tokens[currentTokenIdx].type == Token::IF)) {
         return nullptr;
     }
-    std::cout << indent(level) << "parsing if statement" << std::endl;
+    if (verbose) {
+        std::cout << indent(level) << "parsing if statement" << std::endl;
+    }
 
     currentTokenIdx++;
 
@@ -441,7 +504,7 @@ IfStatementNode *parseIf(const std::vector<Token> &tokens, int &currentTokenIdx,
     }
 
     SequenceNode *ifBody = parseScope(tokens, currentTokenIdx, level + 1);
-    if (ifBody->getChildren().empty()) {
+    if (ifBody == nullptr || ifBody->getChildren().empty()) {
         ifBody = nullptr;
     }
 
@@ -464,11 +527,13 @@ IfStatementNode *parseIf(const std::vector<Token> &tokens, int &currentTokenIdx,
     return ifNode;
 }
 
-ForStatementNode *parseFor(const std::vector<Token> &tokens, int &currentTokenIdx, int level) {
+ForStatementNode *SimpleParser::parseFor(const std::vector<Token> &tokens, int &currentTokenIdx, int level) const {
     if (!(currentTokenIdx < tokens.size() && tokens[currentTokenIdx].type == Token::FOR)) {
         return nullptr;
     }
-    std::cout << indent(level) << "parsing for statement" << std::endl;
+    if (verbose) {
+        std::cout << indent(level) << "parsing for statement" << std::endl;
+    }
 
     auto forStatement = new ForStatementNode();
     return forStatement;
@@ -480,11 +545,14 @@ StatementNode *createStatementNode(AstNode *child) {
     return statement;
 }
 
-StatementNode *parseReturnStatement(const std::vector<Token> &tokens, int &currentTokenIdx, int level) {
+StatementNode *SimpleParser::parseReturnStatement(const std::vector<Token> &tokens, int &currentTokenIdx,
+                                                  int level) const {
     if (!(currentTokenIdx < tokens.size() && tokens[currentTokenIdx].type == Token::RETURN)) {
         return nullptr;
     }
-    std::cout << indent(level) << "parsing return statement" << std::endl;
+    if (verbose) {
+        std::cout << indent(level) << "parsing return statement" << std::endl;
+    }
 
     currentTokenIdx++;
 
@@ -499,11 +567,13 @@ StatementNode *parseReturnStatement(const std::vector<Token> &tokens, int &curre
     return statement;
 }
 
-AssertNode *parseAssert(const std::vector<Token> &tokens, int &currentTokenIdx, int level) {
+AssertNode *SimpleParser::parseAssert(const std::vector<Token> &tokens, int &currentTokenIdx, int level) const {
     if (!(currentTokenIdx < tokens.size() && tokens[currentTokenIdx].type == Token::ASSERT)) {
         return nullptr;
     }
-    std::cout << indent(level) << "parsing assert statement" << std::endl;
+    if (verbose) {
+        std::cout << indent(level) << "parsing assert statement" << std::endl;
+    }
 
     currentTokenIdx++;
 
@@ -517,8 +587,10 @@ AssertNode *parseAssert(const std::vector<Token> &tokens, int &currentTokenIdx, 
     return result;
 }
 
-StatementNode *parseStatement(const std::vector<Token> &tokens, int &currentTokenIdx, int level) {
-    std::cout << indent(level) << "parsing statement node" << std::endl;
+StatementNode *SimpleParser::parseStatement(const std::vector<Token> &tokens, int &currentTokenIdx, int level) const {
+    if (verbose) {
+        std::cout << indent(level) << "parsing statement node" << std::endl;
+    }
 
     while (currentTokenIdx < tokens.size() && tokens[currentTokenIdx].type == Token::NEW_LINE) {
         currentTokenIdx++;
@@ -534,7 +606,7 @@ StatementNode *parseStatement(const std::vector<Token> &tokens, int &currentToke
         return createStatementNode(assertNode);
     }
 
-    auto callNode = parseCall(tokens, currentTokenIdx, level + 1);
+    auto callNode = parseFunctionCall(tokens, currentTokenIdx, level + 1);
     if (callNode != nullptr) {
         return createStatementNode(callNode);
     }
@@ -598,7 +670,7 @@ void SimpleParser::run() {
             continue;
         }
 
-        std::cout << token.type << ": " << token.content << std::endl;
+        std::cerr << "Unexpected token: " << token.type << ": " << token.content << std::endl;
         count++;
     }
     module->root = nodeStack[0];

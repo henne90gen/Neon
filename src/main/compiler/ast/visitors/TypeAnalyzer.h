@@ -10,6 +10,7 @@ class TypeAnalyzer : public AstVisitor {
     explicit TypeAnalyzer(Module *module, const FunctionResolver &functionResolver)
         : module(module), functionResolver(functionResolver) {}
 
+    void visitAssertNode(AssertNode *node) override;
     void visitAssignmentNode(AssignmentNode *node) override;
     void visitBinaryOperationNode(BinaryOperationNode *node) override;
     void visitBoolNode(BoolNode *node) override;

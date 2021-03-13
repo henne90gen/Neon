@@ -34,11 +34,15 @@ bool Linker::link() {
     // Neon standard library
     s += " -lNeonStd";
 
-    std::cout << std::endl << "Calling linker with the following command:" << std::endl << s << std::endl;
+    if (verbose) {
+        std::cout << "Calling linker with the following command:" << std::endl << s << std::endl;
+    }
 
     const char *command = s.c_str();
     int statusCode = system(command);
 
-    std::cout << "Finished linking." << std::endl;
+    if (verbose) {
+        std::cout << "Finished linking." << std::endl;
+    }
     return statusCode != 0;
 }

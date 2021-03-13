@@ -42,6 +42,11 @@ llvm::Function *IrGenerator::getOrCreateStdLibFunction(const std::string &functi
         auto funcType = llvm::FunctionType::get(llvm::Type::getInt8PtrTy(context), arguments, false);
         return llvm::Function::Create(funcType, llvm::Function::ExternalLinkage, functionName, llvmModule);
     }
+    if (functionName == "exit") {
+        std::vector<llvm::Type *> arguments = {llvm::Type::getInt32Ty(context)};
+        auto funcType = llvm::FunctionType::get(llvm::Type::getVoidTy(context), arguments, false);
+        return llvm::Function::Create(funcType, llvm::Function::ExternalLinkage, functionName, llvmModule);
+    }
     return nullptr;
 }
 

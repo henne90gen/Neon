@@ -1,14 +1,14 @@
-#include "TypeFinder.h"
+#include "ComplexTypeFinder.h"
 
-void TypeFinder::visitSequenceNode(SequenceNode *node) {
+void ComplexTypeFinder::visitSequenceNode(SequenceNode *node) {
     for (auto child : node->getChildren()) {
         child->accept(this);
     }
 }
 
-void TypeFinder::visitStatementNode(StatementNode *node) { node->getChild()->accept(this); }
+void ComplexTypeFinder::visitStatementNode(StatementNode *node) { node->getChild()->accept(this); }
 
-void TypeFinder::visitTypeDeclarationNode(TypeDeclarationNode *node) {
+void ComplexTypeFinder::visitTypeDeclarationNode(TypeDeclarationNode *node) {
     ComplexType t = {.type = node->getType()};
 
     for (auto const &member : node->getMembers()) {
@@ -19,7 +19,7 @@ void TypeFinder::visitTypeDeclarationNode(TypeDeclarationNode *node) {
     types.push_back(t);
 }
 
-std::vector<ComplexType> TypeFinder::run(AstNode *rootNode) {
+std::vector<ComplexType> ComplexTypeFinder::run(AstNode *rootNode) {
     rootNode->accept(this);
     return types;
 }

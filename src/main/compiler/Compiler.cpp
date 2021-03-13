@@ -4,10 +4,10 @@
 #include "ast/AstGenerator.h"
 #include "ast/visitors/AstPrinter.h"
 #include "ast/visitors/AstTestCasePrinter.h"
+#include "ast/visitors/ComplexTypeFinder.h"
 #include "ast/visitors/FunctionFinder.h"
 #include "ast/visitors/ImportFinder.h"
 #include "ast/visitors/TypeAnalyzer.h"
-#include "ast/visitors/TypeFinder.h"
 #include "ir/IrGenerator.h"
 #include "simple-parser/SimpleParser.h"
 
@@ -34,7 +34,9 @@ bool Compiler::run() {
         auto itr = program->modules.find(moduleFileName);
         bool moduleAlreadyExists = itr != program->modules.end();
         if (moduleAlreadyExists) {
-            std::cout << "Skipping " << moduleFileName << " because it has already been processed" << std::endl;
+            if (verbose) {
+                std::cout << "Skipping " << moduleFileName << " because it has already been processed" << std::endl;
+            }
             continue;
         }
 
@@ -56,12 +58,20 @@ bool Compiler::run() {
 
     writeModuleToObjectFile();
 
-    std::cout << "Finished compilation." << std::endl;
+    if (verbose) {
+        std::cout << "Finished compilation." << std::endl;
+    }
     return false;
 }
 
 Module *Compiler::loadModule(const std::string &moduleFileName) {
     auto module = new Module(moduleFileName, program->llvmContext);
+
+    if (module->getFilePath().has_parent_path()) {
+        const auto moduleBuildDir =
+              std::filesystem::path(buildEnv->buildDirectory) / module->getFilePath().parent_path();
+        std::filesystem::create_directories(moduleBuildDir);
+    }
 
     Lexer lexer(module->getCodeProvider(), verbose);
 
@@ -82,7 +92,9 @@ Module *Compiler::loadModule(const std::string &moduleFileName) {
 #endif
 
     if (module->root == nullptr) {
-        std::cerr << "Could not create AST" << std::endl;
+        if (verbose) {
+            std::cerr << "Could not create AST" << std::endl;
+        }
         return module;
     }
 
@@ -96,7 +108,7 @@ Module *Compiler::loadModule(const std::string &moduleFileName) {
 
     moduleImportsMap[module] = ImportFinder(module->getDirectoryPath()).run(module->root);
     moduleFunctionsMap[module] = FunctionFinder().run(module->root);
-    moduleComplexTypesMap[module] = TypeFinder().run(module->root);
+    moduleComplexTypesMap[module] = ComplexTypeFinder().run(module->root);
 
     return module;
 }
@@ -163,7 +175,9 @@ void Compiler::writeModuleToObjectFile() {
     }
 
     // print llvm ir to console
-    module.print(llvm::outs(), nullptr);
+    if (verbose) {
+        module.print(llvm::outs(), nullptr);
+    }
 
     // print llvm ir to file
     {

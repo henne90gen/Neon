@@ -7,11 +7,13 @@
 
 class Linker {
   public:
-    explicit Linker(const Program *program, const BuildEnv *buildEnv) : program(program), buildEnv(buildEnv) {}
+    explicit Linker(const Program *program, const BuildEnv *buildEnv, bool verbose = true)
+        : program(program), buildEnv(buildEnv), verbose(verbose) {}
 
     bool link();
 
   private:
     const Program *program;
     const BuildEnv *buildEnv;
+    bool verbose;
 };

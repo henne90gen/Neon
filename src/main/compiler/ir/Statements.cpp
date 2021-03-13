@@ -119,3 +119,36 @@ void IrGenerator::visitForStatementNode(ForStatementNode *node) {
 
     LOG("Exit ForStatement");
 }
+
+void IrGenerator::visitAssertNode(AssertNode *node) {
+    LOG("Enter Assert");
+
+    node->getCondition()->accept(this);
+    auto condition = nodesToValues[node->getCondition()];
+
+    llvm::Function *function = builder.GetInsertBlock()->getParent();
+    llvm::BasicBlock *thenBB = llvm::BasicBlock::Create(context, "then", function);
+    llvm::BasicBlock *elseBB = llvm::BasicBlock::Create(context, "else");
+    llvm::BasicBlock *mergeBB = llvm::BasicBlock::Create(context, "if_merge");
+
+    builder.CreateCondBr(condition, thenBB, elseBB);
+
+    builder.SetInsertPoint(thenBB);
+    // create branch instruction to jump to the merge block
+    builder.CreateBr(mergeBB);
+
+    function->getBasicBlockList().push_back(elseBB);
+    builder.SetInsertPoint(elseBB);
+
+    auto exitCode = llvm::ConstantInt::get(llvm::IntegerType::getInt32Ty(context), 1);
+    std::vector<llvm::Value *> args = {exitCode};
+    createStdLibCall("exit", args);
+
+    // create branch instruction to jump to the merge block
+    builder.CreateBr(mergeBB);
+
+    function->getBasicBlockList().push_back(mergeBB);
+    builder.SetInsertPoint(mergeBB);
+
+    LOG("Exit Assert");
+}

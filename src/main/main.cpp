@@ -16,7 +16,7 @@ int main() {
         return 1;
     }
 
-    auto linker = Linker(program, buildEnv);
+    auto linker = Linker(program, buildEnv, verbose);
     if (linker.link()) {
         return 1;
     }

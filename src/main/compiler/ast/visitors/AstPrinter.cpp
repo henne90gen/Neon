@@ -196,6 +196,14 @@ void AstPrinter::visitMemberAccessNode(MemberAccessNode *node) {
               << "')" << std::endl;
 }
 
+void AstPrinter::visitAssertNode(AssertNode *node) {
+    indent(indentation);
+    std::cout << "AssertNode" << std::endl;
+    indentation++;
+    node->getCondition()->accept(this);
+    indentation--;
+}
+
 void AstPrinter::run() {
     if (module->root == nullptr) {
         std::cerr << "Could not print AST (nullptr)." << std::endl;

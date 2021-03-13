@@ -138,7 +138,9 @@ void IrGenerator::run() {
         exit(1);
     } else {
         this->writeToFile();
-        llvmModule.print(llvm::outs(), nullptr);
+        if (verbose) {
+            llvmModule.print(llvm::outs(), nullptr);
+        }
     }
 }
 
@@ -182,6 +184,9 @@ void IrGenerator::withScope(const std::function<void(void)> &func) {
 }
 
 void IrGenerator::printMetrics() {
+    if (!verbose) {
+        return;
+    }
     for (const auto &metric : metrics) {
         std::cout << metric.first << ": " << metric.second << std::endl;
     }
