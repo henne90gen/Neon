@@ -2,24 +2,19 @@
 
 #include <iostream>
 
-#include "../ast/Types.h"
-
 Token SimpleParser::getNextToken() {
-    const Token token = lexer.getToken();
+    Token token = lexer.getToken();
     module->tokens.push_back(token);
     return token;
 }
 
 std::string indent(int level) {
-    std::string result = "";
+    std::string result;
     for (int i = 0; i < level; i++) {
         result += " ";
     }
     return result;
 }
-
-AstNode *parseExpression(const std::vector<Token> &tokens, int &currentTokenIdx, int level);
-StatementNode *parseStatement(const std::vector<Token> &tokens, int &currentTokenIdx, int level);
 
 ImportNode *parseImport(const std::vector<Token> &tokens, int &currentTokenIdx) {
     if (tokens[currentTokenIdx].type != Token::IMPORT) {
@@ -535,7 +530,52 @@ ForStatementNode *SimpleParser::parseFor(const std::vector<Token> &tokens, int &
         std::cout << indent(level) << "parsing for statement" << std::endl;
     }
 
+    auto beforeTokenIdx = currentTokenIdx;
+    currentTokenIdx++;
+
+    auto init = parseStatement(tokens, currentTokenIdx, level + 1);
+    if (init == nullptr) {
+        currentTokenIdx = beforeTokenIdx;
+        return nullptr;
+    }
+
+    if (!(currentTokenIdx < tokens.size() && tokens[currentTokenIdx].type == Token::SEMICOLON)) {
+        currentTokenIdx = beforeTokenIdx;
+        return nullptr;
+    }
+
+    currentTokenIdx++;
+
+    auto condition = parseExpression(tokens, currentTokenIdx, level + 1);
+    if (condition == nullptr) {
+        currentTokenIdx = beforeTokenIdx;
+        return nullptr;
+    }
+
+    if (!(currentTokenIdx < tokens.size() && tokens[currentTokenIdx].type == Token::SEMICOLON)) {
+        currentTokenIdx = beforeTokenIdx;
+        return nullptr;
+    }
+
+    currentTokenIdx++;
+
+    auto update = parseStatement(tokens, currentTokenIdx, level + 1);
+    if (update == nullptr) {
+        currentTokenIdx = beforeTokenIdx;
+        return nullptr;
+    }
+
+    auto body = parseScope(tokens, currentTokenIdx, level + 1);
+    if (body == nullptr) {
+        currentTokenIdx = beforeTokenIdx;
+        return nullptr;
+    }
+
     auto forStatement = new ForStatementNode();
+    forStatement->setInit(init);
+    forStatement->setCondition(condition);
+    forStatement->setUpdate(update);
+    forStatement->setBody(body);
     return forStatement;
 }
 
@@ -670,7 +710,9 @@ void SimpleParser::run() {
             continue;
         }
 
-        std::cerr << "Unexpected token: " << token.type << ": " << token.content << std::endl;
+        if (verbose) {
+            std::cerr << "Unexpected token: " << token.type << ": " << token.content << std::endl;
+        }
         count++;
     }
     module->root = nodeStack[0];

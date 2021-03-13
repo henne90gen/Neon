@@ -347,51 +347,36 @@ TEST_CASE("SimpleParser") {
 
     SECTION("can handle 'for int i = 0; i < 10; i = i + 1 { }'") {
         std::vector<AstNodeSpec> spec = {
-              {0, ast::NodeType::SEQUENCE},
-              {1, ast::NodeType::STATEMENT},
-              {2, ast::NodeType::FOR_STATEMENT},
-              {3, ast::NodeType::ASSIGNMENT},
-              {4, ast::NodeType::VARIABLE_DEFINITION},
-              {4, ast::NodeType::LITERAL},
-              {3, ast::NodeType::BINARY_OPERATION},
-              {4, ast::NodeType::VARIABLE},
-              {4, ast::NodeType::LITERAL},
-              {3, ast::NodeType::ASSIGNMENT},
-              {4, ast::NodeType::VARIABLE},
-              {4, ast::NodeType::BINARY_OPERATION},
-              {5, ast::NodeType::VARIABLE},
-              {5, ast::NodeType::LITERAL},
+              {0, ast::NodeType::SEQUENCE},      {1, ast::NodeType::STATEMENT},
+              {2, ast::NodeType::FOR_STATEMENT}, {3, ast::NodeType::STATEMENT},
+              {4, ast::NodeType::ASSIGNMENT},    {5, ast::NodeType::VARIABLE_DEFINITION},
+              {5, ast::NodeType::LITERAL},       {3, ast::NodeType::BINARY_OPERATION},
+              {4, ast::NodeType::VARIABLE},      {4, ast::NodeType::LITERAL},
+              {3, ast::NodeType::STATEMENT},     {4, ast::NodeType::ASSIGNMENT},
+              {5, ast::NodeType::VARIABLE},      {5, ast::NodeType::BINARY_OPERATION},
+              {6, ast::NodeType::VARIABLE},      {6, ast::NodeType::LITERAL},
+              {3, ast::NodeType::SEQUENCE},
         };
         std::vector<std::string> program = {"for int i = 0; i < 10; i = i + 1 { }"};
-        // FIXME       assertProgramCreatesAstWithSimpleParser(program, spec);
-        REQUIRE(false);
+        assertProgramCreatesAstWithSimpleParser(program, spec);
     }
 
     SECTION("can handle 'for int i = 0; i < 10; i = i + 1 { int a = 0 }'") {
         std::vector<AstNodeSpec> spec = {
-              {0, ast::NodeType::SEQUENCE},
-              {1, ast::NodeType::STATEMENT},
-              {2, ast::NodeType::FOR_STATEMENT},
-              {3, ast::NodeType::ASSIGNMENT},
-              {4, ast::NodeType::VARIABLE_DEFINITION},
-              {4, ast::NodeType::LITERAL},
-              {3, ast::NodeType::BINARY_OPERATION},
-              {4, ast::NodeType::VARIABLE},
-              {4, ast::NodeType::LITERAL},
-              {3, ast::NodeType::ASSIGNMENT},
-              {4, ast::NodeType::VARIABLE},
-              {4, ast::NodeType::BINARY_OPERATION},
-              {5, ast::NodeType::VARIABLE},
-              {5, ast::NodeType::LITERAL},
-              {3, ast::NodeType::SEQUENCE},
-              {4, ast::NodeType::STATEMENT},
-              {5, ast::NodeType::ASSIGNMENT},
-              {6, ast::NodeType::VARIABLE_DEFINITION},
+              {0, ast::NodeType::SEQUENCE},      {1, ast::NodeType::STATEMENT},
+              {2, ast::NodeType::FOR_STATEMENT}, {3, ast::NodeType::STATEMENT},
+              {4, ast::NodeType::ASSIGNMENT},    {5, ast::NodeType::VARIABLE_DEFINITION},
+              {5, ast::NodeType::LITERAL},       {3, ast::NodeType::BINARY_OPERATION},
+              {4, ast::NodeType::VARIABLE},      {4, ast::NodeType::LITERAL},
+              {3, ast::NodeType::STATEMENT},     {4, ast::NodeType::ASSIGNMENT},
+              {5, ast::NodeType::VARIABLE},      {5, ast::NodeType::BINARY_OPERATION},
+              {6, ast::NodeType::VARIABLE},      {6, ast::NodeType::LITERAL},
+              {3, ast::NodeType::SEQUENCE},      {4, ast::NodeType::STATEMENT},
+              {5, ast::NodeType::ASSIGNMENT},    {6, ast::NodeType::VARIABLE_DEFINITION},
               {6, ast::NodeType::LITERAL},
         };
         std::vector<std::string> program = {"for int i = 0; i < 10; i = i + 1 {", "int a = 0", "}"};
-        // FIXME       assertProgramCreatesAstWithSimpleParser(program, spec);
-        REQUIRE(false);
+        assertProgramCreatesAstWithSimpleParser(program, spec);
     }
 
     SECTION("can handle array example") {

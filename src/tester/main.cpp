@@ -37,7 +37,6 @@ TestResult compileAndRun(const std::string &path, const bool verbose) {
     auto start = std::chrono::high_resolution_clock::now();
     auto compiler = Compiler(program, buildEnv, verbose);
     if (compiler.run()) {
-        std::cout << "Aborting after failed compilation..." << std::endl;
         return {
               .exitCode = -1,
         };
@@ -45,7 +44,6 @@ TestResult compileAndRun(const std::string &path, const bool verbose) {
 
     auto linker = Linker(program, buildEnv, verbose);
     if (linker.link()) {
-        std::cout << "Aborting after failed linking..." << std::endl;
         return {
               .exitCode = -1,
         };
@@ -54,7 +52,6 @@ TestResult compileAndRun(const std::string &path, const bool verbose) {
     auto compileTimeNs = std::chrono::duration_cast<std::chrono::nanoseconds>(end - start);
 
     start = std::chrono::high_resolution_clock::now();
-    // TODO this does not return the correct exit code (maybe use popen?)
     int exitCode = std::system((buildEnv->buildDirectory + program->name).c_str());
     end = std::chrono::high_resolution_clock::now();
 

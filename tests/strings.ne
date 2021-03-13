@@ -9,6 +9,8 @@ fun main() int {
         string s4 = " This is nuts!"
         s0 = s0 + s1 + s2 + s3 + s4
     }
+
     ps(s0)
+
     return 0
 }

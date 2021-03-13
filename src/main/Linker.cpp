@@ -38,6 +38,7 @@ bool Linker::link() {
         std::cout << "Calling linker with the following command:" << std::endl << s << std::endl;
     }
 
+    // TODO capture stdout and stderr. only print to console when verbose==true
     const char *command = s.c_str();
     int statusCode = system(command);
 

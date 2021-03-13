@@ -6,5 +6,7 @@ type MyType {
 fun main() int {
     MyType t = MyType()
     t.i = 5
-    return t.i
+    assert t.i == 5
+
+    return 0
 }
