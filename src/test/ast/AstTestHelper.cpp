@@ -2,7 +2,7 @@
 
 #include "compiler/ast/nodes/AllNodes.h"
 #include "compiler/ast/visitors/AstPrinter.h"
-#include "compiler/simple-parser/SimpleParser.h"
+#include "compiler/parser/SimpleParser.h"
 
 #include <catch2/catch.hpp>
 #include <iostream>
@@ -216,21 +216,6 @@ SimpleTree *createSimpleFromAst(AstNode *node) {
         exit(1);
         return nullptr;
     }
-}
-
-void assertProgramCreatesAst(const std::vector<std::string> &program, std::vector<AstNodeSpec> &spec) {
-    int index = 0;
-    auto expected = createSimpleFromSpecification(spec, index);
-    CodeProvider *codeProvider = new StringCodeProvider(program, true);
-    auto context = new llvm::LLVMContext();
-    auto prog = new Module("test.ne", *context);
-    auto lexer = Lexer(codeProvider);
-    Parser parser(lexer, prog->tokens, false);
-    ParseTreeNode *parseTree = parser.createParseTree();
-    auto astGenerator = AstGenerator(prog);
-    astGenerator.run(parseTree);
-    auto actual = prog->root;
-    assertAstsAreEqual(expected, createSimpleFromAst(actual), 0);
 }
 
 void assertProgramCreatesAstWithSimpleParser(const std::vector<std::string> &program, std::vector<AstNodeSpec> &spec) {

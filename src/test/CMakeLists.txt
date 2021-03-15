@@ -7,7 +7,6 @@ set(SOURCES_TEST
         parser/ParserTest.cpp
         parser/FunctionTest.cpp
         parser/OperationTest.cpp
-        ast/AstGeneratorTest.cpp
         ast/SimpleParserTest.cpp
         ast/AstTestHelper.cpp)
 
@@ -15,14 +14,14 @@ add_executable(Tests ${SOURCES_TEST})
 target_include_directories(Tests
         PRIVATE ${CATCH_INCLUDE_DIR}
         ${PROJECT_SOURCE_DIR}/src/main)
-target_link_libraries(Tests NeonGrammar NeonCompiler)
+target_link_libraries(Tests NeonCompiler)
 catch_discover_tests(Tests)
 
 
 add_executable(FuzzTests fuzz/LexerFuzzTester.cpp)
 target_include_directories(FuzzTests PRIVATE ${PROJECT_SOURCE_DIR}/src/main)
 target_compile_options(FuzzTests PRIVATE $<$<C_COMPILER_ID:Clang>:-g -O1 -fsanitize=fuzzer>)
-target_link_libraries(FuzzTests PRIVATE $<$<C_COMPILER_ID:Clang>:-fsanitize=fuzzer> NeonGrammar NeonCompiler)
+target_link_libraries(FuzzTests PRIVATE $<$<C_COMPILER_ID:Clang>:-fsanitize=fuzzer> NeonCompiler)
 
 # Allow short runs during automated testing to see if something new breaks
 set(FUZZ_RUNTIME 5 CACHE STRING "Number of seconds to run fuzz tests during ctest run")

@@ -2,36 +2,15 @@
 
 #include "ParserTest.h"
 
-ParseTreeNode *createParseTree(const std::vector<std::pair<int, GrammarSymbol>> &tree, int &index,
-                               int indentation = 0) {
-    auto firstLine = tree[index];
-    auto node = new ParseTreeNode();
-    node->symbol = firstLine.second;
-    while (index + 1 < tree.size() && tree[index + 1].first > indentation) {
-        index++;
-        auto child = createParseTree(tree, index, indentation + 1);
-        node->children.push_back(child);
-    }
-    return node;
-}
-
-void assertParseTreesAreEqual(ParseTreeNode *node1, ParseTreeNode *node2) {
-    INFO("Node " + to_string(node1->symbol) + " | Node " + to_string(node2->symbol))
-    REQUIRE(node1->symbol == node2->symbol);
-    REQUIRE(node1->children.size() == node2->children.size());
-    for (unsigned long i = 0; i < node1->children.size(); i++) {
-        assertParseTreesAreEqual(node1->children[i], node2->children[i]);
-    }
-}
-
 void assertParserAccepts(const std::vector<std::string> &program) {
-    CodeProvider *cp = new StringCodeProvider(program, true);
-    auto tokens = std::vector<Token>();
-    Lexer lexer(cp, false);
-    Parser parser(lexer, tokens, false);
-
-    ParseTreeNode *actual = parser.createParseTree();
-    REQUIRE(actual != nullptr);
+//    CodeProvider *cp = new StringCodeProvider(program, true);
+//    auto tokens = std::vector<Token>();
+//    Lexer lexer(cp, false);
+//    Parser parser(lexer, tokens, false);
+//
+//    ParseTreeNode *actual = parser.createParseTree();
+//    REQUIRE(actual != nullptr);
+      REQUIRE(false);
 }
 
 TEST_CASE("Parser Basics") {

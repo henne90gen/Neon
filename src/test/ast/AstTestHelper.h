@@ -1,8 +1,8 @@
 #pragma once
 
-#include "compiler/parser/Parser.h"
+#include <vector>
+#include <string>
 
-#include "compiler/ast/AstGenerator.h"
 #include "compiler/ast/nodes/AstNode.h"
 
 struct AstNodeSpec {
@@ -17,5 +17,4 @@ struct SimpleTree {
 
 SimpleTree *createSimpleFromAst(AstNode *node);
 
-void assertProgramCreatesAst(const std::vector<std::string> &program, std::vector<AstNodeSpec> &spec);
 void assertProgramCreatesAstWithSimpleParser(const std::vector<std::string> &program, std::vector<AstNodeSpec> &spec);
