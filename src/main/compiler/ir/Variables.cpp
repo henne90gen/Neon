@@ -48,6 +48,15 @@ void IrGenerator::visitVariableDefinitionNode(VariableDefinitionNode *node) {
               getInitializer(node->getType(), node->isArray(), node->getArraySize()));
     } else {
         value = createEntryBlockAlloca(type, name);
+        int sizeOfInt64 = 8;
+        llvm::CastInst *arrayPtr =
+              llvm::CastInst::CreatePointerCast(value, llvm::Type::getInt8PtrTy(context), "", builder.GetInsertBlock());
+        std::vector<llvm::Value *> args = {
+              arrayPtr,
+              llvm::ConstantInt::get(llvm::Type::getInt32Ty(context), 0),
+              llvm::ConstantInt::get(llvm::Type::getInt64Ty(context), node->getArraySize() * sizeOfInt64),
+        };
+        createStdLibCall("memset", args);
     }
 
     currentScope().definedVariables[name] = value;
@@ -80,7 +89,8 @@ void IrGenerator::visitAssignmentNode(AssignmentNode *node) {
         }
     } else if (node->getLeft()->getAstNodeType() == ast::NodeType::MEMBER_ACCESS) {
         // TODO this is a hack!
-        //  setting currentDestination to 1 is used as a flag to signal to visitMemberAccessNode that we are going to write to its result
+        //  setting currentDestination to 1 is used as a flag to signal to visitMemberAccessNode that we are going to
+        //  write to its result
         currentDestination = reinterpret_cast<llvm::Value *>(1);
         node->getLeft()->accept(this);
         dest = nodesToValues[node->getLeft()];

@@ -120,6 +120,17 @@ void IrGenerator::visitForStatementNode(ForStatementNode *node) {
     LOG("Exit ForStatement");
 }
 
+std::string IrGenerator::getTypeFormatSpecifier(AstNode *node) {
+    auto type = typeResolver.getTypeOf(node);
+    if (type == ast::DataType(ast::SimpleDataType::INT)) {
+        return "ld";
+    }
+    if (type == ast::DataType(ast::SimpleDataType::FLOAT)) {
+        return "f";
+    }
+    return "%d";
+}
+
 void IrGenerator::visitAssertNode(AssertNode *node) {
     LOG("Enter Assert");
 
@@ -140,7 +151,26 @@ void IrGenerator::visitAssertNode(AssertNode *node) {
     function->getBasicBlockList().push_back(elseBB);
     builder.SetInsertPoint(elseBB);
 
-    auto exitCode = llvm::ConstantInt::get(llvm::IntegerType::getInt32Ty(context), 1);
+    if (node->getCondition()->getAstNodeType() == ast::BINARY_OPERATION) {
+        auto binaryOperation = reinterpret_cast<BinaryOperationNode *>(node->getCondition());
+        const std::string leftTypeSpecifier = getTypeFormatSpecifier(binaryOperation->getLeft());
+        const std::string rightTypeSpecifier = getTypeFormatSpecifier(binaryOperation->getRight());
+        const std::string format = "> assert %s\nE assert %" + leftTypeSpecifier +
+                                   binaryOperation->operationToString() + "%" + rightTypeSpecifier + "\n";
+        const auto formatStr = builder.CreateGlobalStringPtr(format);
+        const auto conditionStr = builder.CreateGlobalStringPtr(binaryOperation->toString());
+        const auto left = nodesToValues[binaryOperation->getLeft()];
+        const auto right = nodesToValues[binaryOperation->getRight()];
+        std::vector<llvm::Value *> args = {
+              formatStr,
+              conditionStr,
+              left,
+              right,
+        };
+        createStdLibCall("printf", args);
+    }
+
+    auto exitCode = llvm::ConstantInt::get(llvm::Type::getInt32Ty(context), 1);
     std::vector<llvm::Value *> args = {exitCode};
     createStdLibCall("exit", args);
 

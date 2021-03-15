@@ -99,4 +99,6 @@ class IrGenerator : public AstVisitor {
 
     llvm::Function *getOrCreateStdLibFunction(const std::string &functionName);
     llvm::Value *createStdLibCall(const std::string &functionName, const std::vector<llvm::Value *> &args);
+
+    std::string getTypeFormatSpecifier(AstNode *node);
 };

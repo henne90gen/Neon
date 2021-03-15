@@ -7,13 +7,11 @@ class VariableNode : public AstNode {
     explicit VariableNode(std::string name);
 
     void accept(AstVisitor *v) override;
+    std::string toString() override;
 
     std::string &getName();
-
     bool isArrayAccess();
-
     AstNode* getArrayIndex();
-
     void setArrayIndex(AstNode* arrayIndex);
 
   private:

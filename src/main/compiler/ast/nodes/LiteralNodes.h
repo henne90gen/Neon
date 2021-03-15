@@ -22,7 +22,7 @@ class BoolNode : public LiteralNode {
 
     void accept(AstVisitor *v) override;
 
-    bool getValue() { return value; }
+    [[nodiscard]] bool getValue() const { return value; }
 
   private:
     bool value;
@@ -33,8 +33,9 @@ class IntegerNode : public LiteralNode {
     explicit IntegerNode(int value) : LiteralNode(LiteralNode::INTEGER), value(value) {}
 
     void accept(AstVisitor *v) override;
+    std::string toString() override;
 
-    int getValue() { return value; }
+    [[nodiscard]] int getValue() const { return value; }
 
   private:
     int value;
@@ -45,8 +46,9 @@ class FloatNode : public LiteralNode {
     explicit FloatNode(float value) : LiteralNode(LiteralNode::FLOAT), value(value) {}
 
     void accept(AstVisitor *v) override;
+    std::string toString() override;
 
-    double getValue() { return value; }
+    [[nodiscard]] double getValue() const { return value; }
 
   private:
     float value;
@@ -57,8 +59,9 @@ class StringNode : public LiteralNode {
     explicit StringNode(std::string value) : LiteralNode(LiteralNode::STRING), value(std::move(value)) {}
 
     void accept(AstVisitor *v) override;
+    std::string toString() override;
 
-    std::string getValue() { return value; }
+    [[nodiscard]] std::string getValue() const { return value; }
 
   private:
     std::string value;

@@ -9,6 +9,7 @@ class BinaryOperationNode : public AstNode {
     explicit BinaryOperationNode(ast::BinaryOperationType type) : AstNode(ast::NodeType::BINARY_OPERATION), type(type) {}
 
     void accept(AstVisitor *v) override;
+    std::string toString() override;
 
     AstNode *getLeft();
     void setLeft(AstNode *left);
@@ -17,6 +18,7 @@ class BinaryOperationNode : public AstNode {
     AstNode *getRight();
 
     ast::BinaryOperationType getType();
+    std::string operationToString();
 
   private:
     ast::BinaryOperationType type;

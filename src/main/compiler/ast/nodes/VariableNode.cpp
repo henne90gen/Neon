@@ -10,8 +10,13 @@ std::string &VariableNode::getName() { return name; }
 
 bool VariableNode::isArrayAccess() { return arrayIndex != nullptr; }
 
-AstNode* VariableNode::getArrayIndex() { return this->arrayIndex; }
+AstNode *VariableNode::getArrayIndex() { return this->arrayIndex; }
 
-void VariableNode::setArrayIndex(AstNode* arrayIndex) {
-    this->arrayIndex = arrayIndex;
+void VariableNode::setArrayIndex(AstNode *arrayIndex) { this->arrayIndex = arrayIndex; }
+
+std::string VariableNode::toString() {
+    if (isArrayAccess()) {
+        return name + "[" + arrayIndex->toString() + "]";
+    }
+    return name;
 }

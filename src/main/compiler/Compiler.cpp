@@ -1,7 +1,6 @@
 #include "Compiler.h"
 
 #include "FunctionResolver.h"
-#include "ast/AstGenerator.h"
 #include "ast/visitors/AstPrinter.h"
 #include "ast/visitors/AstTestCasePrinter.h"
 #include "ast/visitors/ComplexTypeFinder.h"
@@ -9,7 +8,7 @@
 #include "ast/visitors/ImportFinder.h"
 #include "ast/visitors/TypeAnalyzer.h"
 #include "ir/IrGenerator.h"
-#include "simple-parser/SimpleParser.h"
+#include "parser/SimpleParser.h"
 
 #include <iostream>
 #include <string>

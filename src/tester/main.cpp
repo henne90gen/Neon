@@ -1,7 +1,6 @@
 #include <filesystem>
 #include <iostream>
 #include <string>
-#include <sys/wait.h>
 
 #include <BuildEnv.h>
 #include <Linker.h>
