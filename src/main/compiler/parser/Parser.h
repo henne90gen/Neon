@@ -3,9 +3,9 @@
 #include "../../Module.h"
 #include "../ast/nodes/AllNodes.h"
 
-class SimpleParser {
+class Parser {
   public:
-    SimpleParser(Lexer &lexer, Module *module, bool verbose) : lexer(lexer), module(module), verbose(verbose) {}
+    Parser(Lexer &lexer, Module *module, bool verbose) : lexer(lexer), module(module), verbose(verbose) {}
 
     void run();
 

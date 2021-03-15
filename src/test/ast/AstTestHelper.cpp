@@ -2,7 +2,7 @@
 
 #include "compiler/ast/nodes/AllNodes.h"
 #include "compiler/ast/visitors/AstPrinter.h"
-#include "compiler/parser/SimpleParser.h"
+#include "compiler/parser/Parser.h"
 
 #include <catch2/catch.hpp>
 #include <iostream>
@@ -226,7 +226,7 @@ void assertProgramCreatesAstWithSimpleParser(const std::vector<std::string> &pro
     auto prog = new Module("test.ne", *context);
     auto lexer = Lexer(codeProvider);
 
-    SimpleParser parser(lexer, prog, false);
+    Parser parser(lexer, prog, false);
     parser.run();
 
     auto astPrinter = AstPrinter(prog);

@@ -8,7 +8,7 @@
 #include "ast/visitors/ImportFinder.h"
 #include "ast/visitors/TypeAnalyzer.h"
 #include "ir/IrGenerator.h"
-#include "parser/SimpleParser.h"
+#include "parser/Parser.h"
 
 #include <iostream>
 #include <string>
@@ -74,21 +74,8 @@ Module *Compiler::loadModule(const std::string &moduleFileName) {
 
     Lexer lexer(module->getCodeProvider(), verbose);
 
-#define USE_SIMPLE_PARSER 1
-#if USE_SIMPLE_PARSER
-    SimpleParser parser(lexer, module, verbose);
+    Parser parser(lexer, module, verbose);
     parser.run();
-#else
-    Parser parser(lexer, module->tokens, verbose);
-    auto parseTreeRoot = parser.createParseTree();
-    if (verbose) {
-        printParseTree(parseTreeRoot);
-        printParseTreeTestCase(parseTreeRoot, module->toArrayString());
-    }
-
-    auto astGenerator = AstGenerator(module);
-    astGenerator.run(parseTreeRoot);
-#endif
 
     if (module->root == nullptr) {
         if (verbose) {

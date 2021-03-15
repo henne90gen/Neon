@@ -70,6 +70,10 @@ int main() {
     std::cout << std::setprecision(2);
     bool success = true;
 
+    int totalNumTests = 0;
+    int successfulTests = 0;
+    double compileTimeTotalMillis = 0;
+    double runTimeTotalMillis = 0;
     for (const auto &path : std::filesystem::recursive_directory_iterator(testDirectory)) {
         if (path.is_directory()) {
             continue;
@@ -77,22 +81,31 @@ int main() {
         if (!endsWith(path.path().string(), "_test.ne")) {
             continue;
         }
+        totalNumTests++;
 
         const TestResult &result = compileAndRun(path.path().string(), verbose);
         if (!result.success()) {
-            std::cout << "FAILURE ";
+            std::cout << "FAILURE";
             success = false;
         } else {
-            std::cout << "SUCCESS ";
+            std::cout << "SUCCESS";
+            successfulTests++;
         }
 
-        std::cout << " (exitCode: " << result.exitCode << ", compile: " << result.compileTimeMillis()
-                  << "ms, run: " << result.runTimeMillis() << "ms): " << path << std::endl;
+        compileTimeTotalMillis += result.compileTimeMillis();
+        runTimeTotalMillis += result.runTimeMillis();
+        std::cout << " (compile: " << std::setw(7) << result.compileTimeMillis() << "ms, run: " << std::setw(7)
+                  << result.runTimeMillis() << "ms, exitCode: " << result.exitCode << "): " << path << std::endl;
     }
 
-    if (success) {
-        return 0;
-    } else {
-        return 1;
+    int exitCode = 0;
+    if (!success) {
+        exitCode = 1;
     }
+    std::cout << std::endl
+              << "RESULTS (compile: " << std::setw(7) << compileTimeTotalMillis << "ms, run: " << std::setw(7)
+              << runTimeTotalMillis << "ms, exitCode: " << exitCode << "): " << successfulTests << "/" << totalNumTests
+              << " tests successful" << std::endl;
+
+    return exitCode;
 }

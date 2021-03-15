@@ -396,7 +396,7 @@ TEST_CASE("SimpleParser") {
               {1, ast::NodeType::STATEMENT},
               {2, ast::NodeType::IMPORT},
         };
-        std::vector<std::string> program = {"import \"examples/functions\""};
+        std::vector<std::string> program = {"import \"examples/functions.ne\""};
         assertProgramCreatesAstWithSimpleParser(program, spec);
     }
 
