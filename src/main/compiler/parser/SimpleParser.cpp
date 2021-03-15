@@ -83,13 +83,34 @@ LiteralNode *SimpleParser::parseLiteral(const std::vector<Token> &tokens, int &c
     return nullptr;
 }
 
-VariableNode *parseVariable(const std::vector<Token> &tokens, int &currentTokenIdx, int level) {
+VariableNode *SimpleParser::parseVariable(const std::vector<Token> &tokens, int &currentTokenIdx, int level) const {
     if (!(currentTokenIdx < tokens.size() && tokens[currentTokenIdx].type == Token::IDENTIFIER)) {
         return nullptr;
     }
+    auto beforeTokenIdx = currentTokenIdx;
     std::string name = tokens[currentTokenIdx].content;
     currentTokenIdx++;
-    return new VariableNode(name);
+
+    AstNode *expression = nullptr;
+    if (currentTokenIdx < tokens.size() && tokens[currentTokenIdx].type == Token::LEFT_BRACKET) {
+        currentTokenIdx++;
+
+        expression = parseExpression(tokens, currentTokenIdx, level + 1);
+        if (expression == nullptr) {
+            currentTokenIdx = beforeTokenIdx;
+            return nullptr;
+        }
+        if (!(currentTokenIdx < tokens.size() && tokens[currentTokenIdx].type == Token::RIGHT_BRACKET)) {
+            currentTokenIdx = beforeTokenIdx;
+            return nullptr;
+        }
+
+        currentTokenIdx++;
+    }
+
+    auto result = new VariableNode(name);
+    result->setArrayIndex(expression);
+    return result;
 }
 
 AstNode *SimpleParser::parseBinaryLeft(const std::vector<Token> &tokens, int &currentTokenIdx, int level) const {
@@ -318,22 +339,57 @@ VariableDefinitionNode *SimpleParser::parseVariableDefinition(const std::vector<
         std::cout << indent(level) << "parsing variable definition node" << std::endl;
     }
 
-    if (tokens[currentTokenIdx].type == Token::SIMPLE_DATA_TYPE &&
-        (currentTokenIdx + 1 < tokens.size() && tokens[currentTokenIdx + 1].type == Token::IDENTIFIER)) {
-        std::string variableName = tokens[currentTokenIdx + 1].content;
+    auto beforeTokenIdx = currentTokenIdx;
+    if (currentTokenIdx < tokens.size() && tokens[currentTokenIdx].type == Token::SIMPLE_DATA_TYPE) {
         auto dataType = ast::DataType(from_string(tokens[currentTokenIdx].content));
-        auto variableDefinitionNode = new VariableDefinitionNode(variableName, dataType);
-        currentTokenIdx += 2;
-        if (verbose) {
-            std::cout << indent(level) << "parsed variable definition with simple data type" << std::endl;
+
+        currentTokenIdx++;
+
+        if (currentTokenIdx < tokens.size() && tokens[currentTokenIdx].type == Token::IDENTIFIER) {
+            std::string variableName = tokens[currentTokenIdx].content;
+            auto variableDefinitionNode = new VariableDefinitionNode(variableName, dataType);
+            if (verbose) {
+                std::cout << indent(level) << "parsed variable definition with simple data type" << std::endl;
+            }
+            currentTokenIdx++;
+            return variableDefinitionNode;
+        } else if (currentTokenIdx < tokens.size() && tokens[currentTokenIdx].type == Token::LEFT_BRACKET) {
+            currentTokenIdx++;
+
+            auto literal = parseLiteral(tokens, currentTokenIdx, level + 1);
+            if (literal == nullptr || literal->getLiteralType() != LiteralNode::INTEGER) {
+                currentTokenIdx = beforeTokenIdx;
+                return nullptr;
+            }
+            auto arraySizeLiteral = reinterpret_cast<IntegerNode *>(literal);
+
+            if (!(currentTokenIdx < tokens.size() && tokens[currentTokenIdx].type == Token::RIGHT_BRACKET)) {
+                currentTokenIdx = beforeTokenIdx;
+                return nullptr;
+            }
+
+            currentTokenIdx++;
+
+            if (!(currentTokenIdx < tokens.size() && tokens[currentTokenIdx].type == Token::IDENTIFIER)) {
+                currentTokenIdx = beforeTokenIdx;
+                return nullptr;
+            }
+
+            std::string variableName = tokens[currentTokenIdx].content;
+            auto arraySize = arraySizeLiteral->getValue();
+            auto variableDefinitionNode = new VariableDefinitionNode(variableName, dataType, arraySize);
+
+            currentTokenIdx++;
+            return variableDefinitionNode;
         }
-        return variableDefinitionNode;
     }
+
+    // TODO parse array definitions as well
+    // TODO parse custom types as well
 
     if (verbose) {
         std::cout << indent(level) << "failed to parse variable definition" << std::endl;
     }
-    // TODO parse custom types as well
 
     return nullptr;
 }
@@ -449,8 +505,10 @@ AssignmentNode *SimpleParser::parseAssignment(const std::vector<Token> &tokens, 
     if (verbose) {
         std::cout << indent(level) << "parsing assignment statement" << std::endl;
     }
+    auto beforeTokenIdx = currentTokenIdx;
     auto left = parseAssignmentLeft(tokens, currentTokenIdx, level + 1);
     if (left == nullptr) {
+        currentTokenIdx = beforeTokenIdx;
         return nullptr;
     }
     if (verbose) {
@@ -458,12 +516,14 @@ AssignmentNode *SimpleParser::parseAssignment(const std::vector<Token> &tokens, 
     }
 
     if (!(currentTokenIdx < tokens.size() && tokens[currentTokenIdx].type == Token::SINGLE_EQUALS)) {
+        currentTokenIdx = beforeTokenIdx;
         return nullptr;
     }
     currentTokenIdx++;
 
     auto right = parseExpression(tokens, currentTokenIdx, level + 1);
     if (right == nullptr) {
+        currentTokenIdx = beforeTokenIdx;
         return nullptr;
     }
 
@@ -669,6 +729,11 @@ StatementNode *SimpleParser::parseStatement(const std::vector<Token> &tokens, in
     auto assignmentNode = parseAssignment(tokens, currentTokenIdx, level + 1);
     if (assignmentNode != nullptr) {
         return createStatementNode(assignmentNode);
+    }
+
+    auto variableDefinition = parseVariableDefinition(tokens, currentTokenIdx, level + 1);
+    if (variableDefinition != nullptr) {
+        return createStatementNode(variableDefinition);
     }
 
     auto returnStatement = parseReturnStatement(tokens, currentTokenIdx, level + 1);

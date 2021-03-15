@@ -27,7 +27,7 @@ class SimpleParser {
     VariableDefinitionNode *parseVariableDefinition(const std::vector<Token> &tokens, int &currentTokenIdx,
                                                     int level) const;
     CallNode *parseFunctionCall(const std::vector<Token> &tokens, int &currentTokenIdx, int level) const;
-
+    VariableNode *parseVariable(const std::vector<Token> &tokens, int &currentTokenIdx, int level) const;
     AstNode *parseExpression(const std::vector<Token> &tokens, int &currentTokenIdx, int level) const;
     AstNode *parseAssignmentLeft(const std::vector<Token> &tokens, int &currentTokenIdx, int level) const;
     BinaryOperationNode *parseBinaryOperation(const std::vector<Token> &tokens, int &currentTokenIdx, int level) const;
