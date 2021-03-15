@@ -11,7 +11,7 @@ class AstNode {
 
     virtual void accept(AstVisitor *v) = 0;
 
-    // TODO make this a pure virtual function
+    // TODO make this a pure virtual function at some point
     virtual std::string toString() { return "not implemented"; }
 
     ast::NodeType getAstNodeType() { return type; }

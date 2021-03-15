@@ -18,6 +18,9 @@ class BinaryOperationNode : public AstNode {
     AstNode *getRight();
 
     ast::BinaryOperationType getType();
+    /**
+     * @return symbol with a single whitespace on either side that represents this binary operation, e.g. " == ".
+     */
     std::string operationToString();
 
   private:
