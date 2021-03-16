@@ -62,6 +62,26 @@ TestResult compileAndRun(const std::string &path, const bool verbose) {
     };
 }
 
+std::vector<std::filesystem::path> collectTests(const std::string &testDirectory) {
+    std::vector<std::filesystem::path> results = {};
+    for (const auto &path : std::filesystem::recursive_directory_iterator(testDirectory)) {
+        if (path.is_directory()) {
+            continue;
+        }
+        if (!endsWith(path.path().string(), "_test.ne")) {
+            continue;
+        }
+
+        results.push_back(path.path());
+    }
+
+    std::sort(results.begin(), results.end(), [](const std::filesystem::path &a, const std::filesystem::path &b) {
+        return std::lexicographical_compare(a.string().begin(), a.string().end(), b.string().begin(), b.string().end());
+    });
+
+    return results;
+}
+
 int main() {
     std::string testDirectory = "tests/";
     bool verbose = false;
@@ -74,16 +94,12 @@ int main() {
     int successfulTests = 0;
     double compileTimeTotalMillis = 0;
     double runTimeTotalMillis = 0;
-    for (const auto &path : std::filesystem::recursive_directory_iterator(testDirectory)) {
-        if (path.is_directory()) {
-            continue;
-        }
-        if (!endsWith(path.path().string(), "_test.ne")) {
-            continue;
-        }
+
+    std::vector<std::filesystem::path> tests = collectTests(testDirectory);
+    for (const auto &path : tests) {
         totalNumTests++;
 
-        const TestResult &result = compileAndRun(path.path().string(), verbose);
+        const TestResult &result = compileAndRun(path.string(), verbose);
         if (!result.success()) {
             std::cout << "FAILURE";
             success = false;
@@ -95,7 +111,8 @@ int main() {
         compileTimeTotalMillis += result.compileTimeMillis();
         runTimeTotalMillis += result.runTimeMillis();
         std::cout << " (compile: " << std::setw(7) << result.compileTimeMillis() << "ms, run: " << std::setw(7)
-                  << result.runTimeMillis() << "ms, exitCode: " << result.exitCode << "): " << path << std::endl;
+                  << result.runTimeMillis() << "ms, exitCode: " << std::setw(2) << result.exitCode << "): " << path
+                  << std::endl;
     }
 
     int exitCode = 0;
@@ -104,8 +121,8 @@ int main() {
     }
     std::cout << std::endl
               << "RESULTS (compile: " << std::setw(7) << compileTimeTotalMillis << "ms, run: " << std::setw(7)
-              << runTimeTotalMillis << "ms, exitCode: " << exitCode << "): " << successfulTests << "/" << totalNumTests
-              << " tests successful" << std::endl;
+              << runTimeTotalMillis << "ms, exitCode: " << std::setw(2) << exitCode << "): " << successfulTests << "/"
+              << totalNumTests << " tests successful" << std::endl;
 
     return exitCode;
 }

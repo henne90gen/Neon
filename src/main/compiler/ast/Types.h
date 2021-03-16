@@ -41,6 +41,7 @@ enum NodeType {
     TYPE_MEMBER,
     MEMBER_ACCESS,
     ASSERT,
+    COMMENT,
 };
 
 enum BinaryOperationType {

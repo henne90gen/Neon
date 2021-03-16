@@ -226,6 +226,22 @@ TEST_CASE("SimpleParser") {
         assertProgramCreatesAstWithSimpleParser(program, spec);
     }
 
+    SECTION("can handle function call with multiple arguments") {
+        std::vector<AstNodeSpec> spec = {
+              {0, ast::NodeType::SEQUENCE},  {1, ast::NodeType::STATEMENT}, {2, ast::NodeType::CALL},
+              {3, ast::NodeType::LITERAL},   {3, ast::NodeType::LITERAL},   {1, ast::NodeType::STATEMENT},
+              {2, ast::NodeType::CALL},      {3, ast::NodeType::VARIABLE},  {3, ast::NodeType::LITERAL},
+              {1, ast::NodeType::STATEMENT}, {2, ast::NodeType::CALL},      {3, ast::NodeType::VARIABLE},
+              {3, ast::NodeType::VARIABLE},  {1, ast::NodeType::STATEMENT}, {2, ast::NodeType::CALL},
+              {3, ast::NodeType::VARIABLE},  {1, ast::NodeType::STATEMENT}, {2, ast::NodeType::CALL},
+              {3, ast::NodeType::VARIABLE},  {3, ast::NodeType::VARIABLE},
+        };
+        std::vector<std::string> program = {
+              "hello(1, 2)", "hello(num, 2)", "hello(num, num)", "hello(num, )", "hello(num, num)",
+        };
+        assertProgramCreatesAstWithSimpleParser(program, spec);
+    }
+
     SECTION("can handle external function") {
         std::vector<AstNodeSpec> spec = {
               {0, ast::NodeType::SEQUENCE},
@@ -466,6 +482,16 @@ TEST_CASE("SimpleParser") {
               {3, ast::NodeType::LITERAL},
         };
         std::vector<std::string> program = {"assert true"};
+        assertProgramCreatesAstWithSimpleParser(program, spec);
+    }
+
+    SECTION("can handle comment") {
+        std::vector<AstNodeSpec> spec = {
+              {0, ast::NodeType::SEQUENCE},
+              {1, ast::NodeType::STATEMENT},
+              {2, ast::NodeType::COMMENT},
+        };
+        std::vector<std::string> program = {"# this is a comment"};
         assertProgramCreatesAstWithSimpleParser(program, spec);
     }
 }

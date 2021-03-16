@@ -4,6 +4,7 @@
 #include "AssignmentNode.h"
 #include "AstNode.h"
 #include "BinaryOperationNode.h"
+#include "CommentNode.h"
 #include "ForStatementNode.h"
 #include "FunctionNode.h"
 #include "IfStatementNode.h"

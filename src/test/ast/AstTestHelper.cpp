@@ -45,12 +45,6 @@ SimpleTree *createSimpleFromStatement(StatementNode *node) {
     return result;
 }
 
-SimpleTree *createSimpleFromLiteral(LiteralNode *node) {
-    auto result = new SimpleTree();
-    result->type = node->getAstNodeType();
-    return result;
-}
-
 SimpleTree *createSimpleFromUnary(UnaryOperationNode *node) {
     auto result = new SimpleTree();
     result->type = node->getAstNodeType();
@@ -75,18 +69,6 @@ SimpleTree *createSimpleFromFunction(FunctionNode *node) {
     if (!node->isExternal()) {
         result->children.push_back(createSimpleFromAst(node->getBody()));
     }
-    return result;
-}
-
-SimpleTree *createSimpleFromVariableDefinition(VariableDefinitionNode *node) {
-    auto result = new SimpleTree();
-    result->type = node->getAstNodeType();
-    return result;
-}
-
-SimpleTree *createSimpleFromVariable(VariableNode *node) {
-    auto result = new SimpleTree();
-    result->type = node->getAstNodeType();
     return result;
 }
 
@@ -138,30 +120,12 @@ SimpleTree *createSimpleFromFor(ForStatementNode *node) {
     return result;
 }
 
-SimpleTree *createSimpleFromImport(ImportNode *node) {
-    auto result = new SimpleTree();
-    result->type = node->getAstNodeType();
-    return result;
-}
-
 SimpleTree *createSimpleFromTypeDeclaration(TypeDeclarationNode *node) {
     auto result = new SimpleTree();
     result->type = node->getAstNodeType();
     for (const auto &member : node->getMembers()) {
         result->children.push_back(createSimpleFromAst(member));
     }
-    return result;
-}
-
-SimpleTree *createSimpleFromTypeMember(TypeMemberNode *node) {
-    auto result = new SimpleTree();
-    result->type = node->getAstNodeType();
-    return result;
-}
-
-SimpleTree *createSimpleFromMemberAccess(MemberAccessNode *node) {
-    auto result = new SimpleTree();
-    result->type = node->getAstNodeType();
     return result;
 }
 
@@ -172,27 +136,35 @@ SimpleTree *createSimpleFromAssert(AssertNode *node) {
     return result;
 }
 
+SimpleTree *createSimpleFromNode(AstNode *node) {
+    auto result = new SimpleTree();
+    result->type = node->getAstNodeType();
+    return result;
+}
+
 SimpleTree *createSimpleFromAst(AstNode *node) {
     if (node == nullptr) {
         return nullptr;
     }
     switch (node->getAstNodeType()) {
+    case ast::NodeType::LITERAL:
+    case ast::NodeType::VARIABLE_DEFINITION:
+    case ast::NodeType::VARIABLE:
+    case ast::NodeType::IMPORT:
+    case ast::NodeType::TYPE_MEMBER:
+    case ast::NodeType::MEMBER_ACCESS:
+    case ast::NodeType::COMMENT:
+        return createSimpleFromNode(node);
     case ast::NodeType::SEQUENCE:
         return createSimpleFromSequence((SequenceNode *)node);
     case ast::NodeType::STATEMENT:
         return createSimpleFromStatement((StatementNode *)node);
-    case ast::NodeType::LITERAL:
-        return createSimpleFromLiteral((LiteralNode *)node);
     case ast::NodeType::UNARY_OPERATION:
         return createSimpleFromUnary((UnaryOperationNode *)node);
     case ast::NodeType::BINARY_OPERATION:
         return createSimpleFromBinary((BinaryOperationNode *)node);
     case ast::NodeType::FUNCTION:
         return createSimpleFromFunction((FunctionNode *)node);
-    case ast::NodeType::VARIABLE_DEFINITION:
-        return createSimpleFromVariableDefinition((VariableDefinitionNode *)node);
-    case ast::NodeType::VARIABLE:
-        return createSimpleFromVariable((VariableNode *)node);
     case ast::NodeType::ASSIGNMENT:
         return createSimpleFromAssignment((AssignmentNode *)node);
     case ast::NodeType::CALL:
@@ -201,14 +173,8 @@ SimpleTree *createSimpleFromAst(AstNode *node) {
         return createSimpleFromIf((IfStatementNode *)node);
     case ast::NodeType::FOR_STATEMENT:
         return createSimpleFromFor((ForStatementNode *)node);
-    case ast::NodeType::IMPORT:
-        return createSimpleFromImport((ImportNode *)node);
     case ast::NodeType::TYPE_DECLARATION:
         return createSimpleFromTypeDeclaration((TypeDeclarationNode *)node);
-    case ast::NodeType::TYPE_MEMBER:
-        return createSimpleFromTypeMember((TypeMemberNode *)node);
-    case ast::NodeType::MEMBER_ACCESS:
-        return createSimpleFromMemberAccess((MemberAccessNode *)node);
     case ast::NodeType::ASSERT:
         return createSimpleFromAssert((AssertNode *)node);
     default:

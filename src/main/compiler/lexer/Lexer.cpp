@@ -104,6 +104,12 @@ Token Lexer::getToken() {
             return stringToken.value();
         }
 
+        auto commentToken = matchRegex("^#.*(\\n|$)", Token::COMMENT);
+        if (commentToken.has_value()) {
+            currentWord = currentWord.substr(commentToken.value().content.length(), currentWord.length() - 1);
+            return commentToken.value();
+        }
+
         auto wordToken = matchWordToken();
         if (wordToken.has_value()) {
             currentWord = currentWord.substr(wordToken.value().content.length(), currentWord.length() - 1);

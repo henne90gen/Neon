@@ -5,6 +5,7 @@ class AssignmentNode;
 class BinaryOperationNode;
 class BoolNode;
 class CallNode;
+class CommentNode;
 class FloatNode;
 class ForStatementNode;
 class FunctionNode;
@@ -28,6 +29,7 @@ class AstVisitor {
     virtual void visitBinaryOperationNode(BinaryOperationNode *node){};
     virtual void visitBoolNode(BoolNode *node){};
     virtual void visitCallNode(CallNode *node){};
+    virtual void visitCommentNode(CommentNode *node){};
     virtual void visitFloatNode(FloatNode *node){};
     virtual void visitForStatementNode(ForStatementNode *node){};
     virtual void visitFunctionNode(FunctionNode *node){};

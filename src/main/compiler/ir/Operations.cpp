@@ -111,22 +111,15 @@ void IrGenerator::emitStringOperation(BinaryOperationNode *node, llvm::Value *l,
         return;
     }
     case ast::MULTIPLICATION:
-        return;
     case ast::SUBTRACTION:
-        return;
     case ast::DIVISION:
-        return;
     case ast::EQUALS:
-        return;
     case ast::NOT_EQUALS:
-        return;
     case ast::LESS_EQUALS:
-        return;
     case ast::LESS_THAN:
-        return;
     case ast::GREATER_EQUALS:
-        return;
     case ast::GREATER_THAN:
+        // not defined for strings
         return;
     }
     logError("Invalid binary operation. " + to_string(node->getType()));

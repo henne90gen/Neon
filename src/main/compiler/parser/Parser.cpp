@@ -164,7 +164,7 @@ AstNode *Parser::parseBinaryRight(const std::vector<Token> &tokens, int &current
 }
 
 BinaryOperationNode *Parser::parseBinaryOperation(const std::vector<Token> &tokens, int &currentTokenIdx,
-                                                        int level) const {
+                                                  int level) const {
     if (verbose) {
         std::cout << indent(level) << "parsing binary operation node" << std::endl;
     }
@@ -237,8 +237,7 @@ BinaryOperationNode *Parser::parseBinaryOperation(const std::vector<Token> &toke
     return binaryOperation;
 }
 
-AstNode *Parser::parseExpressionInsideParens(const std::vector<Token> &tokens, int &currentTokenIdx,
-                                                   int level) const {
+AstNode *Parser::parseExpressionInsideParens(const std::vector<Token> &tokens, int &currentTokenIdx, int level) const {
     auto binaryOperation = parseBinaryOperation(tokens, currentTokenIdx, level + 1);
     if (binaryOperation != nullptr) {
         return binaryOperation;
@@ -296,13 +295,19 @@ AstNode *Parser::parseExpression(const std::vector<Token> &tokens, int &currentT
 }
 
 CallNode *Parser::parseFunctionCall(const std::vector<Token> &tokens, int &currentTokenIdx, int level) const {
-    if (tokens[currentTokenIdx].type != Token::IDENTIFIER) {
+    if (!(currentTokenIdx < tokens.size() && tokens[currentTokenIdx].type == Token::IDENTIFIER)) {
+        return nullptr;
+    }
+    int beforeTokenIdx = currentTokenIdx;
+    std::string name = tokens[currentTokenIdx].content;
+    currentTokenIdx++;
+
+    if (!(currentTokenIdx < tokens.size() && tokens[currentTokenIdx].type == Token::LEFT_PARAN)) {
+        currentTokenIdx = beforeTokenIdx;
         return nullptr;
     }
 
-    if (currentTokenIdx + 1 >= tokens.size() || tokens[currentTokenIdx + 1].type != Token::LEFT_PARAN) {
-        return nullptr;
-    }
+    currentTokenIdx++;
 
     if (verbose) {
         std::cout << indent(level) << "parsing call node" << std::endl;
@@ -311,30 +316,34 @@ CallNode *Parser::parseFunctionCall(const std::vector<Token> &tokens, int &curre
     std::vector<AstNode *> params = {};
     // hello ( param1 , param2 )
     //   i  i+1  i+2 i+3  i+4 i+5
-    int parameterTokenIdx = currentTokenIdx + 2;
-    while (parameterTokenIdx < tokens.size() && tokens[parameterTokenIdx].type != Token::RIGHT_PARAN) {
-        auto expression = parseExpression(tokens, parameterTokenIdx, level + 1);
+    while (currentTokenIdx < tokens.size() && tokens[currentTokenIdx].type != Token::RIGHT_PARAN) {
+        auto expression = parseExpression(tokens, currentTokenIdx, level + 1);
         if (expression == nullptr) {
+            currentTokenIdx = beforeTokenIdx;
             return nullptr;
         }
         params.push_back(expression);
+        if (currentTokenIdx < tokens.size() && tokens[currentTokenIdx].type == Token::COMMA) {
+            currentTokenIdx++;
+        }
     }
 
-    if (tokens[parameterTokenIdx].type != Token::RIGHT_PARAN) {
+    if (!(currentTokenIdx < tokens.size() && tokens[currentTokenIdx].type == Token::RIGHT_PARAN)) {
+        currentTokenIdx = beforeTokenIdx;
         return nullptr;
     }
 
-    auto callNode = new CallNode(tokens[currentTokenIdx].content);
+    currentTokenIdx++;
+
+    auto callNode = new CallNode(name);
     for (const auto param : params) {
         callNode->getArguments().push_back(param);
     }
-
-    currentTokenIdx = parameterTokenIdx + 1;
     return callNode;
 }
 
 VariableDefinitionNode *Parser::parseVariableDefinition(const std::vector<Token> &tokens, int &currentTokenIdx,
-                                                              int level) const {
+                                                        int level) const {
     if (verbose) {
         std::cout << indent(level) << "parsing variable definition node" << std::endl;
     }
@@ -645,8 +654,7 @@ StatementNode *createStatementNode(AstNode *child) {
     return statement;
 }
 
-StatementNode *Parser::parseReturnStatement(const std::vector<Token> &tokens, int &currentTokenIdx,
-                                                  int level) const {
+StatementNode *Parser::parseReturnStatement(const std::vector<Token> &tokens, int &currentTokenIdx, int level) const {
     if (!(currentTokenIdx < tokens.size() && tokens[currentTokenIdx].type == Token::RETURN)) {
         return nullptr;
     }
@@ -687,6 +695,16 @@ AssertNode *Parser::parseAssert(const std::vector<Token> &tokens, int &currentTo
     return result;
 }
 
+CommentNode *Parser::parseComment(const std::vector<Token> &tokens, int &currentTokenIdx, int level) const {
+    if (!(currentTokenIdx < tokens.size() && tokens[currentTokenIdx].type == Token::COMMENT)) {
+        return nullptr;
+    }
+
+    auto result = new CommentNode(tokens[currentTokenIdx].content);
+    currentTokenIdx++;
+    return result;
+}
+
 StatementNode *Parser::parseStatement(const std::vector<Token> &tokens, int &currentTokenIdx, int level) const {
     if (verbose) {
         std::cout << indent(level) << "parsing statement node" << std::endl;
@@ -694,6 +712,11 @@ StatementNode *Parser::parseStatement(const std::vector<Token> &tokens, int &cur
 
     while (currentTokenIdx < tokens.size() && tokens[currentTokenIdx].type == Token::NEW_LINE) {
         currentTokenIdx++;
+    }
+
+    auto commentNode = parseComment(tokens, currentTokenIdx, level + 1);
+    if (commentNode != nullptr) {
+        return createStatementNode(commentNode);
     }
 
     auto importNode = parseImport(tokens, currentTokenIdx);

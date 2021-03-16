@@ -5,6 +5,7 @@ add_library(NeonCompiler
         compiler/ast/nodes/AssignmentNode.cpp
         compiler/ast/nodes/AstNode.cpp
         compiler/ast/nodes/BinaryOperationNode.cpp
+        compiler/ast/nodes/CommentNode.cpp
         compiler/ast/nodes/ForStatementNode.cpp
         compiler/ast/nodes/FunctionNode.cpp
         compiler/ast/nodes/IfStatementNode.cpp
