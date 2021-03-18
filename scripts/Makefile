@@ -25,4 +25,4 @@ custom_types:
 assert:
 	clang++ -O0 -S assert.cpp -emit-llvm
 
-.PHONY: compile llvm link memory_test struct_pointer time
+.PHONY: compile llvm link memory_test struct_pointer time assert
