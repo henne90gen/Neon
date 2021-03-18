@@ -137,8 +137,8 @@ void IrGenerator::visitBinaryOperationNode(BinaryOperationNode *node) {
         return logError("Generating left or right side failed.");
     }
 
-    ast::DataType typeOfLeft = typeResolver.getTypeOf(node->getLeft());
-    ast::DataType typeOfRight = typeResolver.getTypeOf(node->getRight());
+    ast::DataType typeOfLeft = typeResolver.getTypeOf(module, node->getLeft());
+    ast::DataType typeOfRight = typeResolver.getTypeOf(module, node->getRight());
     if (typeOfLeft != typeOfRight) {
         return logError("Types " + to_string(typeOfLeft) + " and " + to_string(typeOfRight) +
                         " are not compatible for binary operation");

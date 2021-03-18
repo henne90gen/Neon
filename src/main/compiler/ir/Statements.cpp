@@ -121,7 +121,7 @@ void IrGenerator::visitForStatementNode(ForStatementNode *node) {
 }
 
 std::string IrGenerator::getTypeFormatSpecifier(AstNode *node) {
-    auto type = typeResolver.getTypeOf(node);
+    auto type = typeResolver.getTypeOf(module, node);
     if (type == ast::DataType(ast::SimpleDataType::INT)) {
         return "ld";
     }

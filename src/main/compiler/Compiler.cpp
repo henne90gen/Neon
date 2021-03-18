@@ -44,7 +44,7 @@ bool Compiler::run() {
         }
         program->modules[moduleFileName] = module;
 
-        for (auto &importedModule : moduleImportsMap[module]) {
+        for (auto &importedModule : moduleCompileState[module].imports) {
             uncompiledModulePaths.push_back(importedModule);
         }
     }
@@ -86,19 +86,19 @@ Module *Compiler::loadModule(const std::string &moduleFileName) {
         astTestCasePrinter.run();
     }
 
-    moduleImportsMap[module] = ImportFinder(module->getDirectoryPath()).run(module->root);
-    moduleFunctionsMap[module] = FunctionFinder().run(module->root);
-    moduleComplexTypesMap[module] = ComplexTypeFinder().run(module->root);
+    moduleCompileState[module].imports = ImportFinder(module->getDirectoryPath()).run(module->root);
+    moduleCompileState[module].functions = FunctionFinder().run(module->root);
+    moduleCompileState[module].complexTypes = ComplexTypeFinder().run(module->root);
 
     return module;
 }
 
 void Compiler::generateIR() {
-    auto functionResolver = FunctionResolver(program, moduleImportsMap, moduleFunctionsMap);
-    for (const auto &module : program->modules) {
-        auto typeResolver = TypeResolver(program, moduleNodeToTypeMap[module.second],
-                                         moduleNameToTypeMap[module.second], moduleImportsMap, moduleComplexTypesMap);
-        auto generator = IrGenerator(buildEnv, module.second, functionResolver, typeResolver, log);
+    auto functionResolver = FunctionResolver(program, moduleCompileState);
+    for (const auto &entry : program->modules) {
+        auto module = entry.second;
+        auto typeResolver = TypeResolver(program, moduleCompileState);
+        auto generator = IrGenerator(buildEnv, module, functionResolver, typeResolver, log);
         generator.run();
     }
 }
@@ -197,9 +197,9 @@ void Compiler::writeModuleToObjectFile() {
 void Compiler::analyseTypes() {
     for (auto &entry : program->modules) {
         auto &module = entry.second;
-        auto functionResolver = FunctionResolver(program, moduleImportsMap, moduleFunctionsMap);
+        auto functionResolver = FunctionResolver(program, moduleCompileState);
         auto result = TypeAnalyzer(module, functionResolver).run(module->root);
-        moduleNodeToTypeMap[module] = result.first;
-        moduleNameToTypeMap[module] = result.second;
+        moduleCompileState[module].nodeToTypeMap = result.first;
+        moduleCompileState[module].nameToTypeMap = result.second;
     }
 }

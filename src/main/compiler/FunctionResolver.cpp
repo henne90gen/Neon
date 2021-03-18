@@ -1,9 +1,10 @@
 #include "FunctionResolver.h"
 
 FunctionResolveResult FunctionResolver::resolveFunction(Module *module, const std::string &functionName) const {
-    FunctionResolveResult result = {false};
+    FunctionResolveResult result = {.functionExists = false};
 
-    for (const auto &function : moduleFunctionsMap[module]) {
+    // look inside the current module first
+    for (const auto &function : moduleCompileState[module].functions) {
         if (function.name == functionName) {
             result.functionExists = true;
             result.module = module;
@@ -12,10 +13,11 @@ FunctionResolveResult FunctionResolver::resolveFunction(Module *module, const st
         }
     }
 
-    const auto &moduleIds = moduleImportsMap[module];
+    // then check all the imported modules
+    const auto &moduleIds = moduleCompileState[module].imports;
     for (const auto &importedModuleId : moduleIds) {
         auto importedModule = program->modules[importedModuleId];
-        for (const auto &function : moduleFunctionsMap[importedModule]) {
+        for (const auto &function : moduleCompileState[importedModule].functions) {
             if (function.name == functionName) {
                 result.functionExists = true;
                 result.module = importedModule;

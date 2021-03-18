@@ -3,6 +3,7 @@
 #include "../BuildEnv.h"
 #include "../Program.h"
 #include "MetaTypes.h"
+#include "ModuleCompileState.h"
 #include "ast/nodes/FunctionNode.h"
 
 class Compiler {
@@ -17,11 +18,7 @@ class Compiler {
     const BuildEnv *buildEnv;
     const Logger &log;
 
-    std::unordered_map<Module *, std::vector<std::string>> moduleImportsMap = {};
-    std::unordered_map<Module *, std::vector<FunctionSignature>> moduleFunctionsMap = {};
-    std::unordered_map<Module *, std::unordered_map<AstNode *, ast::DataType>> moduleNodeToTypeMap;
-    std::unordered_map<Module *, std::unordered_map<std::string, ast::DataType>> moduleNameToTypeMap;
-    std::unordered_map<Module *, std::vector<ComplexType>> moduleComplexTypesMap;
+    std::unordered_map<Module *, ModuleCompileState> moduleCompileState = {};
 
     Module *loadModule(const std::string &moduleFileName);
     void writeModuleToObjectFile();

@@ -229,7 +229,7 @@ void IrGenerator::visitCallNode(CallNode *node) {
         if (itr == nodesToValues.end()) {
             return logError("Could not generate code for argument.");
         }
-        if (typeResolver.getTypeOf(argument) == ast::DataType(ast::SimpleDataType::STRING)) {
+        if (typeResolver.getTypeOf(module, argument) == ast::DataType(ast::SimpleDataType::STRING)) {
             arguments.push_back(builder.CreateLoad(itr->second));
         } else {
             arguments.push_back(itr->second);

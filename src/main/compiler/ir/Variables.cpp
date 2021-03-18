@@ -18,7 +18,7 @@ void IrGenerator::visitVariableNode(VariableNode *node) {
         auto elementPtr = builder.CreateInBoundsGEP(value, indices);
         nodesToValues[node] = builder.CreateLoad(elementPtr);
     } else {
-        if (isPrimitiveType(typeResolver.getTypeOf(node))) {
+        if (isPrimitiveType(typeResolver.getTypeOf(module, node))) {
             llvm::Value *loadedValue = builder.CreateLoad(value, node->getName());
             nodesToValues[node] = loadedValue;
         } else {
@@ -107,7 +107,7 @@ void IrGenerator::visitAssignmentNode(AssignmentNode *node) {
         return logError("Could not create assignment.");
     }
 
-    if (typeResolver.getTypeOf(node->getRight()) == ast::DataType(ast::SimpleDataType::STRING)) {
+    if (typeResolver.getTypeOf(module, node->getRight()) == ast::DataType(ast::SimpleDataType::STRING)) {
         if (node->getLeft()->getAstNodeType() != ast::NodeType::VARIABLE_DEFINITION) {
             llvm::Value *loadedDest = builder.CreateLoad(dest);
             llvm::Value *loadedSrc = builder.CreateLoad(src);
@@ -132,7 +132,7 @@ void IrGenerator::visitMemberAccessNode(MemberAccessNode *node) {
         return logError("Could not create member access, since there are no members.");
     }
 
-    const ast::DataType baseType = typeResolver.getTypeOf(node->getVariableName());
+    const ast::DataType baseType = typeResolver.getTypeOf(module, node->getVariableName());
 
     auto resolveResult = typeResolver.resolveType(module, baseType);
     if (!resolveResult.typeExists) {

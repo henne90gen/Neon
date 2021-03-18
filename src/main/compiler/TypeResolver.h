@@ -2,6 +2,7 @@
 
 #include "../Program.h"
 #include "MetaTypes.h"
+#include "ModuleCompileState.h"
 #include "ast/Types.h"
 #include "ast/nodes/AstNode.h"
 
@@ -16,24 +17,16 @@ struct TypeResolveResult {
 
 class TypeResolver {
   public:
-    explicit TypeResolver(Program *program, const std::unordered_map<AstNode *, ast::DataType> &nodeToTypeMap,
-                          const std::unordered_map<std::string, ast::DataType> &nameToTypeMap,
-                          std::unordered_map<Module *, std::vector<std::string>> &moduleImportsMap,
-                          std::unordered_map<Module *, std::vector<ComplexType>> &moduleComplexTypesMap)
-        : program(program), nodeToTypeMap(nodeToTypeMap), nameToTypeMap(nameToTypeMap),
-          moduleImportsMap(moduleImportsMap), moduleComplexTypesMap(moduleComplexTypesMap) {}
+    explicit TypeResolver(Program *program, std::unordered_map<Module *, ModuleCompileState> &moduleCompileState)
+        : program(program), moduleCompileState(moduleCompileState) {}
 
-    ast::DataType getTypeOf(AstNode *node);
-    ast::DataType getTypeOf(const std::string &variableName);
+    ast::DataType getTypeOf(Module *module, AstNode *node);
+    ast::DataType getTypeOf(Module *module, const std::string &variableName);
 
     TypeResolveResult resolveType(Module *module, const ast::DataType &type) const;
 
   private:
     Program *program;
 
-    const std::unordered_map<AstNode *, ast::DataType> &nodeToTypeMap;
-    const std::unordered_map<std::string, ast::DataType> &nameToTypeMap;
-
-    std::unordered_map<Module *, std::vector<std::string>> &moduleImportsMap;
-    std::unordered_map<Module *, std::vector<ComplexType>> &moduleComplexTypesMap;
+    std::unordered_map<Module *, ModuleCompileState> &moduleCompileState;
 };
