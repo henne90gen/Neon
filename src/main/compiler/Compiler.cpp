@@ -33,9 +33,7 @@ bool Compiler::run() {
         auto itr = program->modules.find(moduleFileName);
         bool moduleAlreadyExists = itr != program->modules.end();
         if (moduleAlreadyExists) {
-            if (verbose) {
-                std::cout << "Skipping " << moduleFileName << " because it has already been processed" << std::endl;
-            }
+            log.debug("Skipping " + moduleFileName + " because it has already been processed");
             continue;
         }
 
@@ -57,9 +55,7 @@ bool Compiler::run() {
 
     writeModuleToObjectFile();
 
-    if (verbose) {
-        std::cout << "Finished compilation." << std::endl;
-    }
+    log.debug("Finished compilation.");
     return false;
 }
 
@@ -72,19 +68,17 @@ Module *Compiler::loadModule(const std::string &moduleFileName) {
         std::filesystem::create_directories(moduleBuildDir);
     }
 
-    Lexer lexer(module->getCodeProvider(), verbose);
+    Lexer lexer(module->getCodeProvider(), log);
 
-    Parser parser(lexer, module, verbose);
+    Parser parser(lexer, module, log);
     parser.run();
 
     if (module->root == nullptr) {
-        if (verbose) {
-            std::cerr << "Could not create AST" << std::endl;
-        }
+        log.error("Could not parse '" + moduleFileName + "'");
         return module;
     }
 
-    if (verbose) {
+    if (log.getLogLevel() == Logger::LogLevel::DEBUG_) {
         auto astPrinter = AstPrinter(module);
         astPrinter.run();
 
@@ -104,7 +98,7 @@ void Compiler::generateIR() {
     for (const auto &module : program->modules) {
         auto typeResolver = TypeResolver(program, moduleNodeToTypeMap[module.second],
                                          moduleNameToTypeMap[module.second], moduleImportsMap, moduleComplexTypesMap);
-        auto generator = IrGenerator(buildEnv, module.second, functionResolver, typeResolver, verbose);
+        auto generator = IrGenerator(buildEnv, module.second, functionResolver, typeResolver, log);
         generator.run();
     }
 }
@@ -161,7 +155,7 @@ void Compiler::writeModuleToObjectFile() {
     }
 
     // print llvm ir to console
-    if (verbose) {
+    if (log.getLogLevel() == Logger::LogLevel::DEBUG_) {
         module.print(llvm::outs(), nullptr);
     }
 

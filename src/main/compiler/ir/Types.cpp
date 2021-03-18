@@ -64,17 +64,17 @@ llvm::StructType *IrGenerator::getStringType() {
 
 void IrGenerator::visitIntegerNode(IntegerNode *node) {
     nodesToValues[node] = llvm::ConstantInt::get(context, llvm::APInt(NUM_BITS_OF_INT, node->getValue()));
-    LOG("Created Integer")
+    log.debug("Created Integer");
 }
 
 void IrGenerator::visitFloatNode(FloatNode *node) {
     nodesToValues[node] = llvm::ConstantFP::get(context, llvm::APFloat(node->getValue()));
-    LOG("Created Float")
+    log.debug("Created Float");
 }
 
 void IrGenerator::visitBoolNode(BoolNode *node) {
     nodesToValues[node] = llvm::ConstantInt::get(context, llvm::APInt(1, static_cast<uint64_t>(node->getValue())));
-    LOG("Created Bool")
+    log.debug("Created Bool");
 }
 
 void IrGenerator::visitStringNode(StringNode *node) {
@@ -107,7 +107,7 @@ void IrGenerator::visitStringNode(StringNode *node) {
         createStdLibCall("deleteString", args);
     });
 
-    LOG("Created String");
+    log.debug("Created String");
 }
 
 void IrGenerator::visitTypeDeclarationNode(TypeDeclarationNode *node) {

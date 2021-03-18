@@ -15,15 +15,10 @@
 #include <llvm/IR/LLVMContext.h>
 #include <llvm/IR/Module.h>
 
-#define LOG(msg)                                                                                                       \
-    if (verbose) {                                                                                                     \
-        std::cout << msg << std::endl;                                                                                 \
-    }
-
 class IrGenerator : public AstVisitor {
   public:
     explicit IrGenerator(const BuildEnv *buildEnv, Module *module, FunctionResolver &functionResolver,
-                         TypeResolver &typeResolver, bool verbose);
+                         TypeResolver &typeResolver, const Logger &logger);
 
     void visitAssertNode(AssertNode *node) override;
     void visitAssignmentNode(AssignmentNode *node) override;
@@ -53,7 +48,7 @@ class IrGenerator : public AstVisitor {
     Module *module;
     FunctionResolver &functionResolver;
     TypeResolver &typeResolver;
-    const bool verbose = false;
+    const Logger &log;
 
     llvm::LLVMContext &context;
     llvm::Module &llvmModule;

@@ -3,7 +3,7 @@
 #include "../../Utils.h"
 
 void IrGenerator::visitVariableNode(VariableNode *node) {
-    LOG("Enter Variable")
+    log.debug("Enter Variable");
 
     auto value = findVariable(node->getName());
     if (value == nullptr) {
@@ -27,11 +27,11 @@ void IrGenerator::visitVariableNode(VariableNode *node) {
         }
     }
 
-    LOG("Exit Variable")
+    log.debug("Exit Variable");
 }
 
 void IrGenerator::visitVariableDefinitionNode(VariableDefinitionNode *node) {
-    LOG("Enter VariableDefinition")
+    log.debug("Enter VariableDefinition");
 
     llvm::Type *type = getType(node->getType());
     std::string &name = node->getName();
@@ -62,11 +62,11 @@ void IrGenerator::visitVariableDefinitionNode(VariableDefinitionNode *node) {
     currentScope().definedVariables[name] = value;
     nodesToValues[node] = value;
 
-    LOG("Exit VariableDefinition")
+    log.debug("Exit VariableDefinition");
 }
 
 void IrGenerator::visitAssignmentNode(AssignmentNode *node) {
-    LOG("Enter Assignment")
+    log.debug("Enter Assignment");
 
     llvm::Value *dest;
     if (node->getLeft()->getAstNodeType() == ast::NodeType::VARIABLE_DEFINITION) {
@@ -119,13 +119,13 @@ void IrGenerator::visitAssignmentNode(AssignmentNode *node) {
         nodesToValues[node] = builder.CreateStore(src, dest);
     }
 
-    LOG("Exit Assignment")
+    log.debug("Exit Assignment");
 }
 
 void IrGenerator::visitMemberAccessNode(MemberAccessNode *node) {
     // TODO add nested member access
 
-    LOG("Enter MemberAccess")
+    log.debug("Enter MemberAccess");
 
     auto memberAccesses = node->getMemberAccesses();
     if (memberAccesses.empty()) {
@@ -168,5 +168,5 @@ void IrGenerator::visitMemberAccessNode(MemberAccessNode *node) {
 
     nodesToValues[node] = result;
 
-    LOG("Exit MemberAccess")
+    log.debug("Exit MemberAccess");
 }

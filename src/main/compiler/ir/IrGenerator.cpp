@@ -17,9 +17,9 @@
 #include "../../Utils.h"
 
 IrGenerator::IrGenerator(const BuildEnv *buildEnv, Module *module, FunctionResolver &functionResolver,
-                         TypeResolver &typeResolver, const bool verbose)
-    : buildEnv(buildEnv), module(module), functionResolver(functionResolver), typeResolver(typeResolver),
-      verbose(verbose), context(module->llvmModule.getContext()), llvmModule(module->llvmModule), builder(context) {
+                         TypeResolver &typeResolver, const Logger &logger)
+    : buildEnv(buildEnv), module(module), functionResolver(functionResolver), typeResolver(typeResolver), log(logger),
+      context(module->llvmModule.getContext()), llvmModule(module->llvmModule), builder(context) {
     pushScope();
 }
 
@@ -78,7 +78,7 @@ void IrGenerator::setupGlobalInitialization(llvm::Function *func) {
 }
 
 void IrGenerator::visitSequenceNode(SequenceNode *node) {
-    LOG("Enter Sequence")
+    log.debug("Enter Sequence");
 
     llvm::Function *initFunc = nullptr;
     if (currentFunction == nullptr) {
@@ -109,7 +109,7 @@ void IrGenerator::visitSequenceNode(SequenceNode *node) {
         isGlobalScope = false;
     }
 
-    LOG("Exit Sequence")
+    log.debug("Exit Sequence");
 }
 
 void IrGenerator::writeToFile() {
@@ -138,7 +138,7 @@ void IrGenerator::run() {
         exit(1);
     } else {
         this->writeToFile();
-        if (verbose) {
+        if (log.getLogLevel() == Logger::LogLevel::DEBUG_) {
             llvmModule.print(llvm::outs(), nullptr);
         }
     }
@@ -184,11 +184,12 @@ void IrGenerator::withScope(const std::function<void(void)> &func) {
 }
 
 void IrGenerator::printMetrics() {
-    if (!verbose) {
+    if (log.getLogLevel() != Logger::LogLevel::DEBUG_) {
         return;
     }
+
     for (const auto &metric : metrics) {
-        std::cout << metric.first << ": " << metric.second << std::endl;
+        log.debug(metric.first + ": " + std::to_string(metric.second));
     }
 }
 

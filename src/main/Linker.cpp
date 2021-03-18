@@ -34,16 +34,13 @@ bool Linker::link() {
     // Neon standard library
     s += " -lNeonStd";
 
-    if (verbose) {
-        std::cout << "Calling linker with the following command:" << std::endl << s << std::endl;
-    }
+    log.debug("Calling linker with the following command:\n" + s);
 
     // TODO capture stdout and stderr. only print to console when verbose==true
     const char *command = s.c_str();
     int statusCode = system(command);
 
-    if (verbose) {
-        std::cout << "Finished linking." << std::endl;
-    }
+    log.debug("Finished linking.");
+
     return statusCode != 0;
 }

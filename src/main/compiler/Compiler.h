@@ -7,15 +7,15 @@
 
 class Compiler {
   public:
-    Compiler(Program *program, const BuildEnv *buildEnv, bool verbose)
-        : program(program), buildEnv(buildEnv), verbose(verbose) {}
+    Compiler(Program *program, const BuildEnv *buildEnv, const Logger &logger)
+        : program(program), buildEnv(buildEnv), log(logger) {}
 
     bool run();
 
   private:
     Program *program;
     const BuildEnv *buildEnv;
-    bool verbose;
+    const Logger &log;
 
     std::unordered_map<Module *, std::vector<std::string>> moduleImportsMap = {};
     std::unordered_map<Module *, std::vector<FunctionSignature>> moduleFunctionsMap = {};

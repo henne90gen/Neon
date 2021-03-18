@@ -82,7 +82,7 @@ llvm::Value *IrGenerator::createStdLibCall(const std::string &functionName, cons
 }
 
 void IrGenerator::visitFunctionNode(FunctionNode *node) {
-    LOG("Enter Function")
+    log.debug("Enter Function");
 
     llvm::Function *previousFunction = currentFunction;
     bool previousGlobalScopeState = isGlobalScope;
@@ -128,7 +128,7 @@ void IrGenerator::visitFunctionNode(FunctionNode *node) {
     //      we should save that last insertion point somewhere, instead of guessing it here
     builder.SetInsertPoint(&currentFunction->getBasicBlockList().back());
 
-    LOG("Exit Function")
+    log.debug("Exit Function");
 }
 
 llvm::Function *IrGenerator::getOrCreateFunctionDefinition(const std::string &name, const ast::DataType &returnType,
@@ -203,6 +203,8 @@ void IrGenerator::finalizeFunction(llvm::Function *function, const ast::DataType
 }
 
 void IrGenerator::visitCallNode(CallNode *node) {
+    log.debug("Enter Function Call");
+
     llvm::Function *calleeFunc = llvmModule.getFunction(node->getName());
     if (calleeFunc == nullptr) {
         const FunctionResolveResult resolveResult = functionResolver.resolveFunction(module, node->getName());
@@ -241,6 +243,8 @@ void IrGenerator::visitCallNode(CallNode *node) {
         call = builder.CreateCall(calleeFunc, arguments, "call");
     }
     nodesToValues[node] = call;
+
+    log.debug("Exit Function Call");
 }
 
 bool IrGenerator::isPrimitiveType(const ast::DataType &type) {

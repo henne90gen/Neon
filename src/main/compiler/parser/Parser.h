@@ -1,18 +1,19 @@
 #pragma once
 
 #include "../../Module.h"
+#include "../Logger.h"
 #include "../ast/nodes/AllNodes.h"
 
 class Parser {
   public:
-    Parser(Lexer &lexer, Module *module, bool verbose) : lexer(lexer), module(module), verbose(verbose) {}
+    Parser(Lexer &lexer, Module *module, const Logger &logger) : lexer(lexer), module(module), log(logger) {}
 
     void run();
 
   private:
     Lexer &lexer;
     Module *module;
-    bool verbose;
+    const Logger &log;
 
     Token getNextToken();
 

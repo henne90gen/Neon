@@ -63,10 +63,6 @@ else ()
     add_definitions(-std=c++17)
 endif ()
 
-if ("${CMAKE_BUILD_TYPE}" STREQUAL "Debug")
-    add_compile_definitions(DEBUG)
-endif ()
-
 if (CLANG_TIDY_EXE AND RUN_CLANG_TIDY)
     set_target_properties(NeonCompiler PROPERTIES CXX_CLANG_TIDY "${DO_CLANG_TIDY}")
 endif ()

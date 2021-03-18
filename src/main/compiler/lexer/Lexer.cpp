@@ -82,9 +82,7 @@ Token Lexer::getToken() {
         }
 
         currentWord = removeLeadingWhitespace(currentWord);
-        if (verbose) {
-            // std::cout << "Current word: '" << currentWord << "'" << std::endl;
-        }
+        log.debug("Current word: '" + currentWord + "'");
 
         auto floatToken = matchRegex("^[0-9]+\\.[0-9]+", Token::FLOAT);
         if (floatToken.has_value()) {
@@ -157,8 +155,8 @@ Token Lexer::getToken() {
         currentWord = currentWord.substr(nextSpace + 1, currentWord.length() - 1);
     }
 
-    if (!invalidToken.empty() && verbose) {
-        std::cout << "Found an invalid token: '" << invalidToken << "'" << std::endl;
+    if (!invalidToken.empty()) {
+        log.debug("Found an invalid token: '" + invalidToken + "'");
     }
     return {Token::INVALID, invalidToken};
 }

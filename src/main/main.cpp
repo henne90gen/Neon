@@ -10,13 +10,16 @@ int main() {
     auto program = new Program("main.ne");
     auto buildEnv = new BuildEnv();
 
-    auto compiler = Compiler(program, buildEnv, verbose);
+    Logger logger = {};
+    logger.setLogLevel(Logger::LogLevel::DEBUG_);
+
+    auto compiler = Compiler(program, buildEnv, logger);
     if (compiler.run()) {
         std::cout << "Aborting after failed compilation..." << std::endl;
         return 1;
     }
 
-    auto linker = Linker(program, buildEnv, verbose);
+    auto linker = Linker(program, buildEnv, logger);
     if (linker.link()) {
         return 1;
     }

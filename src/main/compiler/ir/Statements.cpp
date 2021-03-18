@@ -1,7 +1,7 @@
 #include "IrGenerator.h"
 
 void IrGenerator::visitStatementNode(StatementNode *node) {
-    LOG("Enter Statement")
+    log.debug("Enter Statement");
 
     if (node->getChild() == nullptr) {
         return;
@@ -14,7 +14,7 @@ void IrGenerator::visitStatementNode(StatementNode *node) {
     }
     nodesToValues[node] = value;
 
-    LOG("Exit Statement")
+    log.debug("Exit Statement");
 }
 
 bool hasReturnStatement(AstNode *node) {
@@ -47,7 +47,7 @@ bool hasReturnStatement(AstNode *node) {
 }
 
 void IrGenerator::visitIfStatementNode(IfStatementNode *node) {
-    LOG("Enter IfStatement")
+    log.debug("Enter IfStatement");
 
     node->getCondition()->accept(this);
     auto condition = nodesToValues[node->getCondition()];
@@ -82,11 +82,11 @@ void IrGenerator::visitIfStatementNode(IfStatementNode *node) {
     function->getBasicBlockList().push_back(mergeBB);
     builder.SetInsertPoint(mergeBB);
 
-    LOG("Exit IfStatement")
+    log.debug("Exit IfStatement");
 }
 
 void IrGenerator::visitForStatementNode(ForStatementNode *node) {
-    LOG("Enter ForStatement");
+    log.debug("Enter ForStatement");
     pushScope();
 
     node->getInit()->accept(this);
@@ -117,7 +117,7 @@ void IrGenerator::visitForStatementNode(ForStatementNode *node) {
 
     builder.SetInsertPoint(loopExitBB);
 
-    LOG("Exit ForStatement");
+    log.debug("Exit ForStatement");
 }
 
 std::string IrGenerator::getTypeFormatSpecifier(AstNode *node) {
@@ -132,7 +132,7 @@ std::string IrGenerator::getTypeFormatSpecifier(AstNode *node) {
 }
 
 void IrGenerator::visitAssertNode(AssertNode *node) {
-    LOG("Enter Assert");
+    log.debug("Enter Assert");
 
     node->getCondition()->accept(this);
     auto condition = nodesToValues[node->getCondition()];
@@ -180,5 +180,5 @@ void IrGenerator::visitAssertNode(AssertNode *node) {
     function->getBasicBlockList().push_back(mergeBB);
     builder.SetInsertPoint(mergeBB);
 
-    LOG("Exit Assert");
+    log.debug("Exit Assert");
 }

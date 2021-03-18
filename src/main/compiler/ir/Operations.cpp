@@ -126,7 +126,7 @@ void IrGenerator::emitStringOperation(BinaryOperationNode *node, llvm::Value *l,
 }
 
 void IrGenerator::visitBinaryOperationNode(BinaryOperationNode *node) {
-    LOG("Enter BinaryOperation")
+    log.debug("Enter BinaryOperation");
 
     node->getLeft()->accept(this);
     auto l = nodesToValues[node->getLeft()];
@@ -155,11 +155,11 @@ void IrGenerator::visitBinaryOperationNode(BinaryOperationNode *node) {
                         to_string(typeOfRight));
     }
 
-    LOG("Exit BinaryOperation")
+    log.debug("Exit BinaryOperation");
 }
 
 void IrGenerator::visitUnaryOperationNode(UnaryOperationNode *node) {
-    LOG("Enter UnaryOperation")
+    log.debug("Enter UnaryOperation");
 
     node->getChild()->accept(this);
     auto c = nodesToValues[node->getChild()];
@@ -176,5 +176,5 @@ void IrGenerator::visitUnaryOperationNode(UnaryOperationNode *node) {
         break;
     }
 
-    LOG("Exit UnaryOperation")
+    log.debug("Exit UnaryOperation");
 }

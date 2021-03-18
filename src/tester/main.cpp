@@ -6,6 +6,22 @@
 #include <Linker.h>
 #include <Program.h>
 #include <compiler/Compiler.h>
+#include <compiler/Logger.h>
+
+struct CmdArguments {
+    std::string testDirectory = "tests";
+    bool verbose = false;
+};
+
+struct TestResult {
+    int exitCode = 0;
+    std::chrono::nanoseconds compileTime = {};
+    std::chrono::nanoseconds runTime = {};
+
+    [[nodiscard]] bool success() const { return exitCode == 0; }
+    [[nodiscard]] double compileTimeMillis() const { return static_cast<double>(compileTime.count()) / 1.0e+6; }
+    [[nodiscard]] double runTimeMillis() const { return static_cast<double>(runTime.count()) / 1.0e+6; }
+};
 
 bool endsWith(const std::string &str, const std::string &pattern) {
     if (str.size() < pattern.size()) {
@@ -19,29 +35,19 @@ bool endsWith(const std::string &str, const std::string &pattern) {
     return true;
 }
 
-struct TestResult {
-    int exitCode = 0;
-    std::chrono::nanoseconds compileTime = {};
-    std::chrono::nanoseconds runTime = {};
-
-    [[nodiscard]] bool success() const { return exitCode == 0; }
-    [[nodiscard]] double compileTimeMillis() const { return static_cast<double>(compileTime.count()) / 1.0e+6; }
-    [[nodiscard]] double runTimeMillis() const { return static_cast<double>(runTime.count()) / 1.0e+6; }
-};
-
-TestResult compileAndRun(const std::string &path, const bool verbose) {
+TestResult compileAndRun(const std::string &path, const Logger &logger) {
     auto program = new Program(path);
     auto buildEnv = new BuildEnv();
 
     auto start = std::chrono::high_resolution_clock::now();
-    auto compiler = Compiler(program, buildEnv, verbose);
+    auto compiler = Compiler(program, buildEnv, logger);
     if (compiler.run()) {
         return {
               .exitCode = -1,
         };
     }
 
-    auto linker = Linker(program, buildEnv, verbose);
+    auto linker = Linker(program, buildEnv, logger);
     if (linker.link()) {
         return {
               .exitCode = -1,
@@ -64,6 +70,11 @@ TestResult compileAndRun(const std::string &path, const bool verbose) {
 
 std::vector<std::filesystem::path> collectTests(const std::string &testDirectory) {
     std::vector<std::filesystem::path> results = {};
+    if (!std::filesystem::exists(testDirectory)) {
+        std::cout << "Could not find test directory '" << testDirectory << "'" << std::endl;
+        return results;
+    }
+
     for (const auto &path : std::filesystem::recursive_directory_iterator(testDirectory)) {
         if (path.is_directory()) {
             continue;
@@ -82,9 +93,40 @@ std::vector<std::filesystem::path> collectTests(const std::string &testDirectory
     return results;
 }
 
-int main() {
-    std::string testDirectory = "tests/";
-    bool verbose = false;
+CmdArguments parseArgs(int argc, char **argv) {
+    CmdArguments result = {};
+    if (argc == 1) {
+        return result;
+    }
+
+    for (int i = 1; i < argc; i++) {
+        const std::string &argument = std::string(argv[i]);
+        std::cout << argument << std::endl;
+        if (argument == "-d" || argument == "--directory") {
+            if (i + 1 < argc) {
+                result.testDirectory = std::string(argv[i + 1]);
+                i++;
+                continue;
+            } else {
+                std::cout << "expected directory, but there were no more arguments" << std::endl;
+                continue;
+            }
+        } else if (argument == "-v" || argument == "--verbose") {
+            result.verbose = true;
+            continue;
+        }
+    }
+
+    return result;
+}
+
+int main(int argc, char **argv) {
+    auto args = parseArgs(argc, argv);
+
+    Logger logger = {};
+    if (args.verbose) {
+        logger.setLogLevel(Logger::LogLevel::DEBUG_);
+    }
 
     std::cout << std::fixed;
     std::cout << std::setprecision(2);
@@ -95,11 +137,11 @@ int main() {
     double compileTimeTotalMillis = 0;
     double runTimeTotalMillis = 0;
 
-    std::vector<std::filesystem::path> tests = collectTests(testDirectory);
+    std::vector<std::filesystem::path> tests = collectTests(args.testDirectory);
     for (const auto &path : tests) {
         totalNumTests++;
 
-        const TestResult &result = compileAndRun(path.string(), verbose);
+        const TestResult &result = compileAndRun(path.string(), logger);
         if (!result.success()) {
             std::cout << "FAILURE";
             success = false;

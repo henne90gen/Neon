@@ -6,6 +6,7 @@
 #include <utility>
 #include <vector>
 
+#include "../Logger.h"
 #include "Token.h"
 
 class CodeProvider {
@@ -52,7 +53,7 @@ class ByteCodeProvider : public CodeProvider {
 
 class Lexer {
   public:
-    explicit Lexer(CodeProvider *codeProvider, bool verbose = false) : codeProvider(codeProvider), verbose(verbose){};
+    explicit Lexer(CodeProvider *codeProvider, const Logger &logger) : codeProvider(codeProvider), log(logger){};
 
     ~Lexer() { delete codeProvider; }
 
@@ -61,7 +62,7 @@ class Lexer {
   private:
     std::string currentWord;
     CodeProvider *codeProvider;
-    bool verbose;
+    const Logger &log;
 
     std::optional<Token> matchRegex(const std::string &regex, Token::TokenType tokenType);
     std::optional<Token> matchOneCharToken();
