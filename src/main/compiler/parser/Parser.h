@@ -32,10 +32,13 @@ class Parser {
     AstNode *parseExpression(const std::vector<Token> &tokens, int &currentTokenIdx, int level) const;
     AstNode *parseAssignmentLeft(const std::vector<Token> &tokens, int &currentTokenIdx, int level) const;
     BinaryOperationNode *parseBinaryOperation(const std::vector<Token> &tokens, int &currentTokenIdx, int level) const;
+    UnaryOperationNode *parseUnaryOperation(const std::vector<Token> &tokens, int &currentTokenIdx, int level) const;
     LiteralNode *parseLiteral(const std::vector<Token> &tokens, int &currentTokenIdx, int level) const;
     AstNode *parseBinaryLeft(const std::vector<Token> &tokens, int &currentTokenIdx, int level) const;
     AstNode *parseExpressionInsideParens(const std::vector<Token> &tokens, int &currentTokenIdx, int level) const;
     AstNode *parseBinaryRight(const std::vector<Token> &tokens, int &currentTokenIdx, int level) const;
     CommentNode *parseComment(const std::vector<Token> &tokens, int &currentTokenIdx, int level) const;
     TypeDeclarationNode *parseTypeDeclaration(const std::vector<Token> &tokens, int &currentTokenIdx, int level) const;
+    TypeMemberNode *parseMemberVariable(const std::vector<Token> &tokens, int &currentTokenIdx,
+                                                int level) const;
 };

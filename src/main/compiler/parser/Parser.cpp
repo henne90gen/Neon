@@ -169,7 +169,7 @@ BinaryOperationNode *Parser::parseBinaryOperation(const std::vector<Token> &toke
         return nullptr;
     }
 
-    auto operationType = ast::BinaryOperationType::ADDITION;
+    ast::BinaryOperationType operationType;
     if (tokens[currentTokenIdx].type == Token::PLUS) {
         operationType = ast::BinaryOperationType::ADDITION;
     } else if (tokens[currentTokenIdx].type == Token::MINUS) {
@@ -213,7 +213,32 @@ BinaryOperationNode *Parser::parseBinaryOperation(const std::vector<Token> &toke
     return binaryOperation;
 }
 
+UnaryOperationNode *Parser::parseUnaryOperation(const std::vector<Token> &tokens, int &currentTokenIdx,
+                                                int level) const {
+    if (!(currentTokenIdx < tokens.size() && tokens[currentTokenIdx].type == Token::NOT)) {
+        return nullptr;
+    }
+
+    auto beforeTokenIdx = currentTokenIdx;
+    currentTokenIdx++;
+
+    auto expression = parseExpression(tokens, currentTokenIdx, level + 1);
+    if (expression == nullptr) {
+        currentTokenIdx = beforeTokenIdx;
+        return nullptr;
+    }
+
+    auto operation = new UnaryOperationNode(UnaryOperationNode::NOT);
+    operation->setChild(expression);
+    return operation;
+}
+
 AstNode *Parser::parseExpressionInsideParens(const std::vector<Token> &tokens, int &currentTokenIdx, int level) const {
+    auto unaryOperation = parseUnaryOperation(tokens, currentTokenIdx, level + 1);
+    if (unaryOperation != nullptr) {
+        return unaryOperation;
+    }
+
     auto binaryOperation = parseBinaryOperation(tokens, currentTokenIdx, level + 1);
     if (binaryOperation != nullptr) {
         return binaryOperation;
@@ -658,6 +683,11 @@ CommentNode *Parser::parseComment(const std::vector<Token> &tokens, int &current
     return result;
 }
 
+TypeMemberNode *Parser::parseMemberVariable(const std::vector<Token> &tokens, int &currentTokenIdx, int level) const {
+    // TODO implement this
+    return nullptr;
+}
+
 TypeDeclarationNode *Parser::parseTypeDeclaration(const std::vector<Token> &tokens, int &currentTokenIdx,
                                                   int level) const {
     if (!(currentTokenIdx < tokens.size() && tokens[currentTokenIdx].type == Token::TYPE)) {
@@ -675,11 +705,26 @@ TypeDeclarationNode *Parser::parseTypeDeclaration(const std::vector<Token> &toke
     std::string name = tokens[currentTokenIdx].content;
     currentTokenIdx++;
 
-    auto sequence = parseScope(tokens, currentTokenIdx, level + 1);
-    if (sequence == nullptr) {
+    if (!(currentTokenIdx < tokens.size() && tokens[currentTokenIdx].type == Token::IDENTIFIER)) {
         currentTokenIdx = beforeTokenIdx;
         return nullptr;
     }
+
+    currentTokenIdx++;
+
+    std::vector<TypeMemberNode *> memberVariables = {};
+    do {
+        auto memberVariable = parseMemberVariable(tokens, currentTokenIdx, level + 1);
+        if (memberVariable == nullptr) {
+            currentTokenIdx = beforeTokenIdx;
+            return nullptr;
+        }
+        memberVariables.push_back(memberVariable);
+
+        if (!(currentTokenIdx < tokens.size() && tokens[currentTokenIdx].type == Token::NEW_LINE)) {
+            currentTokenIdx++;
+        }
+    } while (!(currentTokenIdx < tokens.size() && tokens[currentTokenIdx].type == Token::RIGHT_CURLY_BRACE));
 
     if (!(currentTokenIdx < tokens.size() && tokens[currentTokenIdx].type == Token::RIGHT_CURLY_BRACE)) {
         currentTokenIdx = beforeTokenIdx;
@@ -689,8 +734,7 @@ TypeDeclarationNode *Parser::parseTypeDeclaration(const std::vector<Token> &toke
     currentTokenIdx++;
 
     auto node = new TypeDeclarationNode(name);
-    // TODO check parsed sequence for member variables and member functions
-    //    node->setMembers()
+    node->setMembers(memberVariables);
     return node;
 }
 
