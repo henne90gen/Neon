@@ -1,4 +1,4 @@
-#include "AstTestHelper.h"
+#include "ParserTestHelper.h"
 
 #include "compiler/ast/nodes/AllNodes.h"
 #include "compiler/ast/visitors/AstPrinter.h"
@@ -190,9 +190,10 @@ void assertProgramCreatesAstWithSimpleParser(const std::vector<std::string> &pro
     CodeProvider *codeProvider = new StringCodeProvider(program, true);
     auto context = new llvm::LLVMContext();
     auto prog = new Module("test.ne", *context);
-    auto lexer = Lexer(codeProvider);
+    Logger logger = {};
+    auto lexer = Lexer(codeProvider, logger);
 
-    Parser parser(lexer, prog, false);
+    Parser parser(lexer, prog, logger);
     parser.run();
 
     auto astPrinter = AstPrinter(prog);

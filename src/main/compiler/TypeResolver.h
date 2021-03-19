@@ -10,7 +10,7 @@
 
 struct TypeResolveResult {
     bool typeExists = false;
-    CompositeType complexType = {.type = ast::DataType()};
+    CompositeType complexType = {ast::DataType()};
     // TODO do we really need this?
     Module *module = nullptr;
 };

@@ -5,6 +5,7 @@
 #include <string>
 #include <utility>
 #include <vector>
+#include <filesystem>
 
 #include "../Logger.h"
 #include "Token.h"
@@ -18,12 +19,12 @@ class CodeProvider {
 
 class FileCodeProvider : public CodeProvider {
   public:
-    explicit FileCodeProvider(std::string absoluteFilePath) : fileName(std::move(absoluteFilePath)) {}
+    explicit FileCodeProvider(std::filesystem::path absoluteFilePath) : fileName(std::move(absoluteFilePath)) {}
 
     std::optional<std::string> getMoreCode() override;
 
   private:
-    const std::string fileName;
+    const std::filesystem::path fileName;
     bool fileHasBeenRead = false;
     std::vector<std::string> lines = {};
 };
@@ -54,8 +55,6 @@ class ByteCodeProvider : public CodeProvider {
 class Lexer {
   public:
     explicit Lexer(CodeProvider *codeProvider, const Logger &logger) : codeProvider(codeProvider), log(logger){};
-
-    ~Lexer() { delete codeProvider; }
 
     Token getToken();
 

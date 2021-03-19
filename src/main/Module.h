@@ -25,10 +25,10 @@ class Module {
     [[nodiscard]] std::string toEscapedString() const;
     [[nodiscard]] std::string toArrayString() const;
 
-    std::string getDirectoryPath() const { return filePath.parent_path(); }
+    std::string getDirectoryPath() const { return filePath.parent_path().string(); }
     std::filesystem::path getFilePath() const { return filePath; }
 
-    CodeProvider *getCodeProvider();
+    CodeProvider *getCodeProvider() const;
 
   public:
     CodeProvider *codeProvider;

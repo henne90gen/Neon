@@ -4,9 +4,9 @@
 
 #include <unordered_map>
 
-Lexer getLexer(const std::vector<std::string> &lines) {
+Lexer getLexer(const std::vector<std::string> &lines, Logger &logger) {
     CodeProvider *codeProvider = new StringCodeProvider(lines, false);
-    auto lexer = Lexer(codeProvider);
+    auto lexer = Lexer(codeProvider, logger);
     return lexer;
 }
 
@@ -17,7 +17,8 @@ void assertTokensCanBeLexed(const std::unordered_map<std::string, Token::TokenTy
         lines.push_back(kv.first);
     }
 
-    auto lexer = getLexer(lines);
+    Logger logger = {};
+    auto lexer = getLexer(lines, logger);
     for (auto &expectedToken : tokens) {
         auto actualToken = lexer.getToken();
         INFO(to_string(actualToken.type) + " != " + to_string(expectedToken.second));
@@ -30,7 +31,8 @@ void assertTokensCanBeLexed(const std::unordered_map<std::string, Token::TokenTy
 TEST_CASE("Lexer") {
     SECTION("can handle lots of spaces") {
         std::vector<std::string> lines = {"     1    "};
-        auto lexer = getLexer(lines);
+        Logger logger = {};
+        auto lexer = getLexer(lines, logger);
         auto token = lexer.getToken();
         REQUIRE(token.content == "1");
         REQUIRE(token.type == Token::INTEGER);
@@ -38,7 +40,8 @@ TEST_CASE("Lexer") {
 
     SECTION("can handle spaces between tokens") {
         std::vector<std::string> lines = {"1 - 5"};
-        auto lexer = getLexer(lines);
+        Logger logger = {};
+        auto lexer = getLexer(lines, logger);
         auto token = lexer.getToken();
         REQUIRE(token.type == Token::INTEGER);
         REQUIRE(token.content == "1");
@@ -54,7 +57,8 @@ TEST_CASE("Lexer") {
 
     SECTION("can handle tabs") {
         std::vector<std::string> lines = {"\t1"};
-        auto lexer = getLexer(lines);
+        Logger logger = {};
+        auto lexer = getLexer(lines, logger);
         auto token = lexer.getToken();
         REQUIRE(token.content == "1");
         REQUIRE(token.type == Token::INTEGER);
@@ -62,7 +66,8 @@ TEST_CASE("Lexer") {
 
     SECTION("can handle no spaces between tokens") {
         std::vector<std::string> lines = {"1-5"};
-        Lexer lexer = getLexer(lines);
+        Logger logger = {};
+        Lexer lexer = getLexer(lines, logger);
         auto token = lexer.getToken();
         REQUIRE(token.type == Token::INTEGER);
         REQUIRE(token.content == "1");

@@ -1,40 +1,165 @@
-#include "ParserTest.h"
-
 #include <catch2/catch.hpp>
+#include "ParserTestHelper.h"
 
 TEST_CASE("Parser Functions") {
     SECTION("function definition") {
-        std::vector<std::string> program = {"fun helloWorld() { }"};
-        assertParserAccepts(program);
+        std::vector<AstNodeSpec> spec = {
+              {0, ast::NodeType::SEQUENCE},
+              {1, ast::NodeType::STATEMENT},
+              {2, ast::NodeType::FUNCTION},
+              {3, ast::NodeType::SEQUENCE},
+        };
+        std::vector<std::string> program = {"fun hello() { }"};
+        assertProgramCreatesAstWithSimpleParser(program, spec);
     }
 
-    SECTION("function definition with argument and return type") {
-        std::vector<std::string> program = {"fun hello(int i) float { }"};
-        assertParserAccepts(program);
+    SECTION("function definition with body") {
+        std::vector<AstNodeSpec> spec = {
+              {0, ast::NodeType::SEQUENCE},
+              {1, ast::NodeType::STATEMENT},
+              {2, ast::NodeType::FUNCTION},
+              {3, ast::NodeType::SEQUENCE},
+              {4, ast::NodeType::STATEMENT},
+              {5, ast::NodeType::ASSIGNMENT},
+              {6, ast::NodeType::VARIABLE_DEFINITION},
+              {6, ast::NodeType::LITERAL},
+        };
+        std::vector<std::string> program = {"fun hello() {", "int a = 1", "}"};
+        assertProgramCreatesAstWithSimpleParser(program, spec);
     }
 
-    SECTION("function definition with multiple arguments and return type") {
-        std::vector<std::string> program = {"fun hello(int i, bool b) float { }"};
-        assertParserAccepts(program);
+    SECTION("main function definition") {
+        std::vector<AstNodeSpec> spec = {
+              {0, ast::NodeType::SEQUENCE}, {1, ast::NodeType::STATEMENT}, {2, ast::NodeType::FUNCTION},
+              {3, ast::NodeType::SEQUENCE}, {4, ast::NodeType::STATEMENT}, {5, ast::NodeType::LITERAL},
+        };
+        std::vector<std::string> program = {"fun main() {", "return 0", "}"};
+        assertProgramCreatesAstWithSimpleParser(program, spec);
     }
 
-    SECTION("external function definition") {
-        std::vector<std::string> program = {"extern fun calc()"};
-        assertParserAccepts(program);
-    }
-
-    SECTION("external function definition with return type") {
-        std::vector<std::string> program = {"extern fun calc() int"};
-        assertParserAccepts(program);
-    }
-
-    SECTION("external function definition with arguments and return type") {
-        std::vector<std::string> program = {"extern fun calc(int i) int"};
-        assertParserAccepts(program);
-    }
-
-    SECTION("function call without arguments") {
+    SECTION("function call") {
+        std::vector<AstNodeSpec> spec = {
+              {0, ast::NodeType::SEQUENCE},
+              {1, ast::NodeType::STATEMENT},
+              {2, ast::NodeType::CALL},
+        };
         std::vector<std::string> program = {"hello()"};
-        assertParserAccepts(program);
+        assertProgramCreatesAstWithSimpleParser(program, spec);
+    }
+
+    SECTION("function call with argument") {
+        std::vector<AstNodeSpec> spec = {
+              {0, ast::NodeType::SEQUENCE}, //
+              {1, ast::NodeType::STATEMENT},
+              {2, ast::NodeType::CALL},
+              {3, ast::NodeType::LITERAL},
+              {1, ast::NodeType::STATEMENT},
+              {2, ast::NodeType::CALL},
+              {3, ast::NodeType::VARIABLE},
+              {1, ast::NodeType::STATEMENT},
+              {2, ast::NodeType::CALL},
+              {3, ast::NodeType::BINARY_OPERATION},
+              {4, ast::NodeType::VARIABLE},
+              {4, ast::NodeType::LITERAL},
+
+              // return tests
+              {1, ast::NodeType::STATEMENT},
+              {2, ast::NodeType::CALL},
+              {3, ast::NodeType::LITERAL},
+              {1, ast::NodeType::STATEMENT},
+              {2, ast::NodeType::CALL},
+              {3, ast::NodeType::VARIABLE},
+              {1, ast::NodeType::STATEMENT},
+              {2, ast::NodeType::CALL},
+              {3, ast::NodeType::BINARY_OPERATION},
+              {4, ast::NodeType::VARIABLE},
+              {4, ast::NodeType::LITERAL},
+              {1, ast::NodeType::STATEMENT},
+              {2, ast::NodeType::BINARY_OPERATION},
+              {3, ast::NodeType::CALL},
+              {4, ast::NodeType::LITERAL},
+              {3, ast::NodeType::CALL},
+              {4, ast::NodeType::VARIABLE},
+        };
+        std::vector<std::string> program = {
+              "hello(1)",
+              "hello(num)",
+              "hello(num - 1)",
+              "return hello(1)",
+              "return hello(num)",
+              "return hello(num - 1)",
+              "return hello(1) + hello(num)",
+        };
+        assertProgramCreatesAstWithSimpleParser(program, spec);
+    }
+
+    SECTION("function call with multiple arguments") {
+        std::vector<AstNodeSpec> spec = {
+              {0, ast::NodeType::SEQUENCE},  {1, ast::NodeType::STATEMENT}, {2, ast::NodeType::CALL},
+              {3, ast::NodeType::LITERAL},   {3, ast::NodeType::LITERAL},   {1, ast::NodeType::STATEMENT},
+              {2, ast::NodeType::CALL},      {3, ast::NodeType::VARIABLE},  {3, ast::NodeType::LITERAL},
+              {1, ast::NodeType::STATEMENT}, {2, ast::NodeType::CALL},      {3, ast::NodeType::VARIABLE},
+              {3, ast::NodeType::VARIABLE},  {1, ast::NodeType::STATEMENT}, {2, ast::NodeType::CALL},
+              {3, ast::NodeType::VARIABLE},  {1, ast::NodeType::STATEMENT}, {2, ast::NodeType::CALL},
+              {3, ast::NodeType::VARIABLE},  {3, ast::NodeType::VARIABLE},
+        };
+        std::vector<std::string> program = {
+              "hello(1, 2)", "hello(num, 2)", "hello(num, num)", "hello(num, )", "hello(num, num)",
+        };
+        assertProgramCreatesAstWithSimpleParser(program, spec);
+    }
+
+    SECTION("external function") {
+        std::vector<AstNodeSpec> spec = {
+              {0, ast::NodeType::SEQUENCE},
+              {1, ast::NodeType::STATEMENT},
+              {2, ast::NodeType::FUNCTION},
+        };
+        std::vector<std::string> program = {"extern fun hello()"};
+        assertProgramCreatesAstWithSimpleParser(program, spec);
+    }
+
+    SECTION("external function with return type") {
+        std::vector<AstNodeSpec> spec = {
+              {0, ast::NodeType::SEQUENCE},  {1, ast::NodeType::STATEMENT}, {2, ast::NodeType::FUNCTION},
+              {1, ast::NodeType::STATEMENT}, {2, ast::NodeType::FUNCTION},  {1, ast::NodeType::STATEMENT},
+              {2, ast::NodeType::FUNCTION},
+        };
+        std::vector<std::string> program = {
+              "extern fun hello() int",
+              "extern fun hello() float",
+              "extern fun hello() bool",
+        };
+        assertProgramCreatesAstWithSimpleParser(program, spec);
+    }
+
+    SECTION("external function with arguments") {
+        std::vector<AstNodeSpec> spec = {
+              {0, ast::NodeType::SEQUENCE},
+              {1, ast::NodeType::STATEMENT},
+              {2, ast::NodeType::FUNCTION},
+              {3, ast::NodeType::VARIABLE_DEFINITION},
+              {1, ast::NodeType::STATEMENT},
+              {2, ast::NodeType::FUNCTION},
+              {3, ast::NodeType::VARIABLE_DEFINITION},
+              {3, ast::NodeType::VARIABLE_DEFINITION},
+        };
+        std::vector<std::string> program = {"extern fun hello(int i)", "extern fun hello(int i, float j)"};
+        assertProgramCreatesAstWithSimpleParser(program, spec);
+    }
+
+    SECTION("external function with arguments and return type") {
+        std::vector<AstNodeSpec> spec = {
+              {0, ast::NodeType::SEQUENCE},
+              {1, ast::NodeType::STATEMENT},
+              {2, ast::NodeType::FUNCTION},
+              {3, ast::NodeType::VARIABLE_DEFINITION},
+              {1, ast::NodeType::STATEMENT},
+              {2, ast::NodeType::FUNCTION},
+              {3, ast::NodeType::VARIABLE_DEFINITION},
+              {3, ast::NodeType::VARIABLE_DEFINITION},
+        };
+        std::vector<std::string> program = {"extern fun hello(int i) float", "extern fun hello(int i, float j) bool"};
+        assertProgramCreatesAstWithSimpleParser(program, spec);
     }
 }

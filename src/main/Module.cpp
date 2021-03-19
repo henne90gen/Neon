@@ -83,4 +83,4 @@ std::string Module::toArrayString() const {
     return result;
 }
 
-CodeProvider *Module::getCodeProvider() { return codeProvider; }
+CodeProvider *Module::getCodeProvider() const { return codeProvider; }

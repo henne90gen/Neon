@@ -62,11 +62,19 @@ TestResult compileAndRun(const std::string &path, const Logger &logger) {
     end = std::chrono::high_resolution_clock::now();
 
     auto runTime = std::chrono::duration_cast<std::chrono::nanoseconds>(end - start);
+#ifdef WIN32
+    return {
+          .exitCode = exitCode,
+          .compileTime = compileTimeNs,
+          .runTime = runTime,
+    };
+#else
     return {
           .exitCode = WEXITSTATUS(exitCode),
           .compileTime = compileTimeNs,
           .runTime = runTime,
     };
+#endif
 }
 
 std::vector<std::filesystem::path> collectTests(const CmdArguments &args) {
@@ -96,7 +104,9 @@ std::vector<std::filesystem::path> collectTests(const CmdArguments &args) {
     }
 
     std::sort(results.begin(), results.end(), [](const std::filesystem::path &a, const std::filesystem::path &b) {
-        return std::lexicographical_compare(a.string().begin(), a.string().end(), b.string().begin(), b.string().end());
+        const std::string &aStr = a.string();
+        const std::string &bStr = b.string();
+        return std::lexicographical_compare(aStr.begin(), aStr.end(), bStr.begin(), bStr.end());
     });
 
     return results;

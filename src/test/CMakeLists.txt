@@ -1,23 +1,23 @@
 include(${PROJECT_SOURCE_DIR}/vendor/catch/contrib/Catch.cmake)
 set(CATCH_INCLUDE_DIR ${PROJECT_SOURCE_DIR}/vendor/catch/single_include)
 
-set(SOURCES_TEST
+# Unit Tests
+add_executable(Tests
         main.cpp
         LexerTest.cpp
-        parser/ParserTest.cpp
         parser/FunctionTest.cpp
         parser/OperationTest.cpp
-        ast/SimpleParserTest.cpp
-        ast/AstTestHelper.cpp)
-
-add_executable(Tests ${SOURCES_TEST})
+        parser/StatementTest.cpp
+        parser/TypesTest.cpp
+        parser/ParserTest.cpp
+        parser/ParserTestHelper.cpp)
 target_include_directories(Tests
         PRIVATE ${CATCH_INCLUDE_DIR}
         ${PROJECT_SOURCE_DIR}/src/main)
 target_link_libraries(Tests NeonCompiler)
 catch_discover_tests(Tests)
 
-
+# Fuzz Tests
 add_executable(FuzzTests fuzz/LexerFuzzTester.cpp)
 target_compile_options(FuzzTests PRIVATE $<$<C_COMPILER_ID:Clang>:-g -O1 -fsanitize=fuzzer>)
 target_link_libraries(FuzzTests PRIVATE $<$<C_COMPILER_ID:Clang>:-fsanitize=fuzzer> NeonCompiler)
