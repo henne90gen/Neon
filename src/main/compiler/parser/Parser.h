@@ -37,4 +37,5 @@ class Parser {
     AstNode *parseExpressionInsideParens(const std::vector<Token> &tokens, int &currentTokenIdx, int level) const;
     AstNode *parseBinaryRight(const std::vector<Token> &tokens, int &currentTokenIdx, int level) const;
     CommentNode *parseComment(const std::vector<Token> &tokens, int &currentTokenIdx, int level) const;
+    TypeDeclarationNode *parseTypeDeclaration(const std::vector<Token> &tokens, int &currentTokenIdx, int level) const;
 };

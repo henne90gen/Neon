@@ -10,6 +10,7 @@
 
 struct CmdArguments {
     std::string testDirectory = "tests";
+    std::string regex = {};
     bool verbose = false;
 };
 
@@ -68,19 +69,27 @@ TestResult compileAndRun(const std::string &path, const Logger &logger) {
     };
 }
 
-std::vector<std::filesystem::path> collectTests(const std::string &testDirectory) {
+std::vector<std::filesystem::path> collectTests(const CmdArguments &args) {
     std::vector<std::filesystem::path> results = {};
-    if (!std::filesystem::exists(testDirectory)) {
-        std::cout << "Could not find test directory '" << testDirectory << "'" << std::endl;
+    if (!std::filesystem::exists(args.testDirectory)) {
+        std::cout << "Could not find test directory '" << args.testDirectory << "'" << std::endl;
         return results;
     }
+    std::regex re(args.regex);
 
-    for (const auto &path : std::filesystem::recursive_directory_iterator(testDirectory)) {
+    for (const auto &path : std::filesystem::recursive_directory_iterator(args.testDirectory)) {
         if (path.is_directory()) {
             continue;
         }
-        if (!endsWith(path.path().string(), "_test.ne")) {
+        const std::string &pathStr = path.path().string();
+        if (!endsWith(pathStr, "_test.ne")) {
             continue;
+        }
+        if (!args.regex.empty()) {
+            auto itr = std::sregex_iterator(pathStr.begin(), pathStr.end(), re);
+            if (itr == std::sregex_iterator()) {
+                continue;
+            }
         }
 
         results.push_back(path.path());
@@ -114,6 +123,15 @@ CmdArguments parseArgs(int argc, char **argv) {
         } else if (argument == "-v" || argument == "--verbose") {
             result.verbose = true;
             continue;
+        } else if (argument == "-r" || argument == "--regex") {
+            if (i + 1 < argc) {
+                result.regex = std::string(argv[i + 1]);
+                i++;
+                continue;
+            } else {
+                std::cout << "expected regular expression, but there were no more arguments" << std::endl;
+                continue;
+            }
         }
     }
 
@@ -137,7 +155,7 @@ int main(int argc, char **argv) {
     double compileTimeTotalMillis = 0;
     double runTimeTotalMillis = 0;
 
-    std::vector<std::filesystem::path> tests = collectTests(args.testDirectory);
+    std::vector<std::filesystem::path> tests = collectTests(args);
     for (const auto &path : tests) {
         totalNumTests++;
 
@@ -161,6 +179,7 @@ int main(int argc, char **argv) {
     if (!success) {
         exitCode = 1;
     }
+
     std::cout << std::endl
               << "RESULTS (compile: " << std::setw(7) << compileTimeTotalMillis << "ms, run: " << std::setw(7)
               << runTimeTotalMillis << "ms, exitCode: " << std::setw(2) << exitCode << "): " << successfulTests << "/"

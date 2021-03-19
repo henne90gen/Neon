@@ -658,6 +658,42 @@ CommentNode *Parser::parseComment(const std::vector<Token> &tokens, int &current
     return result;
 }
 
+TypeDeclarationNode *Parser::parseTypeDeclaration(const std::vector<Token> &tokens, int &currentTokenIdx,
+                                                  int level) const {
+    if (!(currentTokenIdx < tokens.size() && tokens[currentTokenIdx].type == Token::TYPE)) {
+        return nullptr;
+    }
+
+    int beforeTokenIdx = currentTokenIdx;
+    currentTokenIdx++;
+
+    if (!(currentTokenIdx < tokens.size() && tokens[currentTokenIdx].type == Token::IDENTIFIER)) {
+        currentTokenIdx = beforeTokenIdx;
+        return nullptr;
+    }
+
+    std::string name = tokens[currentTokenIdx].content;
+    currentTokenIdx++;
+
+    auto sequence = parseScope(tokens, currentTokenIdx, level + 1);
+    if (sequence == nullptr) {
+        currentTokenIdx = beforeTokenIdx;
+        return nullptr;
+    }
+
+    if (!(currentTokenIdx < tokens.size() && tokens[currentTokenIdx].type == Token::RIGHT_CURLY_BRACE)) {
+        currentTokenIdx = beforeTokenIdx;
+        return nullptr;
+    }
+
+    currentTokenIdx++;
+
+    auto node = new TypeDeclarationNode(name);
+    // TODO check parsed sequence for member variables and member functions
+    //    node->setMembers()
+    return node;
+}
+
 StatementNode *Parser::parseStatement(const std::vector<Token> &tokens, int &currentTokenIdx, int level) const {
     log.debug(indent(level) + "parsing statement node");
 
@@ -673,6 +709,11 @@ StatementNode *Parser::parseStatement(const std::vector<Token> &tokens, int &cur
     auto importNode = parseImport(tokens, currentTokenIdx);
     if (importNode != nullptr) {
         return createStatementNode(importNode);
+    }
+
+    auto typeNode = parseTypeDeclaration(tokens, currentTokenIdx, level + 1);
+    if (typeNode != nullptr) {
+        return createStatementNode(typeNode);
     }
 
     auto assertNode = parseAssert(tokens, currentTokenIdx, level + 1);
@@ -726,14 +767,15 @@ void Parser::run() {
         }
     }
 
-    std::vector<AstNode *> nodeStack = {};
-    nodeStack.push_back(new SequenceNode());
+    int currentTokenIdx = 0;
+    std::vector<AstNode *> children = {};
+    bool error = false;
 
     int count = 0;
-    int currentTokenIdx = 0;
-    while (currentTokenIdx < module->tokens.size() && count < 5) {
+    while (currentTokenIdx < module->tokens.size()) {
         auto token = module->tokens[currentTokenIdx];
         if (token.type == Token::INVALID) {
+            error = currentTokenIdx != module->tokens.size() - 1;
             break;
         }
 
@@ -744,14 +786,29 @@ void Parser::run() {
 
         auto statementNode = parseStatement(module->tokens, currentTokenIdx, 0);
         if (statementNode != nullptr) {
-            assert(nodeStack.back()->getAstNodeType() == ast::NodeType::SEQUENCE);
-            reinterpret_cast<SequenceNode *>(nodeStack.back())->getChildren().push_back(statementNode);
+            children.push_back(statementNode);
             continue;
         }
 
         log.error("Unexpected token: " + to_string(token.type) + ": " + token.content);
 
+        if (count > 2) {
+            error = true;
+            break;
+        }
         count++;
     }
-    module->root = nodeStack[0];
+
+    if (error) {
+        for (auto child : children) {
+            delete child;
+        }
+        return;
+    }
+
+    auto sequence = new SequenceNode();
+    for (auto child : children) {
+        sequence->getChildren().push_back(child);
+    }
+    module->root = sequence;
 }

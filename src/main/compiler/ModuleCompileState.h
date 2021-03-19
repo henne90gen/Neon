@@ -5,5 +5,5 @@ struct ModuleCompileState {
     std::vector<FunctionSignature> functions = {};
     std::unordered_map<AstNode *, ast::DataType> nodeToTypeMap;
     std::unordered_map<std::string, ast::DataType> nameToTypeMap;
-    std::vector<ComplexType> complexTypes;
+    std::vector<CompositeType> compositeTypes;
 };

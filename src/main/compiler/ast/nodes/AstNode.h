@@ -8,6 +8,7 @@ class AstVisitor;
 class AstNode {
   public:
     explicit AstNode(ast::NodeType type) : type(type) {}
+    virtual ~AstNode() = default;
 
     virtual void accept(AstVisitor *v) = 0;
 

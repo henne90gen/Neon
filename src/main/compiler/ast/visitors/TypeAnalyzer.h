@@ -38,5 +38,5 @@ class TypeAnalyzer : public AstVisitor {
 
     std::unordered_map<AstNode *, ast::DataType> nodeTypeMap = {};
     std::unordered_map<std::string, ast::DataType> variableTypeMap = {};
-    std::unordered_map<ast::DataType, ComplexType> complexTypeMap = {};
+    std::unordered_map<ast::DataType, CompositeType> complexTypeMap = {};
 };

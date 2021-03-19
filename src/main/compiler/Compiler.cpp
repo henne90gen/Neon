@@ -39,7 +39,7 @@ bool Compiler::run() {
 
         auto module = loadModule(moduleFileName);
         if (module->root == nullptr) {
-            std::cout << "Failed to compile module " << moduleFileName << std::endl;
+            log.error("Failed to compile module " + moduleFileName);
             return true;
         }
         program->modules[moduleFileName] = module;
@@ -88,7 +88,7 @@ Module *Compiler::loadModule(const std::string &moduleFileName) {
 
     moduleCompileState[module].imports = ImportFinder(module->getDirectoryPath()).run(module->root);
     moduleCompileState[module].functions = FunctionFinder().run(module->root);
-    moduleCompileState[module].complexTypes = ComplexTypeFinder().run(module->root);
+    moduleCompileState[module].compositeTypes = ComplexTypeFinder().run(module->root);
 
     return module;
 }

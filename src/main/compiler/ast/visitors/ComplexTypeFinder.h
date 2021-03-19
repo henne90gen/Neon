@@ -12,8 +12,8 @@ class ComplexTypeFinder : public AstVisitor {
     void visitStatementNode(StatementNode *node) override;
     void visitTypeDeclarationNode(TypeDeclarationNode *node) override;
 
-    std::vector<ComplexType> run(AstNode *rootNode);
+    std::vector<CompositeType> run(AstNode *rootNode);
 
   private:
-    std::vector<ComplexType> types = {};
+    std::vector<CompositeType> types = {};
 };

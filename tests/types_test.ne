@@ -1,6 +1,10 @@
 
 type MyType {
     int i
+
+    fun hello() int {
+        return i + 10
+    }
 }
 
 fun main() int {

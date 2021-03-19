@@ -9,7 +9,7 @@ void ComplexTypeFinder::visitSequenceNode(SequenceNode *node) {
 void ComplexTypeFinder::visitStatementNode(StatementNode *node) { node->getChild()->accept(this); }
 
 void ComplexTypeFinder::visitTypeDeclarationNode(TypeDeclarationNode *node) {
-    ComplexType t = {.type = node->getType()};
+    CompositeType t = {.type = node->getType()};
 
     for (auto const &member : node->getMembers()) {
         ComplexTypeMember m = {.name = member->getName(), .type = member->getType()};
@@ -19,7 +19,7 @@ void ComplexTypeFinder::visitTypeDeclarationNode(TypeDeclarationNode *node) {
     types.push_back(t);
 }
 
-std::vector<ComplexType> ComplexTypeFinder::run(AstNode *rootNode) {
+std::vector<CompositeType> ComplexTypeFinder::run(AstNode *rootNode) {
     rootNode->accept(this);
     return types;
 }

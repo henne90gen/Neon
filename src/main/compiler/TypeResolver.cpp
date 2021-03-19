@@ -21,7 +21,7 @@ ast::DataType TypeResolver::getTypeOf(Module *module, const std::string &variabl
 TypeResolveResult TypeResolver::resolveType(Module *module, const ast::DataType &type) const {
     TypeResolveResult result = {false};
 
-    for (const auto &complexType : moduleCompileState[module].complexTypes) {
+    for (const auto &complexType : moduleCompileState[module].compositeTypes) {
         if (complexType.type == type) {
             result.typeExists = true;
             result.module = module;
@@ -33,7 +33,7 @@ TypeResolveResult TypeResolver::resolveType(Module *module, const ast::DataType 
     const auto &moduleIds = moduleCompileState[module].imports;
     for (const auto &importedModuleId : moduleIds) {
         auto importedModule = program->modules[importedModuleId];
-        for (const auto &complexType : moduleCompileState[importedModule].complexTypes) {
+        for (const auto &complexType : moduleCompileState[importedModule].compositeTypes) {
             if (complexType.type == type) {
                 result.typeExists = true;
                 result.module = importedModule;

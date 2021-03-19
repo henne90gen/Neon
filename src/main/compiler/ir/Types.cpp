@@ -36,7 +36,7 @@ llvm::Type *IrGenerator::getType(const ast::DataType &type) {
     }
 }
 
-llvm::StructType *IrGenerator::getOrCreateComplexType(const ComplexType &type) {
+llvm::StructType *IrGenerator::getOrCreateComplexType(const CompositeType &type) {
     auto result = llvmModule.getTypeByName(type.type.typeName);
     if (result != nullptr) {
         return result;
