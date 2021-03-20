@@ -1,5 +1,5 @@
-#include <catch2/catch.hpp>
 #include "ParserTestHelper.h"
+#include <catch2/catch.hpp>
 
 TEST_CASE("Parser Functions") {
     SECTION("function definition") {
@@ -47,7 +47,41 @@ TEST_CASE("Parser Functions") {
         assertProgramCreatesAstWithSimpleParser(program, spec);
     }
 
-    SECTION("function call with argument") {
+    SECTION("function call with literal argument") {
+        std::vector<AstNodeSpec> spec = {
+              {0, ast::NodeType::SEQUENCE}, //
+              {1, ast::NodeType::STATEMENT},
+              {2, ast::NodeType::CALL},
+              {3, ast::NodeType::LITERAL},
+              {1, ast::NodeType::STATEMENT},
+              {2, ast::NodeType::CALL},
+              {3, ast::NodeType::LITERAL},
+        };
+        std::vector<std::string> program = {
+              "hello(1)",
+              "return hello(1)",
+        };
+        assertProgramCreatesAstWithSimpleParser(program, spec);
+    }
+
+    SECTION("function call with variable argument") {
+        std::vector<AstNodeSpec> spec = {
+              {0, ast::NodeType::SEQUENCE}, //
+              {1, ast::NodeType::STATEMENT},
+              {2, ast::NodeType::CALL},
+              {3, ast::NodeType::VARIABLE},
+              {1, ast::NodeType::STATEMENT},
+              {2, ast::NodeType::CALL},
+              {3, ast::NodeType::VARIABLE},
+        };
+        std::vector<std::string> program = {
+              "hello(num)",
+              "return hello(num)",
+        };
+        assertProgramCreatesAstWithSimpleParser(program, spec);
+    }
+
+    SECTION("function call with variable argument") {
         std::vector<AstNodeSpec> spec = {
               {0, ast::NodeType::SEQUENCE}, //
               {1, ast::NodeType::STATEMENT},

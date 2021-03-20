@@ -55,6 +55,8 @@ enum BinaryOperationType {
     LESS_THAN,
     GREATER_EQUALS,
     GREATER_THAN,
+    AND,
+    OR,
 };
 
 bool isSimpleDataType(const ast::DataType &type);

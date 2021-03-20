@@ -32,6 +32,10 @@ void IrGenerator::emitIntegerOperation(BinaryOperationNode *node, llvm::Value *l
     case ast::BinaryOperationType::GREATER_THAN:
         nodesToValues[node] = builder.CreateICmpSGT(l, r, "gt");
         return;
+    case ast::AND:
+    case ast::OR:
+        // not defined for integers
+        return;
     }
     logError("Invalid binary operation. " + to_string(node->getType()));
 }
@@ -67,6 +71,10 @@ void IrGenerator::emitFloatOperation(BinaryOperationNode *node, llvm::Value *l, 
         return;
     case ast::BinaryOperationType::GREATER_THAN:
         nodesToValues[node] = builder.CreateFCmpOGT(l, r, "gt");
+        return;
+    case ast::AND:
+    case ast::OR:
+        // not defined for floats
         return;
     }
     logError("Invalid binary operation. " + to_string(node->getType()));
@@ -119,10 +127,36 @@ void IrGenerator::emitStringOperation(BinaryOperationNode *node, llvm::Value *l,
     case ast::LESS_THAN:
     case ast::GREATER_EQUALS:
     case ast::GREATER_THAN:
+    case ast::AND:
+    case ast::OR:
         // not defined for strings
         return;
     }
-    logError("Invalid binary operation. " + to_string(node->getType()));
+    logError("Invalid binary operation: " + to_string(node->getType()));
+}
+
+void IrGenerator::emitBooleanOperation(BinaryOperationNode *node, llvm::Value *l, llvm::Value *r) {
+    switch (node->getType()) {
+    case ast::AND:
+        nodesToValues[node] = builder.CreateAnd(l, r, "and");
+        return;
+    case ast::OR:
+        nodesToValues[node] = builder.CreateOr(l, r, "or");
+        return;
+    case ast::ADDITION:
+    case ast::MULTIPLICATION:
+    case ast::SUBTRACTION:
+    case ast::DIVISION:
+    case ast::EQUALS:
+    case ast::NOT_EQUALS:
+    case ast::LESS_EQUALS:
+    case ast::LESS_THAN:
+    case ast::GREATER_EQUALS:
+    case ast::GREATER_THAN:
+        // not defined for booleans
+        return;
+    }
+    logError("Invalid binary operation: " + to_string(node->getType()));
 }
 
 void IrGenerator::visitBinaryOperationNode(BinaryOperationNode *node) {
@@ -150,6 +184,8 @@ void IrGenerator::visitBinaryOperationNode(BinaryOperationNode *node) {
         emitFloatOperation(node, l, r);
     } else if (typeOfLeft == ast::DataType(ast::SimpleDataType::STRING)) {
         emitStringOperation(node, l, r);
+    } else if (typeOfLeft == ast::DataType(ast::SimpleDataType::BOOL)) {
+        emitBooleanOperation(node, l, r);
     } else {
         return logError("Binary operations are not supported for types " + to_string(typeOfLeft) + " and " +
                         to_string(typeOfRight));

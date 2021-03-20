@@ -21,6 +21,7 @@ class BoolNode : public LiteralNode {
     explicit BoolNode(bool value) : LiteralNode(LiteralNode::BOOL), value(value) {}
 
     void accept(AstVisitor *v) override;
+    std::string toString() override;
 
     [[nodiscard]] bool getValue() const { return value; }
 

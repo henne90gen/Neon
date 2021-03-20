@@ -28,9 +28,9 @@ TEST_CASE("Parser Operations") {
         std::vector<AstNodeSpec> spec = {
               {0, ast::NodeType::SEQUENCE},         {1, ast::NodeType::STATEMENT},
               {2, ast::NodeType::ASSIGNMENT},       {3, ast::NodeType::VARIABLE_DEFINITION},
-              {3, ast::NodeType::BINARY_OPERATION}, {4, ast::NodeType::LITERAL},
-              {4, ast::NodeType::BINARY_OPERATION}, {5, ast::NodeType::LITERAL},
-              {5, ast::NodeType::LITERAL},
+              {3, ast::NodeType::BINARY_OPERATION}, {4, ast::NodeType::BINARY_OPERATION},
+              {5, ast::NodeType::LITERAL},          {5, ast::NodeType::LITERAL},
+              {4, ast::NodeType::LITERAL},
         };
         std::vector<std::string> program = {"int a = (1 + 1 + 1)"};
         assertProgramCreatesAstWithSimpleParser(program, spec);
@@ -40,9 +40,9 @@ TEST_CASE("Parser Operations") {
         std::vector<AstNodeSpec> spec = {
               {0, ast::NodeType::SEQUENCE},         {1, ast::NodeType::STATEMENT},
               {2, ast::NodeType::ASSIGNMENT},       {3, ast::NodeType::VARIABLE_DEFINITION},
-              {3, ast::NodeType::BINARY_OPERATION}, {4, ast::NodeType::LITERAL},
-              {4, ast::NodeType::BINARY_OPERATION}, {5, ast::NodeType::LITERAL},
-              {5, ast::NodeType::LITERAL},
+              {3, ast::NodeType::BINARY_OPERATION}, {4, ast::NodeType::BINARY_OPERATION},
+              {5, ast::NodeType::LITERAL},          {5, ast::NodeType::LITERAL},
+              {4, ast::NodeType::LITERAL},
         };
         std::vector<std::string> program = {"int a = 1 + 1 + 1"};
         assertProgramCreatesAstWithSimpleParser(program, spec);

@@ -88,6 +88,7 @@ class IrGenerator : public AstVisitor {
     void emitIntegerOperation(BinaryOperationNode *node, llvm::Value *l, llvm::Value *r);
     void emitFloatOperation(BinaryOperationNode *node, llvm::Value *l, llvm::Value *r);
     void emitStringOperation(BinaryOperationNode *node, llvm::Value *l, llvm::Value *r);
+    void emitBooleanOperation(BinaryOperationNode *node, llvm::Value *l, llvm::Value *r);
 
     llvm::StructType *getStringType();
     static bool isPrimitiveType(const ast::DataType &type);

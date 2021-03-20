@@ -168,6 +168,15 @@ void IrGenerator::visitAssertNode(AssertNode *node) {
               right,
         };
         createStdLibCall("printf", args);
+    } else {
+        const std::string format = "E assert %s\n";
+        const auto formatStr = builder.CreateGlobalStringPtr(format);
+        const auto conditionStr = builder.CreateGlobalStringPtr(node->getCondition()->toString());
+        std::vector<llvm::Value *> args = {
+              formatStr,
+              conditionStr,
+        };
+        createStdLibCall("printf", args);
     }
 
     auto exitCode = llvm::ConstantInt::get(llvm::Type::getInt32Ty(context), 1);

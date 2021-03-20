@@ -3,6 +3,7 @@
 #include "../AstVisitor.h"
 
 void BoolNode::accept(AstVisitor *v) { v->visitBoolNode(this); }
+std::string BoolNode::toString() { return value ? "true" : "false"; }
 
 void IntegerNode::accept(AstVisitor *v) { v->visitIntegerNode(this); }
 std::string IntegerNode::toString() { return std::to_string(value); }
