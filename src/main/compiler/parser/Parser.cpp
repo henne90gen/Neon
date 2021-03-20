@@ -8,6 +8,12 @@ Token Parser::getNextToken() {
     return token;
 }
 
+bool Parser::currentTokenIs(Token::TokenType tokenType) const {
+    return currentTokenIdx < module->tokens.size() && module->tokens[currentTokenIdx].type == tokenType;
+}
+
+std::string Parser::currentTokenContent() const { return module->tokens[currentTokenIdx].content; }
+
 std::string Parser::indent(int level) {
     std::string result;
     for (int i = 0; i < level; i++) {
@@ -16,52 +22,56 @@ std::string Parser::indent(int level) {
     return result;
 }
 
-ImportNode *parseImport(const std::vector<Token> &tokens, int &currentTokenIdx) {
-    if (tokens[currentTokenIdx].type != Token::IMPORT) {
+ImportNode *Parser::parseImport() {
+    if (!currentTokenIs(Token::IMPORT)) {
         return nullptr;
     }
 
-    if (currentTokenIdx + 1 >= tokens.size() || tokens[currentTokenIdx + 1].type != Token::STRING) {
+    currentTokenIdx++;
+
+    if (!currentTokenIs(Token::STRING)) {
+        currentTokenIdx--;
         return nullptr;
     }
 
-    std::string fileName = tokens[currentTokenIdx + 1].content;
+    std::string fileName = currentTokenContent();
     fileName = fileName.substr(1, fileName.size() - 2);
 
     auto importNode = new ImportNode();
     importNode->setFileName(fileName);
 
-    currentTokenIdx += 2;
+    currentTokenIdx++;
+
     return importNode;
 }
 
-LiteralNode *Parser::parseLiteral(const std::vector<Token> &tokens, int &currentTokenIdx, int level) const {
+LiteralNode *Parser::parseLiteral(int level) {
     log.debug(indent(level) + "parsing literal node");
 
-    if (tokens[currentTokenIdx].type == Token::INTEGER) {
+    if (currentTokenIs(Token::INTEGER)) {
         log.debug(indent(level) + "parsing integer node");
-        int value = std::stoi(tokens[currentTokenIdx].content);
+        int value = std::stoi(currentTokenContent());
         currentTokenIdx++;
         return new IntegerNode(value);
     }
 
-    if (tokens[currentTokenIdx].type == Token::FLOAT) {
+    if (currentTokenIs(Token::FLOAT)) {
         log.debug(indent(level) + "parsed float node");
-        float value = std::stof(tokens[currentTokenIdx].content);
+        float value = std::stof(currentTokenContent());
         currentTokenIdx++;
         return new FloatNode(value);
     }
 
-    if (tokens[currentTokenIdx].type == Token::BOOLEAN) {
+    if (currentTokenIs(Token::BOOLEAN)) {
         log.debug(indent(level) + "parsed boolean node");
-        bool value = tokens[currentTokenIdx].content == "true";
+        bool value = currentTokenContent() == "true";
         currentTokenIdx++;
         return new BoolNode(value);
     }
 
-    if (tokens[currentTokenIdx].type == Token::STRING) {
+    if (currentTokenIs(Token::STRING)) {
         log.debug(indent(level) + "parsed string node");
-        std::string value = tokens[currentTokenIdx].content;
+        std::string value = currentTokenContent();
         value = value.substr(1, value.size() - 2);
         currentTokenIdx++;
         return new StringNode(value);
@@ -71,15 +81,15 @@ LiteralNode *Parser::parseLiteral(const std::vector<Token> &tokens, int &current
     return nullptr;
 }
 
-CallNode *Parser::parseFunctionCall(const std::vector<Token> &tokens, int &currentTokenIdx, int level) const {
-    if (!(currentTokenIdx < tokens.size() && tokens[currentTokenIdx].type == Token::IDENTIFIER)) {
+CallNode *Parser::parseFunctionCall(int level) {
+    if (!currentTokenIs(Token::IDENTIFIER)) {
         return nullptr;
     }
-    int beforeTokenIdx = currentTokenIdx;
-    std::string name = tokens[currentTokenIdx].content;
+    auto beforeTokenIdx = currentTokenIdx;
+    std::string name = currentTokenContent();
     currentTokenIdx++;
 
-    if (!(currentTokenIdx < tokens.size() && tokens[currentTokenIdx].type == Token::LEFT_PARAN)) {
+    if (!currentTokenIs(Token::LEFT_PARAN)) {
         currentTokenIdx = beforeTokenIdx;
         return nullptr;
     }
@@ -89,19 +99,19 @@ CallNode *Parser::parseFunctionCall(const std::vector<Token> &tokens, int &curre
     log.debug(indent(level) + "parsing call node");
 
     std::vector<AstNode *> params = {};
-    while (currentTokenIdx < tokens.size() && tokens[currentTokenIdx].type != Token::RIGHT_PARAN) {
-        auto expression = parseExpression(tokens, currentTokenIdx, level + 1);
+    while (!currentTokenIs(Token::RIGHT_PARAN)) {
+        auto expression = parseExpression(level + 1);
         if (expression == nullptr) {
             currentTokenIdx = beforeTokenIdx;
             return nullptr;
         }
         params.push_back(expression);
-        if (currentTokenIdx < tokens.size() && tokens[currentTokenIdx].type == Token::COMMA) {
+        if (currentTokenIs(Token::COMMA)) {
             currentTokenIdx++;
         }
     }
 
-    if (!(currentTokenIdx < tokens.size() && tokens[currentTokenIdx].type == Token::RIGHT_PARAN)) {
+    if (!currentTokenIs(Token::RIGHT_PARAN)) {
         currentTokenIdx = beforeTokenIdx;
         return nullptr;
     }
@@ -115,24 +125,26 @@ CallNode *Parser::parseFunctionCall(const std::vector<Token> &tokens, int &curre
     return callNode;
 }
 
-VariableNode *Parser::parseVariable(const std::vector<Token> &tokens, int &currentTokenIdx, int level) const {
-    if (!(currentTokenIdx < tokens.size() && tokens[currentTokenIdx].type == Token::IDENTIFIER)) {
+VariableNode *Parser::parseVariable(int level) {
+    if (!currentTokenIs(Token::IDENTIFIER)) {
         return nullptr;
     }
+
     auto beforeTokenIdx = currentTokenIdx;
-    std::string name = tokens[currentTokenIdx].content;
+    std::string name = currentTokenContent();
+
     currentTokenIdx++;
 
     AstNode *expression = nullptr;
-    if (currentTokenIdx < tokens.size() && tokens[currentTokenIdx].type == Token::LEFT_BRACKET) {
+    if (currentTokenIs(Token::LEFT_BRACKET)) {
         currentTokenIdx++;
 
-        expression = parseExpression(tokens, currentTokenIdx, level + 1);
+        expression = parseExpression(level + 1);
         if (expression == nullptr) {
             currentTokenIdx = beforeTokenIdx;
             return nullptr;
         }
-        if (!(currentTokenIdx < tokens.size() && tokens[currentTokenIdx].type == Token::RIGHT_BRACKET)) {
+        if (!currentTokenIs(Token::RIGHT_BRACKET)) {
             currentTokenIdx = beforeTokenIdx;
             return nullptr;
         }
@@ -145,45 +157,44 @@ VariableNode *Parser::parseVariable(const std::vector<Token> &tokens, int &curre
     return result;
 }
 
-VariableDefinitionNode *Parser::parseVariableDefinition(const std::vector<Token> &tokens, int &currentTokenIdx,
-                                                        int level) const {
+VariableDefinitionNode *Parser::parseVariableDefinition(int level) {
     log.debug(indent(level) + "parsing variable definition node");
 
     auto beforeTokenIdx = currentTokenIdx;
-    if (currentTokenIdx < tokens.size() && tokens[currentTokenIdx].type == Token::SIMPLE_DATA_TYPE) {
-        auto dataType = ast::DataType(from_string(tokens[currentTokenIdx].content));
+    if (currentTokenIs(Token::SIMPLE_DATA_TYPE)) {
+        auto dataType = ast::DataType(from_string(currentTokenContent()));
 
         currentTokenIdx++;
 
-        if (currentTokenIdx < tokens.size() && tokens[currentTokenIdx].type == Token::IDENTIFIER) {
-            std::string variableName = tokens[currentTokenIdx].content;
+        if (currentTokenIs(Token::IDENTIFIER)) {
+            std::string variableName = currentTokenContent();
             auto variableDefinitionNode = new VariableDefinitionNode(variableName, dataType);
             log.debug(indent(level) + "parsed variable definition with simple data type");
             currentTokenIdx++;
             return variableDefinitionNode;
-        } else if (currentTokenIdx < tokens.size() && tokens[currentTokenIdx].type == Token::LEFT_BRACKET) {
+        } else if (currentTokenIs(Token::LEFT_BRACKET)) {
             currentTokenIdx++;
 
-            auto literal = parseLiteral(tokens, currentTokenIdx, level + 1);
+            auto literal = parseLiteral(level + 1);
             if (literal == nullptr || literal->getLiteralType() != LiteralNode::INTEGER) {
                 currentTokenIdx = beforeTokenIdx;
                 return nullptr;
             }
             auto arraySizeLiteral = reinterpret_cast<IntegerNode *>(literal);
 
-            if (!(currentTokenIdx < tokens.size() && tokens[currentTokenIdx].type == Token::RIGHT_BRACKET)) {
+            if (!currentTokenIs(Token::RIGHT_BRACKET)) {
                 currentTokenIdx = beforeTokenIdx;
                 return nullptr;
             }
 
             currentTokenIdx++;
 
-            if (!(currentTokenIdx < tokens.size() && tokens[currentTokenIdx].type == Token::IDENTIFIER)) {
+            if (!currentTokenIs(Token::IDENTIFIER)) {
                 currentTokenIdx = beforeTokenIdx;
                 return nullptr;
             }
 
-            std::string variableName = tokens[currentTokenIdx].content;
+            std::string variableName = currentTokenContent();
             auto arraySize = arraySizeLiteral->getValue();
             auto variableDefinitionNode = new VariableDefinitionNode(variableName, dataType, arraySize);
 
@@ -192,7 +203,6 @@ VariableDefinitionNode *Parser::parseVariableDefinition(const std::vector<Token>
         }
     }
 
-    // TODO parse array definitions as well
     // TODO parse custom types as well
 
     log.debug(indent(level) + "failed to parse variable definition");
@@ -200,19 +210,18 @@ VariableDefinitionNode *Parser::parseVariableDefinition(const std::vector<Token>
     return nullptr;
 }
 
-SequenceNode *Parser::parseScope(const std::vector<Token> &tokens, int &currentTokenIdx, int level) const {
-    if (!(currentTokenIdx < tokens.size() && tokens[currentTokenIdx].type == Token::LEFT_CURLY_BRACE)) {
+SequenceNode *Parser::parseScope(int level) {
+    if (!currentTokenIs(Token::LEFT_CURLY_BRACE)) {
         return nullptr;
     }
     log.debug(indent(level) + "parsing scope");
 
-    int beforeTokenIdx = currentTokenIdx;
-
+    auto beforeTokenIdx = currentTokenIdx;
     currentTokenIdx++;
 
     std::vector<AstNode *> children = {};
     while (true) {
-        auto statement = parseStatement(tokens, currentTokenIdx, level + 1);
+        auto statement = parseStatement(level + 1);
         if (statement == nullptr) {
             break;
         }
@@ -220,7 +229,7 @@ SequenceNode *Parser::parseScope(const std::vector<Token> &tokens, int &currentT
         children.push_back(statement);
     }
 
-    if (!(currentTokenIdx < tokens.size() && tokens[currentTokenIdx].type == Token::RIGHT_CURLY_BRACE)) {
+    if (!currentTokenIs(Token::RIGHT_CURLY_BRACE)) {
         currentTokenIdx = beforeTokenIdx;
         return nullptr;
     }
@@ -234,52 +243,58 @@ SequenceNode *Parser::parseScope(const std::vector<Token> &tokens, int &currentT
     return body;
 }
 
-FunctionNode *Parser::parseFunction(const std::vector<Token> &tokens, int &currentTokenIdx, int level) const {
-    bool isExternFunc = false;
-    if (tokens[currentTokenIdx].type == Token::EXTERN) {
-        isExternFunc = true;
+FunctionNode *Parser::parseFunction(int level) {
+    auto beforeTokenIdx = currentTokenIdx;
+    if (currentTokenIs(Token::EXTERN)) {
         currentTokenIdx++;
     }
 
-    if (!(tokens[currentTokenIdx].type == Token::FUN &&
-          (currentTokenIdx + 1 < tokens.size() && tokens[currentTokenIdx + 1].type == Token::IDENTIFIER))) {
-        if (isExternFunc) {
-            currentTokenIdx--;
-        }
+    if (!currentTokenIs(Token::FUN)) {
+        currentTokenIdx = beforeTokenIdx;
+        return nullptr;
+    }
+
+    currentTokenIdx++;
+
+    if (!currentTokenIs(Token::IDENTIFIER)) {
+        currentTokenIdx = beforeTokenIdx;
         return nullptr;
     }
 
     log.debug(indent(level) + "parsing function node");
 
+    std::string functionName = currentTokenContent();
+    currentTokenIdx++;
+
+    if (!currentTokenIs(Token::LEFT_PARAN)) {
+        currentTokenIdx = beforeTokenIdx;
+        return nullptr;
+    }
+
     std::vector<VariableDefinitionNode *> params = {};
-    int paramsIdx = 2;
     do {
-        paramsIdx++;
-        int idx = currentTokenIdx + paramsIdx;
-        auto variableDefinitionNode = parseVariableDefinition(tokens, idx, level + 1);
+        currentTokenIdx++;
+        auto variableDefinitionNode = parseVariableDefinition(level + 1);
         if (variableDefinitionNode == nullptr) {
             break;
         }
         params.push_back(variableDefinitionNode);
-        paramsIdx = idx - currentTokenIdx;
-    } while (currentTokenIdx + paramsIdx < tokens.size() && tokens[currentTokenIdx + paramsIdx].type == Token::COMMA);
+    } while (currentTokenIs(Token::COMMA));
 
-    if (currentTokenIdx + paramsIdx < tokens.size() && tokens[currentTokenIdx + paramsIdx].type != Token::RIGHT_PARAN) {
-        if (isExternFunc) {
-            currentTokenIdx -= 1;
-        }
+    if (!currentTokenIs(Token::RIGHT_PARAN)) {
+        currentTokenIdx = beforeTokenIdx;
         return nullptr;
     }
 
-    std::string functionName = tokens[currentTokenIdx + 1].content;
-    currentTokenIdx += paramsIdx + 1;
+    currentTokenIdx++;
+
     ast::DataType returnType = ast::DataType();
-    if (currentTokenIdx < tokens.size() && tokens[currentTokenIdx].type == Token::SIMPLE_DATA_TYPE) {
-        returnType = ast::DataType(from_string(tokens[currentTokenIdx].content));
-        currentTokenIdx += 1;
+    if (currentTokenIs(Token::SIMPLE_DATA_TYPE)) {
+        returnType = ast::DataType(from_string(currentTokenContent()));
+        currentTokenIdx++;
     }
 
-    auto body = parseScope(tokens, currentTokenIdx, level + 1);
+    auto body = parseScope(level + 1);
 
     auto functionNode = new FunctionNode(functionName, returnType);
     functionNode->setBody(body);
@@ -289,13 +304,13 @@ FunctionNode *Parser::parseFunction(const std::vector<Token> &tokens, int &curre
     return functionNode;
 }
 
-AstNode *Parser::parseAssignmentLeft(const std::vector<Token> &tokens, int &currentTokenIdx, int level) const {
-    auto variableDefinitionNode = parseVariableDefinition(tokens, currentTokenIdx, level + 1);
+AstNode *Parser::parseAssignmentLeft(int level) {
+    auto variableDefinitionNode = parseVariableDefinition(level + 1);
     if (variableDefinitionNode != nullptr) {
         return variableDefinitionNode;
     }
 
-    auto variableNode = parseVariable(tokens, currentTokenIdx, level + 1);
+    auto variableNode = parseVariable(level + 1);
     if (variableNode != nullptr) {
         return variableNode;
     }
@@ -303,23 +318,23 @@ AstNode *Parser::parseAssignmentLeft(const std::vector<Token> &tokens, int &curr
     return nullptr;
 }
 
-AssignmentNode *Parser::parseAssignment(const std::vector<Token> &tokens, int &currentTokenIdx, int level) const {
+AssignmentNode *Parser::parseAssignment(int level) {
     log.debug(indent(level) + "parsing assignment statement");
     auto beforeTokenIdx = currentTokenIdx;
-    auto left = parseAssignmentLeft(tokens, currentTokenIdx, level + 1);
+    auto left = parseAssignmentLeft(level + 1);
     if (left == nullptr) {
         currentTokenIdx = beforeTokenIdx;
         return nullptr;
     }
     log.debug(indent(level) + "parsed assignment left");
 
-    if (!(currentTokenIdx < tokens.size() && tokens[currentTokenIdx].type == Token::SINGLE_EQUALS)) {
+    if (!currentTokenIs(Token::SINGLE_EQUALS)) {
         currentTokenIdx = beforeTokenIdx;
         return nullptr;
     }
     currentTokenIdx++;
 
-    auto right = parseExpression(tokens, currentTokenIdx, level + 1);
+    auto right = parseExpression(level + 1);
     if (right == nullptr) {
         currentTokenIdx = beforeTokenIdx;
         return nullptr;
@@ -333,37 +348,32 @@ AssignmentNode *Parser::parseAssignment(const std::vector<Token> &tokens, int &c
     return assignmentNode;
 }
 
-IfStatementNode *Parser::parseIf(const std::vector<Token> &tokens, int &currentTokenIdx, int level) const {
-    if (!(currentTokenIdx < tokens.size() && tokens[currentTokenIdx].type == Token::IF)) {
+IfStatementNode *Parser::parseIf(int level) {
+    if (!currentTokenIs(Token::IF)) {
         return nullptr;
     }
 
     log.debug(indent(level) + "parsing if statement");
-
+    auto beforeTokenIdx = currentTokenIdx;
     currentTokenIdx++;
 
-    auto condition = parseExpression(tokens, currentTokenIdx, level + 1);
+    auto condition = parseExpression(level + 1);
     if (condition == nullptr) {
-        currentTokenIdx--;
+        currentTokenIdx = beforeTokenIdx;
         return nullptr;
     }
 
-    if (!(currentTokenIdx < tokens.size() && tokens[currentTokenIdx].type == Token::LEFT_CURLY_BRACE)) {
-        currentTokenIdx--;
-        return nullptr;
-    }
-
-    SequenceNode *ifBody = parseScope(tokens, currentTokenIdx, level + 1);
+    SequenceNode *ifBody = parseScope(level + 1);
     if (ifBody == nullptr || ifBody->getChildren().empty()) {
         ifBody = nullptr;
     }
 
     SequenceNode *elseBody = nullptr;
-    if (currentTokenIdx < tokens.size() && tokens[currentTokenIdx].type == Token::ELSE) {
+    if (currentTokenIs(Token::ELSE)) {
         currentTokenIdx++;
-        elseBody = parseScope(tokens, currentTokenIdx, level + 1);
+        elseBody = parseScope(level + 1);
         if (elseBody == nullptr) {
-            currentTokenIdx--;
+            currentTokenIdx = beforeTokenIdx;
             return nullptr;
         } else if (elseBody->getChildren().empty()) {
             elseBody = nullptr;
@@ -377,8 +387,8 @@ IfStatementNode *Parser::parseIf(const std::vector<Token> &tokens, int &currentT
     return ifNode;
 }
 
-ForStatementNode *Parser::parseFor(const std::vector<Token> &tokens, int &currentTokenIdx, int level) const {
-    if (!(currentTokenIdx < tokens.size() && tokens[currentTokenIdx].type == Token::FOR)) {
+ForStatementNode *Parser::parseFor(int level) {
+    if (!currentTokenIs(Token::FOR)) {
         return nullptr;
     }
     log.debug(indent(level) + "parsing for statement");
@@ -386,39 +396,39 @@ ForStatementNode *Parser::parseFor(const std::vector<Token> &tokens, int &curren
     auto beforeTokenIdx = currentTokenIdx;
     currentTokenIdx++;
 
-    auto init = parseStatement(tokens, currentTokenIdx, level + 1);
+    auto init = parseStatement(level + 1);
     if (init == nullptr) {
         currentTokenIdx = beforeTokenIdx;
         return nullptr;
     }
 
-    if (!(currentTokenIdx < tokens.size() && tokens[currentTokenIdx].type == Token::SEMICOLON)) {
+    if (!currentTokenIs(Token::SEMICOLON)) {
         currentTokenIdx = beforeTokenIdx;
         return nullptr;
     }
 
     currentTokenIdx++;
 
-    auto condition = parseExpression(tokens, currentTokenIdx, level + 1);
+    auto condition = parseExpression(level + 1);
     if (condition == nullptr) {
         currentTokenIdx = beforeTokenIdx;
         return nullptr;
     }
 
-    if (!(currentTokenIdx < tokens.size() && tokens[currentTokenIdx].type == Token::SEMICOLON)) {
+    if (!currentTokenIs(Token::SEMICOLON)) {
         currentTokenIdx = beforeTokenIdx;
         return nullptr;
     }
 
     currentTokenIdx++;
 
-    auto update = parseStatement(tokens, currentTokenIdx, level + 1);
+    auto update = parseStatement(level + 1);
     if (update == nullptr) {
         currentTokenIdx = beforeTokenIdx;
         return nullptr;
     }
 
-    auto body = parseScope(tokens, currentTokenIdx, level + 1);
+    auto body = parseScope(level + 1);
     if (body == nullptr) {
         currentTokenIdx = beforeTokenIdx;
         return nullptr;
@@ -438,18 +448,18 @@ StatementNode *createStatementNode(AstNode *child) {
     return statement;
 }
 
-StatementNode *Parser::parseReturnStatement(const std::vector<Token> &tokens, int &currentTokenIdx, int level) const {
-    if (!(currentTokenIdx < tokens.size() && tokens[currentTokenIdx].type == Token::RETURN)) {
+StatementNode *Parser::parseReturnStatement(int level) {
+    if (!currentTokenIs(Token::RETURN)) {
         return nullptr;
     }
 
     log.debug(indent(level) + "parsing return statement");
-
+    auto beforeTokenIdx = currentTokenIdx;
     currentTokenIdx++;
 
-    auto expression = parseExpression(tokens, currentTokenIdx, level + 1);
+    auto expression = parseExpression(level + 1);
     if (expression == nullptr) {
-        currentTokenIdx--;
+        currentTokenIdx = beforeTokenIdx;
         return nullptr;
     }
 
@@ -458,8 +468,8 @@ StatementNode *Parser::parseReturnStatement(const std::vector<Token> &tokens, in
     return statement;
 }
 
-AssertNode *Parser::parseAssert(const std::vector<Token> &tokens, int &currentTokenIdx, int level) const {
-    if (!(currentTokenIdx < tokens.size() && tokens[currentTokenIdx].type == Token::ASSERT)) {
+AssertNode *Parser::parseAssert(int level) {
+    if (!currentTokenIs(Token::ASSERT)) {
         return nullptr;
     }
 
@@ -467,7 +477,7 @@ AssertNode *Parser::parseAssert(const std::vector<Token> &tokens, int &currentTo
 
     currentTokenIdx++;
 
-    auto expression = parseExpression(tokens, currentTokenIdx, level + 1);
+    auto expression = parseExpression(level + 1);
     if (expression == nullptr) {
         currentTokenIdx--;
         return nullptr;
@@ -477,41 +487,40 @@ AssertNode *Parser::parseAssert(const std::vector<Token> &tokens, int &currentTo
     return result;
 }
 
-CommentNode *Parser::parseComment(const std::vector<Token> &tokens, int &currentTokenIdx, int level) const {
-    if (!(currentTokenIdx < tokens.size() && tokens[currentTokenIdx].type == Token::COMMENT)) {
+CommentNode *Parser::parseComment(int level) {
+    if (!currentTokenIs(Token::COMMENT)) {
         return nullptr;
     }
 
     log.debug("parsed comment node");
 
-    auto result = new CommentNode(tokens[currentTokenIdx].content);
+    auto result = new CommentNode(currentTokenContent());
     currentTokenIdx++;
     return result;
 }
 
-TypeMemberNode *Parser::parseMemberVariable(const std::vector<Token> &tokens, int &currentTokenIdx, int level) const {
+TypeMemberNode *Parser::parseMemberVariable(int level) {
     // TODO implement this
     return nullptr;
 }
 
-TypeDeclarationNode *Parser::parseTypeDeclaration(const std::vector<Token> &tokens, int &currentTokenIdx,
-                                                  int level) const {
-    if (!(currentTokenIdx < tokens.size() && tokens[currentTokenIdx].type == Token::TYPE)) {
+TypeDeclarationNode *Parser::parseTypeDeclaration(int level) {
+    if (!currentTokenIs(Token::TYPE)) {
         return nullptr;
     }
 
     int beforeTokenIdx = currentTokenIdx;
     currentTokenIdx++;
 
-    if (!(currentTokenIdx < tokens.size() && tokens[currentTokenIdx].type == Token::IDENTIFIER)) {
+    if (!currentTokenIs(Token::IDENTIFIER)) {
         currentTokenIdx = beforeTokenIdx;
         return nullptr;
     }
 
-    std::string name = tokens[currentTokenIdx].content;
+    std::string name = currentTokenContent();
     currentTokenIdx++;
 
-    if (!(currentTokenIdx < tokens.size() && tokens[currentTokenIdx].type == Token::IDENTIFIER)) {
+    if (!currentTokenIs(Token::IDENTIFIER)) {
         currentTokenIdx = beforeTokenIdx;
         return nullptr;
     }
@@ -520,19 +529,19 @@ TypeDeclarationNode *Parser::parseTypeDeclaration(const std::vector<Token> &toke
 
     std::vector<TypeMemberNode *> memberVariables = {};
     do {
-        auto memberVariable = parseMemberVariable(tokens, currentTokenIdx, level + 1);
+        auto memberVariable = parseMemberVariable(level + 1);
         if (memberVariable == nullptr) {
             currentTokenIdx = beforeTokenIdx;
             return nullptr;
         }
         memberVariables.push_back(memberVariable);
 
-        if (!(currentTokenIdx < tokens.size() && tokens[currentTokenIdx].type == Token::NEW_LINE)) {
+        if (!currentTokenIs(Token::NEW_LINE)) {
             currentTokenIdx++;
         }
-    } while (!(currentTokenIdx < tokens.size() && tokens[currentTokenIdx].type == Token::RIGHT_CURLY_BRACE));
+    } while (!currentTokenIs(Token::RIGHT_CURLY_BRACE));
 
-    if (!(currentTokenIdx < tokens.size() && tokens[currentTokenIdx].type == Token::RIGHT_CURLY_BRACE)) {
+    if (!currentTokenIs(Token::RIGHT_CURLY_BRACE)) {
         currentTokenIdx = beforeTokenIdx;
         return nullptr;
     }
@@ -544,64 +553,64 @@ TypeDeclarationNode *Parser::parseTypeDeclaration(const std::vector<Token> &toke
     return node;
 }
 
-StatementNode *Parser::parseStatement(const std::vector<Token> &tokens, int &currentTokenIdx, int level) const {
+StatementNode *Parser::parseStatement(int level) {
     log.debug(indent(level) + "parsing statement node");
 
-    while (currentTokenIdx < tokens.size() && tokens[currentTokenIdx].type == Token::NEW_LINE) {
+    while (currentTokenIs(Token::NEW_LINE)) {
         currentTokenIdx++;
     }
 
-    auto commentNode = parseComment(tokens, currentTokenIdx, level + 1);
+    auto commentNode = parseComment(level + 1);
     if (commentNode != nullptr) {
         return createStatementNode(commentNode);
     }
 
-    auto importNode = parseImport(tokens, currentTokenIdx);
+    auto importNode = parseImport();
     if (importNode != nullptr) {
         return createStatementNode(importNode);
     }
 
-    auto typeNode = parseTypeDeclaration(tokens, currentTokenIdx, level + 1);
+    auto typeNode = parseTypeDeclaration(level + 1);
     if (typeNode != nullptr) {
         return createStatementNode(typeNode);
     }
 
-    auto assertNode = parseAssert(tokens, currentTokenIdx, level + 1);
+    auto assertNode = parseAssert(level + 1);
     if (assertNode != nullptr) {
         return createStatementNode(assertNode);
     }
 
-    auto callNode = parseFunctionCall(tokens, currentTokenIdx, level + 1);
+    auto callNode = parseFunctionCall(level + 1);
     if (callNode != nullptr) {
         return createStatementNode(callNode);
     }
 
-    auto functionNode = parseFunction(tokens, currentTokenIdx, level + 1);
+    auto functionNode = parseFunction(level + 1);
     if (functionNode != nullptr) {
         return createStatementNode(functionNode);
     }
 
-    auto ifNode = parseIf(tokens, currentTokenIdx, level + 1);
+    auto ifNode = parseIf(level + 1);
     if (ifNode != nullptr) {
         return createStatementNode(ifNode);
     }
 
-    auto forNode = parseFor(tokens, currentTokenIdx, level + 1);
+    auto forNode = parseFor(level + 1);
     if (forNode != nullptr) {
         return createStatementNode(forNode);
     }
 
-    auto assignmentNode = parseAssignment(tokens, currentTokenIdx, level + 1);
+    auto assignmentNode = parseAssignment(level + 1);
     if (assignmentNode != nullptr) {
         return createStatementNode(assignmentNode);
     }
 
-    auto variableDefinition = parseVariableDefinition(tokens, currentTokenIdx, level + 1);
+    auto variableDefinition = parseVariableDefinition(level + 1);
     if (variableDefinition != nullptr) {
         return createStatementNode(variableDefinition);
     }
 
-    auto returnStatement = parseReturnStatement(tokens, currentTokenIdx, level + 1);
+    auto returnStatement = parseReturnStatement(level + 1);
     if (returnStatement != nullptr) {
         return returnStatement;
     }
@@ -617,7 +626,6 @@ void Parser::run() {
         }
     }
 
-    int currentTokenIdx = 0;
     std::vector<AstNode *> children = {};
     bool error = false;
 
@@ -634,7 +642,7 @@ void Parser::run() {
             continue;
         }
 
-        auto statementNode = parseStatement(module->tokens, currentTokenIdx, 0);
+        auto statementNode = parseStatement(0);
         if (statementNode != nullptr) {
             children.push_back(statementNode);
             continue;

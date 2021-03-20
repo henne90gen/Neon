@@ -15,13 +15,9 @@ class FunctionNode : public AstNode {
 
     AstNode *getBody();
     void setBody(AstNode *body);
-
     std::vector<VariableDefinitionNode *> &getArguments();
-
     std::string &getName();
-
     ast::DataType getReturnType();
-
     bool isExternal();
 
   private:

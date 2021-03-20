@@ -1,37 +1,36 @@
 #include "Parser.h"
 
-
-AstNode *Parser::parsePrimary(const std::vector<Token> &tokens, int &currentTokenIdx, int level) const {
+AstNode *Parser::parsePrimary(int level) {
     auto beforeTokenIdx = currentTokenIdx;
-    auto functionCall = parseFunctionCall(tokens, currentTokenIdx, level + 1);
+    auto functionCall = parseFunctionCall(level + 1);
     if (functionCall != nullptr) {
         return functionCall;
     }
 
-    auto variable = parseVariable(tokens, currentTokenIdx, level + 1);
+    auto variable = parseVariable(level + 1);
     if (variable != nullptr) {
         return variable;
     }
 
-    auto literal = parseLiteral(tokens, currentTokenIdx, level + 1);
+    auto literal = parseLiteral(level + 1);
     if (literal != nullptr) {
         return literal;
     }
 
-    if (!(currentTokenIdx < tokens.size() && tokens[currentTokenIdx].type == Token::LEFT_PARAN)) {
+    if (!currentTokenIs(Token::LEFT_PARAN)) {
         currentTokenIdx = beforeTokenIdx;
         return nullptr;
     }
 
     currentTokenIdx++;
 
-    auto expression = parseExpression(tokens, currentTokenIdx, level + 1);
+    auto expression = parseExpression(level + 1);
     if (expression == nullptr) {
         currentTokenIdx = beforeTokenIdx;
         return nullptr;
     }
 
-    if (!(currentTokenIdx < tokens.size() && tokens[currentTokenIdx].type == Token::RIGHT_PARAN)) {
+    if (!currentTokenIs(Token::RIGHT_PARAN)) {
         currentTokenIdx = beforeTokenIdx;
         return nullptr;
     }
@@ -41,37 +40,37 @@ AstNode *Parser::parsePrimary(const std::vector<Token> &tokens, int &currentToke
     return expression;
 }
 
-AstNode *Parser::parseUnary(const std::vector<Token> &tokens, int &currentTokenIdx, int level) const {
+AstNode *Parser::parseUnary(int level) {
     auto beforeTokenIdx = currentTokenIdx;
-    if (currentTokenIdx < tokens.size() && tokens[currentTokenIdx].type == Token::NOT) {
-        currentTokenIdx++;
-
-        auto child = parseUnary(tokens, currentTokenIdx, level + 1);
-        if (child == nullptr) {
-            currentTokenIdx = beforeTokenIdx;
-            return nullptr;
-        }
-
-        auto node = new UnaryOperationNode(UnaryOperationNode::UnaryOperationType::NOT);
-        node->setChild(child);
-        return node;
+    if (!currentTokenIs(Token::NOT)) {
+        return parsePrimary(level);
     }
 
-    return parsePrimary(tokens, currentTokenIdx, level);
+    currentTokenIdx++;
+
+    auto child = parseUnary(level + 1);
+    if (child == nullptr) {
+        currentTokenIdx = beforeTokenIdx;
+        return nullptr;
+    }
+
+    auto node = new UnaryOperationNode(UnaryOperationNode::UnaryOperationType::NOT);
+    node->setChild(child);
+    return node;
 }
 
-AstNode *Parser::parseFactor(const std::vector<Token> &tokens, int &currentTokenIdx, int level) const {
+AstNode *Parser::parseFactor(int level) {
     auto beforeTokenIdx = currentTokenIdx;
-    auto lastUnary = parseUnary(tokens, currentTokenIdx, level + 1);
+    auto lastUnary = parseUnary(level + 1);
     if (lastUnary == nullptr) {
         currentTokenIdx = beforeTokenIdx;
         return nullptr;
     }
     while (true) {
         ast::BinaryOperationType operationType;
-        if (currentTokenIdx < tokens.size() && tokens[currentTokenIdx].type == Token::STAR) {
+        if (currentTokenIs(Token::STAR)) {
             operationType = ast::BinaryOperationType::MULTIPLICATION;
-        } else if (currentTokenIdx < tokens.size() && tokens[currentTokenIdx].type == Token::DIV) {
+        } else if (currentTokenIs(Token::DIV)) {
             operationType = ast::BinaryOperationType::DIVISION;
         } else {
             break;
@@ -79,7 +78,7 @@ AstNode *Parser::parseFactor(const std::vector<Token> &tokens, int &currentToken
 
         currentTokenIdx++;
 
-        auto other = parseUnary(tokens, currentTokenIdx, level + 1);
+        auto other = parseUnary(level + 1);
         if (other == nullptr) {
             currentTokenIdx = beforeTokenIdx;
             return nullptr;
@@ -94,18 +93,18 @@ AstNode *Parser::parseFactor(const std::vector<Token> &tokens, int &currentToken
     return lastUnary;
 }
 
-AstNode *Parser::parseTerm(const std::vector<Token> &tokens, int &currentTokenIdx, int level) const {
+AstNode *Parser::parseTerm(int level) {
     auto beforeTokenIdx = currentTokenIdx;
-    auto lastFactor = parseFactor(tokens, currentTokenIdx, level + 1);
+    auto lastFactor = parseFactor(level + 1);
     if (lastFactor == nullptr) {
         currentTokenIdx = beforeTokenIdx;
         return nullptr;
     }
     while (true) {
         ast::BinaryOperationType operationType;
-        if (currentTokenIdx < tokens.size() && tokens[currentTokenIdx].type == Token::PLUS) {
+        if (currentTokenIs(Token::PLUS)) {
             operationType = ast::BinaryOperationType::ADDITION;
-        } else if (currentTokenIdx < tokens.size() && tokens[currentTokenIdx].type == Token::MINUS) {
+        } else if (currentTokenIs(Token::MINUS)) {
             operationType = ast::BinaryOperationType::SUBTRACTION;
         } else {
             break;
@@ -113,7 +112,7 @@ AstNode *Parser::parseTerm(const std::vector<Token> &tokens, int &currentTokenId
 
         currentTokenIdx++;
 
-        auto other = parseFactor(tokens, currentTokenIdx, level + 1);
+        auto other = parseFactor(level + 1);
         if (other == nullptr) {
             currentTokenIdx = beforeTokenIdx;
             return nullptr;
@@ -128,22 +127,22 @@ AstNode *Parser::parseTerm(const std::vector<Token> &tokens, int &currentTokenId
     return lastFactor;
 }
 
-AstNode *Parser::parseComparison(const std::vector<Token> &tokens, int &currentTokenIdx, int level) const {
+AstNode *Parser::parseComparison(int level) {
     auto beforeTokenIdx = currentTokenIdx;
-    auto lastTerm = parseTerm(tokens, currentTokenIdx, level + 1);
+    auto lastTerm = parseTerm(level + 1);
     if (lastTerm == nullptr) {
         currentTokenIdx = beforeTokenIdx;
         return nullptr;
     }
     while (true) {
         ast::BinaryOperationType operationType;
-        if (currentTokenIdx < tokens.size() && tokens[currentTokenIdx].type == Token::LESS_THAN) {
+        if (currentTokenIs(Token::LESS_THAN)) {
             operationType = ast::BinaryOperationType::LESS_THAN;
-        } else if (currentTokenIdx < tokens.size() && tokens[currentTokenIdx].type == Token::LESS_EQUALS) {
+        } else if (currentTokenIs(Token::LESS_EQUALS)) {
             operationType = ast::BinaryOperationType::LESS_EQUALS;
-        } else if (currentTokenIdx < tokens.size() && tokens[currentTokenIdx].type == Token::GREATER_THAN) {
+        } else if (currentTokenIs(Token::GREATER_THAN)) {
             operationType = ast::BinaryOperationType::GREATER_THAN;
-        } else if (currentTokenIdx < tokens.size() && tokens[currentTokenIdx].type == Token::GREATER_EQUALS) {
+        } else if (currentTokenIs(Token::GREATER_EQUALS)) {
             operationType = ast::BinaryOperationType::GREATER_EQUALS;
         } else {
             break;
@@ -151,7 +150,7 @@ AstNode *Parser::parseComparison(const std::vector<Token> &tokens, int &currentT
 
         currentTokenIdx++;
 
-        auto other = parseTerm(tokens, currentTokenIdx, level + 1);
+        auto other = parseTerm(level + 1);
         if (other == nullptr) {
             currentTokenIdx = beforeTokenIdx;
             return nullptr;
@@ -166,18 +165,18 @@ AstNode *Parser::parseComparison(const std::vector<Token> &tokens, int &currentT
     return lastTerm;
 }
 
-AstNode *Parser::parseEquality(const std::vector<Token> &tokens, int &currentTokenIdx, int level) const {
+AstNode *Parser::parseEquality(int level) {
     auto beforeTokenIdx = currentTokenIdx;
-    auto lastComparison = parseComparison(tokens, currentTokenIdx, level + 1);
+    auto lastComparison = parseComparison(level + 1);
     if (lastComparison == nullptr) {
         currentTokenIdx = beforeTokenIdx;
         return nullptr;
     }
     while (true) {
         ast::BinaryOperationType operationType;
-        if (currentTokenIdx < tokens.size() && tokens[currentTokenIdx].type == Token::DOUBLE_EQUALS) {
+        if (currentTokenIs(Token::DOUBLE_EQUALS)) {
             operationType = ast::BinaryOperationType::EQUALS;
-        } else if (currentTokenIdx < tokens.size() && tokens[currentTokenIdx].type == Token::NOT_EQUALS) {
+        } else if (currentTokenIs(Token::NOT_EQUALS)) {
             operationType = ast::BinaryOperationType::NOT_EQUALS;
         } else {
             break;
@@ -185,7 +184,7 @@ AstNode *Parser::parseEquality(const std::vector<Token> &tokens, int &currentTok
 
         currentTokenIdx++;
 
-        auto other = parseComparison(tokens, currentTokenIdx, level + 1);
+        auto other = parseComparison(level + 1);
         if (other == nullptr) {
             currentTokenIdx = beforeTokenIdx;
             return nullptr;
@@ -200,9 +199,10 @@ AstNode *Parser::parseEquality(const std::vector<Token> &tokens, int &currentTok
     return lastComparison;
 }
 
-AstNode *Parser::parseAndOr(const std::vector<Token> &tokens, int &currentTokenIdx, int level) const {
+AstNode *Parser::parseExpression(int level) {
+    log.debug(indent(level) + "parsing expression node");
     auto beforeTokenIdx = currentTokenIdx;
-    auto last = parseEquality(tokens, currentTokenIdx, level + 1);
+    auto last = parseEquality(level + 1);
     if (last == nullptr) {
         currentTokenIdx = beforeTokenIdx;
         return nullptr;
@@ -210,9 +210,9 @@ AstNode *Parser::parseAndOr(const std::vector<Token> &tokens, int &currentTokenI
 
     while (true) {
         ast::BinaryOperationType operationType;
-        if (currentTokenIdx < tokens.size() && tokens[currentTokenIdx].type == Token::AND) {
+        if (currentTokenIs(Token::AND)) {
             operationType = ast::BinaryOperationType::AND;
-        } else if (currentTokenIdx < tokens.size() && tokens[currentTokenIdx].type == Token::OR) {
+        } else if (currentTokenIs(Token::OR)) {
             operationType = ast::BinaryOperationType::OR;
         } else {
             break;
@@ -220,7 +220,7 @@ AstNode *Parser::parseAndOr(const std::vector<Token> &tokens, int &currentTokenI
 
         currentTokenIdx++;
 
-        auto other = parseEquality(tokens, currentTokenIdx, level + 1);
+        auto other = parseEquality(level + 1);
         if (other == nullptr) {
             currentTokenIdx = beforeTokenIdx;
             return nullptr;
@@ -233,10 +233,4 @@ AstNode *Parser::parseAndOr(const std::vector<Token> &tokens, int &currentTokenI
     }
 
     return last;
-}
-
-AstNode *Parser::parseExpression(const std::vector<Token> &tokens, int &currentTokenIdx, int level) const {
-    log.debug(indent(level) + "parsing expression node");
-
-    return parseAndOr(tokens, currentTokenIdx, level + 1);
 }

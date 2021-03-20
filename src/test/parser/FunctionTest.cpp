@@ -50,12 +50,8 @@ TEST_CASE("Parser Functions") {
     SECTION("function call with literal argument") {
         std::vector<AstNodeSpec> spec = {
               {0, ast::NodeType::SEQUENCE}, //
-              {1, ast::NodeType::STATEMENT},
-              {2, ast::NodeType::CALL},
-              {3, ast::NodeType::LITERAL},
-              {1, ast::NodeType::STATEMENT},
-              {2, ast::NodeType::CALL},
-              {3, ast::NodeType::LITERAL},
+              {1, ast::NodeType::STATEMENT}, {2, ast::NodeType::CALL}, {3, ast::NodeType::LITERAL},
+              {1, ast::NodeType::STATEMENT}, {2, ast::NodeType::CALL}, {3, ast::NodeType::LITERAL},
         };
         std::vector<std::string> program = {
               "hello(1)",
@@ -67,12 +63,8 @@ TEST_CASE("Parser Functions") {
     SECTION("function call with variable argument") {
         std::vector<AstNodeSpec> spec = {
               {0, ast::NodeType::SEQUENCE}, //
-              {1, ast::NodeType::STATEMENT},
-              {2, ast::NodeType::CALL},
-              {3, ast::NodeType::VARIABLE},
-              {1, ast::NodeType::STATEMENT},
-              {2, ast::NodeType::CALL},
-              {3, ast::NodeType::VARIABLE},
+              {1, ast::NodeType::STATEMENT}, {2, ast::NodeType::CALL}, {3, ast::NodeType::VARIABLE},
+              {1, ast::NodeType::STATEMENT}, {2, ast::NodeType::CALL}, {3, ast::NodeType::VARIABLE},
         };
         std::vector<std::string> program = {
               "hello(num)",
