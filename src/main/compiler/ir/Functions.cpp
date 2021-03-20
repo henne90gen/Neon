@@ -1,7 +1,6 @@
 #include "IrGenerator.h"
 
 #include <llvm/IR/Verifier.h>
-#include <llvm/Passes/PassBuilder.h>
 
 #define ENABLE_OPTIMIZATIONS 0
 

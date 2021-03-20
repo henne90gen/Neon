@@ -37,7 +37,7 @@ llvm::Type *IrGenerator::getType(const ast::DataType &type) {
 }
 
 llvm::StructType *IrGenerator::getOrCreateComplexType(const CompositeType &type) {
-    auto result = llvm::StructType::getTypeByName(context, type.type.typeName);
+    auto result = llvmModule.getTypeByName(type.type.typeName);
     if (result != nullptr) {
         return result;
     }
@@ -49,7 +49,7 @@ llvm::StructType *IrGenerator::getOrCreateComplexType(const CompositeType &type)
 }
 
 llvm::StructType *IrGenerator::getStringType() {
-    auto type = llvm::StructType::getTypeByName(context, "string");
+    auto type = llvmModule.getTypeByName("string");
     if (type != nullptr) {
         return type;
     }
