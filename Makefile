@@ -12,15 +12,15 @@ build:
 build-test:
 	cd build; ninja Tests FuzzTests NeonTester
 
-test-all: build-test test-unit fuzz-test integration-test
+test-all: build-test test-unit test-fuzz test-integration
 
 test-unit:
 	cd build/src/test; ./Tests
 
-fuzz-test:
+test-fuzz:
 	cd build/src/test; ./FuzzTests
 
-integration-test:
+test-integration:
 	./build/src/tester/NeonTester
 
 run: build
