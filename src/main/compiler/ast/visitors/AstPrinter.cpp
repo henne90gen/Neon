@@ -2,8 +2,8 @@
 
 #include <iostream>
 
-#include "../../../Utils.h"
 #include "../nodes/AllNodes.h"
+#include "util/Utils.h"
 
 void indent(int indentation) {
     for (int i = 0; i < indentation; i++) {

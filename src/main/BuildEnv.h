@@ -2,19 +2,20 @@
 
 #include <filesystem>
 #include <string>
+#include <utility>
 
 struct BuildEnv {
     std::string buildDirectory = "./neon-build/";
 
     explicit BuildEnv() { createBuildDir(); }
-    explicit BuildEnv(const std::string &buildDir) : buildDirectory(buildDir) {
+    explicit BuildEnv(std::string buildDir) : buildDirectory(std::move(buildDir)) {
         if (buildDirectory.back() != '/') {
             buildDirectory += '/';
         }
         createBuildDir();
     }
 
-    void createBuildDir() {
+    void createBuildDir() const {
         if (std::filesystem::exists(buildDirectory)) {
             return;
         }

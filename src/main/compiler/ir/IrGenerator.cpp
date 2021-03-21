@@ -11,7 +11,7 @@
 
 #include <iostream>
 
-#include "../../Utils.h"
+#include "util/Utils.h"
 
 IrGenerator::IrGenerator(const BuildEnv *buildEnv, Module *module, FunctionResolver &functionResolver,
                          TypeResolver &typeResolver, const Logger &logger)

@@ -42,10 +42,11 @@ add_library(NeonCompiler
         compiler/parser/Types.cpp
         compiler/lexer/Token.cpp
         compiler/TypeResolver.cpp
+        util/Timing.cpp
         Linker.cpp
         Module.cpp
         Program.cpp
-        Utils.cpp)
+        util/Utils.cpp)
 
 add_dependencies(NeonCompiler NeonStd)
 target_link_libraries(NeonCompiler PUBLIC ${LLVM_LIBS})

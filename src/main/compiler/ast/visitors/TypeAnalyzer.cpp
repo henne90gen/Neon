@@ -2,8 +2,8 @@
 
 #include <iostream>
 
-#include "../../../Utils.h"
 #include "../nodes/AllNodes.h"
+#include "util/Utils.h"
 
 void TypeAnalyzer::visitFunctionNode(FunctionNode *node) {
     for (auto &argument : node->getArguments()) {

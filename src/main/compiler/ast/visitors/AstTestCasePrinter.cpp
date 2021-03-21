@@ -2,8 +2,8 @@
 
 #include <iostream>
 
-#include "../../../Utils.h"
 #include "../nodes/AllNodes.h"
+#include "util/Utils.h"
 
 void AstTestCasePrinter::printNode(AstNode *node) {
     std::cout << "        {" << indentation << ", " << to_string(node->getAstNodeType()) << "}," << std::endl;

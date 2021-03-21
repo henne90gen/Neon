@@ -7,6 +7,7 @@
 #include <Program.h>
 #include <compiler/Compiler.h>
 #include <compiler/Logger.h>
+#include <util/Timing.h>
 
 struct CmdArguments {
     std::string testDirectory = "tests";
@@ -17,10 +18,12 @@ struct CmdArguments {
 struct TestResult {
     int exitCode = 0;
     std::chrono::nanoseconds compileTime = {};
+    std::chrono::nanoseconds linkTime = {};
     std::chrono::nanoseconds runTime = {};
 
     [[nodiscard]] bool success() const { return exitCode == 0; }
     [[nodiscard]] double compileTimeMillis() const { return static_cast<double>(compileTime.count()) / 1.0e+6; }
+    [[nodiscard]] double linkTimeMillis() const { return static_cast<double>(linkTime.count()) / 1.0e+6; }
     [[nodiscard]] double runTimeMillis() const { return static_cast<double>(runTime.count()) / 1.0e+6; }
 };
 
@@ -36,28 +39,8 @@ bool endsWith(const std::string &str, const std::string &pattern) {
     return true;
 }
 
-TestResult compileAndRun(const std::string &path, const Logger &logger) {
-    auto program = new Program(path);
-    auto buildEnv = new BuildEnv();
-
-    auto start = std::chrono::high_resolution_clock::now();
-    auto compiler = Compiler(program, buildEnv, logger);
-    if (compiler.run()) {
-        return {
-              .exitCode = -1,
-        };
-    }
-
-    auto linker = Linker(program, buildEnv, logger);
-    if (linker.link()) {
-        return {
-              .exitCode = -1,
-        };
-    }
-    auto end = std::chrono::high_resolution_clock::now();
-    auto compileTimeNs = std::chrono::duration_cast<std::chrono::nanoseconds>(end - start);
-
-    start = std::chrono::high_resolution_clock::now();
+int runTest(const BuildEnv *buildEnv, const Program *program, TimeKeeper &timeKeeper) {
+    auto timer = Timer(timeKeeper, "run");
     std::string executable = buildEnv->buildDirectory + program->executableFileName();
 #if WIN32
     if (executable.starts_with("./")) {
@@ -69,21 +52,49 @@ TestResult compileAndRun(const std::string &path, const Logger &logger) {
         }
     }
 #endif
-    int exitCode = std::system(executable.c_str());
-    end = std::chrono::high_resolution_clock::now();
+    return std::system(executable.c_str());
+}
 
-    auto runTime = std::chrono::duration_cast<std::chrono::nanoseconds>(end - start);
+TestResult compileAndRun(const std::string &path, const Logger &logger) {
+    auto timeKeeper = TimeKeeper();
+    auto program = new Program(path);
+    auto buildEnv = new BuildEnv();
+
+    {
+        auto timer = Timer(timeKeeper, "compile");
+        auto compiler = Compiler(program, buildEnv, logger);
+        if (compiler.run()) {
+            return {
+                  .exitCode = -1,
+            };
+        }
+    }
+
+    {
+        auto timer = Timer(timeKeeper, "link");
+        auto linker = Linker(program, buildEnv, logger);
+        if (linker.link()) {
+            return {
+                  .exitCode = -1,
+            };
+        }
+    }
+
+    int exitCode = runTest(buildEnv, program, timeKeeper);
+
 #ifdef WIN32
     return {
           .exitCode = exitCode,
-          .compileTime = compileTimeNs,
-          .runTime = runTime,
+          .compileTime = timeKeeper.get("compile"),
+          .linkTime = timeKeeper.get("link"),
+          .runTime = timeKeeper.get("run"),
     };
 #else
     return {
           .exitCode = WEXITSTATUS(exitCode),
-          .compileTime = compileTimeNs,
-          .runTime = runTime,
+          .compileTime = timeKeeper.get("compile"),
+          .linkTime = timeKeeper.get("link"),
+          .runTime = timeKeeper.get("run"),
     };
 #endif
 }
@@ -191,9 +202,9 @@ int main(int argc, char **argv) {
 
         compileTimeTotalMillis += result.compileTimeMillis();
         runTimeTotalMillis += result.runTimeMillis();
-        std::cout << " (compile: " << std::setw(7) << result.compileTimeMillis() << "ms, run: " << std::setw(7)
-                  << result.runTimeMillis() << "ms, exitCode: " << std::setw(2) << result.exitCode << "): " << path
-                  << std::endl;
+        std::cout << " (compile: " << std::setw(7) << result.compileTimeMillis() << "ms, link: " << std::setw(7)
+                  << result.linkTimeMillis() << "ms, run: " << std::setw(7) << result.runTimeMillis()
+                  << "ms, exitCode: " << std::setw(2) << result.exitCode << "): " << path << std::endl;
     }
 
     int exitCode = 0;

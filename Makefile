@@ -1,4 +1,4 @@
-all: clean cmake build test
+all: clean cmake build test-all
 
 clean:
 	rm build -rf
@@ -10,10 +10,18 @@ build:
 	cd build; ninja Neon
 
 build-test:
-	cd build; ninja Tests FuzzTests
+	cd build; ninja Tests FuzzTests NeonTester
+
+all-test: test fuzz-test integration-test
 
 test: build-test
 	cd build/src/test; ./Tests
+
+fuzz-test:
+	cd build/src/test; ./FuzzTests
+
+integration-test:
+	./build/src/tester/NeonTester
 
 run: build
 	./build/src/main/Neon && echo "" && ./neon-build/main; echo $$?
