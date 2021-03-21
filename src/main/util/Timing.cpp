@@ -2,7 +2,7 @@
 
 Timer::~Timer() {
     auto end = std::chrono::high_resolution_clock::now();
-    auto duration = end - start;
+    auto duration = std::chrono::duration_cast<std::chrono::nanoseconds>(end - start);
     timeKeeper.add(name, duration);
 }
 
