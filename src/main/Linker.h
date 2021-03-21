@@ -17,4 +17,6 @@ class Linker {
     const Program *program;
     const BuildEnv *buildEnv;
     const Logger &log;
+
+    std::string getLinkerCommand();
 };

@@ -14,8 +14,10 @@ class Program {
 
     std::string entryPoint;
     std::string name;
-    std::string objectFileName;
 
     std::unordered_map<std::string, Module *> modules = {};
     llvm::LLVMContext llvmContext = {};
+
+    [[nodiscard]] std::string objectFileName() const;
+    [[nodiscard]] std::string executableFileName() const;
 };

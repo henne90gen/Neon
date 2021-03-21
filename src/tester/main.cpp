@@ -58,7 +58,18 @@ TestResult compileAndRun(const std::string &path, const Logger &logger) {
     auto compileTimeNs = std::chrono::duration_cast<std::chrono::nanoseconds>(end - start);
 
     start = std::chrono::high_resolution_clock::now();
-    int exitCode = std::system((buildEnv->buildDirectory + program->name).c_str());
+    std::string executable = buildEnv->buildDirectory + program->executableFileName();
+#if WIN32
+    if (executable.starts_with("./")) {
+        executable = executable.substr(2);
+        for (char &c : executable) {
+            if (c == '/') {
+                c = '\\';
+            }
+        }
+    }
+#endif
+    int exitCode = std::system(executable.c_str());
     end = std::chrono::high_resolution_clock::now();
 
     auto runTime = std::chrono::duration_cast<std::chrono::nanoseconds>(end - start);

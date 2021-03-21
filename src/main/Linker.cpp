@@ -1,8 +1,68 @@
 #include "Linker.h"
 
+#include <cstdlib>
 #include <iostream>
 
-bool Linker::link() {
+#if WIN32
+void setenv(const std::string &key, const std::string &value) {
+    const auto envStr = key + "=" + value;
+    putenv(envStr.c_str());
+}
+
+std::string Linker::getLinkerCommand() {
+    std::string hostArch = "x64";
+    std::string targetArch = "x64";
+    std::string windowsSdkDir = R"(C:\Program Files (x86)\Windows Kits\10\)";
+    std::string windowsSdkVersion = "10.0.18362.0";
+    std::string vsInstallDir = R"(C:\Program Files (x86)\Microsoft Visual Studio\2019\Community\)";
+    std::string vcInstallDir = vsInstallDir + "VC\\";
+    std::string vcToolsVersion = "14.28.29910";
+    std::string vcToolsInstallDir = vcInstallDir + "Tools\\MSVC\\" + vcToolsVersion + "\\";
+
+    // setup path so that we can find the linker
+    const auto pathBefore = std::string(getenv("PATH"));
+    std::string newPath;
+    newPath += pathBefore + ";";
+    newPath += vcToolsInstallDir + "bin\\Host" + hostArch + "\\" + targetArch + ";";
+    setenv("PATH", newPath);
+
+    std::string s = "link";
+
+    // remove logo from output
+    s += " /NOLOGO";
+
+    // specify the search directories for libraries to link against
+    // contains libcmt.lib
+    s += " /LIBPATH:\"" + vcToolsInstallDir + "lib\\" + targetArch + "\"";
+    // contains transitive dependecies of libucrt.lib
+    s += " /LIBPATH:\"" + windowsSdkDir + "lib\\" + windowsSdkVersion + "\\um\\" + targetArch + "\"";
+    // contains libucrt.lib (universal c runtime)
+    s += " /LIBPATH:\"" + windowsSdkDir + "lib\\" + windowsSdkVersion + "\\ucrt\\" + targetArch + "\"";
+    // contains the Neon standard library
+    s += " /LIBPATH:\"" + buildEnv->buildDirectory + "\"";
+
+    // link against the c runtime library
+    s += " /DEFAULTLIB:\"libucrt\"";
+    s += " /DEFAULTLIB:\"libcmt\"";
+    s += " /DEFAULTLIB:\"libvcruntime\"";
+    s += " /DEFAULTLIB:\"NeonStd\"";
+
+    // don't link against this version of the c runtime library
+    s += " /NODEFAULTLIB:\"msvcrtd\"";
+
+    // ignore some linker warning
+    s += " /IGNORE:4217";
+
+    // define the name of the final executable fille
+    s += " /OUT:\"" + buildEnv->buildDirectory + program->executableFileName() + "\"";
+
+    // specify the object file to link
+    s += " " + buildEnv->buildDirectory + program->objectFileName();
+
+    return s;
+}
+#else
+std::string Linker::getLinkerCommand() {
     // TODO find out what these options do:
     //  -pie --eh-frame-hdr -m elf_x86_64
 
@@ -34,10 +94,17 @@ bool Linker::link() {
     // Neon standard library
     s += " -lNeonStd";
 
-    log.debug("Calling linker with the following command:\n" + s);
+    return s;
+}
+#endif
+
+bool Linker::link() {
+    std::string linkerCommand = getLinkerCommand();
+
+    log.debug("Calling linker with the following command:\n" + linkerCommand);
 
     // TODO capture stdout and stderr. only print to console when verbose==true
-    const char *command = s.c_str();
+    const char *command = linkerCommand.c_str();
     int statusCode = system(command);
 
     log.debug("Finished linking.");

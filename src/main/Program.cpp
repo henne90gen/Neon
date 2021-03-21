@@ -10,5 +10,20 @@ Program::Program(std::string _entryPoint) : entryPoint(std::move(_entryPoint)) {
     }
 
     name = entryPoint.substr(0, position);
-    objectFileName = name + ".o";
+}
+
+std::string Program::objectFileName() const {
+#if WIN32
+    return name + ".obj";
+#else
+    return name + ".o";
+#endif
+}
+
+std::string Program::executableFileName() const {
+#if WIN32
+    return name + ".exe";
+#else
+    return name;
+#endif
 }

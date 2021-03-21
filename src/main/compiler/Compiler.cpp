@@ -144,7 +144,7 @@ void Compiler::writeModuleToObjectFile() {
     auto targetMachine = target->createTargetMachine(targetTriple, cpu, features, targetOptions, RM);
     auto dataLayout = targetMachine->createDataLayout();
 
-    auto module = llvm::Module(buildEnv->buildDirectory + program->objectFileName, program->llvmContext);
+    auto module = llvm::Module(buildEnv->buildDirectory + program->objectFileName(), program->llvmContext);
     module.setDataLayout(dataLayout);
     module.setTargetTriple(targetTriple);
 
@@ -174,7 +174,7 @@ void Compiler::writeModuleToObjectFile() {
     // write object file
     {
         std::error_code EC;
-        llvm::raw_fd_ostream dest(buildEnv->buildDirectory + program->objectFileName, EC, llvm::sys::fs::OF_None);
+        llvm::raw_fd_ostream dest(buildEnv->buildDirectory + program->objectFileName(), EC, llvm::sys::fs::OF_None);
 
         if (EC) {
             llvm::errs() << "Could not open file: " << EC.message() << "\n";
