@@ -12,9 +12,9 @@ build:
 build-test:
 	cd build; ninja Tests FuzzTests NeonTester
 
-all-test: test fuzz-test integration-test
+test-all: build-test test-unit fuzz-test integration-test
 
-test: build-test
+test-unit:
 	cd build/src/test; ./Tests
 
 fuzz-test:
