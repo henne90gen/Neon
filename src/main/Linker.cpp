@@ -72,7 +72,7 @@ std::string Linker::getLinkerCommand() {
     s += " -dynamic-linker /lib64/ld-linux-x86-64.so.2";
 
     // specify output file name
-    s += " -o " + buildEnv->buildDirectory + program->name;
+    s += " -o " + buildEnv->buildDirectory + program->executableFileName();
 
     // additional object files that have to be linked (they contain the actual entry point and some setup stuff)
     s += " /lib64/crt1.o";
@@ -86,7 +86,7 @@ std::string Linker::getLinkerCommand() {
     s += " -L" + buildEnv->buildDirectory;
 
     // specify the object file to link
-    s += " " + buildEnv->buildDirectory + program->objectFileName;
+    s += " " + buildEnv->buildDirectory + program->objectFileName();
 
     // c: c standard library, m: math library
     s += " -lc -lm";
