@@ -17,11 +17,14 @@ jobs:
         with:
           submodules: recursive
 
+      - name: Uninstall other llvm versions
+        run: apt purge llvm
+
       - name: Install llvm repository
         run: wget https://apt.llvm.org/llvm.sh && chmod +x llvm.sh && sudo ./llvm.sh 11
 
       - name: Install dependcies
-        run: sudo apt-get update && sudo apt-get install -y cmake ninja-build clang-11 clang-tools-11 clang-11-doc libclang-common-11-dev libclang-11-dev libclang1-11 clang-format-11 clangd-11 libfuzzer-11-dev zlib1g-dev
+        run: sudo apt-get update && sudo apt-get install -y cmake ninja-build clang-tools-11 clang-11-doc libclang-11-dev libfuzzer-11-dev
 
       - name: Build and Test
         run: CC=/usr/bin/clang-11 CXX=/usr/bin/clang++-11 make all
