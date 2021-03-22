@@ -5,6 +5,13 @@ extern "C" int LLVMFuzzerTestOneInput(const uint8_t *data, size_t size) {
     Logger logger = {};
     auto codeProvider = ByteCodeProvider((char *)data, size);
     Lexer lexer(&codeProvider, logger);
-    lexer.getToken();
+
+    do {
+        auto token = lexer.getToken();
+        if (token.type == Token::INVALID) {
+            break;
+        }
+    } while (true);
+
     return 0;
 }

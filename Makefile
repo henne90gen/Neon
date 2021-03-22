@@ -10,18 +10,22 @@ build:
 	cd build; ninja Neon
 
 build-test:
-	cd build; ninja Tests FuzzTests NeonTester
+	cd build; ninja Tests LexerFuzzTests ParserFuzzTests NeonTester
 
-test-all: build-test test-unit test-fuzz test-integration
+test-all: build-test
+	cd build; ninja test
 
-test-unit:
-	cd build/src/test; ./Tests
+test-unit: build-test
+	cd build/src/test/unit; ./Tests
 
-test-fuzz:
-	cd build/src/test; ./FuzzTests -max_total_time=5
+test-fuzz-lexer: build-test
+	./build/src/test/fuzz/LexerFuzzTests src/test/fuzz/lexer-corpus tests -dict=src/test/fuzz/lexer_fuzz_dictionary -print_final_stats=1 #-workers=8 -jobs=8
 
-test-integration:
-	./build/src/tester/NeonTester
+test-fuzz-parser: build-test
+	./build/src/test/fuzz/ParserFuzzTests src/test/fuzz/parser-corpus tests -dict=src/test/fuzz/parser_fuzz_dictionary -print_final_stats=1 #-workers=8 -jobs=8
+
+test-integration: build-test
+	./build/src/test/integration/NeonTester
 
 run: build
 	./build/src/main/Neon && echo "" && ./neon-build/main; echo $$?
