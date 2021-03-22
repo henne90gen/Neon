@@ -74,7 +74,9 @@ std::string Linker::getLinkerCommand() {
     // specify output file name
     s += " -o " + buildEnv->buildDirectory + program->executableFileName();
 
+    // TODO find a robust way to determine the c runtime library location (crt1.o, crti.o, crtn.o)
     // additional object files that have to be linked (they contain the actual entry point and some setup stuff)
+    // c runtime library
     s += " /lib64/crt1.o";
     s += " /lib64/crti.o";
     s += " /lib64/crtn.o";

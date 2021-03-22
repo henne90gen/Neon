@@ -1,0 +1,27 @@
+name: Build and Test
+
+# Run this workflow every time a new commit pushed to your repository
+on: push
+
+jobs:
+  build-and-test:
+    # Name the Job
+    name: Build and Test the Compiler
+    # Set the type of machine to run on
+    runs-on: ubuntu-latest
+
+    steps:
+      # Checks out a copy of your repository on the ubuntu-latest machine
+      - name: Checkout code
+        uses: actions/checkout@v2
+        with:
+          - submodules: recursive
+
+      - name: Install llvm repository
+        run: wget https://apt.llvm.org/llvm.sh && chmod +x llvm.sh && ./llvm.sh 11
+
+      - name: Install dependcies
+        run: apt-get update && apt-get install -y cmake ninja-build clang-11 clang-tools-11 clang-11-doc libclang-common-11-dev libclang-11-dev libclang1-11 clang-format-11 clangd-11 libfuzzer-11-dev zlib1g-dev
+
+      - name: Build and Test
+        run: CC=/usr/bin/clang-11 CXX=/usr/bin/clang++-11 make all
