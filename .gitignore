@@ -11,6 +11,8 @@ env/
 docs/
 neon-build/
 main.ne
+src/test/fuzz/lexer-corpus
+src/test/fuzz/parser-corpus
 
 *.llvm
 *.o
