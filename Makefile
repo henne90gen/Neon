@@ -18,7 +18,7 @@ test-unit:
 	cd build/src/test; ./Tests
 
 test-fuzz:
-	cd build/src/test; ./FuzzTests
+	cd build/src/test; ./FuzzTests -max_total_time=5
 
 test-integration:
 	./build/src/tester/NeonTester
