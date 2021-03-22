@@ -15,7 +15,7 @@ jobs:
       - name: Checkout code
         uses: actions/checkout@v2
         with:
-          - submodules: recursive
+          submodules: recursive
 
       - name: Install llvm repository
         run: wget https://apt.llvm.org/llvm.sh && chmod +x llvm.sh && ./llvm.sh 11
