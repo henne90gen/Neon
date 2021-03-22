@@ -13,7 +13,7 @@ build-test:
 	cd build; ninja Tests LexerFuzzTests ParserFuzzTests NeonTester
 
 test-all: build-test
-	cd build; ninja test
+	cd build; CTEST_OUTPUT_ON_FAILURE=1 ninja test
 
 test-unit: build-test
 	cd build/src/test/unit; ./Tests
