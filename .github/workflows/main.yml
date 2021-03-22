@@ -18,7 +18,7 @@ jobs:
           submodules: recursive
 
       - name: Uninstall other llvm versions
-        run: sudo apt-get purge llvm-9 llvm-10 llvm-12
+        run: sudo apt-get purge llvm-9 llvm-10
 
       - name: Install llvm repository
         run: wget https://apt.llvm.org/llvm.sh && chmod +x llvm.sh && sudo ./llvm.sh 11
