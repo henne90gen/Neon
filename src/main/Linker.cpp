@@ -66,67 +66,21 @@ std::string Linker::getLinkerCommand() {
     // TODO find out what these options do:
     //  -pie --eh-frame-hdr
 
-#if 0
-    std::string s = "ld";
-
-    if (log.getLogLevel() == Logger::DEBUG_) {
-        s += " --verbose";
-    }
-
-    s += " -m elf_x86_64";
-
-    // specify which dynamic linker should be used at runtime for dynamically linked libraries
-    s += " -dynamic-linker /lib64/ld-linux-x86-64.so.2";
-
-    // specify output file name
-    s += " -o " + buildEnv->buildDirectory + program->executableFileName();
-
-    // TODO find a robust way to determine the c runtime library location (crt1.o, crti.o, crtn.o)
-    // additional object files that have to be linked (they contain the actual entry point and some setup stuff)
-    // c runtime library
-    s += " /lib64/crt1.o";
-    s += " /lib64/crti.o";
-    s += " /lib64/crtn.o";
-
-    // search directory for c standard library and math library
-    s += " -L/usr/lib/gcc/x86_64-pc-linux-gnu/9.2.0/";
-
-    // search directory for Neon standard library
-    s += " -L" + buildEnv->buildDirectory;
-
-    // specify the object file to link
-    s += " " + buildEnv->buildDirectory + program->objectFileName();
-
-    // c: c standard library, m: math library
-    s += " -lc -lm";
-
-    // Neon standard library
-    s += " -lNeonStd";
-
-    return s;
-#else
-#if 1
     std::string s = "\"" + buildEnv->buildDirectory + "crt/bin/ld.musl-clang\"";
-#else
-    std::string s = "ld";
-#endif
     if (log.getLogLevel() == Logger::DEBUG_) {
         s += " --verbose";
     }
 
     s += " --sysroot=" + buildEnv->buildDirectory + "crt";
 
-    //    s += " -m elf_x86_64";
+    s += " -m elf_x86_64";
 
-    // specify which dynamic linker should be used at runtime for dynamically linked libraries
-    //    s += " -dynamic-linker /lib64/ld-linux-x86-64.so.2";
     // link everything statically
     s += " -static";
 
     // specify output file name
     s += " -o " + buildEnv->buildDirectory + program->executableFileName();
 
-    // TODO find a robust way to determine the c runtime library location (crt1.o, crti.o, crtn.o)
     // additional object files that have to be linked (they contain the actual entry point and some setup stuff)
     // c runtime library
     s += " " + buildEnv->buildDirectory + "crt/lib/crt1.o";
@@ -148,7 +102,6 @@ std::string Linker::getLinkerCommand() {
     // Neon standard library
     s += " " + buildEnv->buildDirectory + "libNeonStd.a";
     return s;
-#endif
 }
 #endif
 
