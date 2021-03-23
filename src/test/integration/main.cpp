@@ -174,6 +174,7 @@ int main(int argc, char **argv) {
     auto args = parseArgs(argc, argv);
 
     Logger logger = {};
+//    logger.setLogLevel(Logger::LogLevel::DEBUG_);
     if (args.verbose) {
         logger.setLogLevel(Logger::LogLevel::DEBUG_);
     }

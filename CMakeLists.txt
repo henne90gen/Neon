@@ -5,6 +5,7 @@ project(Neon)
 set(CMAKE_CXX_STANDARD 20)
 set(CMAKE_EXPORT_COMPILE_COMMANDS TRUE)
 set(CMAKE_VERBOSE_MAKEFILE OFF)
+set(NEON_BUILD_DIR ${PROJECT_SOURCE_DIR}/neon-build/)
 
 # Clang Tidy
 message(STATUS "Looking for clang-tidy")
@@ -38,6 +39,15 @@ llvm_map_components_to_libnames(LLVM_LIBS
         support
         passes
         native)
+
+if (NOT (${CMAKE_SYSTEM_NAME} STREQUAL "Windows"))
+# Download and Compile musl
+include(ExternalProject)
+ExternalProject_Add(musl
+        SOURCE_DIR ${CMAKE_SOURCE_DIR}/vendor/musl
+        CONFIGURE_COMMAND ${CMAKE_SOURCE_DIR}/vendor/musl/configure --prefix=${CMAKE_SOURCE_DIR}/neon-build/crt
+        BUILD_COMMAND make -j 8)
+endif()
 
 enable_testing()
 add_subdirectory(src)

@@ -49,13 +49,14 @@ add_library(NeonCompiler
         util/Utils.cpp)
 
 add_dependencies(NeonCompiler NeonStd)
+if (NOT (${CMAKE_SYSTEM_NAME} STREQUAL "Windows"))
+    add_dependencies(NeonCompiler musl)
+endif ()
 target_link_libraries(NeonCompiler PUBLIC ${LLVM_LIBS})
 target_include_directories(NeonCompiler PUBLIC ${CMAKE_CURRENT_SOURCE_DIR})
 
-set(EXECUTABLE_NAME ${PROJECT_NAME})
-add_executable(${EXECUTABLE_NAME} ${CMAKE_CURRENT_SOURCE_DIR}/main.cpp)
-
-target_link_libraries(${EXECUTABLE_NAME} NeonCompiler)
+add_executable(Neon ${CMAKE_CURRENT_SOURCE_DIR}/main.cpp)
+target_link_libraries(Neon NeonCompiler)
 
 if (${CMAKE_SYSTEM_NAME} STREQUAL "Windows")
     add_compile_options(${LIB_NAME} PRIVATE /std:c++17)

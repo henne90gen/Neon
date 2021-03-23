@@ -1,3 +1,6 @@
 [submodule "vendor/catch"]
 	path = vendor/catch
 	url = git@github.com:catchorg/Catch2.git
+[submodule "vendor/musl"]
+	path = vendor/musl
+	url = git://git.musl-libc.org/musl
