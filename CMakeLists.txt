@@ -41,13 +41,12 @@ llvm_map_components_to_libnames(LLVM_LIBS
         native)
 
 if (NOT (${CMAKE_SYSTEM_NAME} STREQUAL "Windows"))
-# Download and Compile musl
-include(ExternalProject)
-ExternalProject_Add(musl
-        SOURCE_DIR ${CMAKE_SOURCE_DIR}/vendor/musl
-        CONFIGURE_COMMAND ${CMAKE_SOURCE_DIR}/vendor/musl/configure --prefix=${CMAKE_SOURCE_DIR}/neon-build/crt
-        BUILD_COMMAND make -j 8)
-endif()
+    include(ExternalProject)
+    ExternalProject_Add(musl
+            SOURCE_DIR ${CMAKE_SOURCE_DIR}/vendor/musl
+            CONFIGURE_COMMAND ${CMAKE_SOURCE_DIR}/vendor/musl/configure --prefix=${CMAKE_SOURCE_DIR}/neon-build/crt --syslibdir=${CMAKE_SOURCE_DIR}/neon-build/crt
+            BUILD_COMMAND make -j 8)
+endif ()
 
 enable_testing()
 add_subdirectory(src)
