@@ -7,14 +7,29 @@
 #include <catch2/catch.hpp>
 #include <iostream>
 
-void assertAstsAreEqual(SimpleTree *expected, SimpleTree *actual, int level) {
-    REQUIRE(actual != nullptr);
-    INFO(std::to_string(level) + ": " + to_string(expected->type) + " | " + to_string(actual->type));
-    REQUIRE(expected->type == actual->type);
-    REQUIRE(expected->children.size() == actual->children.size());
-    for (unsigned long i = 0; i < expected->children.size(); i++) {
-        assertAstsAreEqual(expected->children[i], actual->children[i], level + 1);
+bool astsAreEqual(SimpleTree *expected, SimpleTree *actual, int level) {
+    if (actual == nullptr) {
+        return false;
     }
+    UNSCOPED_INFO(std::to_string(level) + ": " + to_string(expected->type) + " | " + to_string(actual->type));
+    if (expected->type != actual->type) {
+        UNSCOPED_INFO("Wrong ast node type:");
+        UNSCOPED_INFO("  expected " + to_string(expected->type) + ", got " + to_string(actual->type));
+        return false;
+    }
+    if (expected->children.size() != actual->children.size()) {
+        UNSCOPED_INFO("Wrong number of children:");
+        UNSCOPED_INFO("  expected " + std::to_string(expected->children.size()) + ", got " +
+                      std::to_string(actual->children.size()));
+        return false;
+    }
+    for (unsigned long i = 0; i < expected->children.size(); i++) {
+        bool success = astsAreEqual(expected->children[i], actual->children[i], level + 1);
+        if (!success) {
+            return false;
+        }
+    }
+    return true;
 }
 
 SimpleTree *createSimpleFromSpecification(const std::vector<AstNodeSpec> &spec, int &index, int indentation = 0) {
@@ -184,7 +199,7 @@ SimpleTree *createSimpleFromAst(AstNode *node) {
     }
 }
 
-void assertProgramCreatesAstWithSimpleParser(const std::vector<std::string> &program, std::vector<AstNodeSpec> &spec) {
+bool parserCreatesCorrectAst(const std::vector<std::string> &program, std::vector<AstNodeSpec> &spec) {
     int index = 0;
     auto expected = createSimpleFromSpecification(spec, index);
     CodeProvider *codeProvider = new StringCodeProvider(program, true);
@@ -197,9 +212,10 @@ void assertProgramCreatesAstWithSimpleParser(const std::vector<std::string> &pro
     parser.run();
 
     auto astPrinter = AstPrinter(prog);
-    astPrinter.run();
+    std::string result = astPrinter.run();
+    UNSCOPED_INFO(result);
 
     auto actual = prog->root;
 
-    assertAstsAreEqual(expected, createSimpleFromAst(actual), 0);
+    return astsAreEqual(expected, createSimpleFromAst(actual), 0);
 }

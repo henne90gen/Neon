@@ -12,7 +12,7 @@ TEST_CASE("Parser") {
               {3, ast::NodeType::VARIABLE},
         };
         std::vector<std::string> program = {"a = 5", "int b = a"};
-        assertProgramCreatesAstWithSimpleParser(program, spec);
+        REQUIRE(parserCreatesCorrectAst(program, spec));
     }
 
     SECTION("can handle member access") {
@@ -39,6 +39,6 @@ TEST_CASE("Parser") {
         };
         std::vector<std::string> program = {"type MyType {",       "int i",   "}",          "fun main() int {",
                                             "MyType t = MyType()", "t.i = 5", "return t.i", "}"};
-        assertProgramCreatesAstWithSimpleParser(program, spec);
+        REQUIRE(parserCreatesCorrectAst(program, spec));
     }
 }

@@ -11,7 +11,7 @@ TEST_CASE("Parser Statements") {
               {3, ast::NodeType::LITERAL},
         };
         std::vector<std::string> program = {"if true { }"};
-        assertProgramCreatesAstWithSimpleParser(program, spec);
+        REQUIRE(parserCreatesCorrectAst(program, spec));
     }
 
     SECTION("can handle 'if true { int i = 0 }'") {
@@ -23,7 +23,7 @@ TEST_CASE("Parser Statements") {
               {6, ast::NodeType::LITERAL},
         };
         std::vector<std::string> program = {"if true {", "int i = 0", "}"};
-        assertProgramCreatesAstWithSimpleParser(program, spec);
+        REQUIRE(parserCreatesCorrectAst(program, spec));
     }
 
     SECTION("can handle 'if num == 1 { }'") {
@@ -32,7 +32,7 @@ TEST_CASE("Parser Statements") {
               {3, ast::NodeType::BINARY_OPERATION}, {4, ast::NodeType::VARIABLE},  {4, ast::NodeType::LITERAL},
         };
         std::vector<std::string> program = {"if num == 1 {", "}"};
-        assertProgramCreatesAstWithSimpleParser(program, spec);
+        REQUIRE(parserCreatesCorrectAst(program, spec));
     }
 
     SECTION("can handle 'if true { int i = 0 } else { int j = 1 }'") {
@@ -53,7 +53,7 @@ TEST_CASE("Parser Statements") {
               {6, ast::NodeType::LITERAL},
         };
         std::vector<std::string> program = {"if true {", "int i = 0", "} else {", "int j = 1", "}"};
-        assertProgramCreatesAstWithSimpleParser(program, spec);
+        REQUIRE(parserCreatesCorrectAst(program, spec));
     }
 
     SECTION("can handle 'for int i = 0; i < 10; i = i + 1 { }'") {
@@ -69,7 +69,7 @@ TEST_CASE("Parser Statements") {
               {3, ast::NodeType::SEQUENCE},
         };
         std::vector<std::string> program = {"for int i = 0; i < 10; i = i + 1 { }"};
-        assertProgramCreatesAstWithSimpleParser(program, spec);
+        REQUIRE(parserCreatesCorrectAst(program, spec));
     }
 
     SECTION("can handle 'for int i = 0; i < 10; i = i + 1 { int a = 0 }'") {
@@ -87,7 +87,7 @@ TEST_CASE("Parser Statements") {
               {6, ast::NodeType::LITERAL},
         };
         std::vector<std::string> program = {"for int i = 0; i < 10; i = i + 1 {", "int a = 0", "}"};
-        assertProgramCreatesAstWithSimpleParser(program, spec);
+        REQUIRE(parserCreatesCorrectAst(program, spec));
     }
 
     SECTION("can handle assert statement") {
@@ -98,7 +98,7 @@ TEST_CASE("Parser Statements") {
               {3, ast::NodeType::LITERAL},
         };
         std::vector<std::string> program = {"assert true"};
-        assertProgramCreatesAstWithSimpleParser(program, spec);
+        REQUIRE(parserCreatesCorrectAst(program, spec));
     }
 
     SECTION("can handle comment") {
@@ -108,7 +108,7 @@ TEST_CASE("Parser Statements") {
               {2, ast::NodeType::COMMENT},
         };
         std::vector<std::string> program = {"# this is a comment"};
-        assertProgramCreatesAstWithSimpleParser(program, spec);
+        REQUIRE(parserCreatesCorrectAst(program, spec));
     }
 
     SECTION("can handle import statement") {
@@ -118,6 +118,6 @@ TEST_CASE("Parser Statements") {
               {2, ast::NodeType::IMPORT},
         };
         std::vector<std::string> program = {"import \"examples/functions.ne\""};
-        assertProgramCreatesAstWithSimpleParser(program, spec);
+        REQUIRE(parserCreatesCorrectAst(program, spec));
     }
 }

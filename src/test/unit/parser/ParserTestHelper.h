@@ -17,4 +17,4 @@ struct SimpleTree {
 
 SimpleTree *createSimpleFromAst(AstNode *node);
 
-void assertProgramCreatesAstWithSimpleParser(const std::vector<std::string> &program, std::vector<AstNodeSpec> &spec);
+bool parserCreatesCorrectAst(const std::vector<std::string> &program, std::vector<AstNodeSpec> &spec);

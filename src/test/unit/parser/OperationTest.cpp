@@ -10,7 +10,7 @@ TEST_CASE("Parser Operations") {
               {4, ast::NodeType::LITERAL},
         };
         std::vector<std::string> program = {"int a = 1 + 1"};
-        assertProgramCreatesAstWithSimpleParser(program, spec);
+        REQUIRE(parserCreatesCorrectAst(program, spec));
     }
 
     SECTION("can handle addition with parentheses") {
@@ -21,7 +21,7 @@ TEST_CASE("Parser Operations") {
               {4, ast::NodeType::LITERAL},
         };
         std::vector<std::string> program = {"int a = (1 + 1)"};
-        assertProgramCreatesAstWithSimpleParser(program, spec);
+        REQUIRE(parserCreatesCorrectAst(program, spec));
     }
 
     SECTION("can handle chained addition with parentheses") {
@@ -33,7 +33,7 @@ TEST_CASE("Parser Operations") {
               {4, ast::NodeType::LITERAL},
         };
         std::vector<std::string> program = {"int a = (1 + 1 + 1)"};
-        assertProgramCreatesAstWithSimpleParser(program, spec);
+        REQUIRE(parserCreatesCorrectAst(program, spec));
     }
 
     SECTION("can handle chained addition") {
@@ -45,7 +45,7 @@ TEST_CASE("Parser Operations") {
               {4, ast::NodeType::LITERAL},
         };
         std::vector<std::string> program = {"int a = 1 + 1 + 1"};
-        assertProgramCreatesAstWithSimpleParser(program, spec);
+        REQUIRE(parserCreatesCorrectAst(program, spec));
     }
 
     SECTION("can handle nested addition right") {
@@ -57,7 +57,7 @@ TEST_CASE("Parser Operations") {
               {5, ast::NodeType::LITERAL},
         };
         std::vector<std::string> program = {"int a = 1 + (2 + 3)"};
-        assertProgramCreatesAstWithSimpleParser(program, spec);
+        REQUIRE(parserCreatesCorrectAst(program, spec));
     }
 
     SECTION("can handle nested addition left") {
@@ -69,7 +69,7 @@ TEST_CASE("Parser Operations") {
               {4, ast::NodeType::LITERAL},
         };
         std::vector<std::string> program = {"int b = (1 + 2) + 3"};
-        assertProgramCreatesAstWithSimpleParser(program, spec);
+        REQUIRE(parserCreatesCorrectAst(program, spec));
     }
 
     SECTION("can handle arithmetic operations") {
@@ -89,7 +89,7 @@ TEST_CASE("Parser Operations") {
               {4, ast::NodeType::LITERAL},
         };
         std::vector<std::string> program = {"int a = 1 + 1", "int a = 1 - 1", "int a = 1 / 1", "int a = 1 * 1"};
-        assertProgramCreatesAstWithSimpleParser(program, spec);
+        REQUIRE(parserCreatesCorrectAst(program, spec));
     }
 
     SECTION("can handle boolean binary operations") {
@@ -124,7 +124,7 @@ TEST_CASE("Parser Operations") {
               "bool a = 1 == 0", "bool b = 1 <= 0", "bool c = 1 < 0",          "bool d = 1 >= 0",
               "bool e = 1 > 0",  "bool f = 1 != 0", "bool g = true and false", "bool g = true or false",
         };
-        assertProgramCreatesAstWithSimpleParser(program, spec);
+        REQUIRE(parserCreatesCorrectAst(program, spec));
     }
 
     SECTION("can handle boolean unary operations") {
@@ -147,6 +147,6 @@ TEST_CASE("Parser Operations") {
               "bool g = not true",
               "bool g = not (true and false)",
         };
-        assertProgramCreatesAstWithSimpleParser(program, spec);
+        REQUIRE(parserCreatesCorrectAst(program, spec));
     }
 }

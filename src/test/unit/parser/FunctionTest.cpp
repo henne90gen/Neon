@@ -10,7 +10,7 @@ TEST_CASE("Parser Functions") {
               {3, ast::NodeType::SEQUENCE},
         };
         std::vector<std::string> program = {"fun hello() { }"};
-        assertProgramCreatesAstWithSimpleParser(program, spec);
+        REQUIRE(parserCreatesCorrectAst(program, spec));
     }
 
     SECTION("function definition with body") {
@@ -25,7 +25,7 @@ TEST_CASE("Parser Functions") {
               {6, ast::NodeType::LITERAL},
         };
         std::vector<std::string> program = {"fun hello() {", "int a = 1", "}"};
-        assertProgramCreatesAstWithSimpleParser(program, spec);
+        REQUIRE(parserCreatesCorrectAst(program, spec));
     }
 
     SECTION("main function definition") {
@@ -34,7 +34,7 @@ TEST_CASE("Parser Functions") {
               {3, ast::NodeType::SEQUENCE}, {4, ast::NodeType::STATEMENT}, {5, ast::NodeType::LITERAL},
         };
         std::vector<std::string> program = {"fun main() {", "return 0", "}"};
-        assertProgramCreatesAstWithSimpleParser(program, spec);
+        REQUIRE(parserCreatesCorrectAst(program, spec));
     }
 
     SECTION("function call") {
@@ -44,7 +44,7 @@ TEST_CASE("Parser Functions") {
               {2, ast::NodeType::CALL},
         };
         std::vector<std::string> program = {"hello()"};
-        assertProgramCreatesAstWithSimpleParser(program, spec);
+        REQUIRE(parserCreatesCorrectAst(program, spec));
     }
 
     SECTION("function call with literal argument") {
@@ -57,7 +57,7 @@ TEST_CASE("Parser Functions") {
               "hello(1)",
               "return hello(1)",
         };
-        assertProgramCreatesAstWithSimpleParser(program, spec);
+        REQUIRE(parserCreatesCorrectAst(program, spec));
     }
 
     SECTION("function call with variable argument") {
@@ -70,7 +70,7 @@ TEST_CASE("Parser Functions") {
               "hello(num)",
               "return hello(num)",
         };
-        assertProgramCreatesAstWithSimpleParser(program, spec);
+        REQUIRE(parserCreatesCorrectAst(program, spec));
     }
 
     SECTION("function call with variable argument") {
@@ -116,7 +116,7 @@ TEST_CASE("Parser Functions") {
               "return hello(num - 1)",
               "return hello(1) + hello(num)",
         };
-        assertProgramCreatesAstWithSimpleParser(program, spec);
+        REQUIRE(parserCreatesCorrectAst(program, spec));
     }
 
     SECTION("function call with multiple arguments") {
@@ -132,7 +132,7 @@ TEST_CASE("Parser Functions") {
         std::vector<std::string> program = {
               "hello(1, 2)", "hello(num, 2)", "hello(num, num)", "hello(num, )", "hello(num, num)",
         };
-        assertProgramCreatesAstWithSimpleParser(program, spec);
+        REQUIRE(parserCreatesCorrectAst(program, spec));
     }
 
     SECTION("external function") {
@@ -142,7 +142,7 @@ TEST_CASE("Parser Functions") {
               {2, ast::NodeType::FUNCTION},
         };
         std::vector<std::string> program = {"extern fun hello()"};
-        assertProgramCreatesAstWithSimpleParser(program, spec);
+        REQUIRE(parserCreatesCorrectAst(program, spec));
     }
 
     SECTION("external function with return type") {
@@ -156,7 +156,7 @@ TEST_CASE("Parser Functions") {
               "extern fun hello() float",
               "extern fun hello() bool",
         };
-        assertProgramCreatesAstWithSimpleParser(program, spec);
+        REQUIRE(parserCreatesCorrectAst(program, spec));
     }
 
     SECTION("external function with arguments") {
@@ -171,7 +171,7 @@ TEST_CASE("Parser Functions") {
               {3, ast::NodeType::VARIABLE_DEFINITION},
         };
         std::vector<std::string> program = {"extern fun hello(int i)", "extern fun hello(int i, float j)"};
-        assertProgramCreatesAstWithSimpleParser(program, spec);
+        REQUIRE(parserCreatesCorrectAst(program, spec));
     }
 
     SECTION("external function with arguments and return type") {
@@ -186,6 +186,6 @@ TEST_CASE("Parser Functions") {
               {3, ast::NodeType::VARIABLE_DEFINITION},
         };
         std::vector<std::string> program = {"extern fun hello(int i) float", "extern fun hello(int i, float j) bool"};
-        assertProgramCreatesAstWithSimpleParser(program, spec);
+        REQUIRE(parserCreatesCorrectAst(program, spec));
     }
 }

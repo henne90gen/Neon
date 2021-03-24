@@ -10,7 +10,7 @@ TEST_CASE("Parser Types") {
               {3, ast::NodeType::LITERAL},
         };
         std::vector<std::string> program = {"int a = 1"};
-        assertProgramCreatesAstWithSimpleParser(program, spec);
+        REQUIRE(parserCreatesCorrectAst(program, spec));
     }
 
     SECTION("can handle floats") {
@@ -20,7 +20,7 @@ TEST_CASE("Parser Types") {
               {3, ast::NodeType::LITERAL},
         };
         std::vector<std::string> program = {"float a = 1.0"};
-        assertProgramCreatesAstWithSimpleParser(program, spec);
+        REQUIRE(parserCreatesCorrectAst(program, spec));
     }
 
     SECTION("can handle booleans") {
@@ -32,7 +32,7 @@ TEST_CASE("Parser Types") {
               {3, ast::NodeType::LITERAL},
         };
         std::vector<std::string> program = {"bool a = true", "bool b = false"};
-        assertProgramCreatesAstWithSimpleParser(program, spec);
+        REQUIRE(parserCreatesCorrectAst(program, spec));
     }
 
     SECTION("can handle strings") {
@@ -42,7 +42,7 @@ TEST_CASE("Parser Types") {
               {3, ast::NodeType::LITERAL},
         };
         std::vector<std::string> program = {"string a = \"Hello World\""};
-        assertProgramCreatesAstWithSimpleParser(program, spec);
+        REQUIRE(parserCreatesCorrectAst(program, spec));
     }
 
     SECTION("can handle array example") {
@@ -53,7 +53,7 @@ TEST_CASE("Parser Types") {
               {3, ast::NodeType::VARIABLE},  {3, ast::NodeType::VARIABLE},
         };
         std::vector<std::string> program = {"int[5] a", "a[0] = 5", "a[1] = a[0]"};
-        assertProgramCreatesAstWithSimpleParser(program, spec);
+        REQUIRE(parserCreatesCorrectAst(program, spec));
     }
 
     SECTION("can handle type declarations") {
@@ -66,6 +66,6 @@ TEST_CASE("Parser Types") {
               {3, ast::NodeType::TYPE_MEMBER},
         };
         std::vector<std::string> program = {"type MyType {", "int t", "}"};
-        assertProgramCreatesAstWithSimpleParser(program, spec);
+        REQUIRE(parserCreatesCorrectAst(program, spec));
     }
 }
