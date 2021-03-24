@@ -1,5 +1,7 @@
 #pragma once
 
+#include <sstream>
+
 #include "../../../Module.h"
 #include "../AstVisitor.h"
 #include "../nodes/AstNode.h"
@@ -27,9 +29,12 @@ class AstPrinter : public AstVisitor {
     void visitVariableNode(VariableNode *node) override;
     void visitVariableDefinitionNode(VariableDefinitionNode *node) override;
 
-    void run();
+    std::string run();
 
   private:
     const Module *module;
     int indentation = 0;
+    std::stringstream ss;
+
+    void indent();
 };

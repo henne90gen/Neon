@@ -5,9 +5,9 @@
 #include "../nodes/AllNodes.h"
 #include "util/Utils.h"
 
-void indent(int indentation) {
+void AstPrinter::indent() {
     for (int i = 0; i < indentation; i++) {
-        std::cout << "  ";
+        ss << "  ";
     }
 }
 
@@ -34,9 +34,9 @@ std::string printBinaryOperationType(ast::BinaryOperationType type) {
 }
 
 void AstPrinter::visitFunctionNode(FunctionNode *node) {
-    indent(indentation);
-    std::cout << "FunctionNode(name='" << node->getName() << "', numArguments=" << node->getArguments().size() << ")"
-              << std::endl;
+    indent();
+    ss << "FunctionNode(name='" << node->getName() << "', numArguments=" << node->getArguments().size() << ")"
+       << std::endl;
     indentation++;
     for (auto &argument : node->getArguments()) {
         argument->accept(this);
@@ -48,22 +48,22 @@ void AstPrinter::visitFunctionNode(FunctionNode *node) {
 }
 
 void AstPrinter::visitVariableNode(VariableNode *node) {
-    indent(indentation);
-    std::cout << "VariableNode(name='" << node->getName() << "', isArrayAccess='" << node->isArrayAccess()
-              << "', arrayIndex='" << node->getArrayIndex() << "')" << std::endl;
+    indent();
+    ss << "VariableNode(name='" << node->getName() << "', isArrayAccess='" << node->isArrayAccess() << "', arrayIndex='"
+       << node->getArrayIndex() << "')" << std::endl;
 }
 
 void AstPrinter::visitVariableDefinitionNode(VariableDefinitionNode *node) {
-    indent(indentation);
-    std::cout << "VariableDefinitionNode(type='" << to_string(node->getType()) << "', name='" << node->getName()
-              << "', isArray='" << node->isArray() << "', arraySize='" << node->getArraySize() << "')" << std::endl;
+    indent();
+    ss << "VariableDefinitionNode(type='" << to_string(node->getType()) << "', name='" << node->getName()
+       << "', isArray='" << node->isArray() << "', arraySize='" << node->getArraySize() << "')" << std::endl;
 }
 
 void AstPrinter::visitBinaryOperationNode(BinaryOperationNode *node) {
-    indent(indentation);
+    indent();
     std::string operationType = printBinaryOperationType(node->getType());
-    std::cout << "BinaryOperationNode(hasLeft=" << (node->getLeft() != nullptr)
-              << ", hasRight=" << (node->getRight() != nullptr) << ", type=" << operationType << ")" << std::endl;
+    ss << "BinaryOperationNode(hasLeft=" << (node->getLeft() != nullptr)
+       << ", hasRight=" << (node->getRight() != nullptr) << ", type=" << operationType << ")" << std::endl;
     indentation++;
     node->getLeft()->accept(this);
     node->getRight()->accept(this);
@@ -71,18 +71,18 @@ void AstPrinter::visitBinaryOperationNode(BinaryOperationNode *node) {
 }
 
 void AstPrinter::visitUnaryOperationNode(UnaryOperationNode *node) {
-    indent(indentation);
+    indent();
     std::string operationType = printUnaryOperationType(node->getType());
-    std::cout << "UnaryOperationNode(hasChild=" << (node->getChild() != nullptr) << ", type=" << operationType << ")"
-              << std::endl;
+    ss << "UnaryOperationNode(hasChild=" << (node->getChild() != nullptr) << ", type=" << operationType << ")"
+       << std::endl;
     indentation++;
     node->getChild()->accept(this);
     indentation--;
 }
 
 void AstPrinter::visitSequenceNode(SequenceNode *node) {
-    indent(indentation);
-    std::cout << "SequenceNode(size=" << node->getChildren().size() << ")" << std::endl;
+    indent();
+    ss << "SequenceNode(size=" << node->getChildren().size() << ")" << std::endl;
     indentation++;
     for (auto child : node->getChildren()) {
         child->accept(this);
@@ -91,8 +91,8 @@ void AstPrinter::visitSequenceNode(SequenceNode *node) {
 }
 
 void AstPrinter::visitStatementNode(StatementNode *node) {
-    indent(indentation);
-    std::cout << "StatementNode(isReturnStatement=" << node->isReturnStatement() << ")" << std::endl;
+    indent();
+    ss << "StatementNode(isReturnStatement=" << node->isReturnStatement() << ")" << std::endl;
     indentation++;
     if (node->getChild() != nullptr) {
         node->getChild()->accept(this);
@@ -101,24 +101,24 @@ void AstPrinter::visitStatementNode(StatementNode *node) {
 }
 
 void AstPrinter::visitFloatNode(FloatNode *node) {
-    indent(indentation);
-    std::cout << "FloatNode(value=" << node->getValue() << ")" << std::endl;
+    indent();
+    ss << "FloatNode(value=" << node->getValue() << ")" << std::endl;
 }
 
 void AstPrinter::visitIntegerNode(IntegerNode *node) {
-    indent(indentation);
-    std::cout << "IntegerNode(value=" << node->getValue() << ")" << std::endl;
+    indent();
+    ss << "IntegerNode(value=" << node->getValue() << ")" << std::endl;
 }
 
 void AstPrinter::visitBoolNode(BoolNode *node) {
-    indent(indentation);
-    std::cout << "BoolNode(value=" << node->getValue() << ")" << std::endl;
+    indent();
+    ss << "BoolNode(value=" << node->getValue() << ")" << std::endl;
 }
 
 void AstPrinter::visitAssignmentNode(AssignmentNode *node) {
-    indent(indentation);
-    std::cout << "AssignmentNode(hasLeft=" << (node->getLeft() != nullptr)
-              << ", hasRight=" << (node->getRight() != nullptr) << ")" << std::endl;
+    indent();
+    ss << "AssignmentNode(hasLeft=" << (node->getLeft() != nullptr) << ", hasRight=" << (node->getRight() != nullptr)
+       << ")" << std::endl;
     indentation++;
     if (node->getLeft() != nullptr) {
         node->getLeft()->accept(this);
@@ -130,9 +130,8 @@ void AstPrinter::visitAssignmentNode(AssignmentNode *node) {
 }
 
 void AstPrinter::visitCallNode(CallNode *node) {
-    indent(indentation);
-    std::cout << "CallNode(name='" << node->getName() << "', numArguments=" << node->getArguments().size() << ")"
-              << std::endl;
+    indent();
+    ss << "CallNode(name='" << node->getName() << "', numArguments=" << node->getArguments().size() << ")" << std::endl;
     indentation++;
     for (auto argument : node->getArguments()) {
         argument->accept(this);
@@ -141,8 +140,8 @@ void AstPrinter::visitCallNode(CallNode *node) {
 }
 
 void AstPrinter::visitIfStatementNode(IfStatementNode *node) {
-    indent(indentation);
-    std::cout << "IfStatementNode()" << std::endl;
+    indent();
+    ss << "IfStatementNode()" << std::endl;
     indentation++;
     node->getCondition()->accept(this);
     if (node->getIfBody() != nullptr) {
@@ -155,8 +154,8 @@ void AstPrinter::visitIfStatementNode(IfStatementNode *node) {
 }
 
 void AstPrinter::visitForStatementNode(ForStatementNode *node) {
-    indent(indentation);
-    std::cout << "ForStatementNode()" << std::endl;
+    indent();
+    ss << "ForStatementNode()" << std::endl;
     indentation++;
     if (node->getInit() != nullptr) {
         node->getInit()->accept(this);
@@ -174,8 +173,8 @@ void AstPrinter::visitForStatementNode(ForStatementNode *node) {
 }
 
 void AstPrinter::visitTypeDeclarationNode(TypeDeclarationNode *node) {
-    indent(indentation);
-    std::cout << "TypeDeclarationNode(name='" << node->getName() << "')" << std::endl;
+    indent();
+    ss << "TypeDeclarationNode(name='" << node->getName() << "')" << std::endl;
     indentation++;
     for (const auto member : node->getMembers()) {
         member->accept(this);
@@ -184,31 +183,30 @@ void AstPrinter::visitTypeDeclarationNode(TypeDeclarationNode *node) {
 }
 
 void AstPrinter::visitTypeMemberNode(TypeMemberNode *node) {
-    indent(indentation);
-    std::cout << "TypeMemberNode(name='" << node->getName() << "', type='" << to_string(node->getType()) << "')"
-              << std::endl;
+    indent();
+    ss << "TypeMemberNode(name='" << node->getName() << "', type='" << to_string(node->getType()) << "')" << std::endl;
 }
 
 void AstPrinter::visitMemberAccessNode(MemberAccessNode *node) {
-    indent(indentation);
+    indent();
     // TODO print all chained member accesses
-    std::cout << "MemberAccessNode(name='" << node->getVariableName() << "', members='"
-              << "')" << std::endl;
+    ss << "MemberAccessNode(name='" << node->getVariableName() << "', members='"
+       << "')" << std::endl;
 }
 
 void AstPrinter::visitAssertNode(AssertNode *node) {
-    indent(indentation);
-    std::cout << "AssertNode" << std::endl;
+    indent();
+    ss << "AssertNode" << std::endl;
     indentation++;
     node->getCondition()->accept(this);
     indentation--;
 }
 
-void AstPrinter::run() {
+std::string AstPrinter::run() {
     if (module->root == nullptr) {
-        std::cerr << "Could not print AST (nullptr)." << std::endl;
-        return;
+        return "Could not print AST (nullptr).";
     }
 
     module->root->accept(this);
+    return ss.str();
 }
