@@ -174,7 +174,6 @@ int main(int argc, char **argv) {
     auto args = parseArgs(argc, argv);
 
     Logger logger = {};
-//    logger.setLogLevel(Logger::LogLevel::DEBUG_);
     if (args.verbose) {
         logger.setLogLevel(Logger::LogLevel::DEBUG_);
     }
@@ -187,6 +186,7 @@ int main(int argc, char **argv) {
     int successfulTests = 0;
     double compileTimeTotalMillis = 0;
     double runTimeTotalMillis = 0;
+    double linkTimeTotalMillis = 0;
 
     std::vector<std::filesystem::path> tests = collectTests(args);
     for (const auto &path : tests) {
@@ -202,6 +202,7 @@ int main(int argc, char **argv) {
         }
 
         compileTimeTotalMillis += result.compileTimeMillis();
+        linkTimeTotalMillis += result.linkTimeMillis();
         runTimeTotalMillis += result.runTimeMillis();
         std::cout << " (compile: " << std::setw(7) << result.compileTimeMillis() << "ms, link: " << std::setw(7)
                   << result.linkTimeMillis() << "ms, run: " << std::setw(7) << result.runTimeMillis()
@@ -214,9 +215,10 @@ int main(int argc, char **argv) {
     }
 
     std::cout << std::endl
-              << "RESULTS (compile: " << std::setw(7) << compileTimeTotalMillis << "ms, run: " << std::setw(7)
-              << runTimeTotalMillis << "ms, exitCode: " << std::setw(2) << exitCode << "): " << successfulTests << "/"
-              << totalNumTests << " tests successful" << std::endl;
+              << "RESULTS (compile: " << std::setw(7) << compileTimeTotalMillis << "ms, link: " << std::setw(7)
+              << linkTimeTotalMillis << "ms, run: " << std::setw(7) << runTimeTotalMillis
+              << "ms, exitCode: " << std::setw(2) << exitCode << "): " << successfulTests << "/" << totalNumTests
+              << " tests successful" << std::endl;
 
     return exitCode;
 }
