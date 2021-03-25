@@ -7,6 +7,9 @@ set(CMAKE_EXPORT_COMPILE_COMMANDS TRUE)
 set(CMAKE_VERBOSE_MAKEFILE OFF)
 set(NEON_BUILD_DIR ${PROJECT_SOURCE_DIR}/neon-build/)
 
+# Options
+option(USE_ADDRESS_SANITIZER "Compile all code with address sanitization enabled" OFF)
+
 # Clang Tidy
 message(STATUS "Looking for clang-tidy")
 find_program(CLANG_TIDY_EXE
@@ -21,6 +24,11 @@ else ()
             "${CLANG_TIDY_EXE}" "-fix"
             "-checks=*,-fuchsia-*,-cppcoreguidelines-pro-type-union-access,-hicpp-vararg,-cppcoreguidelines-pro-type-vararg,-cppcoreguidelines-owning-memory,-readability-magic-numbers,-google-runtime-int,-readability-braces-around-statements,-cppcoreguidelines-pro-bounds-constant-array-index,-modernize-use-trailing-return-type"
     )
+endif ()
+
+if (USE_ADDRESS_SANITIZER)
+    set(CMAKE_CXX_FLAGS ${CMAKE_CXX_FLAGS} -fsanitize=address)
+    message("-- Compiling with address sanitizer")
 endif ()
 
 # LLVM

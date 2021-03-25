@@ -1,3 +1,5 @@
+extern fun ps(string s)
+
 fun main() int {
     string s0 = ""
     for int i = 0; i < 10; i = i + 1 {

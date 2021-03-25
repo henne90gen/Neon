@@ -1,5 +1,8 @@
 
-add_library(NeonStd STATIC stdlib.cpp)
+add_library(NeonStd STATIC stdlib.cpp asan.cpp)
+if (USE_ADDRESS_SANITIZER)
+    target_compile_options(NeonStd PRIVATE -static-libsan)
+endif ()
 
 add_custom_command(TARGET NeonStd
         POST_BUILD
