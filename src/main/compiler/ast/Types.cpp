@@ -42,6 +42,21 @@ std::string to_string(ast::BinaryOperationType operationType) {
         return "GREATER_EQUALS";
     case ast::GREATER_THAN:
         return "GREATER_THAN";
+    case ast::AND:
+        return "AND";
+    case ast::OR:
+        return "OR";
+    }
+    std::cerr << "Could not convert " << operationType << " to string." << std::endl;
+    exit(1);
+}
+
+std::string to_string(ast::UnaryOperationType operationType) {
+    switch (operationType) {
+    case ast::NOT:
+        return "NOT";
+    case ast::NEGATE:
+        return "NEGATE";
     }
     std::cerr << "Could not convert " << operationType << " to string." << std::endl;
     exit(1);

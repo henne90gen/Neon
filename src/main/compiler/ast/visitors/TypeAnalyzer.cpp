@@ -66,13 +66,23 @@ void TypeAnalyzer::visitBinaryOperationNode(BinaryOperationNode *node) {
 
 void TypeAnalyzer::visitUnaryOperationNode(UnaryOperationNode *node) {
     node->getChild()->accept(this);
-    if (node->getType() == UnaryOperationNode::UnaryOperationType::NOT &&
+    if (node->getType() == ast::UnaryOperationType::NOT &&
         nodeTypeMap[node->getChild()] == ast::DataType(ast::SimpleDataType::BOOL)) {
         nodeTypeMap[node] = ast::DataType(ast::SimpleDataType::BOOL);
         return;
     }
+    if (node->getType() == ast::UnaryOperationType::NEGATE) {
+        if (nodeTypeMap[node->getChild()] == ast::DataType(ast::SimpleDataType::INT)) {
+            nodeTypeMap[node] = ast::DataType(ast::SimpleDataType::INT);
+            return;
+        }
+        if (nodeTypeMap[node->getChild()] == ast::DataType(ast::SimpleDataType::FLOAT)) {
+            nodeTypeMap[node] = ast::DataType(ast::SimpleDataType::FLOAT);
+            return;
+        }
+    }
     // TODO(henne): unary operators can also be of other types than bool, we need to add support for that as well
-    std::cerr << "TypeAnalyzer: Unary operation type mismatch: " << to_string(node->getAstNodeType()) << std::endl;
+    std::cerr << "TypeAnalyzer: Unary operation type mismatch: " << to_string(node->getType()) << std::endl;
 }
 
 void TypeAnalyzer::visitAssignmentNode(AssignmentNode *node) {

@@ -142,7 +142,7 @@ void AstInterpreter::visitUnaryOperationNode(UnaryOperationNode *node) {
 
     CalculationResult result = {};
     switch (node->getType()) {
-    case UnaryOperationNode::NOT:
+    case ast::UnaryOperationType::NOT:
         result = negate(childResult);
         break;
     }

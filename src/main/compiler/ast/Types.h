@@ -59,6 +59,11 @@ enum BinaryOperationType {
     OR,
 };
 
+enum UnaryOperationType {
+    NOT,
+    NEGATE,
+};
+
 bool isSimpleDataType(const ast::DataType &type);
 
 SimpleDataType toSimpleDataType(const ast::DataType &type);
@@ -68,6 +73,7 @@ SimpleDataType toSimpleDataType(const ast::DataType &type);
 std::string to_string(const ast::DataType &dataType);
 
 std::string to_string(ast::BinaryOperationType operationType);
+std::string to_string(ast::UnaryOperationType operationType);
 
 namespace std {
 

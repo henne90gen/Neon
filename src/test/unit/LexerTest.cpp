@@ -10,7 +10,7 @@ Lexer getLexer(const std::vector<std::string> &lines, Logger &logger) {
     return lexer;
 }
 
-void assertTokensCanBeLexed(const std::unordered_map<std::string, Token::TokenType> &tokens) {
+bool tokensCanBeLexed(const std::vector<std::pair<std::string, Token::TokenType>> &tokens) {
     std::vector<std::string> lines;
     lines.reserve(tokens.size());
     for (auto &kv : tokens) {
@@ -21,11 +21,16 @@ void assertTokensCanBeLexed(const std::unordered_map<std::string, Token::TokenTy
     auto lexer = getLexer(lines, logger);
     for (auto &expectedToken : tokens) {
         auto actualToken = lexer.getToken();
-        INFO(to_string(actualToken.type) + " != " + to_string(expectedToken.second));
-        REQUIRE(actualToken.type == expectedToken.second);
-        INFO(actualToken.content + " != " + expectedToken.first);
-        REQUIRE(actualToken.content == expectedToken.first);
+        UNSCOPED_INFO(to_string(actualToken.type) + " != " + to_string(expectedToken.second));
+        if (actualToken.type != expectedToken.second) {
+            return false;
+        }
+        UNSCOPED_INFO(actualToken.content + " != " + expectedToken.first);
+        if (actualToken.content != expectedToken.first) {
+            return false;
+        }
     }
+    return true;
 }
 
 TEST_CASE("Lexer") {
@@ -82,7 +87,7 @@ TEST_CASE("Lexer") {
     }
 
     SECTION("can handle all tokens") {
-        std::unordered_map<std::string, Token::TokenType> tokens = {
+        std::vector<std::pair<std::string, Token::TokenType>> tokens = {
               {"\n", Token::NEW_LINE},
               {"1", Token::INTEGER},
               {"1.5", Token::FLOAT},
@@ -118,28 +123,29 @@ TEST_CASE("Lexer") {
               {"else", Token::ELSE},
               {"for", Token::FOR},
               {"import", Token::IMPORT},
+              {"assert", Token::ASSERT},
               {"abc.abc", Token::MEMBER_ACCESS},
               {"abc.abc.abc", Token::MEMBER_ACCESS},
               {"abc.abc.abc.abc", Token::MEMBER_ACCESS},
         };
-        assertTokensCanBeLexed(tokens);
+        REQUIRE(tokensCanBeLexed(tokens));
     }
 
     SECTION("can handle variable names") {
-        std::unordered_map<std::string, Token::TokenType> tokens = {
+        std::vector<std::pair<std::string, Token::TokenType>> tokens = {
               {"helloWorld", Token::IDENTIFIER},
               {"hello123World", Token::IDENTIFIER},
               {"_helloWorld", Token::IDENTIFIER},
               {"hello_World", Token::IDENTIFIER},
         };
-        assertTokensCanBeLexed(tokens);
+        REQUIRE(tokensCanBeLexed(tokens));
     }
 
     SECTION("can handle strings") {
-        std::unordered_map<std::string, Token::TokenType> tokens = {
+        std::vector<std::pair<std::string, Token::TokenType>> tokens = {
               {"\"myString\"", Token::STRING},
               {"\"myString/anotherString\"", Token::STRING},
         };
-        assertTokensCanBeLexed(tokens);
+        REQUIRE(tokensCanBeLexed(tokens));
     }
 }

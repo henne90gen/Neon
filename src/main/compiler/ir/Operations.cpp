@@ -204,11 +204,21 @@ void IrGenerator::visitUnaryOperationNode(UnaryOperationNode *node) {
     }
 
     switch (node->getType()) {
-    case UnaryOperationNode::NOT:
+    case ast::UnaryOperationType::NOT:
         nodesToValues[node] = builder.CreateNot(c, "not");
         break;
+    case ast::UnaryOperationType::NEGATE: {
+        const ast::DataType &type = typeResolver.getTypeOf(module, node);
+        if (type == ast::DataType(ast::INT)) {
+            nodesToValues[node] = builder.CreateNeg(c, "neg");
+        } else if (type == ast::DataType(ast::FLOAT)) {
+            nodesToValues[node] = builder.CreateFNeg(c, "neg");
+        } else {
+            logError("Type does not support negation: " + to_string(type));
+        }
+    } break;
     default:
-        logError("Invalid unary operation.");
+        logError("Invalid unary operation: " + to_string(node->getType()));
         break;
     }
 

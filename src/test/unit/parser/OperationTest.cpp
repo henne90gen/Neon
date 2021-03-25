@@ -144,8 +144,32 @@ TEST_CASE("Parser Operations") {
               {5, ast::NodeType::LITERAL},
         };
         std::vector<std::string> program = {
-              "bool g = not true",
-              "bool g = not (true and false)",
+              "bool b = not true",
+              "bool b = not (true and false)",
+        };
+        REQUIRE(parserCreatesCorrectAst(program, spec));
+    }
+
+    SECTION("can handle negate unary operations") {
+        std::vector<AstNodeSpec> spec = {
+              {0, ast::NodeType::SEQUENCE},
+              {1, ast::NodeType::STATEMENT},
+              {2, ast::NodeType::ASSIGNMENT},
+              {3, ast::NodeType::VARIABLE_DEFINITION},
+              {3, ast::NodeType::UNARY_OPERATION},
+              {4, ast::NodeType::LITERAL},
+              {1, ast::NodeType::STATEMENT},
+              {2, ast::NodeType::ASSIGNMENT},
+              {3, ast::NodeType::VARIABLE_DEFINITION},
+              {3, ast::NodeType::UNARY_OPERATION},
+              {4, ast::NodeType::BINARY_OPERATION},
+              {5, ast::NodeType::LITERAL},
+              {5, ast::NodeType::UNARY_OPERATION},
+              {6, ast::NodeType::LITERAL},
+        };
+        std::vector<std::string> program = {
+              "int i = -2",
+              "float f = -(1.0 + -7.0)",
         };
         REQUIRE(parserCreatesCorrectAst(program, spec));
     }

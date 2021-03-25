@@ -11,8 +11,8 @@ void AstPrinter::indent() {
     }
 }
 
-std::string printUnaryOperationType(UnaryOperationNode::UnaryOperationType type) {
-    if (type == UnaryOperationNode::NOT) {
+std::string printUnaryOperationType(ast::UnaryOperationType type) {
+    if (type == ast::UnaryOperationType::NOT) {
         return "NOT";
     }
     return "ERROR";

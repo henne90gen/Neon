@@ -4,11 +4,8 @@
 
 class UnaryOperationNode : public AstNode {
   public:
-    enum UnaryOperationType {
-        NOT,
-    };
 
-    explicit UnaryOperationNode(UnaryOperationType type) : AstNode(ast::NodeType::UNARY_OPERATION), type(type) {}
+    explicit UnaryOperationNode(ast::UnaryOperationType type) : AstNode(ast::NodeType::UNARY_OPERATION), type(type) {}
 
     void accept(AstVisitor *v) override;
 
@@ -16,9 +13,9 @@ class UnaryOperationNode : public AstNode {
 
     void setChild(AstNode *child);
 
-    UnaryOperationType getType();
+    ast::UnaryOperationType getType();
 
   private:
-    UnaryOperationType type;
+    ast::UnaryOperationType type;
     AstNode *child = nullptr;
 };
