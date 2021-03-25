@@ -88,7 +88,7 @@ Module *Compiler::loadModule(const std::string &moduleFileName) {
 
     moduleCompileState[module].imports = ImportFinder(module->getDirectoryPath()).run(module->root);
     moduleCompileState[module].functions = FunctionFinder().run(module->root);
-    moduleCompileState[module].compositeTypes = ComplexTypeFinder().run(module->root);
+    moduleCompileState[module].complexTypes = ComplexTypeFinder().run(module->root);
 
     return module;
 }

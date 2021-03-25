@@ -21,7 +21,7 @@ struct ComplexTypeMember {
     ast::DataType type;
 };
 
-struct CompositeType {
+struct ComplexType {
     ast::DataType type;
     std::vector<ComplexTypeMember> members = {};
 };

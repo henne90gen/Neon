@@ -63,6 +63,9 @@ std::string to_string(ast::UnaryOperationType operationType) {
 }
 
 ast::SimpleDataType from_string(const std::string &type) {
+    if (type == "void") {
+        return ast::SimpleDataType::VOID;
+    }
     if (type == "int") {
         return ast::SimpleDataType::INT;
     }
@@ -71,9 +74,6 @@ ast::SimpleDataType from_string(const std::string &type) {
     }
     if (type == "bool") {
         return ast::SimpleDataType::BOOL;
-    }
-    if (type == "void") {
-        return ast::SimpleDataType::VOID;
     }
     if (type == "string") {
         return ast::SimpleDataType::STRING;

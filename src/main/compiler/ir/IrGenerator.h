@@ -79,7 +79,7 @@ class IrGenerator : public AstVisitor {
     llvm::Function *getOrCreateFunctionDefinition(const std::string &name, const ast::DataType &returnType,
                                                   const std::vector<FunctionArgument> &arguments);
     llvm::Function *getOrCreateFunctionDefinition(const FunctionSignature &signature);
-    llvm::StructType *getOrCreateComplexType(const CompositeType &type);
+    llvm::StructType *getOrCreateComplexType(const ComplexType &type);
     llvm::AllocaInst *createEntryBlockAlloca(llvm::Type *type, const std::string &name);
     void finalizeFunction(llvm::Function *function, const ast::DataType &returnType, bool isExternalFunction);
     llvm::Constant *getInitializer(const ast::DataType &dt, bool isArray, unsigned int arraySize);
