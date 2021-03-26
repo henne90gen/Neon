@@ -1,7 +1,8 @@
 
-add_library(NeonStd STATIC stdlib.cpp asan.cpp)
+add_library(NeonStd STATIC stdlib.cpp)
 if (USE_ADDRESS_SANITIZER)
-    target_compile_options(NeonStd PRIVATE -static-libsan)
+# TODO build the standard library with address sanitization support
+# target_compile_options(NeonStd PRIVATE -static-libsan)
 endif ()
 
 add_custom_command(TARGET NeonStd
