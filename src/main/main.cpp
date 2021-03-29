@@ -5,7 +5,6 @@
 #include "compiler/Compiler.h"
 
 int main() {
-    bool verbose = true;
     //    auto program = new Program("examples/types.ne");
     auto program = new Program("main.ne");
     auto buildEnv = new BuildEnv();

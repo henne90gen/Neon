@@ -13,6 +13,7 @@ struct CmdArguments {
     std::string testDirectory = "tests";
     std::string regex = {};
     bool verbose = false;
+    bool noColor = false;
 };
 
 struct TestResult {
@@ -155,6 +156,9 @@ CmdArguments parseArgs(int argc, char **argv) {
         } else if (argument == "-v" || argument == "--verbose") {
             result.verbose = true;
             continue;
+        } else if (argument == "--plain") {
+            result.noColor = true;
+            continue;
         } else if (argument == "-r" || argument == "--regex") {
             if (i + 1 < argc) {
                 result.regex = std::string(argv[i + 1]);
@@ -170,6 +174,13 @@ CmdArguments parseArgs(int argc, char **argv) {
     return result;
 }
 
+std::string addResultColor(bool success) {
+    if (success) {
+        return "\u001b[32m";
+    }
+    return "\u001b[31m";
+}
+
 int main(int argc, char **argv) {
     auto args = parseArgs(argc, argv);
 
@@ -177,6 +188,7 @@ int main(int argc, char **argv) {
     if (args.verbose) {
         logger.setLogLevel(Logger::LogLevel::DEBUG_);
     }
+    logger.setColorEnabled(!args.noColor);
 
     std::cout << std::fixed;
     std::cout << std::setprecision(2);
@@ -194,10 +206,10 @@ int main(int argc, char **argv) {
 
         const TestResult &result = compileAndRun(path.string(), logger);
         if (!result.success()) {
-            std::cout << "FAILURE";
+            std::cout << addResultColor(false) << "FAILURE";
             success = false;
         } else {
-            std::cout << "SUCCESS";
+            std::cout << addResultColor(true) << "SUCCESS";
             successfulTests++;
         }
 
@@ -215,10 +227,10 @@ int main(int argc, char **argv) {
     }
 
     std::cout << std::endl
-              << "RESULTS (compile: " << std::setw(7) << compileTimeTotalMillis << "ms, link: " << std::setw(7)
-              << linkTimeTotalMillis << "ms, run: " << std::setw(7) << runTimeTotalMillis
-              << "ms, exitCode: " << std::setw(2) << exitCode << "): " << successfulTests << "/" << totalNumTests
-              << " tests successful" << std::endl;
+              << addResultColor(successfulTests == totalNumTests) << "RESULTS (compile: " << std::setw(7)
+              << compileTimeTotalMillis << "ms, link: " << std::setw(7) << linkTimeTotalMillis
+              << "ms, run: " << std::setw(7) << runTimeTotalMillis << "ms, exitCode: " << std::setw(2) << exitCode
+              << "): " << successfulTests << "/" << totalNumTests << " tests successful" << std::endl;
 
     return exitCode;
 }

@@ -23,8 +23,11 @@ class Logger {
     LogLevel getLogLevel() const { return logLevel; }
     void setLogLevel(LogLevel level) { this->logLevel = level; }
 
+    void setColorEnabled(bool enabled) { this->colorEnabled = enabled; }
+
   private:
     LogLevel logLevel = LogLevel::INFO;
+    bool colorEnabled = true;
 
     inline void log(const LogLevel level, const std::string msg) const {
         if (logLevel > level) {
@@ -51,6 +54,7 @@ class Logger {
         case DISABLED:
             break;
         }
+        // TODO choose color depending on log level
         std::cout << "[" << std::put_time(std::localtime(&nowTimeT), "%Y-%m-%d %X") << "] - [" << levelStr << "] "
                   << msg << "\n";
     }
