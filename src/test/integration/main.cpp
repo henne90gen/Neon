@@ -174,7 +174,14 @@ CmdArguments parseArgs(int argc, char **argv) {
     return result;
 }
 
-std::string addResultColor(bool success) {
+std::string addResultColor(bool success, bool bright) {
+    if (bright) {
+        if (success) {
+            return "\u001b[92m";
+        }
+        return "\u001b[91m";
+    }
+
     if (success) {
         return "\u001b[32m";
     }
@@ -206,10 +213,10 @@ int main(int argc, char **argv) {
 
         const TestResult &result = compileAndRun(path.string(), logger);
         if (!result.success()) {
-            std::cout << addResultColor(false) << "FAILURE";
+            std::cout << addResultColor(false, false) << "FAILURE";
             success = false;
         } else {
-            std::cout << addResultColor(true) << "SUCCESS";
+            std::cout << addResultColor(true, false) << "SUCCESS";
             successfulTests++;
         }
 
@@ -218,7 +225,7 @@ int main(int argc, char **argv) {
         runTimeTotalMillis += result.runTimeMillis();
         std::cout << " (compile: " << std::setw(7) << result.compileTimeMillis() << "ms, link: " << std::setw(7)
                   << result.linkTimeMillis() << "ms, run: " << std::setw(7) << result.runTimeMillis()
-                  << "ms, exitCode: " << std::setw(2) << result.exitCode << "): " << path << std::endl;
+                  << "ms, exitCode: " << std::setw(2) << result.exitCode << "): " << path << "\u001b[0m" << std::endl;
     }
 
     int exitCode = 0;
@@ -227,10 +234,11 @@ int main(int argc, char **argv) {
     }
 
     std::cout << std::endl
-              << addResultColor(successfulTests == totalNumTests) << "RESULTS (compile: " << std::setw(7)
+              << addResultColor(successfulTests == totalNumTests, true) << "RESULTS (compile: " << std::setw(7)
               << compileTimeTotalMillis << "ms, link: " << std::setw(7) << linkTimeTotalMillis
               << "ms, run: " << std::setw(7) << runTimeTotalMillis << "ms, exitCode: " << std::setw(2) << exitCode
-              << "): " << successfulTests << "/" << totalNumTests << " tests successful" << std::endl;
+              << "): " << successfulTests << "/" << totalNumTests << " tests successful"
+              << "\u001b[0m" << std::endl;
 
     return exitCode;
 }

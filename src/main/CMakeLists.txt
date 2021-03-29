@@ -32,8 +32,6 @@ add_library(NeonCompiler
         compiler/ir/Statements.cpp
         compiler/ir/Types.cpp
         compiler/ir/Variables.cpp
-        compiler/Compiler.cpp
-        compiler/FunctionResolver.cpp
         compiler/lexer/Lexer.cpp
         compiler/parser/ControlFlow.cpp
         compiler/parser/Expressions.cpp
@@ -41,6 +39,9 @@ add_library(NeonCompiler
         compiler/parser/Parser.cpp
         compiler/parser/Types.cpp
         compiler/lexer/Token.cpp
+        compiler/Compiler.cpp
+        compiler/FunctionResolver.cpp
+        compiler/Logger.cpp
         compiler/TypeResolver.cpp
         util/Timing.cpp
         Linker.cpp

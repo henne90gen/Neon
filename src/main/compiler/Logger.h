@@ -15,6 +15,8 @@ class Logger {
         DISABLED = 4,
     };
 
+    Logger();
+
     inline void debug(const std::string &msg) const { log(LogLevel::DEBUG_, msg); }
     inline void info(const std::string &msg) const { log(LogLevel::INFO, msg); }
     inline void warn(const std::string &msg) const { log(LogLevel::WARNING, msg); }
@@ -29,33 +31,5 @@ class Logger {
     LogLevel logLevel = LogLevel::INFO;
     bool colorEnabled = true;
 
-    inline void log(const LogLevel level, const std::string msg) const {
-        if (logLevel > level) {
-            return;
-        }
-
-        auto now = std::chrono::system_clock::now();
-        auto nowTimeT = std::chrono::system_clock::to_time_t(now);
-
-        std::string levelStr;
-        switch (logLevel) {
-        case DEBUG_:
-            levelStr = "DEBUG";
-            break;
-        case INFO:
-            levelStr = "INFO";
-            break;
-        case WARNING:
-            levelStr = "WARN";
-            break;
-        case ERROR:
-            levelStr = "ERROR";
-            break;
-        case DISABLED:
-            break;
-        }
-        // TODO choose color depending on log level
-        std::cout << "[" << std::put_time(std::localtime(&nowTimeT), "%Y-%m-%d %X") << "] - [" << levelStr << "] "
-                  << msg << "\n";
-    }
+    void log(const LogLevel level, const std::string msg) const;
 };
