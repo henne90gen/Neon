@@ -12,7 +12,7 @@ void ComplexTypeFinder::visitTypeDeclarationNode(TypeDeclarationNode *node) {
     ComplexType t = {.type = node->getType()};
 
     for (auto const &member : node->getMembers()) {
-        ComplexTypeMember m = {.name = member->getName(), .type = member->getType()};
+        ComplexTypeMember m = {.name = member->getDefinition()->getName(), .type = member->getDefinition()->getType()};
         t.members.push_back(m);
     }
 

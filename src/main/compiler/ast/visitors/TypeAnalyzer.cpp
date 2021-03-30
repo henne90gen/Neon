@@ -163,32 +163,40 @@ void TypeAnalyzer::visitForStatementNode(ForStatementNode *node) {
 void TypeAnalyzer::visitTypeDeclarationNode(TypeDeclarationNode *node) {
     std::vector<ComplexTypeMember> members = {};
     for (const auto &member : node->getMembers()) {
-        ComplexTypeMember m = {member->getName(), member->getType()};
+        ComplexTypeMember m = {member->getDefinition()->getName(), member->getDefinition()->getType()};
         members.push_back(m);
     }
     complexTypeMap[node->getType()] = {node->getType(), members};
 }
 
 void TypeAnalyzer::visitMemberAccessNode(MemberAccessNode *node) {
-    // FIXME implement MemberAccess again
-#if 0
-    // TODO do error handling for both of these lookups
-    const auto &variableType = variableTypeMap[node->getVariableName()];
-    const auto &complexType = complexTypeMap[variableType];
-    // TODO eventually this lookup has to support nested access
-    for (const auto &member : complexType.members) {
-        if (member.name != node->getMemberAccesses()[0]) {
-            continue;
-        }
-
-        if (ast::isSimpleDataType(member.type)) {
-            nodeTypeMap[node] = member.type;
-        } else {
-            // TODO nested lookup
-        }
-        break;
+    // FIXME test this whole function (it has not been run yet)
+    auto variables = node->linearizeAccessTree();
+    if (variables.empty()) {
+        log.error("Failed to linearize MemberAccess tree");
+        return;
     }
-#endif
+
+    auto &variableType = variableTypeMap[variables[0]->getName()];
+    auto &currentType = complexTypeMap[variableType];
+    nodeTypeMap[variables[0]] = currentType.type;
+    for (int i = 1; i < variables.size(); i++) {
+        auto variable = variables[i];
+        for (const auto &member : currentType.members) {
+            if (member.name != variable->getName()) {
+                continue;
+            }
+
+            if (ast::isSimpleDataType(member.type)) {
+                nodeTypeMap[node] = member.type;
+                nodeTypeMap[variable] = member.type;
+                break;
+            }
+
+            currentType = complexTypeMap[member.type];
+            nodeTypeMap[variable] = currentType.type;
+        }
+    }
 }
 
 std::pair<std::unordered_map<AstNode *, ast::DataType>, std::unordered_map<std::string, ast::DataType>>

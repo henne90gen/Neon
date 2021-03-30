@@ -1,6 +1,5 @@
 #include "Parser.h"
 
-
 LiteralNode *Parser::parseLiteral(int level) {
     log.debug(indent(level) + "parsing literal node");
 
@@ -35,4 +34,67 @@ LiteralNode *Parser::parseLiteral(int level) {
 
     log.debug(indent(level) + "failed to parse literal node");
     return nullptr;
+}
+
+TypeMemberNode *Parser::parseMemberVariable(int level) {
+    auto beforeTokenIdx = currentTokenIdx;
+    auto node = parseVariableDefinition(level + 1);
+    if (node == nullptr) {
+        currentTokenIdx = beforeTokenIdx;
+        return nullptr;
+    }
+    return new TypeMemberNode(node);
+}
+
+TypeDeclarationNode *Parser::parseTypeDeclaration(int level) {
+    if (!currentTokenIs(Token::TYPE)) {
+        return nullptr;
+    }
+
+    int beforeTokenIdx = currentTokenIdx;
+    currentTokenIdx++;
+
+    if (!currentTokenIs(Token::IDENTIFIER)) {
+        currentTokenIdx = beforeTokenIdx;
+        return nullptr;
+    }
+
+    std::string name = currentTokenContent();
+    currentTokenIdx++;
+
+    if (!currentTokenIs(Token::LEFT_CURLY_BRACE)) {
+        currentTokenIdx = beforeTokenIdx;
+        return nullptr;
+    }
+
+    currentTokenIdx++;
+
+    std::vector<TypeMemberNode *> memberVariables = {};
+    do {
+        while (currentTokenIs(Token::NEW_LINE)) {
+            currentTokenIdx++;
+        }
+
+        auto memberVariable = parseMemberVariable(level + 1);
+        if (memberVariable == nullptr) {
+            currentTokenIdx = beforeTokenIdx;
+            return nullptr;
+        }
+        memberVariables.push_back(memberVariable);
+
+        while (currentTokenIs(Token::NEW_LINE)) {
+            currentTokenIdx++;
+        }
+    } while (!currentTokenIs(Token::RIGHT_CURLY_BRACE));
+
+    if (!currentTokenIs(Token::RIGHT_CURLY_BRACE)) {
+        currentTokenIdx = beforeTokenIdx;
+        return nullptr;
+    }
+
+    currentTokenIdx++;
+
+    auto node = new TypeDeclarationNode(name);
+    node->setMembers(memberVariables);
+    return node;
 }

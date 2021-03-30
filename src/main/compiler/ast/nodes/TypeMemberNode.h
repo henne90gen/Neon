@@ -4,17 +4,15 @@
 
 #include "AstNode.h"
 
+class VariableDefinitionNode;
 class TypeMemberNode : public AstNode {
   public:
-    explicit TypeMemberNode(std::string name, ast::DataType dataType)
-        : AstNode(ast::NodeType::TYPE_MEMBER), name(std::move(name)), dataType(std::move(dataType)) {}
+    explicit TypeMemberNode(VariableDefinitionNode *inner) : AstNode(ast::NodeType::TYPE_MEMBER), inner(inner) {}
 
     void accept(AstVisitor *v) override;
 
-    [[nodiscard]] std::string getName() const { return name; }
-    ast::DataType getType() const { return dataType; }
+    VariableDefinitionNode *getDefinition() { return inner; }
 
   private:
-    std::string name;
-    ast::DataType dataType;
+    VariableDefinitionNode *inner = nullptr;
 };

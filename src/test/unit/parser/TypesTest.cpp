@@ -57,8 +57,6 @@ TEST_CASE("Parser Types") {
     }
 
     SECTION("can handle type declarations") {
-        // TODO activate this again as soon as complex types are implemented
-        return;
         std::vector<AstNodeSpec> spec = {
               {0, ast::NodeType::SEQUENCE},
               {1, ast::NodeType::STATEMENT},

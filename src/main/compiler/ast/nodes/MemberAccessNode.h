@@ -6,6 +6,8 @@
 
 #include "AstNode.h"
 
+class VariableNode;
+
 class MemberAccessNode : public AstNode {
   public:
     explicit MemberAccessNode() : AstNode(ast::NodeType::MEMBER_ACCESS) {}
@@ -17,6 +19,8 @@ class MemberAccessNode : public AstNode {
 
     AstNode *getRight() { return right; }
     void setRight(AstNode *r) { this->right = r; }
+
+    std::vector<VariableNode*> linearizeAccessTree();
 
   private:
     AstNode *left = nullptr;

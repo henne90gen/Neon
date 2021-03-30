@@ -198,7 +198,7 @@ void Compiler::analyseTypes() {
     for (auto &entry : program->modules) {
         auto &module = entry.second;
         auto functionResolver = FunctionResolver(program, moduleCompileState);
-        auto result = TypeAnalyzer(module, functionResolver).run(module->root);
+        auto result = TypeAnalyzer(log, module, functionResolver).run(module->root);
         moduleCompileState[module].nodeToTypeMap = result.first;
         moduleCompileState[module].nameToTypeMap = result.second;
     }

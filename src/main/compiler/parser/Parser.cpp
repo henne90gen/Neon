@@ -127,9 +127,22 @@ VariableDefinitionNode *Parser::parseVariableDefinition(int level) {
             currentTokenIdx++;
             return variableDefinitionNode;
         }
-    }
+    } else if (currentTokenIs(Token::IDENTIFIER)) {
+        auto dataType = ast::DataType(currentTokenContent());
 
-    // TODO parse custom types as well
+        currentTokenIdx++;
+
+        if (!currentTokenIs(Token::IDENTIFIER)) {
+            currentTokenIdx = beforeTokenIdx;
+            return nullptr;
+        }
+
+        std::string variableName = currentTokenContent();
+        auto variableDefinitionNode = new VariableDefinitionNode(variableName, dataType);
+        log.debug(indent(level) + "parsed variable definition with simple data type");
+        currentTokenIdx++;
+        return variableDefinitionNode;
+    }
 
     log.debug(indent(level) + "failed to parse variable definition");
 
@@ -173,6 +186,11 @@ AstNode *Parser::parseAssignmentLeft(int level) {
     auto variableDefinitionNode = parseVariableDefinition(level + 1);
     if (variableDefinitionNode != nullptr) {
         return variableDefinitionNode;
+    }
+
+    auto memberAccess = parseMemberAccess(level + 1);
+    if (memberAccess != nullptr) {
+        return memberAccess;
     }
 
     auto variableNode = parseVariable(level + 1);
@@ -242,60 +260,6 @@ CommentNode *Parser::parseComment(int level) {
     auto result = new CommentNode(currentTokenContent());
     currentTokenIdx++;
     return result;
-}
-
-TypeMemberNode *Parser::parseMemberVariable(int level) {
-    // TODO implement this
-    return nullptr;
-}
-
-TypeDeclarationNode *Parser::parseTypeDeclaration(int level) {
-    if (!currentTokenIs(Token::TYPE)) {
-        return nullptr;
-    }
-
-    int beforeTokenIdx = currentTokenIdx;
-    currentTokenIdx++;
-
-    if (!currentTokenIs(Token::IDENTIFIER)) {
-        currentTokenIdx = beforeTokenIdx;
-        return nullptr;
-    }
-
-    std::string name = currentTokenContent();
-    currentTokenIdx++;
-
-    if (!currentTokenIs(Token::IDENTIFIER)) {
-        currentTokenIdx = beforeTokenIdx;
-        return nullptr;
-    }
-
-    currentTokenIdx++;
-
-    std::vector<TypeMemberNode *> memberVariables = {};
-    do {
-        auto memberVariable = parseMemberVariable(level + 1);
-        if (memberVariable == nullptr) {
-            currentTokenIdx = beforeTokenIdx;
-            return nullptr;
-        }
-        memberVariables.push_back(memberVariable);
-
-        if (!currentTokenIs(Token::NEW_LINE)) {
-            currentTokenIdx++;
-        }
-    } while (!currentTokenIs(Token::RIGHT_CURLY_BRACE));
-
-    if (!currentTokenIs(Token::RIGHT_CURLY_BRACE)) {
-        currentTokenIdx = beforeTokenIdx;
-        return nullptr;
-    }
-
-    currentTokenIdx++;
-
-    auto node = new TypeDeclarationNode(name);
-    node->setMembers(memberVariables);
-    return node;
 }
 
 StatementNode *Parser::parseStatement(int level) {

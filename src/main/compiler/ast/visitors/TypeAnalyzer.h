@@ -7,8 +7,8 @@
 
 class TypeAnalyzer : public AstVisitor {
   public:
-    explicit TypeAnalyzer(Module *module, const FunctionResolver &functionResolver)
-        : module(module), functionResolver(functionResolver) {}
+    explicit TypeAnalyzer(const Logger &log, Module *module, const FunctionResolver &functionResolver)
+        : log(log), module(module), functionResolver(functionResolver) {}
 
     void visitAssertNode(AssertNode *node) override;
     void visitAssignmentNode(AssignmentNode *node) override;
@@ -33,6 +33,7 @@ class TypeAnalyzer : public AstVisitor {
     run(AstNode *root);
 
   private:
+    const Logger &log;
     Module *module;
     const FunctionResolver &functionResolver;
 

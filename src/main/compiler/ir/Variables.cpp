@@ -124,16 +124,15 @@ void IrGenerator::visitAssignmentNode(AssignmentNode *node) {
 
 void IrGenerator::visitMemberAccessNode(MemberAccessNode *node) {
     // FIXME implement MemberAccess again
-#if 0
     // TODO add nested member access
     log.debug("Enter MemberAccess");
 
-    auto memberAccesses = node->getMemberAccesses();
-    if (memberAccesses.empty()) {
-        return logError("Could not create member access, since there are no members.");
+    auto variables = node->linearizeAccessTree();
+    if (variables.empty()) {
+        return logError("Failed to linearize MemberAccess tree");
     }
 
-    const ast::DataType baseType = typeResolver.getTypeOf(module, node->getVariableName());
+    const ast::DataType baseType = typeResolver.getTypeOf(module, variables[0]);
 
     auto resolveResult = typeResolver.resolveType(module, baseType);
     if (!resolveResult.typeExists) {
@@ -142,19 +141,19 @@ void IrGenerator::visitMemberAccessNode(MemberAccessNode *node) {
 
     int memberIndex = -1;
     for (int i = 0; i < resolveResult.complexType.members.size(); i++) {
-        if (resolveResult.complexType.members[i].name == memberAccesses[0]) {
+        if (resolveResult.complexType.members[i].name == variables[1]->getName()) {
             memberIndex = i;
             break;
         }
     }
     if (memberIndex == -1) {
-        return logError("Could not find member: " + memberAccesses[0]);
+        return logError("Could not find member: " + variables[1]->getName());
     }
 
     auto llvmBaseType = getType(baseType);
     auto elementType = llvmBaseType->getPointerElementType();
 
-    auto baseVariable = findVariable(node->getVariableName());
+    auto baseVariable = findVariable(variables[0]->getName());
     baseVariable = builder.CreateLoad(baseVariable);
 
     llvm::Value *indexOfBaseVariable = llvm::ConstantInt::get(llvm::Type::getInt32Ty(context), 0);
@@ -170,5 +169,4 @@ void IrGenerator::visitMemberAccessNode(MemberAccessNode *node) {
     nodesToValues[node] = result;
 
     log.debug("Exit MemberAccess");
-#endif
 }

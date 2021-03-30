@@ -184,12 +184,12 @@ void AstPrinter::visitTypeDeclarationNode(TypeDeclarationNode *node) {
 
 void AstPrinter::visitTypeMemberNode(TypeMemberNode *node) {
     indent();
-    ss << "TypeMemberNode(name='" << node->getName() << "', type='" << to_string(node->getType()) << "')" << std::endl;
+    ss << "TypeMemberNode(name='" << node->getDefinition()->getName() << "', type='"
+       << to_string(node->getDefinition()->getType()) << "')" << std::endl;
 }
 
 void AstPrinter::visitMemberAccessNode(MemberAccessNode *node) {
     indent();
-    // TODO print all chained member accesses
     ss << "MemberAccessNode" << std::endl;
     indentation++;
     node->getLeft()->accept(this);

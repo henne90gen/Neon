@@ -134,7 +134,6 @@ void IrGenerator::run() {
         printErrors();
         exit(1);
     } else {
-        this->writeToFile();
         if (log.getLogLevel() == Logger::LogLevel::DEBUG_) {
             llvmModule.print(llvm::outs(), nullptr);
         }
