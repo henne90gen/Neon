@@ -32,7 +32,7 @@ struct Token {
         SEMICOLON,
         FUN,
         IDENTIFIER,
-        MEMBER_ACCESS,
+        DOT,
         SIMPLE_DATA_TYPE,
         TYPE,
         RETURN,

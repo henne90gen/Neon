@@ -101,6 +101,7 @@ TEST_CASE("Lexer") {
               {"-", Token::MINUS},
               {"*", Token::STAR},
               {"/", Token::DIV},
+              {".", Token::DOT},
               {"not", Token::NOT},
               {"and", Token::AND},
               {"or", Token::OR},
@@ -124,9 +125,6 @@ TEST_CASE("Lexer") {
               {"for", Token::FOR},
               {"import", Token::IMPORT},
               {"assert", Token::ASSERT},
-              {"abc.abc", Token::MEMBER_ACCESS},
-              {"abc.abc.abc", Token::MEMBER_ACCESS},
-              {"abc.abc.abc.abc", Token::MEMBER_ACCESS},
         };
         REQUIRE(tokensCanBeLexed(tokens));
     }

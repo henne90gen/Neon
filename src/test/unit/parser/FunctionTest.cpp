@@ -73,15 +73,24 @@ TEST_CASE("Parser Functions") {
         REQUIRE(parserCreatesCorrectAst(program, spec));
     }
 
-    SECTION("function call with variable argument") {
+    SECTION("function call with member access argument") {
         std::vector<AstNodeSpec> spec = {
               {0, ast::NodeType::SEQUENCE}, //
-              {1, ast::NodeType::STATEMENT},
-              {2, ast::NodeType::CALL},
-              {3, ast::NodeType::LITERAL},
-              {1, ast::NodeType::STATEMENT},
-              {2, ast::NodeType::CALL},
-              {3, ast::NodeType::VARIABLE},
+              {1, ast::NodeType::STATEMENT}, {2, ast::NodeType::CALL},          {3, ast::NodeType::MEMBER_ACCESS},
+              {4, ast::NodeType::VARIABLE},  {4, ast::NodeType::VARIABLE},      {1, ast::NodeType::STATEMENT},
+              {2, ast::NodeType::CALL},      {3, ast::NodeType::MEMBER_ACCESS}, {4, ast::NodeType::VARIABLE},
+              {4, ast::NodeType::VARIABLE},
+        };
+        std::vector<std::string> program = {
+              "hello(num.x)",
+              "return hello(num.x)",
+        };
+        REQUIRE(parserCreatesCorrectAst(program, spec));
+    }
+
+    SECTION("function call with expression argument") {
+        std::vector<AstNodeSpec> spec = {
+              {0, ast::NodeType::SEQUENCE}, //
               {1, ast::NodeType::STATEMENT},
               {2, ast::NodeType::CALL},
               {3, ast::NodeType::BINARY_OPERATION},
@@ -91,30 +100,13 @@ TEST_CASE("Parser Functions") {
               // return tests
               {1, ast::NodeType::STATEMENT},
               {2, ast::NodeType::CALL},
-              {3, ast::NodeType::LITERAL},
-              {1, ast::NodeType::STATEMENT},
-              {2, ast::NodeType::CALL},
-              {3, ast::NodeType::VARIABLE},
-              {1, ast::NodeType::STATEMENT},
-              {2, ast::NodeType::CALL},
               {3, ast::NodeType::BINARY_OPERATION},
               {4, ast::NodeType::VARIABLE},
               {4, ast::NodeType::LITERAL},
-              {1, ast::NodeType::STATEMENT},
-              {2, ast::NodeType::BINARY_OPERATION},
-              {3, ast::NodeType::CALL},
-              {4, ast::NodeType::LITERAL},
-              {3, ast::NodeType::CALL},
-              {4, ast::NodeType::VARIABLE},
         };
         std::vector<std::string> program = {
-              "hello(1)",
-              "hello(num)",
               "hello(num - 1)",
-              "return hello(1)",
-              "return hello(num)",
               "return hello(num - 1)",
-              "return hello(1) + hello(num)",
         };
         REQUIRE(parserCreatesCorrectAst(program, spec));
     }

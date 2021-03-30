@@ -190,13 +190,16 @@ void AstPrinter::visitTypeMemberNode(TypeMemberNode *node) {
 void AstPrinter::visitMemberAccessNode(MemberAccessNode *node) {
     indent();
     // TODO print all chained member accesses
-    ss << "MemberAccessNode(name='" << node->getVariableName() << "', members='"
-       << "')" << std::endl;
+    ss << "MemberAccessNode" << std::endl;
+    indentation++;
+    node->getLeft()->accept(this);
+    node->getRight()->accept(this);
+    indentation--;
 }
 
 void AstPrinter::visitAssertNode(AssertNode *node) {
     indent();
-    ss << "AssertNode" << std::endl;
+    ss << "AssertNode()" << std::endl;
     indentation++;
     node->getCondition()->accept(this);
     indentation--;

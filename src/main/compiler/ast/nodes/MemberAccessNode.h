@@ -8,21 +8,17 @@
 
 class MemberAccessNode : public AstNode {
   public:
-    explicit MemberAccessNode(std::vector<std::string> members)
-        : AstNode(ast::NodeType::MEMBER_ACCESS), parts(std::move(members)) {}
+    explicit MemberAccessNode() : AstNode(ast::NodeType::MEMBER_ACCESS) {}
 
     void accept(AstVisitor *visitor) override;
 
-    [[nodiscard]] std::string getVariableName() const { return parts[0]; }
+    AstNode *getLeft() { return left; }
+    void setLeft(AstNode *l) { this->left = l; }
 
-    [[nodiscard]] std::vector<std::string> getMemberAccesses() const {
-        if (parts.size() <= 1) {
-            // this is not a real member access: 'myVariable.'
-            return std::vector<std::string>();
-        }
-        return std::vector(parts.begin() + 1, parts.end());
-    }
+    AstNode *getRight() { return right; }
+    void setRight(AstNode *r) { this->right = r; }
 
   private:
-    std::vector<std::string> parts = {};
+    AstNode *left = nullptr;
+    AstNode *right = nullptr;
 };

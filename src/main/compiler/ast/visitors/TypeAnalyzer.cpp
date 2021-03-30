@@ -170,6 +170,8 @@ void TypeAnalyzer::visitTypeDeclarationNode(TypeDeclarationNode *node) {
 }
 
 void TypeAnalyzer::visitMemberAccessNode(MemberAccessNode *node) {
+    // FIXME implement MemberAccess again
+#if 0
     // TODO do error handling for both of these lookups
     const auto &variableType = variableTypeMap[node->getVariableName()];
     const auto &complexType = complexTypeMap[variableType];
@@ -186,6 +188,7 @@ void TypeAnalyzer::visitMemberAccessNode(MemberAccessNode *node) {
         }
         break;
     }
+#endif
 }
 
 std::pair<std::unordered_map<AstNode *, ast::DataType>, std::unordered_map<std::string, ast::DataType>>

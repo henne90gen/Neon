@@ -47,4 +47,5 @@ class Parser {
     AstNode *parsePrimary(int level);
 
     static std::string indent(int level);
+    AstNode *parseMemberAccess(int level);
 };

@@ -151,6 +151,14 @@ SimpleTree *createSimpleFromAssert(AssertNode *node) {
     return result;
 }
 
+SimpleTree *createSimpleFromMemberAccess(MemberAccessNode *node) {
+    auto result = new SimpleTree();
+    result->type = node->getAstNodeType();
+    result->children.push_back(createSimpleFromAst(node->getLeft()));
+    result->children.push_back(createSimpleFromAst(node->getRight()));
+    return result;
+}
+
 SimpleTree *createSimpleFromNode(AstNode *node) {
     auto result = new SimpleTree();
     result->type = node->getAstNodeType();
@@ -167,7 +175,6 @@ SimpleTree *createSimpleFromAst(AstNode *node) {
     case ast::NodeType::VARIABLE:
     case ast::NodeType::IMPORT:
     case ast::NodeType::TYPE_MEMBER:
-    case ast::NodeType::MEMBER_ACCESS:
     case ast::NodeType::COMMENT:
         return createSimpleFromNode(node);
     case ast::NodeType::SEQUENCE:
@@ -190,6 +197,8 @@ SimpleTree *createSimpleFromAst(AstNode *node) {
         return createSimpleFromFor((ForStatementNode *)node);
     case ast::NodeType::TYPE_DECLARATION:
         return createSimpleFromTypeDeclaration((TypeDeclarationNode *)node);
+    case ast::NodeType::MEMBER_ACCESS:
+        return createSimpleFromMemberAccess((MemberAccessNode *)node);
     case ast::NodeType::ASSERT:
         return createSimpleFromAssert((AssertNode *)node);
     default:
@@ -206,6 +215,7 @@ bool parserCreatesCorrectAst(const std::vector<std::string> &program, std::vecto
     auto context = new llvm::LLVMContext();
     auto prog = new Module("test.ne", *context);
     Logger logger = {};
+    logger.setColorEnabled(false);
     auto lexer = Lexer(codeProvider, logger);
 
     Parser parser(lexer, prog, logger);

@@ -123,8 +123,9 @@ void IrGenerator::visitAssignmentNode(AssignmentNode *node) {
 }
 
 void IrGenerator::visitMemberAccessNode(MemberAccessNode *node) {
+    // FIXME implement MemberAccess again
+#if 0
     // TODO add nested member access
-
     log.debug("Enter MemberAccess");
 
     auto memberAccesses = node->getMemberAccesses();
@@ -169,4 +170,5 @@ void IrGenerator::visitMemberAccessNode(MemberAccessNode *node) {
     nodesToValues[node] = result;
 
     log.debug("Exit MemberAccess");
+#endif
 }

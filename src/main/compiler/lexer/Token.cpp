@@ -46,8 +46,8 @@ std::string to_string(Token::TokenType type) {
         return "FUN";
     case Token::IDENTIFIER:
         return "IDENTIFIER";
-    case Token::MEMBER_ACCESS:
-        return "MEMBER_ACCESS";
+    case Token::DOT:
+        return "DOT";
     case Token::SIMPLE_DATA_TYPE:
         return "SIMPLE_DATA_TYPE";
     case Token::LEFT_CURLY_BRACE:

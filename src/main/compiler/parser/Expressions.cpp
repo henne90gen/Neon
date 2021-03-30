@@ -1,7 +1,48 @@
 #include "Parser.h"
 
+AstNode *Parser::parseMemberAccess(int level) {
+    auto beforeTokenIdx = currentTokenIdx;
+    AstNode *lastNode = parseVariable(level + 1);
+    if (lastNode == nullptr) {
+        currentTokenIdx = beforeTokenIdx;
+        return nullptr;
+    }
+    bool foundAtLeastOneDot = false;
+    while (true) {
+        if (!currentTokenIs(Token::DOT)) {
+            break;
+        }
+        foundAtLeastOneDot = true;
+
+        currentTokenIdx++;
+
+        auto other = parseVariable(level + 1);
+        if (other == nullptr) {
+            currentTokenIdx = beforeTokenIdx;
+            return nullptr;
+        }
+
+        auto op = new MemberAccessNode();
+        op->setLeft(lastNode);
+        op->setRight(other);
+        lastNode = op;
+    }
+
+    if (!foundAtLeastOneDot) {
+        currentTokenIdx = beforeTokenIdx;
+        return nullptr;
+    }
+
+    return lastNode;
+}
+
 AstNode *Parser::parsePrimary(int level) {
     auto beforeTokenIdx = currentTokenIdx;
+    auto memberAccess = parseMemberAccess(level + 1);
+    if (memberAccess != nullptr) {
+        return memberAccess;
+    }
+
     auto functionCall = parseFunctionCall(level + 1);
     if (functionCall != nullptr) {
         return functionCall;
@@ -41,24 +82,6 @@ AstNode *Parser::parsePrimary(int level) {
 }
 
 AstNode *Parser::parseUnary(int level) {
-#if 0
-    auto beforeTokenIdx = currentTokenIdx;
-    if (!currentTokenIs(Token::NOT)) {
-        return parsePrimary(level);
-    }
-
-    currentTokenIdx++;
-
-    auto child = parseUnary(level + 1);
-    if (child == nullptr) {
-        currentTokenIdx = beforeTokenIdx;
-        return nullptr;
-    }
-
-    auto node = new UnaryOperationNode(UnaryOperationNode::UnaryOperationType::NOT);
-    node->setChild(child);
-    return node;
-#elif 1
     auto beforeTokenIdx = currentTokenIdx;
     ast::UnaryOperationType operationType;
     if (currentTokenIs(Token::NOT)) {
@@ -80,38 +103,6 @@ AstNode *Parser::parseUnary(int level) {
     auto node = new UnaryOperationNode(operationType);
     node->setChild(child);
     return node;
-#else
-    auto beforeTokenIdx = currentTokenIdx;
-    auto lastPrimary = parsePrimary(level + 1);
-    if (lastPrimary == nullptr) {
-        currentTokenIdx = beforeTokenIdx;
-        return nullptr;
-    }
-    while (true) {
-        UnaryOperationNode::UnaryOperationType operationType;
-        if (currentTokenIs(Token::NOT)) {
-            operationType = UnaryOperationNode::NOT;
-        } else if (currentTokenIs(Token::MINUS)) {
-            operationType = UnaryOperationNode::NEGATE;
-        } else {
-            break;
-        }
-
-        currentTokenIdx++;
-
-        auto other = parsePrimary(level + 1);
-        if (other == nullptr) {
-            currentTokenIdx = beforeTokenIdx;
-            return nullptr;
-        }
-
-        auto op = new UnaryOperationNode(operationType);
-        op->setChild(lastPrimary);
-        lastPrimary = op;
-    }
-
-    return lastPrimary;
-#endif
 }
 
 AstNode *Parser::parseFactor(int level) {

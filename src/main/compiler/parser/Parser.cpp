@@ -374,7 +374,6 @@ void Parser::run() {
     std::vector<AstNode *> children = {};
     bool error = false;
 
-    int count = 0;
     while (currentTokenIdx < module->tokens.size()) {
         auto token = module->tokens[currentTokenIdx];
         if (token.type == Token::INVALID) {
@@ -394,12 +393,8 @@ void Parser::run() {
         }
 
         log.error("Unexpected token: " + to_string(token.type) + ": " + token.content);
-
-        if (count > 2) {
-            error = true;
-            break;
-        }
-        count++;
+        error = true;
+        break;
     }
 
     if (error) {

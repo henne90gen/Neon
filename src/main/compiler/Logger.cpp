@@ -53,5 +53,9 @@ void Logger::log(const Logger::LogLevel level, const std::string msg) const {
     }
 
     std::cout << colorStr << "[" << std::put_time(std::localtime(&nowTimeT), "%Y-%m-%d %X") << "] - [" << levelStr
-              << "] " << msg << "\u001b[0m\n";
+              << "] " << msg;
+    if (colorEnabled) {
+        std::cout << "\u001b[0m";
+    }
+    std::cout << "\n";
 }
