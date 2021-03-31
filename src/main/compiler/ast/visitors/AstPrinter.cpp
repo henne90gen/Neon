@@ -1,7 +1,5 @@
 #include "AstPrinter.h"
 
-#include <iostream>
-
 #include "../nodes/AllNodes.h"
 #include "util/Utils.h"
 

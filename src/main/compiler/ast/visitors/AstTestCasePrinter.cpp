@@ -1,7 +1,5 @@
 #include "AstTestCasePrinter.h"
 
-#include <iostream>
-
 #include "../nodes/AllNodes.h"
 #include "util/Utils.h"
 

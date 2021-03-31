@@ -14,7 +14,7 @@ std::vector<VariableNode *> MemberAccessNode::linearizeAccessTree() {
             variables.push_back(reinterpret_cast<VariableNode *>(current));
             continue;
         } if (current->getAstNodeType() == ast::NodeType::MEMBER_ACCESS) {
-            auto ma = reinterpret_cast<MemberAccessNode *>(current);
+            auto *ma = reinterpret_cast<MemberAccessNode *>(current);
             stack.push_back(ma->getRight());
             stack.push_back(ma->getLeft());
         } else {

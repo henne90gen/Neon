@@ -92,7 +92,7 @@ ast::SimpleDataType ast::toSimpleDataType(const ast::DataType &type) {
         return ast::SimpleDataType::VOID;
     } if (type.typeName == "BOOL") {
         return ast::SimpleDataType::BOOL;
-    } else if (type.typeName == "INT") {
+    } if (type.typeName == "INT") {
         return ast::SimpleDataType::INT;
     } else if (type.typeName == "FLOAT") {
         return ast::SimpleDataType::FLOAT;
