@@ -1,4 +1,4 @@
-all: clean cmake build test-all
+all: cmake test-all
 
 clean:
 	rm build -rf

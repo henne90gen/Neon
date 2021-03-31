@@ -219,13 +219,14 @@ int main(int argc, char **argv) {
             std::cout << addResultColor(true, false) << "SUCCESS";
             successfulTests++;
         }
+        std::cout << "\u001b[0m";
 
         compileTimeTotalMillis += result.compileTimeMillis();
         linkTimeTotalMillis += result.linkTimeMillis();
         runTimeTotalMillis += result.runTimeMillis();
         std::cout << " (compile: " << std::setw(7) << result.compileTimeMillis() << "ms, link: " << std::setw(7)
                   << result.linkTimeMillis() << "ms, run: " << std::setw(7) << result.runTimeMillis()
-                  << "ms, exitCode: " << std::setw(2) << result.exitCode << "): " << path << "\u001b[0m" << std::endl;
+                  << "ms, exitCode: " << std::setw(2) << result.exitCode << "): " << path << std::endl;
     }
 
     int exitCode = 0;
