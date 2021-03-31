@@ -133,7 +133,7 @@ void AstInterpreter::visitBinaryOperationNode(BinaryOperationNode *node) {
 }
 
 void AstInterpreter::visitUnaryOperationNode(UnaryOperationNode *node) {
-    auto child = node->getChild();
+    auto *child = node->getChild();
     if (calculationResults.find(child) == calculationResults.end()) {
         child->accept(this);
     }
@@ -150,7 +150,7 @@ void AstInterpreter::visitUnaryOperationNode(UnaryOperationNode *node) {
 }
 
 void AstInterpreter::visitSequenceNode(SequenceNode *node) {
-    for (auto child : node->getChildren()) {
+    for (auto *child : node->getChildren()) {
         child->accept(this);
     }
 }
@@ -209,6 +209,6 @@ void interpretAst(AstNode *node, bool verbose) {
         return;
     }
 
-    auto interpreter = new AstInterpreter(verbose);
+    auto *interpreter = new AstInterpreter(verbose);
     node->accept(interpreter);
 }

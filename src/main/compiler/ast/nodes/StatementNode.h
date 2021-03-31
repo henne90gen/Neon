@@ -8,7 +8,7 @@ class StatementNode : public AstNode {
 
     void accept(AstVisitor *v) override;
 
-    bool isReturnStatement();
+    bool isReturnStatement() const;
     void setIsReturnStatement(bool returnStatement);
 
     AstNode *getChild();

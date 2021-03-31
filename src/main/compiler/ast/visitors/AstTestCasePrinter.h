@@ -33,5 +33,5 @@ class AstTestCasePrinter : public AstVisitor {
     const Module *module;
     int indentation = 0;
 
-    void printNode(AstNode *node);
+    void printNode(AstNode *node) const;
 };

@@ -84,7 +84,7 @@ void AstPrinter::visitSequenceNode(SequenceNode *node) {
     indent();
     ss << "SequenceNode(size=" << node->getChildren().size() << ")" << std::endl;
     indentation++;
-    for (auto child : node->getChildren()) {
+    for (auto *child : node->getChildren()) {
         child->accept(this);
     }
     indentation--;
@@ -133,7 +133,7 @@ void AstPrinter::visitCallNode(CallNode *node) {
     indent();
     ss << "CallNode(name='" << node->getName() << "', numArguments=" << node->getArguments().size() << ")" << std::endl;
     indentation++;
-    for (auto argument : node->getArguments()) {
+    for (auto *argument : node->getArguments()) {
         argument->accept(this);
     }
     indentation--;
@@ -176,7 +176,7 @@ void AstPrinter::visitTypeDeclarationNode(TypeDeclarationNode *node) {
     indent();
     ss << "TypeDeclarationNode(name='" << node->getName() << "')" << std::endl;
     indentation++;
-    for (const auto member : node->getMembers()) {
+    for (auto *const member : node->getMembers()) {
         member->accept(this);
     }
     indentation--;

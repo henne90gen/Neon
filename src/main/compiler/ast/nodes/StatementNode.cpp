@@ -4,7 +4,7 @@
 
 void StatementNode::accept(AstVisitor *v) { v->visitStatementNode(this); }
 
-bool StatementNode::isReturnStatement() { return this->returnStatement; }
+bool StatementNode::isReturnStatement() const { return this->returnStatement; }
 
 void StatementNode::setIsReturnStatement(bool returnStatement) { this->returnStatement = returnStatement; }
 

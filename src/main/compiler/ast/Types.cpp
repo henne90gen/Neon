@@ -90,7 +90,7 @@ bool ast::isSimpleDataType(const ast::DataType &type) {
 ast::SimpleDataType ast::toSimpleDataType(const ast::DataType &type) {
     if (type.typeName == "VOID") {
         return ast::SimpleDataType::VOID;
-    } else if (type.typeName == "BOOL") {
+    } if (type.typeName == "BOOL") {
         return ast::SimpleDataType::BOOL;
     } else if (type.typeName == "INT") {
         return ast::SimpleDataType::INT;

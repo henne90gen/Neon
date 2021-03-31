@@ -1,7 +1,7 @@
 #include "ComplexTypeFinder.h"
 
 void ComplexTypeFinder::visitSequenceNode(SequenceNode *node) {
-    for (auto child : node->getChildren()) {
+    for (auto *child : node->getChildren()) {
         child->accept(this);
     }
 }
