@@ -90,13 +90,17 @@ bool ast::isSimpleDataType(const ast::DataType &type) {
 ast::SimpleDataType ast::toSimpleDataType(const ast::DataType &type) {
     if (type.typeName == "VOID") {
         return ast::SimpleDataType::VOID;
-    } if (type.typeName == "BOOL") {
+    }
+    if (type.typeName == "BOOL") {
         return ast::SimpleDataType::BOOL;
-    } if (type.typeName == "INT") {
+    }
+    if (type.typeName == "INT") {
         return ast::SimpleDataType::INT;
-    } if (type.typeName == "FLOAT") {
+    }
+    if (type.typeName == "FLOAT") {
         return ast::SimpleDataType::FLOAT;
-    } else if (type.typeName == "STRING") {
+    }
+    if (type.typeName == "STRING") {
         return ast::SimpleDataType::STRING;
     }
     return ast::SimpleDataType::VOID;

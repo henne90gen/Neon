@@ -101,12 +101,12 @@ VariableDefinitionNode *Parser::parseVariableDefinition(int level) {
         } if (currentTokenIs(Token::LEFT_BRACKET)) {
             currentTokenIdx++;
 
-            auto literal = parseLiteral(level + 1);
+            auto *literal = parseLiteral(level + 1);
             if (literal == nullptr || literal->getLiteralType() != LiteralNode::INTEGER) {
                 currentTokenIdx = beforeTokenIdx;
                 return nullptr;
             }
-            auto arraySizeLiteral = reinterpret_cast<IntegerNode *>(literal);
+            auto *arraySizeLiteral = reinterpret_cast<IntegerNode *>(literal);
 
             if (!currentTokenIs(Token::RIGHT_BRACKET)) {
                 currentTokenIdx = beforeTokenIdx;
@@ -122,7 +122,7 @@ VariableDefinitionNode *Parser::parseVariableDefinition(int level) {
 
             std::string variableName = currentTokenContent();
             auto arraySize = arraySizeLiteral->getValue();
-            auto variableDefinitionNode = new VariableDefinitionNode(variableName, dataType, arraySize);
+            auto *variableDefinitionNode = new VariableDefinitionNode(variableName, dataType, arraySize);
 
             currentTokenIdx++;
             return variableDefinitionNode;
