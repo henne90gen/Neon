@@ -5,7 +5,7 @@
 void IrGenerator::visitVariableNode(VariableNode *node) {
     log.debug("Enter Variable");
 
-    auto value = findVariable(node->getName());
+    auto *value = findVariable(node->getName());
     if (value == nullptr) {
         return logError("Undefined variable '" + node->getName() + "'");
     }
@@ -13,9 +13,9 @@ void IrGenerator::visitVariableNode(VariableNode *node) {
     if (node->isArrayAccess()) {
         node->getArrayIndex()->accept(this);
         llvm::Value *indexOfArray = llvm::ConstantInt::get(llvm::Type::getInt64Ty(context), 0);
-        auto arrayIndex = nodesToValues[node->getArrayIndex()];
+        auto *arrayIndex = nodesToValues[node->getArrayIndex()];
         std::vector<llvm::Value *> indices = {indexOfArray, arrayIndex};
-        auto elementPtr = builder.CreateInBoundsGEP(value, indices);
+        auto *elementPtr = builder.CreateInBoundsGEP(value, indices);
         nodesToValues[node] = builder.CreateLoad(elementPtr);
     } else {
         if (isPrimitiveType(typeResolver.getTypeOf(module, node))) {
@@ -40,7 +40,7 @@ void IrGenerator::visitVariableDefinitionNode(VariableDefinitionNode *node) {
         type = llvm::ArrayType::get(type, node->getArraySize());
     }
 
-    llvm::Value *value;
+    llvm::Value *value = nullptr;
     if (isGlobalScope) {
         value = llvmModule.getOrInsertGlobal(name, type);
         llvmModule.getNamedGlobal(name)->setDSOLocal(true);
@@ -68,14 +68,14 @@ void IrGenerator::visitVariableDefinitionNode(VariableDefinitionNode *node) {
 void IrGenerator::visitAssignmentNode(AssignmentNode *node) {
     log.debug("Enter Assignment");
 
-    llvm::Value *dest;
+    llvm::Value *dest = nullptr;
     if (node->getLeft()->getAstNodeType() == ast::NodeType::VARIABLE_DEFINITION) {
         // generate variable definition
         node->getLeft()->accept(this);
         dest = nodesToValues[node->getLeft()];
     } else if (node->getLeft()->getAstNodeType() == ast::NodeType::VARIABLE) {
         // lookup the variable to save into
-        auto variable = dynamic_cast<VariableNode *>(node->getLeft());
+        auto *variable = dynamic_cast<VariableNode *>(node->getLeft());
         dest = findVariable(variable->getName());
         if (variable->isArrayAccess()) {
             variable->getArrayIndex()->accept(this);
@@ -88,7 +88,7 @@ void IrGenerator::visitAssignmentNode(AssignmentNode *node) {
             dest = builder.CreateInBoundsGEP(dest, indices);
         }
     } else if (node->getLeft()->getAstNodeType() == ast::NodeType::MEMBER_ACCESS) {
-        // TODO this is a hack!
+        // TODO(henne): this is a hack!
         //  setting currentDestination to 1 is used as a flag to signal to visitMemberAccessNode that we are going to
         //  write to its result
         currentDestination = reinterpret_cast<llvm::Value *>(1);
@@ -124,7 +124,7 @@ void IrGenerator::visitAssignmentNode(AssignmentNode *node) {
 
 void IrGenerator::visitMemberAccessNode(MemberAccessNode *node) {
     // FIXME implement MemberAccess again
-    // TODO add nested member access
+    // TODO(henne): add nested member access
     log.debug("Enter MemberAccess");
 
     auto variables = node->linearizeAccessTree();
@@ -150,17 +150,17 @@ void IrGenerator::visitMemberAccessNode(MemberAccessNode *node) {
         return logError("Could not find member: " + variables[1]->getName());
     }
 
-    auto llvmBaseType = getType(baseType);
-    auto elementType = llvmBaseType->getPointerElementType();
+    auto *llvmBaseType = getType(baseType);
+    auto *elementType = llvmBaseType->getPointerElementType();
 
-    auto baseVariable = findVariable(variables[0]->getName());
+    auto *baseVariable = findVariable(variables[0]->getName());
     baseVariable = builder.CreateLoad(baseVariable);
 
     llvm::Value *indexOfBaseVariable = llvm::ConstantInt::get(llvm::Type::getInt32Ty(context), 0);
     llvm::Value *indexOfMember = llvm::ConstantInt::get(llvm::Type::getInt32Ty(context), memberIndex);
     std::vector<llvm::Value *> indices = {indexOfBaseVariable, indexOfMember};
 
-    auto result = builder.CreateInBoundsGEP(elementType, baseVariable, indices, "memberAccess");
+    auto *result = builder.CreateInBoundsGEP(elementType, baseVariable, indices, "memberAccess");
 
     if (reinterpret_cast<long>(currentDestination) != 1) {
         result = builder.CreateLoad(result, "memberAccessLoad");

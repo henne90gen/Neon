@@ -3,7 +3,7 @@
 #include "../nodes/AllNodes.h"
 
 void FunctionFinder::visitSequenceNode(SequenceNode *node) {
-    for (auto child : node->getChildren()) {
+    for (auto *child : node->getChildren()) {
         child->accept(this);
     }
 }
@@ -21,7 +21,7 @@ void FunctionFinder::visitFunctionNode(FunctionNode *node) {
 
 void FunctionFinder::visitTypeDeclarationNode(TypeDeclarationNode *node) {
     FunctionSignature funcSig = {.name = node->getName(), .returnType = node->getType()};
-    // TODO add constructor arguments, maybe...
+    // TODO(henne): add constructor arguments, maybe...
     functions.push_back(funcSig);
 }
 

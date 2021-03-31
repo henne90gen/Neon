@@ -16,13 +16,13 @@ AstNode *Parser::parseMemberAccess(int level) {
 
         currentTokenIdx++;
 
-        auto other = parseVariable(level + 1);
+        auto *other = parseVariable(level + 1);
         if (other == nullptr) {
             currentTokenIdx = beforeTokenIdx;
             return nullptr;
         }
 
-        auto op = new MemberAccessNode();
+        auto *op = new MemberAccessNode();
         op->setLeft(lastNode);
         op->setRight(other);
         lastNode = op;
@@ -38,22 +38,22 @@ AstNode *Parser::parseMemberAccess(int level) {
 
 AstNode *Parser::parsePrimary(int level) {
     auto beforeTokenIdx = currentTokenIdx;
-    auto memberAccess = parseMemberAccess(level + 1);
+    auto *memberAccess = parseMemberAccess(level + 1);
     if (memberAccess != nullptr) {
         return memberAccess;
     }
 
-    auto functionCall = parseFunctionCall(level + 1);
+    auto *functionCall = parseFunctionCall(level + 1);
     if (functionCall != nullptr) {
         return functionCall;
     }
 
-    auto variable = parseVariable(level + 1);
+    auto *variable = parseVariable(level + 1);
     if (variable != nullptr) {
         return variable;
     }
 
-    auto literal = parseLiteral(level + 1);
+    auto *literal = parseLiteral(level + 1);
     if (literal != nullptr) {
         return literal;
     }
@@ -65,7 +65,7 @@ AstNode *Parser::parsePrimary(int level) {
 
     currentTokenIdx++;
 
-    auto expression = parseExpression(level + 1);
+    auto *expression = parseExpression(level + 1);
     if (expression == nullptr) {
         currentTokenIdx = beforeTokenIdx;
         return nullptr;
@@ -83,7 +83,7 @@ AstNode *Parser::parsePrimary(int level) {
 
 AstNode *Parser::parseUnary(int level) {
     auto beforeTokenIdx = currentTokenIdx;
-    ast::UnaryOperationType operationType;
+    ast::UnaryOperationType operationType = 0;
     if (currentTokenIs(Token::NOT)) {
         operationType = ast::UnaryOperationType::NOT;
     } else if (currentTokenIs(Token::MINUS)) {
@@ -94,26 +94,26 @@ AstNode *Parser::parseUnary(int level) {
 
     currentTokenIdx++;
 
-    auto child = parseUnary(level + 1);
+    auto *child = parseUnary(level + 1);
     if (child == nullptr) {
         currentTokenIdx = beforeTokenIdx;
         return nullptr;
     }
 
-    auto node = new UnaryOperationNode(operationType);
+    auto *node = new UnaryOperationNode(operationType);
     node->setChild(child);
     return node;
 }
 
 AstNode *Parser::parseFactor(int level) {
     auto beforeTokenIdx = currentTokenIdx;
-    auto lastUnary = parseUnary(level + 1);
+    auto *lastUnary = parseUnary(level + 1);
     if (lastUnary == nullptr) {
         currentTokenIdx = beforeTokenIdx;
         return nullptr;
     }
     while (true) {
-        ast::BinaryOperationType operationType;
+        ast::BinaryOperationType operationType = 0;
         if (currentTokenIs(Token::STAR)) {
             operationType = ast::BinaryOperationType::MULTIPLICATION;
         } else if (currentTokenIs(Token::DIV)) {
@@ -124,13 +124,13 @@ AstNode *Parser::parseFactor(int level) {
 
         currentTokenIdx++;
 
-        auto other = parseUnary(level + 1);
+        auto *other = parseUnary(level + 1);
         if (other == nullptr) {
             currentTokenIdx = beforeTokenIdx;
             return nullptr;
         }
 
-        auto op = new BinaryOperationNode(operationType);
+        auto *op = new BinaryOperationNode(operationType);
         op->setLeft(lastUnary);
         op->setRight(other);
         lastUnary = op;
@@ -141,13 +141,13 @@ AstNode *Parser::parseFactor(int level) {
 
 AstNode *Parser::parseTerm(int level) {
     auto beforeTokenIdx = currentTokenIdx;
-    auto lastFactor = parseFactor(level + 1);
+    auto *lastFactor = parseFactor(level + 1);
     if (lastFactor == nullptr) {
         currentTokenIdx = beforeTokenIdx;
         return nullptr;
     }
     while (true) {
-        ast::BinaryOperationType operationType;
+        ast::BinaryOperationType operationType = 0;
         if (currentTokenIs(Token::PLUS)) {
             operationType = ast::BinaryOperationType::ADDITION;
         } else if (currentTokenIs(Token::MINUS)) {
@@ -158,13 +158,13 @@ AstNode *Parser::parseTerm(int level) {
 
         currentTokenIdx++;
 
-        auto other = parseFactor(level + 1);
+        auto *other = parseFactor(level + 1);
         if (other == nullptr) {
             currentTokenIdx = beforeTokenIdx;
             return nullptr;
         }
 
-        auto op = new BinaryOperationNode(operationType);
+        auto *op = new BinaryOperationNode(operationType);
         op->setLeft(lastFactor);
         op->setRight(other);
         lastFactor = op;
@@ -175,13 +175,13 @@ AstNode *Parser::parseTerm(int level) {
 
 AstNode *Parser::parseComparison(int level) {
     auto beforeTokenIdx = currentTokenIdx;
-    auto lastTerm = parseTerm(level + 1);
+    auto *lastTerm = parseTerm(level + 1);
     if (lastTerm == nullptr) {
         currentTokenIdx = beforeTokenIdx;
         return nullptr;
     }
     while (true) {
-        ast::BinaryOperationType operationType;
+        ast::BinaryOperationType operationType = 0;
         if (currentTokenIs(Token::LESS_THAN)) {
             operationType = ast::BinaryOperationType::LESS_THAN;
         } else if (currentTokenIs(Token::LESS_EQUALS)) {
@@ -196,13 +196,13 @@ AstNode *Parser::parseComparison(int level) {
 
         currentTokenIdx++;
 
-        auto other = parseTerm(level + 1);
+        auto *other = parseTerm(level + 1);
         if (other == nullptr) {
             currentTokenIdx = beforeTokenIdx;
             return nullptr;
         }
 
-        auto op = new BinaryOperationNode(operationType);
+        auto *op = new BinaryOperationNode(operationType);
         op->setLeft(lastTerm);
         op->setRight(other);
         lastTerm = op;
@@ -213,13 +213,13 @@ AstNode *Parser::parseComparison(int level) {
 
 AstNode *Parser::parseEquality(int level) {
     auto beforeTokenIdx = currentTokenIdx;
-    auto lastComparison = parseComparison(level + 1);
+    auto *lastComparison = parseComparison(level + 1);
     if (lastComparison == nullptr) {
         currentTokenIdx = beforeTokenIdx;
         return nullptr;
     }
     while (true) {
-        ast::BinaryOperationType operationType;
+        ast::BinaryOperationType operationType = 0;
         if (currentTokenIs(Token::DOUBLE_EQUALS)) {
             operationType = ast::BinaryOperationType::EQUALS;
         } else if (currentTokenIs(Token::NOT_EQUALS)) {
@@ -230,13 +230,13 @@ AstNode *Parser::parseEquality(int level) {
 
         currentTokenIdx++;
 
-        auto other = parseComparison(level + 1);
+        auto *other = parseComparison(level + 1);
         if (other == nullptr) {
             currentTokenIdx = beforeTokenIdx;
             return nullptr;
         }
 
-        auto op = new BinaryOperationNode(operationType);
+        auto *op = new BinaryOperationNode(operationType);
         op->setLeft(lastComparison);
         op->setRight(other);
         lastComparison = op;
@@ -248,14 +248,14 @@ AstNode *Parser::parseEquality(int level) {
 AstNode *Parser::parseExpression(int level) {
     log.debug(indent(level) + "parsing expression node");
     auto beforeTokenIdx = currentTokenIdx;
-    auto last = parseEquality(level + 1);
+    auto *last = parseEquality(level + 1);
     if (last == nullptr) {
         currentTokenIdx = beforeTokenIdx;
         return nullptr;
     }
 
     while (true) {
-        ast::BinaryOperationType operationType;
+        ast::BinaryOperationType operationType = 0;
         if (currentTokenIs(Token::AND)) {
             operationType = ast::BinaryOperationType::AND;
         } else if (currentTokenIs(Token::OR)) {
@@ -266,13 +266,13 @@ AstNode *Parser::parseExpression(int level) {
 
         currentTokenIdx++;
 
-        auto other = parseEquality(level + 1);
+        auto *other = parseEquality(level + 1);
         if (other == nullptr) {
             currentTokenIdx = beforeTokenIdx;
             return nullptr;
         }
 
-        auto op = new BinaryOperationNode(operationType);
+        auto *op = new BinaryOperationNode(operationType);
         op->setLeft(last);
         op->setRight(other);
         last = op;

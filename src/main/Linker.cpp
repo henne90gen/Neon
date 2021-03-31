@@ -63,7 +63,7 @@ std::string Linker::getLinkerCommand() {
 }
 #else
 std::string Linker::getLinkerCommand() {
-    // TODO find out what these options do:
+    // TODO(henne): find out what these options do:
     //  -pie --eh-frame-hdr
 
     std::string s = "\"" + buildEnv->buildDirectory + "crt/bin/ld.musl-clang\"";
@@ -110,7 +110,7 @@ bool Linker::link() {
 
     log.debug("Calling linker with the following command:\n" + linkerCommand);
 
-    // TODO capture stdout and stderr. only print to console when verbose==true
+    // TODO(henne): capture stdout and stderr. only print to console when verbose==true
     const char *command = linkerCommand.c_str();
     int statusCode = system(command);
 

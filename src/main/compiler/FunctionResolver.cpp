@@ -16,7 +16,7 @@ FunctionResolveResult FunctionResolver::resolveFunction(Module *module, const st
     // then check all the imported modules
     const auto &moduleIds = moduleCompileState[module].imports;
     for (const auto &importedModuleId : moduleIds) {
-        auto importedModule = program->modules[importedModuleId];
+        auto *importedModule = program->modules[importedModuleId];
         for (const auto &function : moduleCompileState[importedModule].functions) {
             if (function.name == functionName) {
                 result.functionExists = true;

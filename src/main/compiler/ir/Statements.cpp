@@ -8,7 +8,7 @@ void IrGenerator::visitStatementNode(StatementNode *node) {
     }
 
     node->getChild()->accept(this);
-    auto value = nodesToValues[node->getChild()];
+    auto *value = nodesToValues[node->getChild()];
     if (node->isReturnStatement()) {
         builder.CreateRet(value);
     }
@@ -50,7 +50,7 @@ void IrGenerator::visitIfStatementNode(IfStatementNode *node) {
     log.debug("Enter IfStatement");
 
     node->getCondition()->accept(this);
-    auto condition = nodesToValues[node->getCondition()];
+    auto *condition = nodesToValues[node->getCondition()];
 
     llvm::Function *function = builder.GetInsertBlock()->getParent();
     llvm::BasicBlock *thenBB = llvm::BasicBlock::Create(context, "then", function);
@@ -99,7 +99,7 @@ void IrGenerator::visitForStatementNode(ForStatementNode *node) {
     builder.SetInsertPoint(loopHeaderBB);
 
     node->getCondition()->accept(this);
-    auto condition = nodesToValues[node->getCondition()];
+    auto *condition = nodesToValues[node->getCondition()];
 
     builder.CreateCondBr(condition, loopBodyBB, loopExitBB);
 
@@ -135,7 +135,7 @@ void IrGenerator::visitAssertNode(AssertNode *node) {
     log.debug("Enter Assert");
 
     node->getCondition()->accept(this);
-    auto condition = nodesToValues[node->getCondition()];
+    auto *condition = nodesToValues[node->getCondition()];
 
     llvm::Function *function = builder.GetInsertBlock()->getParent();
     llvm::BasicBlock *thenBB = llvm::BasicBlock::Create(context, "then", function);
@@ -152,15 +152,15 @@ void IrGenerator::visitAssertNode(AssertNode *node) {
     builder.SetInsertPoint(elseBB);
 
     if (node->getCondition()->getAstNodeType() == ast::BINARY_OPERATION) {
-        auto binaryOperation = reinterpret_cast<BinaryOperationNode *>(node->getCondition());
+        auto *binaryOperation = reinterpret_cast<BinaryOperationNode *>(node->getCondition());
         const std::string leftTypeSpecifier = getTypeFormatSpecifier(binaryOperation->getLeft());
         const std::string rightTypeSpecifier = getTypeFormatSpecifier(binaryOperation->getRight());
         const std::string format = "> assert %s\nE assert %" + leftTypeSpecifier +
                                    binaryOperation->operationToString() + "%" + rightTypeSpecifier + "\n";
-        const auto formatStr = builder.CreateGlobalStringPtr(format);
-        const auto conditionStr = builder.CreateGlobalStringPtr(binaryOperation->toString());
-        const auto left = nodesToValues[binaryOperation->getLeft()];
-        const auto right = nodesToValues[binaryOperation->getRight()];
+        auto *const formatStr = builder.CreateGlobalStringPtr(format);
+        auto *const conditionStr = builder.CreateGlobalStringPtr(binaryOperation->toString());
+        auto *const left = nodesToValues[binaryOperation->getLeft()];
+        auto *const right = nodesToValues[binaryOperation->getRight()];
         std::vector<llvm::Value *> args = {
               formatStr,
               conditionStr,
@@ -170,8 +170,8 @@ void IrGenerator::visitAssertNode(AssertNode *node) {
         createStdLibCall("printf", args);
     } else {
         const std::string format = "E assert %s\n";
-        const auto formatStr = builder.CreateGlobalStringPtr(format);
-        const auto conditionStr = builder.CreateGlobalStringPtr(node->getCondition()->toString());
+        auto *const formatStr = builder.CreateGlobalStringPtr(format);
+        auto *const conditionStr = builder.CreateGlobalStringPtr(node->getCondition()->toString());
         std::vector<llvm::Value *> args = {
               formatStr,
               conditionStr,
@@ -179,7 +179,7 @@ void IrGenerator::visitAssertNode(AssertNode *node) {
         createStdLibCall("printf", args);
     }
 
-    auto exitCode = llvm::ConstantInt::get(llvm::Type::getInt32Ty(context), 1);
+    auto *exitCode = llvm::ConstantInt::get(llvm::Type::getInt32Ty(context), 1);
     std::vector<llvm::Value *> args = {exitCode};
     createStdLibCall("exit", args);
 

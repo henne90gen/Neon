@@ -83,26 +83,26 @@ void IrGenerator::emitFloatOperation(BinaryOperationNode *node, llvm::Value *l, 
 void IrGenerator::emitStringOperation(BinaryOperationNode *node, llvm::Value *l, llvm::Value *r) {
     switch (node->getType()) {
     case ast::ADDITION: {
-        auto stringType = getStringType();
+        auto *stringType = getStringType();
         std::string name = "tmpStr";
-        auto result = createEntryBlockAlloca(stringType->getPointerTo(), name);
+        auto *result = createEntryBlockAlloca(stringType->getPointerTo(), name);
 
         unsigned int numCharacters = 0; // default number of characters, forces a resize to the correct size
-        auto data = builder.CreateGlobalStringPtr("", "str");
-        auto size = llvm::ConstantInt::get(llvm::IntegerType::getInt64Ty(context), numCharacters);
-        auto maxSize = llvm::ConstantInt::get(llvm::IntegerType::getInt64Ty(context), numCharacters);
+        auto *data = builder.CreateGlobalStringPtr("", "str");
+        auto *size = llvm::ConstantInt::get(llvm::IntegerType::getInt64Ty(context), numCharacters);
+        auto *maxSize = llvm::ConstantInt::get(llvm::IntegerType::getInt64Ty(context), numCharacters);
 
         std::vector<llvm::Value *> args = {};
         args.push_back(data);
         args.push_back(size);
         args.push_back(maxSize);
-        auto value = createStdLibCall("createString", args);
+        auto *value = createStdLibCall("createString", args);
 
         builder.CreateStore(value, result);
 
-        auto dest = builder.CreateLoad(result);
-        auto loadedLeft = builder.CreateLoad(l);
-        auto loadedRight = builder.CreateLoad(r);
+        auto *dest = builder.CreateLoad(result);
+        auto *loadedLeft = builder.CreateLoad(l);
+        auto *loadedRight = builder.CreateLoad(r);
         args.clear();
         args.push_back(dest);
         args.push_back(loadedLeft);
@@ -111,7 +111,7 @@ void IrGenerator::emitStringOperation(BinaryOperationNode *node, llvm::Value *l,
         nodesToValues[node] = result;
 
         currentScope().cleanUpFunctions.emplace_back([this, stringType, node]() {
-            auto loadedValue = builder.CreateLoad(nodesToValues[node]);
+            auto *loadedValue = builder.CreateLoad(nodesToValues[node]);
             std::vector<llvm::Value *> args = {};
             args.push_back(loadedValue);
             createStdLibCall("deleteString", args);
@@ -163,9 +163,9 @@ void IrGenerator::visitBinaryOperationNode(BinaryOperationNode *node) {
     log.debug("Enter BinaryOperation");
 
     node->getLeft()->accept(this);
-    auto l = nodesToValues[node->getLeft()];
+    auto *l = nodesToValues[node->getLeft()];
     node->getRight()->accept(this);
-    auto r = nodesToValues[node->getRight()];
+    auto *r = nodesToValues[node->getRight()];
 
     if (l == nullptr || r == nullptr) {
         return logError("Generating left or right side failed.");
@@ -198,7 +198,7 @@ void IrGenerator::visitUnaryOperationNode(UnaryOperationNode *node) {
     log.debug("Enter UnaryOperation");
 
     node->getChild()->accept(this);
-    auto c = nodesToValues[node->getChild()];
+    auto *c = nodesToValues[node->getChild()];
     if (c == nullptr) {
         return logError("Generating the child failed.");
     }

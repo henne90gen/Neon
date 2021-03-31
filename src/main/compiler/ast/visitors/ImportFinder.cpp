@@ -3,7 +3,7 @@
 #include "../nodes/AllNodes.h"
 
 void ImportFinder::visitSequenceNode(SequenceNode *node) {
-    for (auto child : node->getChildren()) {
+    for (auto *child : node->getChildren()) {
         child->accept(this);
     }
 }

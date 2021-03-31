@@ -27,7 +27,7 @@ llvm::AllocaInst *IrGenerator::createEntryBlockAlloca(llvm::Type *type, const st
     if (block == nullptr) {
         return nullptr;
     }
-    auto function = block->getParent();
+    auto *function = block->getParent();
     llvm::IRBuilder<> tmpB(&function->getEntryBlock(), function->getEntryBlock().begin());
     return tmpB.CreateAlloca(type, nullptr, name);
 }
@@ -52,7 +52,7 @@ llvm::Constant *IrGenerator::getInitializer(const ast::DataType &dt, bool isArra
             return nullptr;
         }
     } else {
-        // TODO get or create the correct complex llvm type
+        // TODO(henne): get or create the correct complex llvm type
         return nullptr;
     }
 }
@@ -60,7 +60,7 @@ llvm::Constant *IrGenerator::getInitializer(const ast::DataType &dt, bool isArra
 void IrGenerator::setupGlobalInitialization(llvm::Function *func) {
     std::vector<llvm::Type *> types = {llvm::Type::getInt32Ty(context), func->getType(),
                                        llvm::PointerType::getInt8PtrTy(context)};
-    auto structType = llvm::StructType::get(context, types);
+    auto *structType = llvm::StructType::get(context, types);
     llvmModule.getOrInsertGlobal("llvm.global_ctors", llvm::ArrayType::get(structType, 1));
     llvm::GlobalVariable *ctorsVar = llvmModule.getGlobalVariable("llvm.global_ctors");
     ctorsVar->setLinkage(llvm::GlobalValue::LinkageTypes::AppendingLinkage);
@@ -91,7 +91,7 @@ void IrGenerator::visitSequenceNode(SequenceNode *node) {
         isGlobalScope = true;
     }
 
-    for (auto child : node->getChildren()) {
+    for (auto *child : node->getChildren()) {
         child->accept(this);
     }
 

@@ -7,7 +7,7 @@ Timer::~Timer() {
 }
 
 void TimeKeeper::add(const std::string &name, std::chrono::nanoseconds duration) {
-    // TODO what should we do if there are multiple durations for the same name?
+    // TODO(henne): what should we do if there are multiple durations for the same name?
     times[name] = duration;
 }
 

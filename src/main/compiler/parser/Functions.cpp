@@ -19,7 +19,7 @@ CallNode *Parser::parseFunctionCall(int level) {
 
     std::vector<AstNode *> params = {};
     while (!currentTokenIs(Token::RIGHT_PARAN)) {
-        auto expression = parseExpression(level + 1);
+        auto *expression = parseExpression(level + 1);
         if (expression == nullptr) {
             currentTokenIdx = beforeTokenIdx;
             return nullptr;
@@ -37,8 +37,8 @@ CallNode *Parser::parseFunctionCall(int level) {
 
     currentTokenIdx++;
 
-    auto callNode = new CallNode(name);
-    for (const auto param : params) {
+    auto *callNode = new CallNode(name);
+    for (auto *const param : params) {
         callNode->getArguments().push_back(param);
     }
     return callNode;
@@ -75,7 +75,7 @@ FunctionNode *Parser::parseFunction(int level) {
     std::vector<VariableDefinitionNode *> params = {};
     do {
         currentTokenIdx++;
-        auto variableDefinitionNode = parseVariableDefinition(level + 1);
+        auto *variableDefinitionNode = parseVariableDefinition(level + 1);
         if (variableDefinitionNode == nullptr) {
             break;
         }
@@ -95,11 +95,11 @@ FunctionNode *Parser::parseFunction(int level) {
         currentTokenIdx++;
     }
 
-    auto body = parseScope(level + 1);
+    auto *body = parseScope(level + 1);
 
-    auto functionNode = new FunctionNode(functionName, returnType);
+    auto *functionNode = new FunctionNode(functionName, returnType);
     functionNode->setBody(body);
-    for (auto node : params) {
+    for (auto *node : params) {
         functionNode->getArguments().push_back(node);
     }
     return functionNode;

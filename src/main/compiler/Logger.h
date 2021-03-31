@@ -31,5 +31,5 @@ class Logger {
     LogLevel logLevel = LogLevel::INFO;
     bool colorEnabled = true;
 
-    void log(const LogLevel level, const std::string msg) const;
+    void log(const LogLevel level, const std::string& msg) const;
 };
