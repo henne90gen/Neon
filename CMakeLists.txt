@@ -8,6 +8,7 @@ set(CMAKE_VERBOSE_MAKEFILE OFF)
 set(NEON_BUILD_DIR ${PROJECT_SOURCE_DIR}/neon-build/)
 
 # Options
+option(RUN_CLANG_TIDY "Compile all code using clang-tidy" OFF)
 option(USE_ADDRESS_SANITIZER "Compile all code with address sanitization enabled" OFF)
 
 # Clang Tidy
