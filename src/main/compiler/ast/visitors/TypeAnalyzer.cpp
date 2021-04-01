@@ -61,7 +61,8 @@ void TypeAnalyzer::visitBinaryOperationNode(BinaryOperationNode *node) {
         }
         return;
     }
-    std::cerr << "TypeAnalyzer: Binary operation type mismatch: " << to_string(node->getAstNodeType()) << std::endl;
+    std::cerr << "TypeAnalyzer: Binary operation type mismatch: " << to_string(leftType) << " "
+              << to_string(node->getType()) << " " << to_string(rightType) << std::endl;
 }
 
 void TypeAnalyzer::visitUnaryOperationNode(UnaryOperationNode *node) {
@@ -178,7 +179,7 @@ void TypeAnalyzer::visitMemberAccessNode(MemberAccessNode *node) {
     }
 
     auto &variableType = variableTypeMap[variables[0]->getName()];
-    auto &currentType = complexTypeMap[variableType];
+    auto currentType = complexTypeMap[variableType];
     nodeTypeMap[variables[0]] = currentType.type;
     for (int i = 1; i < variables.size(); i++) {
         auto variable = variables[i];

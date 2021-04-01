@@ -89,10 +89,7 @@ void IrGenerator::visitStringNode(StringNode *node) {
     auto size = llvm::ConstantInt::get(llvm::IntegerType::getInt64Ty(context), numCharacters);
     auto maxSize = llvm::ConstantInt::get(llvm::IntegerType::getInt64Ty(context), numCharacters);
 
-    std::vector<llvm::Value *> args = {};
-    args.push_back(data);
-    args.push_back(size);
-    args.push_back(maxSize);
+    std::vector<llvm::Value *> args = {data, size, maxSize};
     auto value = createStdLibCall("createString", args);
 
     builder.CreateStore(value, currentDestination);
@@ -116,20 +113,60 @@ void IrGenerator::visitTypeDeclarationNode(TypeDeclarationNode *node) {
     builder.SetInsertPoint(BB);
 
     auto complexType = getType(node->getType());
-    const auto dataLayout = llvmModule.getDataLayout();
+    auto dataLayout = llvmModule.getDataLayout();
     auto typeSize = dataLayout.getTypeAllocSize(complexType);
     auto fixedTypeSize = typeSize.getFixedSize();
     std::vector<llvm::Value *> args = {llvm::ConstantInt::get(llvm::IntegerType::getInt64Ty(context), fixedTypeSize)};
     auto result = createStdLibCall("malloc", args);
     auto castedResult = builder.CreateBitOrPointerCast(result, complexType);
 
-    // TODO init members
-    //    for (auto &member : node->getMembers()) {
-    //        auto *memberType = getType(member->getType());
-    //        auto value = createEntryBlockAlloca(memberType, member->getName());
-    //        // store initial value
-    //        builder.CreateStore(&member, value);
-    //    }
+    for (int i = 0; i < node->getMembers().size(); i++) {
+        auto member = node->getMembers()[i];
+
+        auto *memberType = getType(member->getDefinition()->getType());
+
+        auto llvmT = getType(node->getType());
+        auto elementType = llvmT->getPointerElementType();
+
+        llvm::Value *indexOfBaseVariable = llvm::ConstantInt::get(llvm::Type::getInt32Ty(context), 0);
+        llvm::Value *indexOfMember = llvm::ConstantInt::get(llvm::Type::getInt32Ty(context), i);
+        std::vector<llvm::Value *> indices = {indexOfBaseVariable, indexOfMember};
+
+        auto address = builder.CreateInBoundsGEP(elementType, castedResult, indices, "memberAccess");
+        if (!ast::isSimpleDataType(member->getDefinition()->getType())) {
+            auto subTypeFuncDef = getOrCreateFunctionDefinition(member->getDefinition()->getType().typeName,
+                                                                member->getDefinition()->getType(), {});
+            auto funcResult = builder.CreateCall(subTypeFuncDef, {});
+            builder.CreateStore(funcResult, address);
+        } else if (member->getDefinition()->getType() == ast::DataType(ast::SimpleDataType::STRING)) {
+            int defaultSize = 32;
+            auto data = llvm::ConstantPointerNull::get(llvm::Type::getInt8PtrTy(context));
+            auto size = llvm::ConstantInt::get(llvm::IntegerType::getInt64Ty(context), 0);
+            auto maxSize = llvm::ConstantInt::get(llvm::IntegerType::getInt64Ty(context), defaultSize);
+
+            std::vector<llvm::Value *> createStringArgs = {data, size, maxSize};
+            auto funcResult = createStdLibCall("createString", createStringArgs);
+            builder.CreateStore(funcResult, address);
+        } else {
+            llvm::Value *value = nullptr;
+            switch (ast::toSimpleDataType(member->getDefinition()->getType())) {
+            case ast::SimpleDataType::INT:
+                value = llvm::ConstantInt::get(llvm::Type::getInt64Ty(context), 0);
+                break;
+            case ast::SimpleDataType::FLOAT:
+                value = llvm::ConstantFP::get(llvm::Type::getFloatTy(context), 0);
+                break;
+            case ast::SimpleDataType::BOOL:
+                value = llvm::ConstantInt::get(llvm::Type::getInt1Ty(context), 0);
+                break;
+            }
+            if (value != nullptr) {
+                builder.CreateStore(value, address);
+            } else {
+                logError("Failed to store default value for simple data type during complex type initialization");
+            }
+        }
+    }
 
     builder.CreateRet(castedResult);
 }

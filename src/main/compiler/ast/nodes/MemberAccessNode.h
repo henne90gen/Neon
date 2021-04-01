@@ -13,6 +13,7 @@ class MemberAccessNode : public AstNode {
     explicit MemberAccessNode() : AstNode(ast::NodeType::MEMBER_ACCESS) {}
 
     void accept(AstVisitor *visitor) override;
+    std::string toString() override;
 
     AstNode *getLeft() { return left; }
     void setLeft(AstNode *l) { this->left = l; }

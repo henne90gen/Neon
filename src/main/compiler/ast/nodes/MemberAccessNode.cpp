@@ -1,6 +1,7 @@
 #include "MemberAccessNode.h"
 
 #include "../AstVisitor.h"
+#include "VariableNode.h"
 
 void MemberAccessNode::accept(AstVisitor *visitor) { visitor->visitMemberAccessNode(this); }
 
@@ -23,4 +24,13 @@ std::vector<VariableNode *> MemberAccessNode::linearizeAccessTree() {
         }
     }
     return variables;
+}
+
+std::string MemberAccessNode::toString() {
+    auto variables = linearizeAccessTree();
+    std::string result;
+    for (auto variable : variables) {
+        result += variable->getName() + ".";
+    }
+    return result.substr(0, result.size() - 1);
 }

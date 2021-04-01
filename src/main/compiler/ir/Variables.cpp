@@ -48,15 +48,21 @@ void IrGenerator::visitVariableDefinitionNode(VariableDefinitionNode *node) {
               getInitializer(node->getType(), node->isArray(), node->getArraySize()));
     } else {
         value = createEntryBlockAlloca(type, name);
-        int sizeOfInt64 = 8;
-        llvm::CastInst *arrayPtr =
-              llvm::CastInst::CreatePointerCast(value, llvm::Type::getInt8PtrTy(context), "", builder.GetInsertBlock());
-        std::vector<llvm::Value *> args = {
-              arrayPtr,
-              llvm::ConstantInt::get(llvm::Type::getInt32Ty(context), 0),
-              llvm::ConstantInt::get(llvm::Type::getInt64Ty(context), node->getArraySize() * sizeOfInt64),
-        };
-        createStdLibCall("memset", args);
+        if (node->isArray()) {
+            auto dataLayout = llvmModule.getDataLayout();
+            auto typeSize = dataLayout.getTypeAllocSize(getType(node->getType()));
+            auto fixedTypeSize = typeSize.getFixedSize();
+            // FIXME this only works because our type system doesn't really know about array types
+            fixedTypeSize *= node->getArraySize();
+            llvm::CastInst *arrayPtr = llvm::CastInst::CreatePointerCast(value, llvm::Type::getInt8PtrTy(context), "",
+                                                                         builder.GetInsertBlock());
+            std::vector<llvm::Value *> args = {
+                  arrayPtr,
+                  llvm::ConstantInt::get(llvm::Type::getInt32Ty(context), 0),
+                  llvm::ConstantInt::get(llvm::Type::getInt64Ty(context), fixedTypeSize),
+            };
+            createStdLibCall("memset", args);
+        }
     }
 
     currentScope().definedVariables[name] = value;
@@ -123,8 +129,6 @@ void IrGenerator::visitAssignmentNode(AssignmentNode *node) {
 }
 
 void IrGenerator::visitMemberAccessNode(MemberAccessNode *node) {
-    // FIXME implement MemberAccess again
-    // TODO add nested member access
     log.debug("Enter MemberAccess");
 
     auto variables = node->linearizeAccessTree();
@@ -132,37 +136,58 @@ void IrGenerator::visitMemberAccessNode(MemberAccessNode *node) {
         return logError("Failed to linearize MemberAccess tree");
     }
 
-    const ast::DataType baseType = typeResolver.getTypeOf(module, variables[0]);
-
-    auto resolveResult = typeResolver.resolveType(module, baseType);
-    if (!resolveResult.typeExists) {
-        return logError("Could not resolve type: " + to_string(baseType));
-    }
-
-    int memberIndex = -1;
-    for (int i = 0; i < resolveResult.complexType.members.size(); i++) {
-        if (resolveResult.complexType.members[i].name == variables[1]->getName()) {
-            memberIndex = i;
-            break;
-        }
-    }
-    if (memberIndex == -1) {
-        return logError("Could not find member: " + variables[1]->getName());
-    }
-
-    auto llvmBaseType = getType(baseType);
-    auto elementType = llvmBaseType->getPointerElementType();
-
-    auto baseVariable = findVariable(variables[0]->getName());
-    baseVariable = builder.CreateLoad(baseVariable);
+    llvm::Value *result = findVariable(variables[0]->getName());
 
     llvm::Value *indexOfBaseVariable = llvm::ConstantInt::get(llvm::Type::getInt32Ty(context), 0);
-    llvm::Value *indexOfMember = llvm::ConstantInt::get(llvm::Type::getInt32Ty(context), memberIndex);
-    std::vector<llvm::Value *> indices = {indexOfBaseVariable, indexOfMember};
+    std::vector<llvm::Value *> indices = {indexOfBaseVariable};
 
-    auto result = builder.CreateInBoundsGEP(elementType, baseVariable, indices, "memberAccess");
+    ast::DataType previousType = ast::DataType();
+    for (int i = 1; i < variables.size(); i++) {
+        previousType = typeResolver.getTypeOf(module, variables[i - 1]);
+
+        auto resolveResult = typeResolver.resolveType(module, previousType);
+        if (!resolveResult.typeExists) {
+            return logError("Could not resolve type: " + to_string(previousType));
+        }
+
+        int memberIndex = -1;
+        bool isComplexType = false;
+        for (int j = 0; j < resolveResult.complexType.members.size(); j++) {
+            if (resolveResult.complexType.members[j].name == variables[i]->getName()) {
+                memberIndex = j;
+                isComplexType = !ast::isSimpleDataType(resolveResult.complexType.members[j].type);
+                break;
+            }
+        }
+        if (memberIndex == -1) {
+            return logError("Could not find member: " + variables[i]->getName());
+        }
+
+        llvm::Value *indexOfMember = llvm::ConstantInt::get(llvm::Type::getInt32Ty(context), memberIndex);
+        indices.push_back(indexOfMember);
+
+        if (isComplexType) {
+            // dereference the pointer to the complex type
+            auto llvmT = getType(previousType);
+            auto elementType = llvmT->getPointerElementType();
+
+            result = builder.CreateLoad(result);
+            result = builder.CreateInBoundsGEP(elementType, result, indices, "memberAccess");
+
+            indices.clear();
+            indices.push_back(indexOfBaseVariable);
+        }
+    }
+
+    auto llvmT = getType(previousType);
+    auto elementType = llvmT->getPointerElementType();
+
+    result = builder.CreateLoad(result);
+    result = builder.CreateInBoundsGEP(elementType, result, indices, "memberAccess");
 
     if (reinterpret_cast<long>(currentDestination) != 1) {
+        // TODO this is a hack!
+        //  currentDestination is set to 1 to signal that we are going to write to its result
         result = builder.CreateLoad(result, "memberAccessLoad");
     }
 
