@@ -1,18 +1,16 @@
 #include "AstTestCasePrinter.h"
 
-#include <iostream>
-
 #include "../nodes/AllNodes.h"
 #include "util/Utils.h"
 
-void AstTestCasePrinter::printNode(AstNode *node) {
+void AstTestCasePrinter::printNode(AstNode *node) const {
     std::cout << "        {" << indentation << ", " << to_string(node->getAstNodeType()) << "}," << std::endl;
 }
 
 void AstTestCasePrinter::visitFunctionNode(FunctionNode *node) {
     printNode(node);
     indentation++;
-    for (auto argument : node->getArguments()) {
+    for (auto *argument : node->getArguments()) {
         argument->accept(this);
     }
     if (!node->isExternal()) {
@@ -51,7 +49,7 @@ void AstTestCasePrinter::visitAssignmentNode(AssignmentNode *node) {
 void AstTestCasePrinter::visitSequenceNode(SequenceNode *node) {
     printNode(node);
     indentation++;
-    for (auto child : node->getChildren()) {
+    for (auto *child : node->getChildren()) {
         child->accept(this);
     }
     indentation--;
@@ -73,7 +71,7 @@ void AstTestCasePrinter::visitBoolNode(BoolNode *node) { printNode(node); }
 void AstTestCasePrinter::visitCallNode(CallNode *node) {
     printNode(node);
     indentation++;
-    for (auto argument : node->getArguments()) {
+    for (auto *argument : node->getArguments()) {
         argument->accept(this);
     }
     indentation--;

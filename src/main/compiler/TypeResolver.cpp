@@ -32,7 +32,7 @@ TypeResolveResult TypeResolver::resolveType(Module *module, const ast::DataType 
 
     const auto &moduleIds = moduleCompileState[module].imports;
     for (const auto &importedModuleId : moduleIds) {
-        auto importedModule = program->modules[importedModuleId];
+        auto *importedModule = program->modules[importedModuleId];
         for (const auto &complexType : moduleCompileState[importedModule].complexTypes) {
             if (complexType.type == type) {
                 result.typeExists = true;

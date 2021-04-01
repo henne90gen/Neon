@@ -38,7 +38,7 @@ LiteralNode *Parser::parseLiteral(int level) {
 
 TypeMemberNode *Parser::parseMemberVariable(int level) {
     auto beforeTokenIdx = currentTokenIdx;
-    auto node = parseVariableDefinition(level + 1);
+    auto *node = parseVariableDefinition(level + 1);
     if (node == nullptr) {
         currentTokenIdx = beforeTokenIdx;
         return nullptr;
@@ -75,7 +75,7 @@ TypeDeclarationNode *Parser::parseTypeDeclaration(int level) {
             currentTokenIdx++;
         }
 
-        auto memberVariable = parseMemberVariable(level + 1);
+        auto *memberVariable = parseMemberVariable(level + 1);
         if (memberVariable == nullptr) {
             currentTokenIdx = beforeTokenIdx;
             return nullptr;
@@ -94,7 +94,7 @@ TypeDeclarationNode *Parser::parseTypeDeclaration(int level) {
 
     currentTokenIdx++;
 
-    auto node = new TypeDeclarationNode(name);
+    auto *node = new TypeDeclarationNode(name);
     node->setMembers(memberVariables);
     return node;
 }

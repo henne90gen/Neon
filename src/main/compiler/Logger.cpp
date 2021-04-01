@@ -7,7 +7,7 @@ Logger::Logger() {
 #endif
 }
 
-void Logger::log(const Logger::LogLevel level, const std::string msg) const {
+void Logger::log(const Logger::LogLevel level, const std::string& msg) const {
     if (logLevel > level) {
         return;
     }

@@ -13,9 +13,9 @@ class VariableDefinitionNode : public AstNode {
 
     ast::DataType getType();
 
-    unsigned int getArraySize();
+    unsigned int getArraySize() const;
 
-    bool isArray();
+    bool isArray() const;
 
   private:
     std::string name;

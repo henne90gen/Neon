@@ -1,6 +1,5 @@
 #include "TypeAnalyzer.h"
 
-#include <iostream>
 
 #include "../nodes/AllNodes.h"
 #include "util/Utils.h"
@@ -20,7 +19,7 @@ void TypeAnalyzer::visitCallNode(CallNode *node) {
         std::cerr << "TypeAnalyzer: Undefined function " << node->getName() << std::endl;
         return;
     }
-    for (const auto arg : node->getArguments()) {
+    for (auto *const arg : node->getArguments()) {
         arg->accept(this);
     }
     nodeTypeMap[node] = result.signature.returnType;
@@ -106,7 +105,7 @@ void TypeAnalyzer::visitAssertNode(AssertNode *node) {
 }
 
 void TypeAnalyzer::visitSequenceNode(SequenceNode *node) {
-    for (auto child : node->getChildren()) {
+    for (auto *child : node->getChildren()) {
         child->accept(this);
     }
 }
@@ -182,7 +181,7 @@ void TypeAnalyzer::visitMemberAccessNode(MemberAccessNode *node) {
     auto currentType = complexTypeMap[variableType];
     nodeTypeMap[variables[0]] = currentType.type;
     for (int i = 1; i < variables.size(); i++) {
-        auto variable = variables[i];
+        auto *variable = variables[i];
         for (const auto &member : currentType.members) {
             if (member.name != variable->getName()) {
                 continue;

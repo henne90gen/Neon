@@ -37,7 +37,7 @@ bool Compiler::run() {
             continue;
         }
 
-        auto module = loadModule(moduleFileName);
+        auto *module = loadModule(moduleFileName);
         if (module->root == nullptr) {
             log.error("Failed to compile module " + moduleFileName);
             return true;
@@ -60,7 +60,7 @@ bool Compiler::run() {
 }
 
 Module *Compiler::loadModule(const std::string &moduleFileName) {
-    auto module = new Module(moduleFileName, program->llvmContext);
+    auto *module = new Module(moduleFileName, program->llvmContext);
 
     if (module->getFilePath().has_parent_path()) {
         const auto moduleBuildDir =
@@ -96,7 +96,7 @@ Module *Compiler::loadModule(const std::string &moduleFileName) {
 void Compiler::generateIR() {
     auto functionResolver = FunctionResolver(program, moduleCompileState);
     for (const auto &entry : program->modules) {
-        auto module = entry.second;
+        auto *module = entry.second;
         auto typeResolver = TypeResolver(program, moduleCompileState);
         auto generator = IrGenerator(buildEnv, module, functionResolver, typeResolver, log);
         generator.run();
@@ -130,18 +130,18 @@ void Compiler::writeModuleToObjectFile() {
 
     auto targetTriple = llvm::sys::getDefaultTargetTriple();
     std::string Error;
-    auto target = llvm::TargetRegistry::lookupTarget(targetTriple, Error);
+    const auto *target = llvm::TargetRegistry::lookupTarget(targetTriple, Error);
 
     if (target == nullptr) {
         llvm::errs() << Error;
         exit(1);
     }
 
-    auto cpu = "generic";
-    auto features = "";
+    const auto *cpu = "generic";
+    const auto *features = "";
     llvm::TargetOptions targetOptions = {};
     auto RM = llvm::Optional<llvm::Reloc::Model>();
-    auto targetMachine = target->createTargetMachine(targetTriple, cpu, features, targetOptions, RM);
+    auto *targetMachine = target->createTargetMachine(targetTriple, cpu, features, targetOptions, RM);
     auto dataLayout = targetMachine->createDataLayout();
 
     auto module = llvm::Module(buildEnv->buildDirectory + program->objectFileName(), program->llvmContext);

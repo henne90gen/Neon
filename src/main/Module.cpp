@@ -77,7 +77,7 @@ std::string Module::toEscapedString() const {
 
 std::string Module::toArrayString() const {
     std::string result = toEscapedString();
-    // TODO This can't handle two line breaks
+    // TODO(henne): This can't handle two line breaks
     result = replace(result, " \n ", "\", \"");
     result = replace(result, "\n ", "");
     return result;

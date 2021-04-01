@@ -5,50 +5,50 @@
 #define ENABLE_OPTIMIZATIONS 0
 
 llvm::Function *IrGenerator::getOrCreateStdLibFunction(const std::string &functionName) {
-    auto func = llvmModule.getFunction(functionName);
+    auto *func = llvmModule.getFunction(functionName);
     if (func != nullptr) {
         return func;
     }
     if (functionName == "deleteString") {
-        auto stringType = getStringType();
+        auto *stringType = getStringType();
         std::vector<llvm::Type *> arguments = {stringType->getPointerTo()};
-        auto funcType = llvm::FunctionType::get(llvm::Type::getVoidTy(context), arguments, false);
+        auto *funcType = llvm::FunctionType::get(llvm::Type::getVoidTy(context), arguments, false);
         return llvm::Function::Create(funcType, llvm::Function::ExternalLinkage, functionName, llvmModule);
     }
     if (functionName == "createString") {
-        auto stringType = getStringType();
+        auto *stringType = getStringType();
         std::vector<llvm::Type *> arguments = {
               llvm::PointerType::getInt8PtrTy(context),
               llvm::IntegerType::getInt64Ty(context),
               llvm::IntegerType::getInt64Ty(context),
         };
-        auto funcType = llvm::FunctionType::get(stringType->getPointerTo(), arguments, false);
+        auto *funcType = llvm::FunctionType::get(stringType->getPointerTo(), arguments, false);
         return llvm::Function::Create(funcType, llvm::Function::ExternalLinkage, functionName, llvmModule);
     }
     if (functionName == "appendString") {
-        auto stringType = getStringType();
+        auto *stringType = getStringType();
         std::vector<llvm::Type *> arguments = {
               stringType->getPointerTo(),
               stringType->getPointerTo(),
               stringType->getPointerTo(),
         };
-        auto funcType = llvm::FunctionType::get(llvm::Type::getVoidTy(context), arguments, false);
+        auto *funcType = llvm::FunctionType::get(llvm::Type::getVoidTy(context), arguments, false);
         return llvm::Function::Create(funcType, llvm::Function::ExternalLinkage, functionName, llvmModule);
     }
     if (functionName == "assignString") {
-        auto stringType = getStringType();
+        auto *stringType = getStringType();
         std::vector<llvm::Type *> arguments = {stringType->getPointerTo(), stringType->getPointerTo()};
-        auto funcType = llvm::FunctionType::get(llvm::Type::getVoidTy(context), arguments, false);
+        auto *funcType = llvm::FunctionType::get(llvm::Type::getVoidTy(context), arguments, false);
         return llvm::Function::Create(funcType, llvm::Function::ExternalLinkage, functionName, llvmModule);
     }
     if (functionName == "malloc") {
         std::vector<llvm::Type *> arguments = {llvm::Type::getInt64Ty(context)};
-        auto funcType = llvm::FunctionType::get(llvm::Type::getInt8PtrTy(context), arguments, false);
+        auto *funcType = llvm::FunctionType::get(llvm::Type::getInt8PtrTy(context), arguments, false);
         return llvm::Function::Create(funcType, llvm::Function::ExternalLinkage, functionName, llvmModule);
     }
     if (functionName == "exit") {
         std::vector<llvm::Type *> arguments = {llvm::Type::getInt32Ty(context)};
-        auto funcType = llvm::FunctionType::get(llvm::Type::getVoidTy(context), arguments, false);
+        auto *funcType = llvm::FunctionType::get(llvm::Type::getVoidTy(context), arguments, false);
         return llvm::Function::Create(funcType, llvm::Function::ExternalLinkage, functionName, llvmModule);
     }
     if (functionName == "memset") {
@@ -57,21 +57,21 @@ llvm::Function *IrGenerator::getOrCreateStdLibFunction(const std::string &functi
               llvm::Type::getInt32Ty(context),
               llvm::Type::getInt64Ty(context),
         };
-        auto funcType = llvm::FunctionType::get(llvm::Type::getInt8PtrTy(context), arguments, false);
+        auto *funcType = llvm::FunctionType::get(llvm::Type::getInt8PtrTy(context), arguments, false);
         return llvm::Function::Create(funcType, llvm::Function::ExternalLinkage, functionName, llvmModule);
     }
     if (functionName == "printf") {
         std::vector<llvm::Type *> arguments = {
               llvm::Type::getInt8PtrTy(context), // format
         };
-        auto funcType = llvm::FunctionType::get(llvm::Type::getInt32Ty(context), arguments, true);
+        auto *funcType = llvm::FunctionType::get(llvm::Type::getInt32Ty(context), arguments, true);
         return llvm::Function::Create(funcType, llvm::Function::ExternalLinkage, functionName, llvmModule);
     }
     return nullptr;
 }
 
 llvm::Value *IrGenerator::createStdLibCall(const std::string &functionName, const std::vector<llvm::Value *> &args) {
-    auto func = getOrCreateStdLibFunction(functionName);
+    auto *func = getOrCreateStdLibFunction(functionName);
     if (func == nullptr) {
         logError("Could not create standard library call to function " + functionName);
         return nullptr;
@@ -99,7 +99,7 @@ void IrGenerator::visitFunctionNode(FunctionNode *node) {
 
         withScope([this, &node]() {
             for (auto &arg : currentFunction->args()) {
-                auto value = createEntryBlockAlloca(arg.getType(), arg.getName().str());
+                auto *value = createEntryBlockAlloca(arg.getType(), arg.getName().str());
 
                 // store initial value
                 builder.CreateStore(&arg, value);
@@ -137,11 +137,11 @@ llvm::Function *IrGenerator::getOrCreateFunctionDefinition(const std::string &na
         return function;
     }
 
-    auto retType = getType(returnType);
+    auto *retType = getType(returnType);
 
     std::vector<llvm::Type *> argumentTypes = {};
     argumentTypes.reserve(arguments.size());
-    for (auto &arg : arguments) {
+    for (const auto &arg : arguments) {
         llvm::Type *type = getType(arg.type);
         argumentTypes.push_back(type);
     }
@@ -235,7 +235,7 @@ void IrGenerator::visitCallNode(CallNode *node) {
         }
     }
 
-    llvm::Value *call;
+    llvm::Value *call = nullptr;
     if (calleeFunc->getReturnType()->getTypeID() == llvm::Type::TypeID::VoidTyID) {
         call = builder.CreateCall(calleeFunc, arguments);
     } else {

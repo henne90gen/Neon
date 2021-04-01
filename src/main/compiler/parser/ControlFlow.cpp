@@ -9,7 +9,7 @@ IfStatementNode *Parser::parseIf(int level) {
     auto beforeTokenIdx = currentTokenIdx;
     currentTokenIdx++;
 
-    auto condition = parseExpression(level + 1);
+    auto *condition = parseExpression(level + 1);
     if (condition == nullptr) {
         currentTokenIdx = beforeTokenIdx;
         return nullptr;
@@ -27,12 +27,12 @@ IfStatementNode *Parser::parseIf(int level) {
         if (elseBody == nullptr) {
             currentTokenIdx = beforeTokenIdx;
             return nullptr;
-        } else if (elseBody->getChildren().empty()) {
+        } if (elseBody->getChildren().empty()) {
             elseBody = nullptr;
         }
     }
 
-    auto ifNode = new IfStatementNode();
+    auto *ifNode = new IfStatementNode();
     ifNode->setCondition(condition);
     ifNode->setIfBody(ifBody);
     ifNode->setElseBody(elseBody);
@@ -48,7 +48,7 @@ ForStatementNode *Parser::parseFor(int level) {
     auto beforeTokenIdx = currentTokenIdx;
     currentTokenIdx++;
 
-    auto init = parseStatement(level + 1);
+    auto *init = parseStatement(level + 1);
     if (init == nullptr) {
         currentTokenIdx = beforeTokenIdx;
         return nullptr;
@@ -61,7 +61,7 @@ ForStatementNode *Parser::parseFor(int level) {
 
     currentTokenIdx++;
 
-    auto condition = parseExpression(level + 1);
+    auto *condition = parseExpression(level + 1);
     if (condition == nullptr) {
         currentTokenIdx = beforeTokenIdx;
         return nullptr;
@@ -74,19 +74,19 @@ ForStatementNode *Parser::parseFor(int level) {
 
     currentTokenIdx++;
 
-    auto update = parseStatement(level + 1);
+    auto *update = parseStatement(level + 1);
     if (update == nullptr) {
         currentTokenIdx = beforeTokenIdx;
         return nullptr;
     }
 
-    auto body = parseScope(level + 1);
+    auto *body = parseScope(level + 1);
     if (body == nullptr) {
         currentTokenIdx = beforeTokenIdx;
         return nullptr;
     }
 
-    auto forStatement = new ForStatementNode();
+    auto *forStatement = new ForStatementNode();
     forStatement->setInit(init);
     forStatement->setCondition(condition);
     forStatement->setUpdate(update);
@@ -103,13 +103,13 @@ StatementNode *Parser::parseReturnStatement(int level) {
     auto beforeTokenIdx = currentTokenIdx;
     currentTokenIdx++;
 
-    auto expression = parseExpression(level + 1);
+    auto *expression = parseExpression(level + 1);
     if (expression == nullptr) {
         currentTokenIdx = beforeTokenIdx;
         return nullptr;
     }
 
-    auto statement = new StatementNode();
+    auto *statement = new StatementNode();
     statement->setChild(expression);
     statement->setIsReturnStatement(true);
     return statement;

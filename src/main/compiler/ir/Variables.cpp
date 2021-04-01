@@ -5,7 +5,7 @@
 void IrGenerator::visitVariableNode(VariableNode *node) {
     log.debug("Enter Variable");
 
-    auto value = findVariable(node->getName());
+    auto *value = findVariable(node->getName());
     if (value == nullptr) {
         return logError("Undefined variable '" + node->getName() + "'");
     }
@@ -13,9 +13,9 @@ void IrGenerator::visitVariableNode(VariableNode *node) {
     if (node->isArrayAccess()) {
         node->getArrayIndex()->accept(this);
         llvm::Value *indexOfArray = llvm::ConstantInt::get(llvm::Type::getInt64Ty(context), 0);
-        auto arrayIndex = nodesToValues[node->getArrayIndex()];
+        auto *arrayIndex = nodesToValues[node->getArrayIndex()];
         std::vector<llvm::Value *> indices = {indexOfArray, arrayIndex};
-        auto elementPtr = builder.CreateInBoundsGEP(value, indices);
+        auto *elementPtr = builder.CreateInBoundsGEP(value, indices);
         nodesToValues[node] = builder.CreateLoad(elementPtr);
     } else {
         if (isPrimitiveType(typeResolver.getTypeOf(module, node))) {
@@ -40,7 +40,7 @@ void IrGenerator::visitVariableDefinitionNode(VariableDefinitionNode *node) {
         type = llvm::ArrayType::get(type, node->getArraySize());
     }
 
-    llvm::Value *value;
+    llvm::Value *value = nullptr;
     if (isGlobalScope) {
         value = llvmModule.getOrInsertGlobal(name, type);
         llvmModule.getNamedGlobal(name)->setDSOLocal(true);
@@ -74,14 +74,14 @@ void IrGenerator::visitVariableDefinitionNode(VariableDefinitionNode *node) {
 void IrGenerator::visitAssignmentNode(AssignmentNode *node) {
     log.debug("Enter Assignment");
 
-    llvm::Value *dest;
+    llvm::Value *dest = nullptr;
     if (node->getLeft()->getAstNodeType() == ast::NodeType::VARIABLE_DEFINITION) {
         // generate variable definition
         node->getLeft()->accept(this);
         dest = nodesToValues[node->getLeft()];
     } else if (node->getLeft()->getAstNodeType() == ast::NodeType::VARIABLE) {
         // lookup the variable to save into
-        auto variable = dynamic_cast<VariableNode *>(node->getLeft());
+        auto *variable = dynamic_cast<VariableNode *>(node->getLeft());
         dest = findVariable(variable->getName());
         if (variable->isArrayAccess()) {
             variable->getArrayIndex()->accept(this);
@@ -94,7 +94,7 @@ void IrGenerator::visitAssignmentNode(AssignmentNode *node) {
             dest = builder.CreateInBoundsGEP(dest, indices);
         }
     } else if (node->getLeft()->getAstNodeType() == ast::NodeType::MEMBER_ACCESS) {
-        // TODO this is a hack!
+        // TODO(henne): this is a hack!
         //  setting currentDestination to 1 is used as a flag to signal to visitMemberAccessNode that we are going to
         //  write to its result
         currentDestination = reinterpret_cast<llvm::Value *>(1);

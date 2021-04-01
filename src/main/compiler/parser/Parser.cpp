@@ -3,7 +3,7 @@
 #include <iostream>
 
 StatementNode *createStatementNode(AstNode *child) {
-    auto statement = new StatementNode();
+    auto *statement = new StatementNode();
     statement->setChild(child);
     return statement;
 }
@@ -43,7 +43,7 @@ ImportNode *Parser::parseImport() {
     std::string fileName = currentTokenContent();
     fileName = fileName.substr(1, fileName.size() - 2);
 
-    auto importNode = new ImportNode();
+    auto *importNode = new ImportNode();
     importNode->setFileName(fileName);
 
     currentTokenIdx++;
@@ -78,7 +78,7 @@ VariableNode *Parser::parseVariable(int level) {
         currentTokenIdx++;
     }
 
-    auto result = new VariableNode(name);
+    auto *result = new VariableNode(name);
     result->setArrayIndex(expression);
     return result;
 }
@@ -94,19 +94,19 @@ VariableDefinitionNode *Parser::parseVariableDefinition(int level) {
 
         if (currentTokenIs(Token::IDENTIFIER)) {
             std::string variableName = currentTokenContent();
-            auto variableDefinitionNode = new VariableDefinitionNode(variableName, dataType);
+            auto *variableDefinitionNode = new VariableDefinitionNode(variableName, dataType);
             log.debug(indent(level) + "parsed variable definition with simple data type");
             currentTokenIdx++;
             return variableDefinitionNode;
-        } else if (currentTokenIs(Token::LEFT_BRACKET)) {
+        } if (currentTokenIs(Token::LEFT_BRACKET)) {
             currentTokenIdx++;
 
-            auto literal = parseLiteral(level + 1);
+            auto *literal = parseLiteral(level + 1);
             if (literal == nullptr || literal->getLiteralType() != LiteralNode::INTEGER) {
                 currentTokenIdx = beforeTokenIdx;
                 return nullptr;
             }
-            auto arraySizeLiteral = reinterpret_cast<IntegerNode *>(literal);
+            auto *arraySizeLiteral = reinterpret_cast<IntegerNode *>(literal);
 
             if (!currentTokenIs(Token::RIGHT_BRACKET)) {
                 currentTokenIdx = beforeTokenIdx;
@@ -122,7 +122,7 @@ VariableDefinitionNode *Parser::parseVariableDefinition(int level) {
 
             std::string variableName = currentTokenContent();
             auto arraySize = arraySizeLiteral->getValue();
-            auto variableDefinitionNode = new VariableDefinitionNode(variableName, dataType, arraySize);
+            auto *variableDefinitionNode = new VariableDefinitionNode(variableName, dataType, arraySize);
 
             currentTokenIdx++;
             return variableDefinitionNode;
@@ -138,7 +138,7 @@ VariableDefinitionNode *Parser::parseVariableDefinition(int level) {
         }
 
         std::string variableName = currentTokenContent();
-        auto variableDefinitionNode = new VariableDefinitionNode(variableName, dataType);
+        auto *variableDefinitionNode = new VariableDefinitionNode(variableName, dataType);
         log.debug(indent(level) + "parsed variable definition with simple data type");
         currentTokenIdx++;
         return variableDefinitionNode;
@@ -160,7 +160,7 @@ SequenceNode *Parser::parseScope(int level) {
 
     std::vector<AstNode *> children = {};
     while (true) {
-        auto statement = parseStatement(level + 1);
+        auto *statement = parseStatement(level + 1);
         if (statement == nullptr) {
             break;
         }
@@ -175,25 +175,25 @@ SequenceNode *Parser::parseScope(int level) {
 
     currentTokenIdx++;
 
-    auto body = new SequenceNode();
-    for (auto child : children) {
+    auto *body = new SequenceNode();
+    for (auto *child : children) {
         body->getChildren().push_back(child);
     }
     return body;
 }
 
 AstNode *Parser::parseAssignmentLeft(int level) {
-    auto variableDefinitionNode = parseVariableDefinition(level + 1);
+    auto *variableDefinitionNode = parseVariableDefinition(level + 1);
     if (variableDefinitionNode != nullptr) {
         return variableDefinitionNode;
     }
 
-    auto memberAccess = parseMemberAccess(level + 1);
+    auto *memberAccess = parseMemberAccess(level + 1);
     if (memberAccess != nullptr) {
         return memberAccess;
     }
 
-    auto variableNode = parseVariable(level + 1);
+    auto *variableNode = parseVariable(level + 1);
     if (variableNode != nullptr) {
         return variableNode;
     }
@@ -204,7 +204,7 @@ AstNode *Parser::parseAssignmentLeft(int level) {
 AssignmentNode *Parser::parseAssignment(int level) {
     log.debug(indent(level) + "parsing assignment statement");
     auto beforeTokenIdx = currentTokenIdx;
-    auto left = parseAssignmentLeft(level + 1);
+    auto *left = parseAssignmentLeft(level + 1);
     if (left == nullptr) {
         currentTokenIdx = beforeTokenIdx;
         return nullptr;
@@ -217,7 +217,7 @@ AssignmentNode *Parser::parseAssignment(int level) {
     }
     currentTokenIdx++;
 
-    auto right = parseExpression(level + 1);
+    auto *right = parseExpression(level + 1);
     if (right == nullptr) {
         currentTokenIdx = beforeTokenIdx;
         return nullptr;
@@ -225,7 +225,7 @@ AssignmentNode *Parser::parseAssignment(int level) {
 
     log.debug(indent(level) + "parsed assignment right");
 
-    auto assignmentNode = new AssignmentNode();
+    auto *assignmentNode = new AssignmentNode();
     assignmentNode->setLeft(left);
     assignmentNode->setRight(right);
     return assignmentNode;
@@ -240,7 +240,7 @@ AssertNode *Parser::parseAssert(int level) {
 
     currentTokenIdx++;
 
-    auto expression = parseExpression(level + 1);
+    auto *expression = parseExpression(level + 1);
     if (expression == nullptr) {
         currentTokenIdx--;
         return nullptr;
@@ -250,14 +250,14 @@ AssertNode *Parser::parseAssert(int level) {
     return result;
 }
 
-CommentNode *Parser::parseComment(int level) {
+CommentNode *Parser::parseComment(int  /*level*/) {
     if (!currentTokenIs(Token::COMMENT)) {
         return nullptr;
     }
 
     log.debug("parsed comment node");
 
-    auto result = new CommentNode(currentTokenContent());
+    auto *result = new CommentNode(currentTokenContent());
     currentTokenIdx++;
     return result;
 }
@@ -269,57 +269,57 @@ StatementNode *Parser::parseStatement(int level) {
         currentTokenIdx++;
     }
 
-    auto commentNode = parseComment(level + 1);
+    auto *commentNode = parseComment(level + 1);
     if (commentNode != nullptr) {
         return createStatementNode(commentNode);
     }
 
-    auto importNode = parseImport();
+    auto *importNode = parseImport();
     if (importNode != nullptr) {
         return createStatementNode(importNode);
     }
 
-    auto typeNode = parseTypeDeclaration(level + 1);
+    auto *typeNode = parseTypeDeclaration(level + 1);
     if (typeNode != nullptr) {
         return createStatementNode(typeNode);
     }
 
-    auto assertNode = parseAssert(level + 1);
+    auto *assertNode = parseAssert(level + 1);
     if (assertNode != nullptr) {
         return createStatementNode(assertNode);
     }
 
-    auto callNode = parseFunctionCall(level + 1);
+    auto *callNode = parseFunctionCall(level + 1);
     if (callNode != nullptr) {
         return createStatementNode(callNode);
     }
 
-    auto functionNode = parseFunction(level + 1);
+    auto *functionNode = parseFunction(level + 1);
     if (functionNode != nullptr) {
         return createStatementNode(functionNode);
     }
 
-    auto ifNode = parseIf(level + 1);
+    auto *ifNode = parseIf(level + 1);
     if (ifNode != nullptr) {
         return createStatementNode(ifNode);
     }
 
-    auto forNode = parseFor(level + 1);
+    auto *forNode = parseFor(level + 1);
     if (forNode != nullptr) {
         return createStatementNode(forNode);
     }
 
-    auto assignmentNode = parseAssignment(level + 1);
+    auto *assignmentNode = parseAssignment(level + 1);
     if (assignmentNode != nullptr) {
         return createStatementNode(assignmentNode);
     }
 
-    auto variableDefinition = parseVariableDefinition(level + 1);
+    auto *variableDefinition = parseVariableDefinition(level + 1);
     if (variableDefinition != nullptr) {
         return createStatementNode(variableDefinition);
     }
 
-    auto returnStatement = parseReturnStatement(level + 1);
+    auto *returnStatement = parseReturnStatement(level + 1);
     if (returnStatement != nullptr) {
         return returnStatement;
     }
@@ -350,7 +350,7 @@ void Parser::run() {
             continue;
         }
 
-        auto statementNode = parseStatement(0);
+        auto *statementNode = parseStatement(0);
         if (statementNode != nullptr) {
             children.push_back(statementNode);
             continue;
@@ -362,14 +362,14 @@ void Parser::run() {
     }
 
     if (error) {
-        for (auto child : children) {
+        for (auto *child : children) {
             delete child;
         }
         return;
     }
 
-    auto sequence = new SequenceNode();
-    for (auto child : children) {
+    auto *sequence = new SequenceNode();
+    for (auto *child : children) {
         sequence->getChildren().push_back(child);
     }
     module->root = sequence;

@@ -27,7 +27,7 @@ llvm::Type *IrGenerator::getType(const ast::DataType &type) {
             return llvm::Type::getVoidTy(context);
         }
 
-        auto result = getOrCreateComplexType(resolveResult.complexType);
+        auto *result = getOrCreateComplexType(resolveResult.complexType);
         if (result == nullptr) {
             logError("Could not generate type declaration for type '" + to_string(type) + "'");
             return llvm::Type::getVoidTy(context);
@@ -37,7 +37,7 @@ llvm::Type *IrGenerator::getType(const ast::DataType &type) {
 }
 
 llvm::StructType *IrGenerator::getOrCreateComplexType(const ComplexType &type) {
-    auto result = llvmModule.getTypeByName(type.type.typeName);
+    auto *result = llvmModule.getTypeByName(type.type.typeName);
     if (result != nullptr) {
         return result;
     }
@@ -49,7 +49,7 @@ llvm::StructType *IrGenerator::getOrCreateComplexType(const ComplexType &type) {
 }
 
 llvm::StructType *IrGenerator::getStringType() {
-    auto type = llvmModule.getTypeByName("string");
+    auto *type = llvmModule.getTypeByName("string");
     if (type != nullptr) {
         return type;
     }
@@ -85,9 +85,9 @@ void IrGenerator::visitStringNode(StringNode *node) {
 
     const std::string stringValue = node->getValue();
     unsigned int numCharacters = stringValue.size();
-    auto data = builder.CreateGlobalStringPtr(stringValue, "str");
-    auto size = llvm::ConstantInt::get(llvm::IntegerType::getInt64Ty(context), numCharacters);
-    auto maxSize = llvm::ConstantInt::get(llvm::IntegerType::getInt64Ty(context), numCharacters);
+    auto *data = builder.CreateGlobalStringPtr(stringValue, "str");
+    auto *size = llvm::ConstantInt::get(llvm::IntegerType::getInt64Ty(context), numCharacters);
+    auto *maxSize = llvm::ConstantInt::get(llvm::IntegerType::getInt64Ty(context), numCharacters);
 
     std::vector<llvm::Value *> args = {data, size, maxSize};
     auto value = createStdLibCall("createString", args);
@@ -108,17 +108,17 @@ void IrGenerator::visitStringNode(StringNode *node) {
 }
 
 void IrGenerator::visitTypeDeclarationNode(TypeDeclarationNode *node) {
-    auto functionDef = getOrCreateFunctionDefinition(node->getName(), node->getType(), {});
+    auto *functionDef = getOrCreateFunctionDefinition(node->getName(), node->getType(), {});
     llvm::BasicBlock *BB = llvm::BasicBlock::Create(context, "entry-" + node->getName(), functionDef);
     builder.SetInsertPoint(BB);
 
-    auto complexType = getType(node->getType());
+    auto *complexType = getType(node->getType());
     auto dataLayout = llvmModule.getDataLayout();
     auto typeSize = dataLayout.getTypeAllocSize(complexType);
     auto fixedTypeSize = typeSize.getFixedSize();
     std::vector<llvm::Value *> args = {llvm::ConstantInt::get(llvm::IntegerType::getInt64Ty(context), fixedTypeSize)};
-    auto result = createStdLibCall("malloc", args);
-    auto castedResult = builder.CreateBitOrPointerCast(result, complexType);
+    auto *result = createStdLibCall("malloc", args);
+    auto *castedResult = builder.CreateBitOrPointerCast(result, complexType);
 
     for (int i = 0; i < node->getMembers().size(); i++) {
         auto member = node->getMembers()[i];
