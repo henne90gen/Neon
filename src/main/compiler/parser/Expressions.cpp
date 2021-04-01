@@ -83,7 +83,7 @@ AstNode *Parser::parsePrimary(int level) {
 
 AstNode *Parser::parseUnary(int level) {
     auto beforeTokenIdx = currentTokenIdx;
-    ast::UnaryOperationType operationType = 0;
+    ast::UnaryOperationType operationType;
     if (currentTokenIs(Token::NOT)) {
         operationType = ast::UnaryOperationType::NOT;
     } else if (currentTokenIs(Token::MINUS)) {
@@ -113,7 +113,7 @@ AstNode *Parser::parseFactor(int level) {
         return nullptr;
     }
     while (true) {
-        ast::BinaryOperationType operationType = 0;
+        ast::BinaryOperationType operationType;
         if (currentTokenIs(Token::STAR)) {
             operationType = ast::BinaryOperationType::MULTIPLICATION;
         } else if (currentTokenIs(Token::DIV)) {
@@ -147,7 +147,7 @@ AstNode *Parser::parseTerm(int level) {
         return nullptr;
     }
     while (true) {
-        ast::BinaryOperationType operationType = 0;
+        ast::BinaryOperationType operationType;
         if (currentTokenIs(Token::PLUS)) {
             operationType = ast::BinaryOperationType::ADDITION;
         } else if (currentTokenIs(Token::MINUS)) {
@@ -181,7 +181,7 @@ AstNode *Parser::parseComparison(int level) {
         return nullptr;
     }
     while (true) {
-        ast::BinaryOperationType operationType = 0;
+        ast::BinaryOperationType operationType;
         if (currentTokenIs(Token::LESS_THAN)) {
             operationType = ast::BinaryOperationType::LESS_THAN;
         } else if (currentTokenIs(Token::LESS_EQUALS)) {
@@ -219,7 +219,7 @@ AstNode *Parser::parseEquality(int level) {
         return nullptr;
     }
     while (true) {
-        ast::BinaryOperationType operationType = 0;
+        ast::BinaryOperationType operationType;
         if (currentTokenIs(Token::DOUBLE_EQUALS)) {
             operationType = ast::BinaryOperationType::EQUALS;
         } else if (currentTokenIs(Token::NOT_EQUALS)) {
@@ -255,7 +255,7 @@ AstNode *Parser::parseExpression(int level) {
     }
 
     while (true) {
-        ast::BinaryOperationType operationType = 0;
+        ast::BinaryOperationType operationType;
         if (currentTokenIs(Token::AND)) {
             operationType = ast::BinaryOperationType::AND;
         } else if (currentTokenIs(Token::OR)) {
