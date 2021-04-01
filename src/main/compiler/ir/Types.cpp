@@ -92,6 +92,9 @@ void IrGenerator::visitStringNode(StringNode *node) {
     std::vector<llvm::Value *> args = {data, size, maxSize};
     auto value = createStdLibCall("createString", args);
 
+    if (currentDestination == nullptr) {
+        currentDestination = createEntryBlockAlloca(getStringType()->getPointerTo(), "localString");
+    }
     builder.CreateStore(value, currentDestination);
 
     nodesToValues[node] = currentDestination;

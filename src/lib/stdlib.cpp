@@ -66,6 +66,9 @@ string *createString(char *data, long size, long maxSize) {
     s->buf = (char *)malloc(s->maxSize);
     if (data != nullptr) {
         memcpy(s->buf, data, s->size);
+        memset(s->buf + s->size, 0, s->maxSize - s->size);
+    } else {
+        memset(s->buf, 0, s->maxSize);
     }
     return s;
 }
