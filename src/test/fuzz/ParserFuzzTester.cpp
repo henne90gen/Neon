@@ -10,7 +10,7 @@ extern "C" int LLVMFuzzerTestOneInput(const uint8_t *data, size_t size) {
     Lexer lexer(&codeProvider, logger);
     auto context = new llvm::LLVMContext();
     auto module = new Module("", *context);
-    Parser parser(lexer, module, logger);
-    parser.run();
+    Parser parser(logger, lexer);
+    parser.run(module);
     return 0;
 }

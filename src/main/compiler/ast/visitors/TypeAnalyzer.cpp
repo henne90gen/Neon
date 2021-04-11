@@ -1,209 +1,268 @@
 #include "TypeAnalyzer.h"
 
-
-#include "../nodes/AllNodes.h"
 #include "util/Utils.h"
 
 void TypeAnalyzer::visitFunctionNode(FunctionNode *node) {
-    for (auto &argument : node->getArguments()) {
-        argument->accept(this);
+    for (auto &argument : node->arguments) {
+        visitNode(AST_NODE(argument));
     }
-    if (!node->isExternal()) {
-        node->getBody()->accept(this);
+    if (!node->is_external()) {
+        visitNode(node->body);
     }
 }
 
 void TypeAnalyzer::visitCallNode(CallNode *node) {
-    auto result = functionResolver.resolveFunction(module, node->getName());
+    auto result = functionResolver.resolveFunction(module, node->name);
     if (!result.functionExists) {
-        std::cerr << "TypeAnalyzer: Undefined function " << node->getName() << std::endl;
+        std::cerr << "TypeAnalyzer: Undefined function " << node->name << std::endl;
         return;
     }
-    for (auto *const arg : node->getArguments()) {
-        arg->accept(this);
+    for (auto *const arg : node->arguments) {
+        visitNode(arg);
     }
-    nodeTypeMap[node] = result.signature.returnType;
+    nodeTypeMap[AST_NODE(node)] = result.signature.returnType;
 }
 
 void TypeAnalyzer::visitVariableNode(VariableNode *node) {
-    const auto &itr = variableTypeMap.find(node->getName());
+    const auto &itr = variableTypeMap.find(node->name);
     if (itr == variableTypeMap.end()) {
-        std::cerr << "TypeAnalyzer: Undefined variable " << node->getName() << std::endl;
+        std::cerr << "TypeAnalyzer: Undefined variable " << node->name << std::endl;
         return;
     }
-    nodeTypeMap[node] = itr->second;
+    nodeTypeMap[AST_NODE(node)] = itr->second;
 }
 
 void TypeAnalyzer::visitVariableDefinitionNode(VariableDefinitionNode *node) {
-    nodeTypeMap[node] = node->getType();
-    variableTypeMap[node->getName()] = node->getType();
+    nodeTypeMap[AST_NODE(node)] = node->type;
+    variableTypeMap[node->name] = node->type;
 }
 
 void TypeAnalyzer::visitBinaryOperationNode(BinaryOperationNode *node) {
-    node->getLeft()->accept(this);
-    node->getRight()->accept(this);
-    auto leftType = nodeTypeMap[node->getLeft()];
-    auto rightType = nodeTypeMap[node->getRight()];
+    visitNode(node->left);
+    visitNode(node->right);
+    auto leftType = nodeTypeMap[node->left];
+    auto rightType = nodeTypeMap[node->right];
     if (leftType == rightType) {
-        if (node->getType() == ast::BinaryOperationType::ADDITION ||
-            node->getType() == ast::BinaryOperationType::SUBTRACTION ||
-            node->getType() == ast::BinaryOperationType::MULTIPLICATION ||
-            node->getType() == ast::BinaryOperationType::DIVISION) {
-            nodeTypeMap[node] = leftType;
-        } else if (node->getType() == ast::BinaryOperationType::LESS_EQUALS ||
-                   node->getType() == ast::BinaryOperationType::LESS_THAN ||
-                   node->getType() == ast::BinaryOperationType::GREATER_EQUALS ||
-                   node->getType() == ast::BinaryOperationType::GREATER_THAN ||
-                   node->getType() == ast::BinaryOperationType::EQUALS ||
-                   node->getType() == ast::BinaryOperationType::NOT_EQUALS) {
-            nodeTypeMap[node] = ast::DataType(ast::SimpleDataType::BOOL);
+        if (node->type == ast::BinaryOperationType::ADDITION || node->type == ast::BinaryOperationType::SUBTRACTION ||
+            node->type == ast::BinaryOperationType::MULTIPLICATION ||
+            node->type == ast::BinaryOperationType::DIVISION) {
+            nodeTypeMap[AST_NODE(node)] = leftType;
+        } else if (node->type == ast::BinaryOperationType::LESS_EQUALS ||
+                   node->type == ast::BinaryOperationType::LESS_THAN ||
+                   node->type == ast::BinaryOperationType::GREATER_EQUALS ||
+                   node->type == ast::BinaryOperationType::GREATER_THAN ||
+                   node->type == ast::BinaryOperationType::EQUALS ||
+                   node->type == ast::BinaryOperationType::NOT_EQUALS) {
+            nodeTypeMap[AST_NODE(node)] = ast::DataType(ast::SimpleDataType::BOOLEAN);
         }
         return;
     }
-    std::cerr << "TypeAnalyzer: Binary operation type mismatch: " << to_string(leftType) << " "
-              << to_string(node->getType()) << " " << to_string(rightType) << std::endl;
+    std::cerr << "TypeAnalyzer: Binary operation type mismatch: " << to_string(leftType) << " " << to_string(node->type)
+              << " " << to_string(rightType) << std::endl;
 }
 
 void TypeAnalyzer::visitUnaryOperationNode(UnaryOperationNode *node) {
-    node->getChild()->accept(this);
-    if (node->getType() == ast::UnaryOperationType::NOT &&
-        nodeTypeMap[node->getChild()] == ast::DataType(ast::SimpleDataType::BOOL)) {
-        nodeTypeMap[node] = ast::DataType(ast::SimpleDataType::BOOL);
+    visitNode(node->child);
+    if (node->type == ast::UnaryOperationType::NOT &&
+        nodeTypeMap[node->child] == ast::DataType(ast::SimpleDataType::BOOLEAN)) {
+        nodeTypeMap[AST_NODE(node)] = ast::DataType(ast::SimpleDataType::BOOLEAN);
         return;
     }
-    if (node->getType() == ast::UnaryOperationType::NEGATE) {
-        if (nodeTypeMap[node->getChild()] == ast::DataType(ast::SimpleDataType::INT)) {
-            nodeTypeMap[node] = ast::DataType(ast::SimpleDataType::INT);
+    if (node->type == ast::UnaryOperationType::NEGATE) {
+        if (nodeTypeMap[node->child] == ast::DataType(ast::SimpleDataType::INTEGER)) {
+            nodeTypeMap[AST_NODE(node)] = ast::DataType(ast::SimpleDataType::INTEGER);
             return;
         }
-        if (nodeTypeMap[node->getChild()] == ast::DataType(ast::SimpleDataType::FLOAT)) {
-            nodeTypeMap[node] = ast::DataType(ast::SimpleDataType::FLOAT);
+        if (nodeTypeMap[node->child] == ast::DataType(ast::SimpleDataType::FLOAT)) {
+            nodeTypeMap[AST_NODE(node)] = ast::DataType(ast::SimpleDataType::FLOAT);
             return;
         }
     }
-    // TODO(henne): unary operators can also be of other types than bool, we need to add support for that as well
-    std::cerr << "TypeAnalyzer: Unary operation type mismatch: " << to_string(node->getType()) << std::endl;
+    std::cerr << "TypeAnalyzer: Unary operation type mismatch: " << to_string(node->type) << std::endl;
 }
 
 void TypeAnalyzer::visitAssignmentNode(AssignmentNode *node) {
-    node->getRight()->accept(this);
-    node->getLeft()->accept(this);
-    ast::DataType leftType = nodeTypeMap[node->getLeft()];
-    ast::DataType rightType = nodeTypeMap[node->getRight()];
+    visitNode(node->right);
+    visitNode(node->left);
+    ast::DataType leftType = nodeTypeMap[node->left];
+    ast::DataType rightType = nodeTypeMap[node->right];
     if (leftType != rightType) {
         std::cerr << "TypeAnalyzer: Assignment type mismatch: " << to_string(leftType) << " = " << to_string(rightType)
                   << std::endl;
         return;
     }
 
-    nodeTypeMap[node] = leftType;
+    nodeTypeMap[AST_NODE(node)] = leftType;
 }
 
 void TypeAnalyzer::visitAssertNode(AssertNode *node) {
-    node->getCondition()->accept(this);
-    nodeTypeMap[node] = nodeTypeMap[node->getCondition()];
+    visitNode(node->condition);
+    nodeTypeMap[AST_NODE(node)] = nodeTypeMap[node->condition];
 }
 
 void TypeAnalyzer::visitSequenceNode(SequenceNode *node) {
-    for (auto *child : node->getChildren()) {
-        child->accept(this);
+    for (auto *child : node->children) {
+        visitNode(child);
     }
 }
 
 void TypeAnalyzer::visitStatementNode(StatementNode *node) {
-    if (node->getChild() == nullptr) {
+    if (node->child == nullptr) {
         return;
     }
-    node->getChild()->accept(this);
-    nodeTypeMap[node] = nodeTypeMap[node->getChild()];
+    visitNode(node->child);
+    nodeTypeMap[AST_NODE(node)] = nodeTypeMap[node->child];
 }
 
-void TypeAnalyzer::visitBoolNode(BoolNode *node) { nodeTypeMap[node] = ast::DataType(ast::SimpleDataType::BOOL); }
-
-void TypeAnalyzer::visitFloatNode(FloatNode *node) { nodeTypeMap[node] = ast::DataType(ast::SimpleDataType::FLOAT); }
-
-void TypeAnalyzer::visitIntegerNode(IntegerNode *node) { nodeTypeMap[node] = ast::DataType(ast::SimpleDataType::INT); }
-
-void TypeAnalyzer::visitStringNode(StringNode *node) { nodeTypeMap[node] = ast::DataType(ast::SimpleDataType::STRING); }
+void TypeAnalyzer::visitLiteralNode(LiteralNode *node) {
+    switch (node->type) {
+    case LiteralType::BOOL:
+        nodeTypeMap[AST_NODE(node)] = ast::DataType(ast::SimpleDataType::BOOLEAN);
+        break;
+    case LiteralType::INTEGER:
+        nodeTypeMap[AST_NODE(node)] = ast::DataType(ast::SimpleDataType::INTEGER);
+        break;
+    case LiteralType::FLOAT:
+        nodeTypeMap[AST_NODE(node)] = ast::DataType(ast::SimpleDataType::FLOAT);
+        break;
+    case LiteralType::STRING:
+        nodeTypeMap[AST_NODE(node)] = ast::DataType(ast::SimpleDataType::STRING);
+        break;
+    }
+}
 
 void TypeAnalyzer::visitIfStatementNode(IfStatementNode *node) {
-    node->getCondition()->accept(this);
-    if (nodeTypeMap[node->getCondition()] != ast::DataType(ast::SimpleDataType::BOOL)) {
+    visitNode(node->condition);
+    if (nodeTypeMap[node->condition] != ast::DataType(ast::SimpleDataType::BOOLEAN)) {
         std::cerr << "If condition is not of type bool" << std::endl;
         return;
     }
-    if (node->getIfBody() != nullptr) {
-        node->getIfBody()->accept(this);
+    if (node->ifBody != nullptr) {
+        visitNode(node->ifBody);
     }
-    if (node->getElseBody() != nullptr) {
-        node->getElseBody()->accept(this);
+    if (node->elseBody != nullptr) {
+        visitNode(node->elseBody);
     }
 }
 
 void TypeAnalyzer::visitForStatementNode(ForStatementNode *node) {
-    if (node->getInit() != nullptr) {
-        node->getInit()->accept(this);
+    if (node->init != nullptr) {
+        visitNode(node->init);
     }
 
-    node->getCondition()->accept(this);
-    if (nodeTypeMap[node->getCondition()] != ast::DataType(ast::SimpleDataType::BOOL)) {
+    visitNode(node->condition);
+    if (nodeTypeMap[node->condition] != ast::DataType(ast::SimpleDataType::BOOLEAN)) {
         std::cerr << "For condition is not of type bool" << std::endl;
         return;
     }
 
-    if (node->getUpdate() != nullptr) {
-        node->getUpdate()->accept(this);
+    if (node->update != nullptr) {
+        visitNode(node->update);
     }
 
-    if (node->getBody() != nullptr) {
-        node->getBody()->accept(this);
+    if (node->body != nullptr) {
+        visitNode(node->body);
     }
 }
 
 void TypeAnalyzer::visitTypeDeclarationNode(TypeDeclarationNode *node) {
     std::vector<ComplexTypeMember> members = {};
-    for (const auto &member : node->getMembers()) {
-        ComplexTypeMember m = {member->getDefinition()->getName(), member->getDefinition()->getType()};
+    for (const auto &member : node->members) {
+        ComplexTypeMember m = {
+              member->variable_definition->name,
+              member->variable_definition->type,
+        };
         members.push_back(m);
     }
-    complexTypeMap[node->getType()] = {node->getType(), members};
+    complexTypeMap[node->type()] = {node->type(), members};
 }
 
 void TypeAnalyzer::visitMemberAccessNode(MemberAccessNode *node) {
-    // FIXME test this whole function (it has not been run yet)
-    auto variables = node->linearizeAccessTree();
+    auto variables = node->linearize_access_tree();
     if (variables.empty()) {
         log.error("Failed to linearize MemberAccess tree");
         return;
     }
 
-    auto &variableType = variableTypeMap[variables[0]->getName()];
+    auto &variableType = variableTypeMap[variables[0]->name];
     auto currentType = complexTypeMap[variableType];
-    nodeTypeMap[variables[0]] = currentType.type;
+    nodeTypeMap[AST_NODE(variables[0])] = currentType.type;
     for (int i = 1; i < variables.size(); i++) {
         auto *variable = variables[i];
         for (const auto &member : currentType.members) {
-            if (member.name != variable->getName()) {
+            if (member.name != variable->name) {
                 continue;
             }
 
             if (ast::isSimpleDataType(member.type)) {
-                nodeTypeMap[node] = member.type;
-                nodeTypeMap[variable] = member.type;
+                nodeTypeMap[AST_NODE(node)] = member.type;
+                nodeTypeMap[AST_NODE(variable)] = member.type;
                 break;
             }
 
             currentType = complexTypeMap[member.type];
-            nodeTypeMap[variable] = currentType.type;
+            nodeTypeMap[AST_NODE(variable)] = currentType.type;
         }
     }
 }
 
 std::pair<std::unordered_map<AstNode *, ast::DataType>, std::unordered_map<std::string, ast::DataType>>
-TypeAnalyzer::run(AstNode *root) {
-    if (root == nullptr) {
-        return {};
-    }
-    root->accept(this);
+TypeAnalyzer::run(AST &tree) {
+    visitNode(tree.root());
     return std::make_pair(nodeTypeMap, variableTypeMap);
+}
+
+void TypeAnalyzer::visitNode(AstNode *node) {
+    switch (node->type) {
+    case ast::NodeType::SEQUENCE:
+        visitSequenceNode(&node->sequence);
+        break;
+    case ast::NodeType::STATEMENT:
+        visitStatementNode(&node->statement);
+        break;
+    case ast::NodeType::LITERAL:
+        visitLiteralNode(&node->literal);
+        break;
+    case ast::NodeType::UNARY_OPERATION:
+        visitUnaryOperationNode(&node->unary_operation);
+        break;
+    case ast::NodeType::BINARY_OPERATION:
+        visitBinaryOperationNode(&node->binary_operation);
+        break;
+    case ast::NodeType::FUNCTION:
+        visitFunctionNode(&node->function);
+        break;
+    case ast::NodeType::CALL:
+        visitCallNode(&node->call);
+        break;
+    case ast::NodeType::VARIABLE_DEFINITION:
+        visitVariableDefinitionNode(&node->variable_definition);
+        break;
+    case ast::NodeType::VARIABLE:
+        visitVariableNode(&node->variable);
+        break;
+    case ast::NodeType::ASSIGNMENT:
+        visitAssignmentNode(&node->assignment);
+        break;
+    case ast::NodeType::IF_STATEMENT:
+        visitIfStatementNode(&node->if_statement);
+        break;
+    case ast::NodeType::FOR_STATEMENT:
+        visitForStatementNode(&node->for_statement);
+        break;
+    case ast::NodeType::TYPE_DECLARATION:
+        visitTypeDeclarationNode(&node->type_declaration);
+        break;
+    case ast::NodeType::MEMBER_ACCESS:
+        visitMemberAccessNode(&node->member_access);
+        break;
+    case ast::NodeType::ASSERT:
+        visitAssertNode(&node->assert);
+        break;
+    case ast::NodeType::TYPE_MEMBER:
+    case ast::NodeType::IMPORT:
+    case ast::NodeType::COMMENT:
+        // do nothing
+        break;
+    }
 }

@@ -4,7 +4,6 @@
 #include "../Program.h"
 #include "MetaTypes.h"
 #include "ModuleCompileState.h"
-#include "ast/nodes/FunctionNode.h"
 
 class Compiler {
   public:

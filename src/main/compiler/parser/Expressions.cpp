@@ -1,12 +1,13 @@
 #include "Parser.h"
 
-AstNode *Parser::parseMemberAccess(int level) {
+MemberAccessNode *Parser::parseMemberAccess(int level) {
     auto beforeTokenIdx = currentTokenIdx;
-    AstNode *lastNode = parseVariable(level + 1);
+    auto *lastNode = AST_NODE(parseVariable(level + 1));
     if (lastNode == nullptr) {
         currentTokenIdx = beforeTokenIdx;
         return nullptr;
     }
+
     bool foundAtLeastOneDot = false;
     while (true) {
         if (!currentTokenIs(Token::DOT)) {
@@ -22,10 +23,7 @@ AstNode *Parser::parseMemberAccess(int level) {
             return nullptr;
         }
 
-        auto *op = new MemberAccessNode();
-        op->setLeft(lastNode);
-        op->setRight(other);
-        lastNode = op;
+        lastNode = AST_NODE(tree.createMemberAccess(lastNode, AST_NODE(other)));
     }
 
     if (!foundAtLeastOneDot) {
@@ -33,29 +31,29 @@ AstNode *Parser::parseMemberAccess(int level) {
         return nullptr;
     }
 
-    return lastNode;
+    return &lastNode->member_access;
 }
 
 AstNode *Parser::parsePrimary(int level) {
     auto beforeTokenIdx = currentTokenIdx;
     auto *memberAccess = parseMemberAccess(level + 1);
     if (memberAccess != nullptr) {
-        return memberAccess;
+        return AST_NODE(memberAccess);
     }
 
     auto *functionCall = parseFunctionCall(level + 1);
     if (functionCall != nullptr) {
-        return functionCall;
+        return AST_NODE(functionCall);
     }
 
     auto *variable = parseVariable(level + 1);
     if (variable != nullptr) {
-        return variable;
+        return AST_NODE(variable);
     }
 
     auto *literal = parseLiteral(level + 1);
     if (literal != nullptr) {
-        return literal;
+        return AST_NODE(literal);
     }
 
     if (!currentTokenIs(Token::LEFT_PARAN)) {
@@ -100,9 +98,7 @@ AstNode *Parser::parseUnary(int level) {
         return nullptr;
     }
 
-    auto *node = new UnaryOperationNode(operationType);
-    node->setChild(child);
-    return node;
+    return AST_NODE(tree.createUnaryOperation(operationType, child));
 }
 
 AstNode *Parser::parseFactor(int level) {
@@ -112,6 +108,7 @@ AstNode *Parser::parseFactor(int level) {
         currentTokenIdx = beforeTokenIdx;
         return nullptr;
     }
+
     while (true) {
         ast::BinaryOperationType operationType;
         if (currentTokenIs(Token::STAR)) {
@@ -130,10 +127,7 @@ AstNode *Parser::parseFactor(int level) {
             return nullptr;
         }
 
-        auto *op = new BinaryOperationNode(operationType);
-        op->setLeft(lastUnary);
-        op->setRight(other);
-        lastUnary = op;
+        lastUnary = AST_NODE(tree.createBinaryOperation(operationType, lastUnary, other));
     }
 
     return lastUnary;
@@ -146,6 +140,7 @@ AstNode *Parser::parseTerm(int level) {
         currentTokenIdx = beforeTokenIdx;
         return nullptr;
     }
+
     while (true) {
         ast::BinaryOperationType operationType;
         if (currentTokenIs(Token::PLUS)) {
@@ -164,10 +159,7 @@ AstNode *Parser::parseTerm(int level) {
             return nullptr;
         }
 
-        auto *op = new BinaryOperationNode(operationType);
-        op->setLeft(lastFactor);
-        op->setRight(other);
-        lastFactor = op;
+        lastFactor = AST_NODE(tree.createBinaryOperation(operationType, lastFactor, other));
     }
 
     return lastFactor;
@@ -180,6 +172,7 @@ AstNode *Parser::parseComparison(int level) {
         currentTokenIdx = beforeTokenIdx;
         return nullptr;
     }
+
     while (true) {
         ast::BinaryOperationType operationType;
         if (currentTokenIs(Token::LESS_THAN)) {
@@ -202,10 +195,7 @@ AstNode *Parser::parseComparison(int level) {
             return nullptr;
         }
 
-        auto *op = new BinaryOperationNode(operationType);
-        op->setLeft(lastTerm);
-        op->setRight(other);
-        lastTerm = op;
+        lastTerm = AST_NODE(tree.createBinaryOperation(operationType, lastTerm, other));
     }
 
     return lastTerm;
@@ -218,6 +208,7 @@ AstNode *Parser::parseEquality(int level) {
         currentTokenIdx = beforeTokenIdx;
         return nullptr;
     }
+
     while (true) {
         ast::BinaryOperationType operationType;
         if (currentTokenIs(Token::DOUBLE_EQUALS)) {
@@ -236,10 +227,7 @@ AstNode *Parser::parseEquality(int level) {
             return nullptr;
         }
 
-        auto *op = new BinaryOperationNode(operationType);
-        op->setLeft(lastComparison);
-        op->setRight(other);
-        lastComparison = op;
+        lastComparison = AST_NODE(tree.createBinaryOperation(operationType, lastComparison, other));
     }
 
     return lastComparison;
@@ -248,8 +236,8 @@ AstNode *Parser::parseEquality(int level) {
 AstNode *Parser::parseExpression(int level) {
     log.debug(indent(level) + "parsing expression node");
     auto beforeTokenIdx = currentTokenIdx;
-    auto *last = parseEquality(level + 1);
-    if (last == nullptr) {
+    auto *lastEquality = parseEquality(level + 1);
+    if (lastEquality == nullptr) {
         currentTokenIdx = beforeTokenIdx;
         return nullptr;
     }
@@ -272,11 +260,8 @@ AstNode *Parser::parseExpression(int level) {
             return nullptr;
         }
 
-        auto *op = new BinaryOperationNode(operationType);
-        op->setLeft(last);
-        op->setRight(other);
-        last = op;
+        lastEquality = AST_NODE(tree.createBinaryOperation(operationType, lastEquality, other));
     }
 
-    return last;
+    return lastEquality;
 }

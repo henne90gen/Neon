@@ -5,23 +5,23 @@ LiteralNode *Parser::parseLiteral(int level) {
 
     if (currentTokenIs(Token::INTEGER)) {
         log.debug(indent(level) + "parsing integer node");
-        int value = std::stoi(currentTokenContent());
+        int64_t value = std::stoi(currentTokenContent());
         currentTokenIdx++;
-        return new IntegerNode(value);
+        return tree.createLiteralInteger(value);
     }
 
     if (currentTokenIs(Token::FLOAT)) {
         log.debug(indent(level) + "parsed float node");
-        float value = std::stof(currentTokenContent());
+        double value = std::stof(currentTokenContent());
         currentTokenIdx++;
-        return new FloatNode(value);
+        return tree.createLiteralFloat(value);
     }
 
     if (currentTokenIs(Token::BOOLEAN)) {
         log.debug(indent(level) + "parsed boolean node");
         bool value = currentTokenContent() == "true";
         currentTokenIdx++;
-        return new BoolNode(value);
+        return tree.createLiteralBool(value);
     }
 
     if (currentTokenIs(Token::STRING)) {
@@ -29,7 +29,7 @@ LiteralNode *Parser::parseLiteral(int level) {
         std::string value = currentTokenContent();
         value = value.substr(1, value.size() - 2);
         currentTokenIdx++;
-        return new StringNode(value);
+        return tree.createLiteralString(value);
     }
 
     log.debug(indent(level) + "failed to parse literal node");
@@ -43,7 +43,8 @@ TypeMemberNode *Parser::parseMemberVariable(int level) {
         currentTokenIdx = beforeTokenIdx;
         return nullptr;
     }
-    return new TypeMemberNode(node);
+
+    return tree.createTypeMember(node);
 }
 
 TypeDeclarationNode *Parser::parseTypeDeclaration(int level) {
@@ -94,7 +95,5 @@ TypeDeclarationNode *Parser::parseTypeDeclaration(int level) {
 
     currentTokenIdx++;
 
-    auto *node = new TypeDeclarationNode(name);
-    node->setMembers(memberVariables);
-    return node;
+    return tree.createTypeDeclaration(name, memberVariables);
 }

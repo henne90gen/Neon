@@ -4,7 +4,7 @@
 #include <utility>
 
 namespace ast {
-enum SimpleDataType { VOID, BOOL, INT, FLOAT, STRING };
+enum SimpleDataType { VOID, BOOLEAN, INTEGER, FLOAT, STRING };
 }
 
 std::string to_string(ast::SimpleDataType type);
@@ -13,7 +13,7 @@ ast::SimpleDataType from_string(const std::string &type);
 namespace ast {
 
 struct DataType {
-    std::string typeName = "";
+    std::string typeName;
     explicit DataType() : typeName(to_string(SimpleDataType::VOID)) {}
     explicit DataType(SimpleDataType simple) : typeName(to_string(simple)) {}
     explicit DataType(std::string typeName) : typeName(std::move(typeName)) {}
@@ -22,7 +22,7 @@ struct DataType {
 inline bool operator==(const DataType &lhs, const DataType &rhs) { return lhs.typeName == rhs.typeName; }
 inline bool operator!=(const DataType &lhs, const DataType &rhs) { return lhs.typeName != rhs.typeName; }
 
-enum NodeType {
+enum class NodeType {
     SEQUENCE,
     STATEMENT,
     LITERAL,
@@ -32,7 +32,6 @@ enum NodeType {
     CALL,
     VARIABLE_DEFINITION,
     VARIABLE,
-    ARRAY_ACCESS,
     ASSIGNMENT,
     IF_STATEMENT,
     FOR_STATEMENT,
@@ -44,7 +43,7 @@ enum NodeType {
     COMMENT,
 };
 
-enum BinaryOperationType {
+enum class BinaryOperationType {
     ADDITION,
     MULTIPLICATION,
     SUBTRACTION,
@@ -59,7 +58,7 @@ enum BinaryOperationType {
     OR,
 };
 
-enum UnaryOperationType {
+enum class UnaryOperationType {
     NOT,
     NEGATE,
 };

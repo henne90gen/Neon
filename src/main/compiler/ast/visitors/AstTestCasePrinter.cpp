@@ -1,9 +1,9 @@
 #include "AstTestCasePrinter.h"
 
-#include "../nodes/AllNodes.h"
 #include "util/Utils.h"
 
-void AstTestCasePrinter::printNode(AstNode *node) const {
+#if 0
+void AstTestCasePrinter::printNode(AstNodeID node) const {
     std::cout << "        {" << indentation << ", " << to_string(node->getAstNodeType()) << "}," << std::endl;
 }
 
@@ -142,3 +142,4 @@ void AstTestCasePrinter::run() {
     std::cout << "}" << std::endl;
     std::cout << std::endl;
 }
+#endif

@@ -4,8 +4,7 @@
 #include "../../Module.h"
 #include "../FunctionResolver.h"
 #include "../TypeResolver.h"
-#include "../ast/AstVisitor.h"
-#include "../ast/nodes/AllNodes.h"
+#include "../ast/AstNode.h"
 #include "Scope.h"
 
 #include <iostream>
@@ -15,29 +14,26 @@
 #include <llvm/IR/LLVMContext.h>
 #include <llvm/IR/Module.h>
 
-class IrGenerator : public AstVisitor {
+class IrGenerator {
   public:
     explicit IrGenerator(const BuildEnv *buildEnv, Module *module, FunctionResolver &functionResolver,
                          TypeResolver &typeResolver, const Logger &logger);
 
-    void visitAssertNode(AssertNode *node) override;
-    void visitAssignmentNode(AssignmentNode *node) override;
-    void visitBinaryOperationNode(BinaryOperationNode *node) override;
-    void visitBoolNode(BoolNode *node) override;
-    void visitCallNode(CallNode *node) override;
-    void visitFloatNode(FloatNode *node) override;
-    void visitForStatementNode(ForStatementNode *node) override;
-    void visitFunctionNode(FunctionNode *node) override;
-    void visitIfStatementNode(IfStatementNode *node) override;
-    void visitIntegerNode(IntegerNode *node) override;
-    void visitMemberAccessNode(MemberAccessNode *node) override;
-    void visitSequenceNode(SequenceNode *node) override;
-    void visitStatementNode(StatementNode *node) override;
-    void visitTypeDeclarationNode(TypeDeclarationNode *node) override;
-    void visitStringNode(StringNode *node) override;
-    void visitUnaryOperationNode(UnaryOperationNode *node) override;
-    void visitVariableNode(VariableNode *node) override;
-    void visitVariableDefinitionNode(VariableDefinitionNode *node) override;
+    void visitAssertNode(AssertNode *node);
+    void visitAssignmentNode(AssignmentNode *node);
+    void visitBinaryOperationNode(BinaryOperationNode *node);
+    void visitCallNode(CallNode *node);
+    void visitForStatementNode(ForStatementNode *node);
+    void visitFunctionNode(FunctionNode *node);
+    void visitIfStatementNode(IfStatementNode *node);
+    void visitMemberAccessNode(MemberAccessNode *node);
+    void visitSequenceNode(SequenceNode *node);
+    void visitStatementNode(StatementNode *node);
+    void visitTypeDeclarationNode(TypeDeclarationNode *node);
+    void visitStringNode(LiteralNode *node);
+    void visitUnaryOperationNode(UnaryOperationNode *node);
+    void visitVariableNode(VariableNode *node);
+    void visitVariableDefinitionNode(VariableDefinitionNode *node);
 
     void run();
 
@@ -97,4 +93,6 @@ class IrGenerator : public AstVisitor {
     llvm::Value *createStdLibCall(const std::string &functionName, const std::vector<llvm::Value *> &args);
 
     std::string getTypeFormatSpecifier(AstNode *node);
+    void visitNode(AstNode *node);
+    void visitLiteralNode(LiteralNode *node);
 };

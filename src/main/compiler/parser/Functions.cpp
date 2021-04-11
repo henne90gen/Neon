@@ -4,6 +4,7 @@ CallNode *Parser::parseFunctionCall(int level) {
     if (!currentTokenIs(Token::IDENTIFIER)) {
         return nullptr;
     }
+
     auto beforeTokenIdx = currentTokenIdx;
     std::string name = currentTokenContent();
     currentTokenIdx++;
@@ -37,11 +38,7 @@ CallNode *Parser::parseFunctionCall(int level) {
 
     currentTokenIdx++;
 
-    auto *callNode = new CallNode(name);
-    for (auto *const param : params) {
-        callNode->getArguments().push_back(param);
-    }
-    return callNode;
+    return tree.createCall(name, params);
 }
 
 FunctionNode *Parser::parseFunction(int level) {
@@ -96,11 +93,5 @@ FunctionNode *Parser::parseFunction(int level) {
     }
 
     auto *body = parseScope(level + 1);
-
-    auto *functionNode = new FunctionNode(functionName, returnType);
-    functionNode->setBody(body);
-    for (auto *node : params) {
-        functionNode->getArguments().push_back(node);
-    }
-    return functionNode;
+    return tree.createFunction(functionName, returnType, params, body);
 }

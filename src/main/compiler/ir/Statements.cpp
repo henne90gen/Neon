@@ -3,16 +3,16 @@
 void IrGenerator::visitStatementNode(StatementNode *node) {
     log.debug("Enter Statement");
 
-    if (node->getChild() == nullptr) {
+    if (node->child == nullptr) {
         return;
     }
 
-    node->getChild()->accept(this);
-    auto *value = nodesToValues[node->getChild()];
-    if (node->isReturnStatement()) {
+    visitNode(node->child);
+    auto *value = nodesToValues[node->child];
+    if (node->returnStatement) {
         builder.CreateRet(value);
     }
-    nodesToValues[node] = value;
+    nodesToValues[AST_NODE(node)] = value;
 
     log.debug("Exit Statement");
 }
@@ -21,26 +21,26 @@ bool hasReturnStatement(AstNode *node) {
     if (node == nullptr) {
         return false;
     }
-    switch (node->getAstNodeType()) {
-    case ast::SEQUENCE: {
-        auto children = (dynamic_cast<SequenceNode *>(node))->getChildren();
+    switch (node->type) {
+    case ast::NodeType::SEQUENCE: {
+        auto children = node->sequence.children;
         if (!children.empty()) {
             return hasReturnStatement(children[children.size() - 1]);
         }
         return false;
     }
-    case ast::STATEMENT: {
-        return (dynamic_cast<StatementNode *>(node))->isReturnStatement();
+    case ast::NodeType::STATEMENT: {
+        return node->statement.returnStatement;
     }
-    case ast::LITERAL:
-    case ast::UNARY_OPERATION:
-    case ast::BINARY_OPERATION:
-    case ast::FUNCTION:
-    case ast::CALL:
-    case ast::VARIABLE_DEFINITION:
-    case ast::VARIABLE:
-    case ast::ASSIGNMENT:
-    case ast::IF_STATEMENT:
+    case ast::NodeType::LITERAL:
+    case ast::NodeType::UNARY_OPERATION:
+    case ast::NodeType::BINARY_OPERATION:
+    case ast::NodeType::FUNCTION:
+    case ast::NodeType::CALL:
+    case ast::NodeType::VARIABLE_DEFINITION:
+    case ast::NodeType::VARIABLE:
+    case ast::NodeType::ASSIGNMENT:
+    case ast::NodeType::IF_STATEMENT:
     default:
         return false;
     }
@@ -49,8 +49,8 @@ bool hasReturnStatement(AstNode *node) {
 void IrGenerator::visitIfStatementNode(IfStatementNode *node) {
     log.debug("Enter IfStatement");
 
-    node->getCondition()->accept(this);
-    auto *condition = nodesToValues[node->getCondition()];
+    visitNode(node->condition);
+    auto *condition = nodesToValues[node->condition];
 
     llvm::Function *function = builder.GetInsertBlock()->getParent();
     llvm::BasicBlock *thenBB = llvm::BasicBlock::Create(context, "then", function);
@@ -60,10 +60,10 @@ void IrGenerator::visitIfStatementNode(IfStatementNode *node) {
     builder.CreateCondBr(condition, thenBB, elseBB);
 
     builder.SetInsertPoint(thenBB);
-    if (node->getIfBody() != nullptr) {
-        withScope([this, &node]() { node->getIfBody()->accept(this); });
+    if (node->ifBody != nullptr) {
+        withScope([this, &node]() { visitNode(node->ifBody); });
     }
-    if (!hasReturnStatement(node->getIfBody())) {
+    if (!hasReturnStatement(node->ifBody)) {
         // create branch instruction to jump to the merge block
         builder.CreateBr(mergeBB);
     }
@@ -71,10 +71,10 @@ void IrGenerator::visitIfStatementNode(IfStatementNode *node) {
     function->getBasicBlockList().push_back(elseBB);
     builder.SetInsertPoint(elseBB);
 
-    if (node->getElseBody() != nullptr) {
-        withScope([this, &node]() { node->getElseBody()->accept(this); });
+    if (node->elseBody != nullptr) {
+        withScope([this, &node]() { visitNode(node->elseBody); });
     }
-    if (!hasReturnStatement(node->getElseBody())) {
+    if (!hasReturnStatement(node->elseBody)) {
         // create branch instruction to jump to the merge block
         builder.CreateBr(mergeBB);
     }
@@ -89,7 +89,7 @@ void IrGenerator::visitForStatementNode(ForStatementNode *node) {
     log.debug("Enter ForStatement");
     pushScope();
 
-    node->getInit()->accept(this);
+    visitNode(node->init);
 
     llvm::Function *function = builder.GetInsertBlock()->getParent();
     llvm::BasicBlock *loopHeaderBB = llvm::BasicBlock::Create(context, "loop-header", function);
@@ -98,18 +98,18 @@ void IrGenerator::visitForStatementNode(ForStatementNode *node) {
     builder.CreateBr(loopHeaderBB);
     builder.SetInsertPoint(loopHeaderBB);
 
-    node->getCondition()->accept(this);
-    auto *condition = nodesToValues[node->getCondition()];
+    visitNode(node->condition);
+    auto *condition = nodesToValues[node->condition];
 
     builder.CreateCondBr(condition, loopBodyBB, loopExitBB);
 
     builder.SetInsertPoint(loopBodyBB);
 
-    if (node->getBody() != nullptr) {
-        node->getBody()->accept(this);
+    if (node->body != nullptr) {
+        visitNode(node->body);
     }
 
-    node->getUpdate()->accept(this);
+    visitNode(node->update);
 
     popScope();
 
@@ -120,9 +120,9 @@ void IrGenerator::visitForStatementNode(ForStatementNode *node) {
     log.debug("Exit ForStatement");
 }
 
-std::string IrGenerator::getTypeFormatSpecifier(AstNode *node) {
+std::string IrGenerator::getTypeFormatSpecifier(AstNode* node) {
     auto type = typeResolver.getTypeOf(module, node);
-    if (type == ast::DataType(ast::SimpleDataType::INT)) {
+    if (type == ast::DataType(ast::SimpleDataType::INTEGER)) {
         return "ld";
     }
     if (type == ast::DataType(ast::SimpleDataType::FLOAT)) {
@@ -134,8 +134,8 @@ std::string IrGenerator::getTypeFormatSpecifier(AstNode *node) {
 void IrGenerator::visitAssertNode(AssertNode *node) {
     log.debug("Enter Assert");
 
-    node->getCondition()->accept(this);
-    auto *condition = nodesToValues[node->getCondition()];
+    visitNode(node->condition);
+    auto *condition = nodesToValues[node->condition];
 
     llvm::Function *function = builder.GetInsertBlock()->getParent();
     llvm::BasicBlock *thenBB = llvm::BasicBlock::Create(context, "then", function);
@@ -151,16 +151,16 @@ void IrGenerator::visitAssertNode(AssertNode *node) {
     function->getBasicBlockList().push_back(elseBB);
     builder.SetInsertPoint(elseBB);
 
-    if (node->getCondition()->getAstNodeType() == ast::BINARY_OPERATION) {
-        auto *binaryOperation = reinterpret_cast<BinaryOperationNode *>(node->getCondition());
-        const std::string leftTypeSpecifier = getTypeFormatSpecifier(binaryOperation->getLeft());
-        const std::string rightTypeSpecifier = getTypeFormatSpecifier(binaryOperation->getRight());
+    if (node->condition->type == ast::NodeType::BINARY_OPERATION) {
+        auto binaryOperation = &node->condition->binary_operation;
+        const std::string leftTypeSpecifier = getTypeFormatSpecifier(binaryOperation->left);
+        const std::string rightTypeSpecifier = getTypeFormatSpecifier(binaryOperation->right);
         const std::string format = "> assert %s\nE assert %" + leftTypeSpecifier +
-                                   binaryOperation->operationToString() + "%" + rightTypeSpecifier + "\n";
+                                   binaryOperation->operation_string() + "%" + rightTypeSpecifier + "\n";
         auto *const formatStr = builder.CreateGlobalStringPtr(format);
-        auto *const conditionStr = builder.CreateGlobalStringPtr(binaryOperation->toString());
-        auto *const left = nodesToValues[binaryOperation->getLeft()];
-        auto *const right = nodesToValues[binaryOperation->getRight()];
+        auto *const conditionStr = builder.CreateGlobalStringPtr(to_string(AST_NODE(binaryOperation)));
+        auto *const left = nodesToValues[binaryOperation->left];
+        auto *const right = nodesToValues[binaryOperation->right];
         std::vector<llvm::Value *> args = {
               formatStr,
               conditionStr,
@@ -171,7 +171,7 @@ void IrGenerator::visitAssertNode(AssertNode *node) {
     } else {
         const std::string format = "E assert %s\n";
         auto *const formatStr = builder.CreateGlobalStringPtr(format);
-        auto *const conditionStr = builder.CreateGlobalStringPtr(node->getCondition()->toString());
+        auto *const conditionStr = builder.CreateGlobalStringPtr(to_string(node->condition));
         std::vector<llvm::Value *> args = {
               formatStr,
               conditionStr,

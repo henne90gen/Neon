@@ -1,25 +1,8 @@
 
 add_library(NeonCompiler
+        compiler/ast/AST.cpp
+        compiler/ast/AstNode.cpp
         compiler/ast/Types.cpp
-        compiler/ast/nodes/AssertNode.cpp
-        compiler/ast/nodes/AssignmentNode.cpp
-        compiler/ast/nodes/AstNode.cpp
-        compiler/ast/nodes/BinaryOperationNode.cpp
-        compiler/ast/nodes/CommentNode.cpp
-        compiler/ast/nodes/ForStatementNode.cpp
-        compiler/ast/nodes/FunctionNode.cpp
-        compiler/ast/nodes/IfStatementNode.cpp
-        compiler/ast/nodes/ImportNode.cpp
-        compiler/ast/nodes/LiteralNodes.cpp
-        compiler/ast/nodes/MemberAccessNode.cpp
-        compiler/ast/nodes/SequenceNode.cpp
-        compiler/ast/nodes/StatementNode.cpp
-        compiler/ast/nodes/TypeDeclarationNode.cpp
-        compiler/ast/nodes/TypeMemberNode.cpp
-        compiler/ast/nodes/UnaryOperationNode.cpp
-        compiler/ast/nodes/VariableDefinitionNode.cpp
-        compiler/ast/nodes/VariableNode.cpp
-        compiler/ast/visitors/AstInterpreter.cpp
         compiler/ast/visitors/AstPrinter.cpp
         compiler/ast/visitors/AstTestCasePrinter.cpp
         compiler/ast/visitors/TypeAnalyzer.cpp

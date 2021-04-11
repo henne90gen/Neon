@@ -1,8 +1,6 @@
 #pragma once
 
-#include "compiler/ast/nodes/AstNode.h"
-#include "compiler/ast/nodes/FunctionNode.h"
-#include "compiler/ast/nodes/ImportNode.h"
+#include "compiler/ast/AST.h"
 #include "compiler/lexer/Lexer.h"
 #include "compiler/lexer/Token.h"
 
@@ -32,7 +30,8 @@ class Module {
 
   public:
     CodeProvider *codeProvider;
-    AstNode *root = nullptr;
+
+    AST ast;
     std::vector<Token> tokens = {};
 
     llvm::Module llvmModule;

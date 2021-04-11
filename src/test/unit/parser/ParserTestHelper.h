@@ -1,9 +1,9 @@
 #pragma once
 
-#include <vector>
 #include <string>
+#include <vector>
 
-#include "compiler/ast/nodes/AstNode.h"
+#include "compiler/ast/AstNode.h"
 
 struct AstNodeSpec {
     int indent;

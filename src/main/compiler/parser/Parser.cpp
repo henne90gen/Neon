@@ -2,23 +2,17 @@
 
 #include <iostream>
 
-StatementNode *createStatementNode(AstNode *child) {
-    auto *statement = new StatementNode();
-    statement->setChild(child);
-    return statement;
-}
-
 Token Parser::getNextToken() {
     Token token = lexer.getToken();
-    module->tokens.push_back(token);
+    tokens.push_back(token);
     return token;
 }
 
 bool Parser::currentTokenIs(Token::TokenType tokenType) const {
-    return currentTokenIdx < module->tokens.size() && module->tokens[currentTokenIdx].type == tokenType;
+    return currentTokenIdx < tokens.size() && tokens[currentTokenIdx].type == tokenType;
 }
 
-std::string Parser::currentTokenContent() const { return module->tokens[currentTokenIdx].content; }
+std::string Parser::currentTokenContent() const { return tokens[currentTokenIdx].content; }
 
 std::string Parser::indent(int level) {
     std::string result;
@@ -43,12 +37,8 @@ ImportNode *Parser::parseImport() {
     std::string fileName = currentTokenContent();
     fileName = fileName.substr(1, fileName.size() - 2);
 
-    auto *importNode = new ImportNode();
-    importNode->setFileName(fileName);
-
     currentTokenIdx++;
-
-    return importNode;
+    return tree.createImport(fileName);
 }
 
 VariableNode *Parser::parseVariable(int level) {
@@ -78,9 +68,7 @@ VariableNode *Parser::parseVariable(int level) {
         currentTokenIdx++;
     }
 
-    auto *result = new VariableNode(name);
-    result->setArrayIndex(expression);
-    return result;
+    return tree.createVariable(name, expression);
 }
 
 VariableDefinitionNode *Parser::parseVariableDefinition(int level) {
@@ -93,20 +81,19 @@ VariableDefinitionNode *Parser::parseVariableDefinition(int level) {
         currentTokenIdx++;
 
         if (currentTokenIs(Token::IDENTIFIER)) {
-            std::string variableName = currentTokenContent();
-            auto *variableDefinitionNode = new VariableDefinitionNode(variableName, dataType);
             log.debug(indent(level) + "parsed variable definition with simple data type");
+            std::string variableName = currentTokenContent();
             currentTokenIdx++;
-            return variableDefinitionNode;
-        } if (currentTokenIs(Token::LEFT_BRACKET)) {
+            return tree.createVariableDefinition(variableName, dataType, 0);
+        }
+        if (currentTokenIs(Token::LEFT_BRACKET)) {
             currentTokenIdx++;
 
             auto *literal = parseLiteral(level + 1);
-            if (literal == nullptr || literal->getLiteralType() != LiteralNode::INTEGER) {
+            if (literal == nullptr || literal->type != LiteralType::INTEGER) {
                 currentTokenIdx = beforeTokenIdx;
                 return nullptr;
             }
-            auto *arraySizeLiteral = reinterpret_cast<IntegerNode *>(literal);
 
             if (!currentTokenIs(Token::RIGHT_BRACKET)) {
                 currentTokenIdx = beforeTokenIdx;
@@ -121,11 +108,8 @@ VariableDefinitionNode *Parser::parseVariableDefinition(int level) {
             }
 
             std::string variableName = currentTokenContent();
-            auto arraySize = arraySizeLiteral->getValue();
-            auto *variableDefinitionNode = new VariableDefinitionNode(variableName, dataType, arraySize);
-
             currentTokenIdx++;
-            return variableDefinitionNode;
+            return tree.createVariableDefinition(variableName, dataType, literal->i);
         }
     } else if (currentTokenIs(Token::IDENTIFIER)) {
         auto dataType = ast::DataType(currentTokenContent());
@@ -137,11 +121,10 @@ VariableDefinitionNode *Parser::parseVariableDefinition(int level) {
             return nullptr;
         }
 
-        std::string variableName = currentTokenContent();
-        auto *variableDefinitionNode = new VariableDefinitionNode(variableName, dataType);
         log.debug(indent(level) + "parsed variable definition with simple data type");
+        std::string variableName = currentTokenContent();
         currentTokenIdx++;
-        return variableDefinitionNode;
+        return tree.createVariableDefinition(variableName, dataType, 0);
     }
 
     log.debug(indent(level) + "failed to parse variable definition");
@@ -165,7 +148,7 @@ SequenceNode *Parser::parseScope(int level) {
             break;
         }
 
-        children.push_back(statement);
+        children.push_back(AST_NODE(statement));
     }
 
     if (!currentTokenIs(Token::RIGHT_CURLY_BRACE)) {
@@ -175,27 +158,23 @@ SequenceNode *Parser::parseScope(int level) {
 
     currentTokenIdx++;
 
-    auto *body = new SequenceNode();
-    for (auto *child : children) {
-        body->getChildren().push_back(child);
-    }
-    return body;
+    return tree.createSequence(children);
 }
 
 AstNode *Parser::parseAssignmentLeft(int level) {
     auto *variableDefinitionNode = parseVariableDefinition(level + 1);
     if (variableDefinitionNode != nullptr) {
-        return variableDefinitionNode;
+        return AST_NODE(variableDefinitionNode);
     }
 
     auto *memberAccess = parseMemberAccess(level + 1);
     if (memberAccess != nullptr) {
-        return memberAccess;
+        return AST_NODE(memberAccess);
     }
 
     auto *variableNode = parseVariable(level + 1);
     if (variableNode != nullptr) {
-        return variableNode;
+        return AST_NODE(variableNode);
     }
 
     return nullptr;
@@ -225,10 +204,7 @@ AssignmentNode *Parser::parseAssignment(int level) {
 
     log.debug(indent(level) + "parsed assignment right");
 
-    auto *assignmentNode = new AssignmentNode();
-    assignmentNode->setLeft(left);
-    assignmentNode->setRight(right);
-    return assignmentNode;
+    return tree.createAssignment(left, right);
 }
 
 AssertNode *Parser::parseAssert(int level) {
@@ -245,19 +221,18 @@ AssertNode *Parser::parseAssert(int level) {
         currentTokenIdx--;
         return nullptr;
     }
-    auto *result = new AssertNode();
-    result->setCondition(expression);
-    return result;
+
+    return tree.createAssert(expression);
 }
 
-CommentNode *Parser::parseComment(int  /*level*/) {
+CommentNode *Parser::parseComment(int /*level*/) {
     if (!currentTokenIs(Token::COMMENT)) {
         return nullptr;
     }
 
     log.debug("parsed comment node");
 
-    auto *result = new CommentNode(currentTokenContent());
+    auto *result = tree.createComment(currentTokenContent());
     currentTokenIdx++;
     return result;
 }
@@ -271,52 +246,52 @@ StatementNode *Parser::parseStatement(int level) {
 
     auto *commentNode = parseComment(level + 1);
     if (commentNode != nullptr) {
-        return createStatementNode(commentNode);
+        return tree.createStatement(AST_NODE(commentNode), false);
     }
 
     auto *importNode = parseImport();
     if (importNode != nullptr) {
-        return createStatementNode(importNode);
+        return tree.createStatement(AST_NODE(importNode), false);
     }
 
     auto *typeNode = parseTypeDeclaration(level + 1);
     if (typeNode != nullptr) {
-        return createStatementNode(typeNode);
+        return tree.createStatement(AST_NODE(typeNode), false);
     }
 
     auto *assertNode = parseAssert(level + 1);
     if (assertNode != nullptr) {
-        return createStatementNode(assertNode);
+        return tree.createStatement(AST_NODE(assertNode), false);
     }
 
     auto *callNode = parseFunctionCall(level + 1);
     if (callNode != nullptr) {
-        return createStatementNode(callNode);
+        return tree.createStatement(AST_NODE(callNode), false);
     }
 
     auto *functionNode = parseFunction(level + 1);
     if (functionNode != nullptr) {
-        return createStatementNode(functionNode);
+        return tree.createStatement(AST_NODE(functionNode), false);
     }
 
     auto *ifNode = parseIf(level + 1);
     if (ifNode != nullptr) {
-        return createStatementNode(ifNode);
+        return tree.createStatement(AST_NODE(ifNode), false);
     }
 
     auto *forNode = parseFor(level + 1);
     if (forNode != nullptr) {
-        return createStatementNode(forNode);
+        return tree.createStatement(AST_NODE(forNode), false);
     }
 
     auto *assignmentNode = parseAssignment(level + 1);
     if (assignmentNode != nullptr) {
-        return createStatementNode(assignmentNode);
+        return tree.createStatement(AST_NODE(assignmentNode), false);
     }
 
     auto *variableDefinition = parseVariableDefinition(level + 1);
     if (variableDefinition != nullptr) {
-        return createStatementNode(variableDefinition);
+        return tree.createStatement(AST_NODE(variableDefinition), false);
     }
 
     auto *returnStatement = parseReturnStatement(level + 1);
@@ -327,7 +302,7 @@ StatementNode *Parser::parseStatement(int level) {
     return nullptr;
 }
 
-void Parser::run() {
+void Parser::run(Module *module) {
     while (true) {
         const Token token = getNextToken();
         if (token.type == Token::INVALID) {
@@ -338,10 +313,10 @@ void Parser::run() {
     std::vector<AstNode *> children = {};
     bool error = false;
 
-    while (currentTokenIdx < module->tokens.size()) {
-        auto token = module->tokens[currentTokenIdx];
+    while (currentTokenIdx < tokens.size()) {
+        auto token = tokens[currentTokenIdx];
         if (token.type == Token::INVALID) {
-            error = currentTokenIdx != module->tokens.size() - 1;
+            error = currentTokenIdx != tokens.size() - 1;
             break;
         }
 
@@ -352,7 +327,7 @@ void Parser::run() {
 
         auto *statementNode = parseStatement(0);
         if (statementNode != nullptr) {
-            children.push_back(statementNode);
+            children.push_back(AST_NODE(statementNode));
             continue;
         }
 
@@ -362,15 +337,16 @@ void Parser::run() {
     }
 
     if (error) {
-        for (auto *child : children) {
-            delete child;
-        }
         return;
     }
 
-    auto *sequence = new SequenceNode();
+    auto *root = tree.root();
+    root->type = ast::NodeType::SEQUENCE;
     for (auto *child : children) {
-        sequence->getChildren().push_back(child);
+        root->sequence.children.push_back(child);
     }
-    module->root = sequence;
+    tree.completed();
+
+    module->ast = tree;
+    module->tokens = tokens;
 }

@@ -15,8 +15,8 @@ IfStatementNode *Parser::parseIf(int level) {
         return nullptr;
     }
 
-    SequenceNode *ifBody = parseScope(level + 1);
-    if (ifBody == nullptr || ifBody->getChildren().empty()) {
+    auto *ifBody = parseScope(level + 1);
+    if (ifBody == nullptr || ifBody->children.empty()) {
         ifBody = nullptr;
     }
 
@@ -27,16 +27,13 @@ IfStatementNode *Parser::parseIf(int level) {
         if (elseBody == nullptr) {
             currentTokenIdx = beforeTokenIdx;
             return nullptr;
-        } if (elseBody->getChildren().empty()) {
+        }
+        if (elseBody->children.empty()) {
             elseBody = nullptr;
         }
     }
 
-    auto *ifNode = new IfStatementNode();
-    ifNode->setCondition(condition);
-    ifNode->setIfBody(ifBody);
-    ifNode->setElseBody(elseBody);
-    return ifNode;
+    return tree.createIf(condition, ifBody, elseBody);
 }
 
 ForStatementNode *Parser::parseFor(int level) {
@@ -86,12 +83,7 @@ ForStatementNode *Parser::parseFor(int level) {
         return nullptr;
     }
 
-    auto *forStatement = new ForStatementNode();
-    forStatement->setInit(init);
-    forStatement->setCondition(condition);
-    forStatement->setUpdate(update);
-    forStatement->setBody(body);
-    return forStatement;
+    return tree.createFor(init, condition, update, body);
 }
 
 StatementNode *Parser::parseReturnStatement(int level) {
@@ -109,8 +101,5 @@ StatementNode *Parser::parseReturnStatement(int level) {
         return nullptr;
     }
 
-    auto *statement = new StatementNode();
-    statement->setChild(expression);
-    statement->setIsReturnStatement(true);
-    return statement;
+    return tree.createStatement(expression, true);
 }

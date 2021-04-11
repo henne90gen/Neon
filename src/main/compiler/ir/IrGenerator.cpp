@@ -44,8 +44,8 @@ llvm::Constant *IrGenerator::getInitializer(const ast::DataType &dt, bool isArra
         switch (simpleType) {
         case ast::SimpleDataType::FLOAT:
             return llvm::ConstantFP::get(ty, 0);
-        case ast::SimpleDataType::INT:
-        case ast::SimpleDataType::BOOL:
+        case ast::SimpleDataType::INTEGER:
+        case ast::SimpleDataType::BOOLEAN:
             return llvm::ConstantInt::get(ty, 0);
         case ast::SimpleDataType::VOID:
         default:
@@ -91,12 +91,12 @@ void IrGenerator::visitSequenceNode(SequenceNode *node) {
         isGlobalScope = true;
     }
 
-    for (auto *child : node->getChildren()) {
-        child->accept(this);
+    for (auto *child : node->children) {
+        visitNode(child);
     }
 
-    if (!node->getChildren().empty()) {
-        nodesToValues[node] = nodesToValues[node->getChildren().back()];
+    if (!node->children.empty()) {
+        nodesToValues[AST_NODE(node)] = nodesToValues[node->children.back()];
     }
 
     if (initFunc != nullptr) {
@@ -123,11 +123,11 @@ void IrGenerator::writeToFile() {
 }
 
 void IrGenerator::run() {
-    if (module->root == nullptr) {
+    if (!module->ast.is_complete()) {
         return;
     }
 
-    module->root->accept(this);
+    visitNode(module->ast.root());
 
     this->printMetrics();
     if (!errors.empty()) {

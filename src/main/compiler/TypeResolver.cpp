@@ -1,7 +1,7 @@
 #include "TypeResolver.h"
 
-ast::DataType TypeResolver::getTypeOf(Module *module, AstNode *node) {
-    std::unordered_map<AstNode *, ast::DataType> &nodeToTypeMap = moduleCompileState[module].nodeToTypeMap;
+ast::DataType TypeResolver::getTypeOf(Module *module, AstNode* node) {
+    std::unordered_map<AstNode*, ast::DataType> &nodeToTypeMap = moduleCompileState[module].nodeToTypeMap;
     auto itr = nodeToTypeMap.find(node);
     if (itr == nodeToTypeMap.end()) {
         return ast::DataType(ast::SimpleDataType::VOID);

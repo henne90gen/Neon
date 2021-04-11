@@ -1,6 +1,6 @@
 #include "ParserTestHelper.h"
 
-#include "compiler/ast/nodes/AllNodes.h"
+#include "compiler/ast/AstNode.h"
 #include "compiler/ast/visitors/AstPrinter.h"
 #include "compiler/parser/Parser.h"
 
@@ -46,8 +46,8 @@ SimpleTree *createSimpleFromSpecification(const std::vector<AstNodeSpec> &spec, 
 
 SimpleTree *createSimpleFromSequence(SequenceNode *node) {
     auto result = new SimpleTree();
-    result->type = node->getAstNodeType();
-    for (auto child : node->getChildren()) {
+    result->type = ast::NodeType::SEQUENCE;
+    for (auto child : node->children) {
         result->children.push_back(createSimpleFromAst(child));
     }
     return result;
@@ -55,50 +55,50 @@ SimpleTree *createSimpleFromSequence(SequenceNode *node) {
 
 SimpleTree *createSimpleFromStatement(StatementNode *node) {
     auto result = new SimpleTree();
-    result->type = node->getAstNodeType();
-    result->children.push_back(createSimpleFromAst(node->getChild()));
+    result->type = ast::NodeType::STATEMENT;
+    result->children.push_back(createSimpleFromAst(node->child));
     return result;
 }
 
 SimpleTree *createSimpleFromUnary(UnaryOperationNode *node) {
     auto result = new SimpleTree();
-    result->type = node->getAstNodeType();
-    result->children.push_back(createSimpleFromAst(node->getChild()));
+    result->type = ast::NodeType::UNARY_OPERATION;
+    result->children.push_back(createSimpleFromAst(node->child));
     return result;
 }
 
 SimpleTree *createSimpleFromBinary(BinaryOperationNode *node) {
     auto result = new SimpleTree();
-    result->type = node->getAstNodeType();
-    result->children.push_back(createSimpleFromAst(node->getLeft()));
-    result->children.push_back(createSimpleFromAst(node->getRight()));
+    result->type = ast::NodeType::BINARY_OPERATION;
+    result->children.push_back(createSimpleFromAst(node->left));
+    result->children.push_back(createSimpleFromAst(node->right));
     return result;
 }
 
 SimpleTree *createSimpleFromFunction(FunctionNode *node) {
     auto result = new SimpleTree();
-    result->type = node->getAstNodeType();
-    for (auto argument : node->getArguments()) {
-        result->children.push_back(createSimpleFromAst(argument));
+    result->type = ast::NodeType::FUNCTION;
+    for (auto argument : node->arguments) {
+        result->children.push_back(createSimpleFromAst(AST_NODE(argument)));
     }
-    if (!node->isExternal()) {
-        result->children.push_back(createSimpleFromAst(node->getBody()));
+    if (!node->is_external()) {
+        result->children.push_back(createSimpleFromAst(node->body));
     }
     return result;
 }
 
 SimpleTree *createSimpleFromAssignment(AssignmentNode *node) {
     auto result = new SimpleTree();
-    result->type = node->getAstNodeType();
-    result->children.push_back(createSimpleFromAst(node->getLeft()));
-    result->children.push_back(createSimpleFromAst(node->getRight()));
+    result->type = ast::NodeType::ASSIGNMENT;
+    result->children.push_back(createSimpleFromAst(node->left));
+    result->children.push_back(createSimpleFromAst(node->right));
     return result;
 }
 
 SimpleTree *createSimpleFromCall(CallNode *node) {
     auto result = new SimpleTree();
-    result->type = node->getAstNodeType();
-    for (auto argument : node->getArguments()) {
+    result->type = ast::NodeType::CALL;
+    for (auto argument : node->arguments) {
         result->children.push_back(createSimpleFromAst(argument));
     }
     return result;
@@ -106,62 +106,62 @@ SimpleTree *createSimpleFromCall(CallNode *node) {
 
 SimpleTree *createSimpleFromIf(IfStatementNode *node) {
     auto result = new SimpleTree();
-    result->type = node->getAstNodeType();
-    result->children.push_back(createSimpleFromAst(node->getCondition()));
-    if (node->getIfBody() != nullptr) {
-        result->children.push_back(createSimpleFromAst(node->getIfBody()));
+    result->type = ast::NodeType::IF_STATEMENT;
+    result->children.push_back(createSimpleFromAst(node->condition));
+    if (node->ifBody != nullptr) {
+        result->children.push_back(createSimpleFromAst(node->ifBody));
     }
-    if (node->getElseBody() != nullptr) {
-        result->children.push_back(createSimpleFromAst(node->getElseBody()));
+    if (node->elseBody != nullptr) {
+        result->children.push_back(createSimpleFromAst(node->elseBody));
     }
     return result;
 }
 
 SimpleTree *createSimpleFromFor(ForStatementNode *node) {
     auto result = new SimpleTree();
-    result->type = node->getAstNodeType();
-    if (node->getInit() != nullptr) {
-        result->children.push_back(createSimpleFromAst(node->getInit()));
+    result->type = ast::NodeType::FOR_STATEMENT;
+    if (node->init != nullptr) {
+        result->children.push_back(createSimpleFromAst(node->init));
     }
-    if (node->getCondition() != nullptr) {
-        result->children.push_back(createSimpleFromAst(node->getCondition()));
+    if (node->condition != nullptr) {
+        result->children.push_back(createSimpleFromAst(node->condition));
     }
-    if (node->getUpdate() != nullptr) {
-        result->children.push_back(createSimpleFromAst(node->getUpdate()));
+    if (node->update != nullptr) {
+        result->children.push_back(createSimpleFromAst(node->update));
     }
-    if (node->getBody() != nullptr) {
-        result->children.push_back(createSimpleFromAst(node->getBody()));
+    if (node->body != nullptr) {
+        result->children.push_back(createSimpleFromAst(node->body));
     }
     return result;
 }
 
 SimpleTree *createSimpleFromTypeDeclaration(TypeDeclarationNode *node) {
     auto result = new SimpleTree();
-    result->type = node->getAstNodeType();
-    for (const auto &member : node->getMembers()) {
-        result->children.push_back(createSimpleFromAst(member));
+    result->type = ast::NodeType::TYPE_DECLARATION;
+    for (const auto &member : node->members) {
+        result->children.push_back(createSimpleFromAst(AST_NODE(member)));
     }
     return result;
 }
 
 SimpleTree *createSimpleFromAssert(AssertNode *node) {
     auto result = new SimpleTree();
-    result->type = node->getAstNodeType();
-    result->children.push_back(createSimpleFromAst(node->getCondition()));
+    result->type = ast::NodeType::ASSERT;
+    result->children.push_back(createSimpleFromAst(node->condition));
     return result;
 }
 
 SimpleTree *createSimpleFromMemberAccess(MemberAccessNode *node) {
     auto result = new SimpleTree();
-    result->type = node->getAstNodeType();
-    result->children.push_back(createSimpleFromAst(node->getLeft()));
-    result->children.push_back(createSimpleFromAst(node->getRight()));
+    result->type = ast::NodeType::MEMBER_ACCESS;
+    result->children.push_back(createSimpleFromAst(node->left));
+    result->children.push_back(createSimpleFromAst(node->right));
     return result;
 }
 
 SimpleTree *createSimpleFromNode(AstNode *node) {
     auto result = new SimpleTree();
-    result->type = node->getAstNodeType();
+    result->type = node->type;
     return result;
 }
 
@@ -169,7 +169,7 @@ SimpleTree *createSimpleFromAst(AstNode *node) {
     if (node == nullptr) {
         return nullptr;
     }
-    switch (node->getAstNodeType()) {
+    switch (node->type) {
     case ast::NodeType::LITERAL:
     case ast::NodeType::VARIABLE_DEFINITION:
     case ast::NodeType::VARIABLE:
@@ -202,7 +202,7 @@ SimpleTree *createSimpleFromAst(AstNode *node) {
     case ast::NodeType::ASSERT:
         return createSimpleFromAssert((AssertNode *)node);
     default:
-        std::cerr << "Could not create simple helper tree node for " << to_string(node->getAstNodeType()) << std::endl;
+        std::cerr << "Could not create simple helper tree node for " << to_string(node->type) << std::endl;
         exit(1);
         return nullptr;
     }
@@ -218,14 +218,16 @@ bool parserCreatesCorrectAst(const std::vector<std::string> &program, std::vecto
     logger.setColorEnabled(false);
     auto lexer = Lexer(codeProvider, logger);
 
-    Parser parser(lexer, prog, logger);
-    parser.run();
+    Parser parser(logger, lexer);
+    parser.run(prog);
 
-    auto astPrinter = AstPrinter(prog);
-    std::string result = astPrinter.run();
-    UNSCOPED_INFO(result);
+    /*
+     * TODO activate this again
+        auto astPrinter = AstPrinter(prog);
+        std::string result = astPrinter.run();
+        UNSCOPED_INFO(result);
+    */
 
-    auto actual = prog->root;
-
+    auto actual = prog->ast.root();
     return astsAreEqual(expected, createSimpleFromAst(actual), 0);
 }

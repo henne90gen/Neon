@@ -3,17 +3,18 @@
 #include <vector>
 
 #include "../../MetaTypes.h"
-#include "../AstVisitor.h"
-#include "../nodes/AllNodes.h"
+#include "../AST.h"
+#include "../AstNode.h"
 
-class ComplexTypeFinder : public AstVisitor {
+class ComplexTypeFinder {
+    std::vector<ComplexType> types = {};
+
   public:
-    void visitSequenceNode(SequenceNode *node) override;
-    void visitStatementNode(StatementNode *node) override;
-    void visitTypeDeclarationNode(TypeDeclarationNode *node) override;
-
-    std::vector<ComplexType> run(AstNode *rootNode);
+    std::vector<ComplexType> run(AST &tree);
 
   private:
-    std::vector<ComplexType> types = {};
+    void visitNode(AstNode *node);
+    void visitSequenceNode(AstNode *node);
+    void visitStatementNode(AstNode *node);
+    void visitTypeDeclarationNode(AstNode *node);
 };

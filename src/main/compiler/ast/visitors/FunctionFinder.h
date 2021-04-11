@@ -2,19 +2,22 @@
 
 #include "../../../Module.h"
 #include "../../MetaTypes.h"
-#include "../AstVisitor.h"
+#include "../AST.h"
+#include "../AstNode.h"
 
 #include <string>
 #include <vector>
 
-class FunctionFinder : public AstVisitor {
-  public:
-    void visitFunctionNode(FunctionNode *node) override;
-    void visitSequenceNode(SequenceNode *node) override;
-    void visitStatementNode(StatementNode *node) override;
-    void visitTypeDeclarationNode(TypeDeclarationNode *node) override;
-
-    std::vector<FunctionSignature> run(AstNode *rootNode);
-
+class FunctionFinder {
     std::vector<FunctionSignature> functions = {};
+
+  public:
+    std::vector<FunctionSignature> run(AST &tree);
+
+  private:
+    void visitNode(AstNode *node);
+    void visitFunctionNode(FunctionNode *node);
+    void visitSequenceNode(SequenceNode *node);
+    void visitStatementNode(StatementNode *node);
+    void visitTypeDeclarationNode(TypeDeclarationNode *node);
 };

@@ -38,7 +38,7 @@ bool Compiler::run() {
         }
 
         auto *module = loadModule(moduleFileName);
-        if (module->root == nullptr) {
+        if (!module->ast.is_complete()) {
             log.error("Failed to compile module " + moduleFileName);
             return true;
         }
@@ -70,25 +70,26 @@ Module *Compiler::loadModule(const std::string &moduleFileName) {
 
     Lexer lexer(module->getCodeProvider(), log);
 
-    Parser parser(lexer, module, log);
-    parser.run();
+    Parser parser(log, lexer);
+    parser.run(module);
 
-    if (module->root == nullptr) {
+    if (!module->ast.is_complete()) {
         log.error("Could not parse '" + moduleFileName + "'");
         return module;
     }
 
     if (log.getLogLevel() == Logger::LogLevel::DEBUG_) {
-        auto astPrinter = AstPrinter(module);
-        astPrinter.run();
-
-        auto astTestCasePrinter = AstTestCasePrinter(module);
-        astTestCasePrinter.run();
+        // TODO enable this again
+        //        auto astPrinter = AstPrinter(module);
+        //        astPrinter.run();
+        // TODO enable this again
+        //        auto astTestCasePrinter = AstTestCasePrinter(module);
+        //        astTestCasePrinter.run();
     }
 
-    moduleCompileState[module].imports = ImportFinder(module->getDirectoryPath()).run(module->root);
-    moduleCompileState[module].functions = FunctionFinder().run(module->root);
-    moduleCompileState[module].complexTypes = ComplexTypeFinder().run(module->root);
+    moduleCompileState[module].imports = ImportFinder(module->getDirectoryPath()).run(module->ast);
+    moduleCompileState[module].functions = FunctionFinder().run(module->ast);
+    moduleCompileState[module].complexTypes = ComplexTypeFinder().run(module->ast);
 
     return module;
 }
@@ -198,7 +199,7 @@ void Compiler::analyseTypes() {
     for (auto &entry : program->modules) {
         auto &module = entry.second;
         auto functionResolver = FunctionResolver(program, moduleCompileState);
-        auto result = TypeAnalyzer(log, module, functionResolver).run(module->root);
+        auto result = TypeAnalyzer(log, module, functionResolver).run(module->ast);
         moduleCompileState[module].nodeToTypeMap = result.first;
         moduleCompileState[module].nameToTypeMap = result.second;
     }

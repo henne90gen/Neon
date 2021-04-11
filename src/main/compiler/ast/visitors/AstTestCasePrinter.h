@@ -1,37 +1,35 @@
 #pragma once
 
 #include "../../../Module.h"
-#include "../AstVisitor.h"
-#include "../nodes/AstNode.h"
+#include "../AstNode.h"
 
-class AstTestCasePrinter : public AstVisitor {
+class AstTestCasePrinter {
+    const Module *module;
+    int indentation = 0;
+
   public:
     explicit AstTestCasePrinter(const Module *module) : module(module) {}
-
-    void visitAssignmentNode(AssignmentNode *node) override;
-    void visitBinaryOperationNode(BinaryOperationNode *node) override;
-    void visitBoolNode(BoolNode *node) override;
-    void visitCallNode(CallNode *node) override;
-    void visitFloatNode(FloatNode *node) override;
-    void visitForStatementNode(ForStatementNode *node) override;
-    void visitFunctionNode(FunctionNode *node) override;
-    void visitIfStatementNode(IfStatementNode *node) override;
-    void visitImportNode(ImportNode *node) override;
-    void visitIntegerNode(IntegerNode *node) override;
-    void visitMemberAccessNode(MemberAccessNode *node) override;
-    void visitSequenceNode(SequenceNode *node) override;
-    void visitStatementNode(StatementNode *node) override;
-    void visitTypeDeclarationNode(TypeDeclarationNode *node) override;
-    void visitTypeMemberNode(TypeMemberNode *node) override;
-    void visitUnaryOperationNode(UnaryOperationNode *node) override;
-    void visitVariableNode(VariableNode *node) override;
-    void visitVariableDefinitionNode(VariableDefinitionNode *node) override;
 
     void run();
 
   private:
-    const Module *module;
-    int indentation = 0;
+    void printNode(AstNodeID node) const;
 
-    void printNode(AstNode *node) const;
+    void visitNode(AstNode *node);
+    void visitAssignmentNode(AssignmentNode *node);
+    void visitBinaryOperationNode(BinaryOperationNode *node);
+    void visitCallNode(CallNode *node);
+    void visitForStatementNode(ForStatementNode *node);
+    void visitFunctionNode(FunctionNode *node);
+    void visitIfStatementNode(IfStatementNode *node);
+    void visitImportNode(ImportNode *node);
+    void visitLiteralNode(LiteralNode *node);
+    void visitMemberAccessNode(MemberAccessNode *node);
+    void visitSequenceNode(SequenceNode *node);
+    void visitStatementNode(StatementNode *node);
+    void visitTypeDeclarationNode(TypeDeclarationNode *node);
+    void visitTypeMemberNode(TypeMemberNode *node);
+    void visitUnaryOperationNode(UnaryOperationNode *node);
+    void visitVariableNode(VariableNode *node);
+    void visitVariableDefinitionNode(VariableDefinitionNode *node);
 };

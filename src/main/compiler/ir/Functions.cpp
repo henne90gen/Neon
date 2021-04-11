@@ -87,14 +87,14 @@ void IrGenerator::visitFunctionNode(FunctionNode *node) {
     bool previousGlobalScopeState = isGlobalScope;
     isGlobalScope = false;
     std::vector<FunctionArgument> arguments = {};
-    for (const auto &arg : node->getArguments()) {
-        FunctionArgument newArg = {arg->getName(), arg->getType()};
+    for (const auto &arg : node->arguments) {
+        FunctionArgument newArg = {arg->name, arg->type};
         arguments.push_back(newArg);
     }
-    currentFunction = getOrCreateFunctionDefinition(node->getName(), node->getReturnType(), arguments);
+    currentFunction = getOrCreateFunctionDefinition(node->name, node->returnType, arguments);
 
-    if (!node->isExternal()) {
-        llvm::BasicBlock *BB = llvm::BasicBlock::Create(context, "entry-" + node->getName(), currentFunction);
+    if (!node->is_external()) {
+        llvm::BasicBlock *BB = llvm::BasicBlock::Create(context, "entry-" + node->name, currentFunction);
         builder.SetInsertPoint(BB);
 
         withScope([this, &node]() {
@@ -107,9 +107,9 @@ void IrGenerator::visitFunctionNode(FunctionNode *node) {
                 currentScope().definedVariables[arg.getName().str()] = value;
             }
 
-            node->getBody()->accept(this);
+            visitNode(node->body);
 
-            if (node->getReturnType() != ast::DataType(ast::SimpleDataType::VOID)) {
+            if (node->returnType != ast::DataType(ast::SimpleDataType::VOID)) {
                 // set insertion point to be before the return statement
                 llvm::BasicBlock &lastBB = currentFunction->getBasicBlockList().back();
                 llvm::BasicBlock::InstListType &instructionList = lastBB.getInstList();
@@ -119,7 +119,7 @@ void IrGenerator::visitFunctionNode(FunctionNode *node) {
         });
     }
 
-    finalizeFunction(currentFunction, node->getReturnType(), node->isExternal());
+    finalizeFunction(currentFunction, node->returnType, node->is_external());
 
     isGlobalScope = previousGlobalScopeState;
     currentFunction = previousFunction;
@@ -204,26 +204,26 @@ void IrGenerator::finalizeFunction(llvm::Function *function, const ast::DataType
 void IrGenerator::visitCallNode(CallNode *node) {
     log.debug("Enter Function Call");
 
-    llvm::Function *calleeFunc = llvmModule.getFunction(node->getName());
+    llvm::Function *calleeFunc = llvmModule.getFunction(node->name);
     if (calleeFunc == nullptr) {
-        const FunctionResolveResult resolveResult = functionResolver.resolveFunction(module, node->getName());
+        const FunctionResolveResult resolveResult = functionResolver.resolveFunction(module, node->name);
         if (!resolveResult.functionExists) {
-            return logError("Undefined function '" + node->getName() + "'");
+            return logError("Undefined function '" + node->name + "'");
         }
 
         calleeFunc = getOrCreateFunctionDefinition(resolveResult.signature);
         if (calleeFunc == nullptr) {
-            return logError("Could not generate external definition for function '" + node->getName() + "'");
+            return logError("Could not generate external definition for function '" + node->name + "'");
         }
     }
 
-    if (calleeFunc->arg_size() != node->getArguments().size()) {
+    if (calleeFunc->arg_size() != node->arguments.size()) {
         return logError("Wrong number of arguments passed.");
     }
 
     std::vector<llvm::Value *> arguments;
-    for (auto &argument : node->getArguments()) {
-        argument->accept(this);
+    for (auto &argument : node->arguments) {
+        visitNode(argument);
         auto itr = nodesToValues.find(argument);
         if (itr == nodesToValues.end()) {
             return logError("Could not generate code for argument.");
@@ -241,12 +241,12 @@ void IrGenerator::visitCallNode(CallNode *node) {
     } else {
         call = builder.CreateCall(calleeFunc, arguments, "call");
     }
-    nodesToValues[node] = call;
+    nodesToValues[AST_NODE(node)] = call;
 
     log.debug("Exit Function Call");
 }
 
 bool IrGenerator::isPrimitiveType(const ast::DataType &type) {
-    return type == ast::DataType(ast::SimpleDataType::BOOL) || type == ast::DataType(ast::SimpleDataType::INT) ||
+    return type == ast::DataType(ast::SimpleDataType::BOOLEAN) || type == ast::DataType(ast::SimpleDataType::INTEGER) ||
            type == ast::DataType(ast::SimpleDataType::FLOAT);
 }

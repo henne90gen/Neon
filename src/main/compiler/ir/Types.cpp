@@ -9,11 +9,11 @@ llvm::Type *IrGenerator::getType(const ast::DataType &type) {
         switch (simpleDataType) {
         case ast::SimpleDataType::VOID:
             return llvm::Type::getVoidTy(context);
-        case ast::SimpleDataType::INT:
+        case ast::SimpleDataType::INTEGER:
             return llvm::Type::getInt64Ty(context);
         case ast::SimpleDataType::FLOAT:
             return llvm::Type::getDoubleTy(context);
-        case ast::SimpleDataType::BOOL:
+        case ast::SimpleDataType::BOOLEAN:
             return llvm::Type::getInt1Ty(context);
         case ast::SimpleDataType::STRING:
             return getStringType()->getPointerTo();
@@ -62,28 +62,33 @@ llvm::StructType *IrGenerator::getStringType() {
     return llvm::StructType::create(context, elements, "string");
 }
 
-void IrGenerator::visitIntegerNode(IntegerNode *node) {
-    nodesToValues[node] = llvm::ConstantInt::get(context, llvm::APInt(NUM_BITS_OF_INT, node->getValue()));
-    log.debug("Created Integer");
+void IrGenerator::visitLiteralNode(LiteralNode *node) {
+    switch (node->type) {
+    case LiteralType::BOOL:
+        nodesToValues[AST_NODE(node)] = llvm::ConstantInt::get(context, llvm::APInt(1, static_cast<uint64_t>(node->b)));
+        log.debug("Created Bool");
+        break;
+    case LiteralType::INTEGER:
+        nodesToValues[AST_NODE(node)] = llvm::ConstantInt::get(context, llvm::APInt(NUM_BITS_OF_INT, node->i));
+        log.debug("Created Integer");
+        break;
+    case LiteralType::FLOAT:
+        nodesToValues[AST_NODE(node)] = llvm::ConstantFP::get(context, llvm::APFloat(node->d));
+        log.debug("Created Float");
+        break;
+    case LiteralType::STRING:
+        visitStringNode(node);
+        break;
+    }
 }
 
-void IrGenerator::visitFloatNode(FloatNode *node) {
-    nodesToValues[node] = llvm::ConstantFP::get(context, llvm::APFloat(node->getValue()));
-    log.debug("Created Float");
-}
-
-void IrGenerator::visitBoolNode(BoolNode *node) {
-    nodesToValues[node] = llvm::ConstantInt::get(context, llvm::APInt(1, static_cast<uint64_t>(node->getValue())));
-    log.debug("Created Bool");
-}
-
-void IrGenerator::visitStringNode(StringNode *node) {
+void IrGenerator::visitStringNode(LiteralNode *node) {
     // two options:
     //      generate code that inits string
     //      call function that inits string
     // going with second option for now
 
-    const std::string stringValue = node->getValue();
+    const std::string stringValue = node->s;
     unsigned int numCharacters = stringValue.size();
     auto *data = builder.CreateGlobalStringPtr(stringValue, "str");
     auto *size = llvm::ConstantInt::get(llvm::IntegerType::getInt64Ty(context), numCharacters);
@@ -97,11 +102,11 @@ void IrGenerator::visitStringNode(StringNode *node) {
     }
     builder.CreateStore(value, currentDestination);
 
-    nodesToValues[node] = currentDestination;
+    nodesToValues[AST_NODE(node)] = currentDestination;
     currentDestination = nullptr;
 
     currentScope().cleanUpFunctions.emplace_back([this, node]() {
-        llvm::Value *loadedValue = builder.CreateLoad(nodesToValues[node]);
+        llvm::Value *loadedValue = builder.CreateLoad(nodesToValues[AST_NODE(node)]);
         std::vector<llvm::Value *> args = {};
         args.push_back(loadedValue);
         createStdLibCall("deleteString", args);
@@ -111,11 +116,11 @@ void IrGenerator::visitStringNode(StringNode *node) {
 }
 
 void IrGenerator::visitTypeDeclarationNode(TypeDeclarationNode *node) {
-    auto *functionDef = getOrCreateFunctionDefinition(node->getName(), node->getType(), {});
-    llvm::BasicBlock *BB = llvm::BasicBlock::Create(context, "entry-" + node->getName(), functionDef);
+    auto *functionDef = getOrCreateFunctionDefinition(node->name, node->type(), {});
+    llvm::BasicBlock *BB = llvm::BasicBlock::Create(context, "entry-" + node->name, functionDef);
     builder.SetInsertPoint(BB);
 
-    auto *complexType = getType(node->getType());
+    auto *complexType = getType(node->type());
     auto dataLayout = llvmModule.getDataLayout();
     auto typeSize = dataLayout.getTypeAllocSize(complexType);
     auto fixedTypeSize = typeSize.getFixedSize();
@@ -123,12 +128,12 @@ void IrGenerator::visitTypeDeclarationNode(TypeDeclarationNode *node) {
     auto *result = createStdLibCall("malloc", args);
     auto *castedResult = builder.CreateBitOrPointerCast(result, complexType);
 
-    for (int i = 0; i < node->getMembers().size(); i++) {
-        auto member = node->getMembers()[i];
+    for (int i = 0; i < node->members.size(); i++) {
+        auto member = node->members[i];
 
-        auto *memberType = getType(member->getDefinition()->getType());
+        auto *memberType = getType(member->variable_definition->type);
 
-        auto llvmT = getType(node->getType());
+        auto llvmT = getType(node->type());
         auto elementType = llvmT->getPointerElementType();
 
         llvm::Value *indexOfBaseVariable = llvm::ConstantInt::get(llvm::Type::getInt32Ty(context), 0);
@@ -136,12 +141,12 @@ void IrGenerator::visitTypeDeclarationNode(TypeDeclarationNode *node) {
         std::vector<llvm::Value *> indices = {indexOfBaseVariable, indexOfMember};
 
         auto address = builder.CreateInBoundsGEP(elementType, castedResult, indices, "memberAccess");
-        if (!ast::isSimpleDataType(member->getDefinition()->getType())) {
-            auto subTypeFuncDef = getOrCreateFunctionDefinition(member->getDefinition()->getType().typeName,
-                                                                member->getDefinition()->getType(), {});
+        if (!ast::isSimpleDataType(member->variable_definition->type)) {
+            auto subTypeFuncDef = getOrCreateFunctionDefinition(member->variable_definition->type.typeName,
+                                                                member->variable_definition->type, {});
             auto funcResult = builder.CreateCall(subTypeFuncDef, {});
             builder.CreateStore(funcResult, address);
-        } else if (member->getDefinition()->getType() == ast::DataType(ast::SimpleDataType::STRING)) {
+        } else if (member->variable_definition->type == ast::DataType(ast::SimpleDataType::STRING)) {
             int defaultSize = 32;
             auto data = llvm::ConstantPointerNull::get(llvm::Type::getInt8PtrTy(context));
             auto size = llvm::ConstantInt::get(llvm::IntegerType::getInt64Ty(context), 0);
@@ -152,14 +157,14 @@ void IrGenerator::visitTypeDeclarationNode(TypeDeclarationNode *node) {
             builder.CreateStore(funcResult, address);
         } else {
             llvm::Value *value = nullptr;
-            switch (ast::toSimpleDataType(member->getDefinition()->getType())) {
-            case ast::SimpleDataType::INT:
+            switch (ast::toSimpleDataType(member->variable_definition->type)) {
+            case ast::SimpleDataType::INTEGER:
                 value = llvm::ConstantInt::get(llvm::Type::getInt64Ty(context), 0);
                 break;
             case ast::SimpleDataType::FLOAT:
                 value = llvm::ConstantFP::get(llvm::Type::getFloatTy(context), 0);
                 break;
-            case ast::SimpleDataType::BOOL:
+            case ast::SimpleDataType::BOOLEAN:
                 value = llvm::ConstantInt::get(llvm::Type::getInt1Ty(context), 0);
                 break;
             }

@@ -8,9 +8,9 @@ std::string to_string(ast::SimpleDataType type) {
     switch (type) {
     case ast::VOID:
         return "VOID";
-    case ast::BOOL:
+    case ast::BOOLEAN:
         return "BOOL";
-    case ast::INT:
+    case ast::INTEGER:
         return "INT";
     case ast::FLOAT:
         return "FLOAT";
@@ -22,43 +22,43 @@ std::string to_string(ast::SimpleDataType type) {
 
 std::string to_string(ast::BinaryOperationType operationType) {
     switch (operationType) {
-    case ast::ADDITION:
+    case ast::BinaryOperationType::ADDITION:
         return "ADDITION";
-    case ast::MULTIPLICATION:
+    case ast::BinaryOperationType::MULTIPLICATION:
         return "MULTIPLICATION";
-    case ast::SUBTRACTION:
+    case ast::BinaryOperationType::SUBTRACTION:
         return "SUBTRACTION";
-    case ast::DIVISION:
+    case ast::BinaryOperationType::DIVISION:
         return "DIVISION";
-    case ast::EQUALS:
+    case ast::BinaryOperationType::EQUALS:
         return "EQUALS";
-    case ast::NOT_EQUALS:
+    case ast::BinaryOperationType::NOT_EQUALS:
         return "NOT_EQUALS";
-    case ast::LESS_EQUALS:
+    case ast::BinaryOperationType::LESS_EQUALS:
         return "LESS_EQUALS";
-    case ast::LESS_THAN:
+    case ast::BinaryOperationType::LESS_THAN:
         return "LESS_THAN";
-    case ast::GREATER_EQUALS:
+    case ast::BinaryOperationType::GREATER_EQUALS:
         return "GREATER_EQUALS";
-    case ast::GREATER_THAN:
+    case ast::BinaryOperationType::GREATER_THAN:
         return "GREATER_THAN";
-    case ast::AND:
+    case ast::BinaryOperationType::AND:
         return "AND";
-    case ast::OR:
+    case ast::BinaryOperationType::OR:
         return "OR";
     }
-    std::cerr << "Could not convert " << operationType << " to string." << std::endl;
+    std::cerr << "Could not convert " << static_cast<int>(operationType) << " to string." << std::endl;
     exit(1);
 }
 
 std::string to_string(ast::UnaryOperationType operationType) {
     switch (operationType) {
-    case ast::NOT:
+    case ast::UnaryOperationType::NOT:
         return "NOT";
-    case ast::NEGATE:
+    case ast::UnaryOperationType::NEGATE:
         return "NEGATE";
     }
-    std::cerr << "Could not convert " << operationType << " to string." << std::endl;
+    std::cerr << "Could not convert " << static_cast<int>(operationType) << " to string." << std::endl;
     exit(1);
 }
 
@@ -67,13 +67,13 @@ ast::SimpleDataType from_string(const std::string &type) {
         return ast::SimpleDataType::VOID;
     }
     if (type == "int") {
-        return ast::SimpleDataType::INT;
+        return ast::SimpleDataType::INTEGER;
     }
     if (type == "float") {
         return ast::SimpleDataType::FLOAT;
     }
     if (type == "bool") {
-        return ast::SimpleDataType::BOOL;
+        return ast::SimpleDataType::BOOLEAN;
     }
     if (type == "string") {
         return ast::SimpleDataType::STRING;
@@ -92,10 +92,10 @@ ast::SimpleDataType ast::toSimpleDataType(const ast::DataType &type) {
         return ast::SimpleDataType::VOID;
     }
     if (type.typeName == "BOOL") {
-        return ast::SimpleDataType::BOOL;
+        return ast::SimpleDataType::BOOLEAN;
     }
     if (type.typeName == "INT") {
-        return ast::SimpleDataType::INT;
+        return ast::SimpleDataType::INTEGER;
     }
     if (type.typeName == "FLOAT") {
         return ast::SimpleDataType::FLOAT;
