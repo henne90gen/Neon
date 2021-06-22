@@ -18,10 +18,10 @@ jobs:
           submodules: recursive
 
       - name: Install llvm repository
-        run: wget https://apt.llvm.org/llvm.sh && chmod +x llvm.sh && sudo ./llvm.sh 11
+        run: wget https://apt.llvm.org/llvm.sh && chmod +x llvm.sh && sudo ./llvm.sh 12
 
       - name: Install dependcies
-        run: sudo apt-get update && sudo apt-get install -y cmake ninja-build clang-tools-11 clang-11-doc libclang-11-dev libfuzzer-11-dev
+        run: sudo apt-get update && sudo apt-get install -y cmake ninja-build clang-tools-12 clang-12-doc libclang-12-dev libfuzzer-12-dev
 
       - name: Build and Test
-        run: CC=/usr/bin/clang-11 CXX=/usr/bin/clang++-11 make all
+        run: CC=/usr/bin/clang-12 CXX=/usr/bin/clang++-12 make all
