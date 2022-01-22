@@ -1,17 +1,13 @@
 name: Build and Test
 
-# Run this workflows every time a new commit pushed to your repository
 on: push
 
 jobs:
   build-and-test:
-    # Name the Job
     name: Build and Test the Compiler
-    # Set the type of machine to run on
     runs-on: ubuntu-latest
 
     steps:
-      # Checks out a copy of your repository on the ubuntu-latest machine
       - name: Checkout code
         uses: actions/checkout@v2
         with:
